@@ -1,0 +1,28 @@
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  extensions = [vector]
+}
+
+model Request {
+  id            String   @id @default(cuid())
+  category      String
+  urgency       String
+  location      String
+  description   String
+  embedding     Unsupported("vector(1536)")?
+  priorityScore Float    @default(0)
+  reasoning     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([priorityScore])
+  @@index([category])
+  @@index([urgency])
+  @@index([createdAt])
+}

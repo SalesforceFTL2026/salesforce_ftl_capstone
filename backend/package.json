@@ -1,0 +1,32 @@
+{
+  "name": "crisis360-backend",
+  "version": "1.0.0",
+  "description": "Crisis360 Backend API",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon server.js",
+    "start": "node server.js",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio",
+    "prisma:generate": "prisma generate"
+  },
+  "keywords": ["crisis", "coordination", "ai"],
+  "author": "MAJic Team",
+  "license": "MIT",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
+    "@prisma/client": "6.7.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "helmet": "^8.0.0",
+    "ml-distance": "^4.0.1",
+    "morgan": "^1.10.0",
+    "openai": "^4.73.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9",
+    "prisma": "6.7.0"
+  }
+}
