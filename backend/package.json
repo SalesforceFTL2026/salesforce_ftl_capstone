@@ -11,12 +11,17 @@
     "prisma:studio": "prisma studio",
     "prisma:generate": "prisma generate"
   },
-  "keywords": ["crisis", "coordination", "ai"],
+  "keywords": [
+    "crisis",
+    "coordination",
+    "ai"
+  ],
   "author": "MAJic Team",
   "license": "MIT",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.1",
     "@prisma/client": "6.7.0",
+    "cohere-ai": "^8.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
