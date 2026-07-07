@@ -1,28 +1,292 @@
 generator client {
   provider = "prisma-client-js"
-  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-  extensions = [vector]
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
+// WEEK 1: Core request model
 model Request {
   id            String   @id @default(cuid())
-  category      String
-  urgency       String
-  location      String
-  description   String
-  embedding     Unsupported("vector(1536)")?
-  priorityScore Float    @default(0)
-  reasoning     String?
+  submitterName String?
+  submitterRole String?
+  userId        String?  // Week 2+: Link to User when auth is added
+  category      String   // Food, Shelter, Medical, Transport, Other
+  urgency       String   // Low, Medium, High, Critical
+  location      String   // City, zip code, or coordinates
+  description   String   // Brief description of need
+  embeddingJson String?  // AI-generated vector embeddings (JSON)
+  priorityScore Float    @default(0)  // AI-calculated priority (0-100)
+  reasoning     String?  // AI explanation for priority
+  status        String   @default("pending")  // Week 2+: pending, in-progress, matched, fulfilled, closed
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+
+  // WEEK 2+ relationships
+  user          User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  responses     Response[]
+  updates       Update[]
+  matches       Match[]
+  votes         Vote[]
+  crisisEvents  RequestEvent[]
 
   @@index([priorityScore])
   @@index([category])
   @@index([urgency])
+  @@index([status])
+  @@index([createdAt])
+  @@index([userId])
+}
+
+// WEEK 2: User authentication and profiles
+model User {
+  id                String   @id @default(cuid())
+  email             String   @unique
+  passwordHash      String
+  name              String
+  role              String   // help-seeker, volunteer, organization
+  location          String?
+  phoneNumber       String?
+  verified          Boolean  @default(false)
+  active            Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  lastLoginAt       DateTime?
+
+  // Relationships
+  requests          Request[]
+  volunteerProfile  Volunteer?
+  organizationProfile Organization?
+  responses         Response[]
+  updates           Update[]
+  notifications     Notification[]
+  sentMessages      Message[] @relation("sender")
+  receivedMessages  Message[] @relation("receiver")
+  votes             Vote[]
+
+  @@index([email])
+  @@index([role])
+  @@index([location])
+}
+
+// WEEK 2: Volunteer-specific profile data
+model Volunteer {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  skills          String?  // JSON array: ["medical", "transportation", "translation"]
+  availability    String?  // JSON object: {"monday": ["9am-5pm"], ...}
+  backgroundCheck Boolean  @default(false)
+  rating          Float?   // Average rating from organizations
+  hoursVolunteered Int     @default(0)
+  bio             String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  matches         Match[]
+
+  @@index([userId])
+}
+
+// WEEK 2: Organization-specific profile data
+model Organization {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  organizationName String
+  description     String?
+  resourceTypes   String?  // JSON array: ["food", "shelter", "medical"]
+  contactInfo     String?  // JSON object: {"phone": "...", "website": "..."}
+  verified        Boolean  @default(false)
+  rating          Float?
+  responsesCount  Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  matches         Match[]
+  resources       Resource[]
+
+  @@index([userId])
+  @@index([verified])
+}
+
+// WEEK 3: Organization resources inventory
+model Resource {
+  id              String   @id @default(cuid())
+  organizationId  String
+  resourceType    String   // food, shelter, medical-supplies, transportation
+  name            String
+  quantity        Int
+  unit            String   // units, meals, beds, vehicles
+  available       Boolean  @default(true)
+  location        String?
+  description     String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([resourceType])
+  @@index([available])
+}
+
+// WEEK 2-3: Responses to requests (volunteer/org claiming to help)
+model Response {
+  id              String   @id @default(cuid())
+  requestId       String
+  responderId     String   // userId of volunteer or organization
+  responderType   String   // volunteer or organization
+  status          String   @default("offered")  // offered, accepted, in-progress, completed, declined
+  notes           String?
+  estimatedTime   String?  // "2 hours", "1 day", etc.
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  request         Request  @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  responder       User     @relation(fields: [responderId], references: [id], onDelete: Cascade)
+
+  @@index([requestId])
+  @@index([responderId])
+  @@index([status])
+}
+
+// WEEK 2-3: Status updates and comments on requests
+model Update {
+  id              String   @id @default(cuid())
+  requestId       String
+  userId          String
+  message         String
+  updateType      String   @default("comment")  // comment, status-change, system
+  visibility      String   @default("public")   // public, private, responders-only
+  createdAt       DateTime @default(now())
+
+  request         Request  @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([requestId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+// WEEK 3: Matching system (AI-powered volunteer/org to request matching)
+model Match {
+  id              String   @id @default(cuid())
+  requestId       String
+  volunteerId     String?
+  organizationId  String?
+  matchScore      Float    // AI-calculated match quality (0-100)
+  matchReasoning  String?  // Why this is a good match
+  status          String   @default("suggested")  // suggested, accepted, declined, expired
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  expiresAt       DateTime?
+
+  request         Request       @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  volunteer       Volunteer?    @relation(fields: [volunteerId], references: [id], onDelete: Cascade)
+  organization    Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([requestId])
+  @@index([volunteerId])
+  @@index([organizationId])
+  @@index([status])
+  @@index([matchScore])
+}
+
+// WEEK 4: Crisis events (clustering related requests into events)
+model CrisisEvent {
+  id              String   @id @default(cuid())
+  name            String
+  description     String?
+  eventType       String   // natural-disaster, emergency, ongoing-crisis
+  location        String
+  affectedArea    String?  // Geographic radius or region
+  severity        String   // minor, moderate, severe, catastrophic
+  startDate       DateTime @default(now())
+  endDate         DateTime?
+  active          Boolean  @default(true)
+  totalRequests   Int      @default(0)
+  fulfilledRequests Int    @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  requests        RequestEvent[]
+
+  @@index([active])
+  @@index([eventType])
+  @@index([severity])
+  @@index([startDate])
+}
+
+// WEEK 4: Join table for requests belonging to crisis events
+model RequestEvent {
+  requestId       String
+  crisisEventId   String
+  addedAt         DateTime @default(now())
+  confidence      Float?   // AI confidence that request belongs to this event (0-1)
+
+  request         Request      @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  crisisEvent     CrisisEvent  @relation(fields: [crisisEventId], references: [id], onDelete: Cascade)
+
+  @@id([requestId, crisisEventId])
+  @@index([crisisEventId])
+}
+
+// WEEK 4-5: Community voting/validation on requests
+model Vote {
+  id              String   @id @default(cuid())
+  requestId       String
+  userId          String
+  voteType        String   // upvote, downvote, urgent, verified
+  comment         String?
+  createdAt       DateTime @default(now())
+
+  request         Request  @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([requestId, userId, voteType])
+  @@index([requestId])
+  @@index([userId])
+}
+
+// WEEK 3-4: Messaging between users (optional)
+model Message {
+  id              String   @id @default(cuid())
+  senderId        String
+  receiverId      String
+  subject         String?
+  content         String
+  read            Boolean  @default(false)
+  relatedRequestId String?
+  createdAt       DateTime @default(now())
+
+  sender          User     @relation("sender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver        User     @relation("receiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([read])
+  @@index([createdAt])
+}
+
+// WEEK 2-3: Notifications system
+model Notification {
+  id              String   @id @default(cuid())
+  userId          String
+  type            String   // new-match, response-received, status-update, message
+  title           String
+  message         String
+  read            Boolean  @default(false)
+  actionUrl       String?  // Link to relevant page
+  relatedRequestId String?
+  relatedUserId   String?
+  createdAt       DateTime @default(now())
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([read])
   @@index([createdAt])
 }
