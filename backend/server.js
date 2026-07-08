@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 import prioritizeRoutes from './routes/prioritize.js';
+import requestRoutes from './routes/requests.js';
 
 dotenv.config();
 
@@ -26,6 +27,7 @@ app.get('/health', (req, res) => {
 });
 
 // Routes
+app.use('/api/requests', requestRoutes);
 app.use('/api/prioritize', prioritizeRoutes);
 
 // Error handling middleware
