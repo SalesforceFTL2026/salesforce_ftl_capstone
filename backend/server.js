@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
+import prioritizeRoutes from './routes/prioritize.js';
 
 dotenv.config();
 
@@ -24,8 +25,8 @@ app.get('/health', (req, res) => {
   });
 });
 
-// TODO: Add routes here
-// app.use('/api/requests', requestRoutes);
+// Routes
+app.use('/api/prioritize', prioritizeRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
