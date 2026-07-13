@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import prioritizeRoutes from './routes/prioritize.js';
 import authRoutes from './routes/auth.js';
 import requestRoutes from './routes/requests.js';
+import dashboardRoutes from './routes/dashboard.js';
 
 dotenv.config();
 
@@ -20,9 +21,9 @@ app.use(morgan('dev'));
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
-    message: 'Crisis360 API is running',
+  res.json({
+    status: 'ok',
+    message: 'MapResponse API is running',
     timestamp: new Date().toISOString()
   });
 });
@@ -31,6 +32,7 @@ app.get('/health', (req, res) => {
 app.use('/api/requests', requestRoutes);
 app.use('/api/prioritize', prioritizeRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
