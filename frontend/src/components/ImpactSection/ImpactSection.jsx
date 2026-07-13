@@ -1,6 +1,6 @@
 import StatCard from '../StatCard/StatCard';
 
-function ImpactSection() {
+const ImpactSection = () => {
   const stats = [
     { number: 1, description: 'Fact' },
     { number: 2, description: 'Fact' },
