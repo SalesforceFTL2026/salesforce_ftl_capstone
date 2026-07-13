@@ -1,4 +1,4 @@
-function StatCard({ number, description }) {
+const StatCard = ({ number, description }) => {
   return (
     <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 md:gap-8">
       <div className="w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 bg-[#e8e8e8] dark:bg-[#1a2332] rounded-xl flex items-center justify-center flex-shrink-0 transition-colors duration-300">

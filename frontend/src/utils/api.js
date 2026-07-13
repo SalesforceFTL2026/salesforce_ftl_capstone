@@ -8,14 +8,14 @@ const api = axios.create({
   },
 });
 
-// Request interceptor
+// Request interceptor: attach the login token (if we have one) to every
+// request so protected endpoints like GET /api/auth/me recognize the user.
 api.interceptors.request.use(
   (config) => {
-    // Add auth token here later
-    // const token = localStorage.getItem('token');
-    // if (token) {
-    //   config.headers.Authorization = `Bearer ${token}`;
-    // }
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
     return config;
   },
   (error) => {

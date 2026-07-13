@@ -1,6 +1,6 @@
 import LandingPage from './pages/LandingPage';
 
-function App() {
+const App = () => {
   return <LandingPage />;
 }
 

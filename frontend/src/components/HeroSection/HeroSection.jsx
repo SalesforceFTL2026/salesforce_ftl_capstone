@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-function HeroSection({ onRoleSelect }) {
+const HeroSection = ({ onRoleSelect }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   // Array of disaster images - add more image paths here
