@@ -1,4 +1,4 @@
-function Footer() {
+const Footer = () => {
   return (
     <footer className="bg-[#79A7ED] dark:bg-[#1a2332] py-12 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-6">
