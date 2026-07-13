@@ -50,3 +50,6 @@ generated/
 
 # Wireframes (local design assets)
 wireframe/
+
+# Local project instructions (not tracked)
+CLAUDE.md
