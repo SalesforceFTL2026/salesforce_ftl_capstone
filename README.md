@@ -1,14 +1,12 @@
-📝 `NOTE` Use this template repo to initialize the contents of your group's capstone repo project. As you work on your assignment over the course of the week, update the appropriate repo deliverables. All project planning should be included in the planning directory. (🚫 Remove this paragraph before submitting your assignment.)
-
 # SITE Capstone Project
 
 SITE Course Year: **2026**
 
 Cohort: **Salesforce**
 
-Team Member Names:**Insert Team Member Names**
+Team Member Names: **Monika Basnet, Ava Flanigan, & Jennifer Ye**
 
-Mentors Names: **Insert Professional Mentor Names**
+Mentors Names: **Dallas Dias, Aditya Suresh Kumar, Tripti Sheth, & Miguel Valdez**
 
 Project Code Repository Links
 
@@ -17,7 +15,8 @@ Project Code Repository Links
 
 ## Project Overview
 
-Add a quick summary of what your project theme and objectives are. 
+### MAJic MapResponse
+An AI-powered crisis coordination platform that connects help-seekers, volunteers, and nonprofit organizations through a shared, real-time request system. Individuals can submit assistance requests, while AI prioritizes and clusters similar needs based on urgency, location, and demand to help organizations allocate resources more effectively and guide volunteers toward the highest-impact opportunities. By centralizing fragmented crisis information into a single platform, MapResponse enables faster, more transparent, and more coordinated disaster response.
 
 Deployment Website: **Add Link to Deployed Project**
 
