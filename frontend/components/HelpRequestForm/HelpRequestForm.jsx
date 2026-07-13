@@ -1,184 +1,124 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import { useState } from 'react';
+import api from '../../src/utils/api';
 
-const HelpRequestForm = () => {
-    const [formData, setFormData] = useState({
-        submitterName: '',
-        category: '',
-        urgency: '',
-        location: '',
-        description: ''
-    });
+// Compact, theme-coherent help request form.
+// - `compact` trims padding/spacing so it fits a dashboard column.
+// - `onCreated` (optional) fires after a successful submit so a parent
+//   (e.g. the dashboard) can refresh its "My Requests" list.
+const HelpRequestForm = ({ compact = false, onCreated }) => {
+  const [formData, setFormData] = useState({
+    submitterName: '',
+    category: '',
+    urgency: '',
+    location: '',
+    description: '',
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
 
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState(false);
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setError('');
+  };
 
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-        setError('');
-    };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    setSuccess(false);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        setError('');
-        setSuccess(false);
+    if (!formData.category || !formData.urgency || !formData.location || !formData.description) {
+      setError('Please fill in all required fields');
+      setLoading(false);
+      return;
+    }
 
-        // Basic validation
-        if (!formData.category || !formData.urgency || !formData.location || !formData.description) {
-            setError('Please fill in all required fields');
-            setLoading(false);
-            return;
-        }
+    try {
+      // api sends the saved token, so the request is linked to this user.
+      const { data } = await api.post('/api/requests', formData);
+      if (data.success) {
+        setSuccess(true);
+        setFormData({ submitterName: '', category: '', urgency: '', location: '', description: '' });
+        onCreated?.(data.data);   // let the dashboard refresh its list
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to submit request. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        try {
-            const response = await axios.post('http://localhost:3000/api/requests', formData);
+  // Shared input styling — sage focus ring + dark mode, matching the project.
+  const field =
+    'w-full px-4 py-2 rounded-xl border-2 border-gray-300 dark:border-[#3a4f30] ' +
+    'bg-white dark:bg-[#1a2f1a] text-gray-900 dark:text-white ' +
+    'focus:outline-none focus:border-[#7F9764] focus:ring-2 focus:ring-[#7F9764]/30 transition-all';
+  const label = 'block text-sm font-bold text-gray-800 dark:text-gray-200 mb-2';
 
-            if (response.data.success) {
-                setSuccess(true);
-                // Reset form
-                setFormData({
-                    submitterName: '',
-                    category: '',
-                    urgency: '',
-                    location: '',
-                    description: ''
-                });
-            }
-        } catch (err) {
-            setError(err.response?.data?.message || 'Failed to submit request. Please try again.');
-        } finally {
-            setLoading(false);
-        }
-    };
+  return (
+    <div className={`bg-white dark:bg-[#273A20] rounded-2xl shadow-md transition-colors duration-300 ${compact ? 'p-6' : 'p-8'}`}>
+      <h2 className={`font-bold text-black dark:text-white mb-1 ${compact ? 'text-xl' : 'text-2xl'}`}>
+        Request Help
+      </h2>
+      <p className="text-gray-600 dark:text-gray-400 text-sm mb-5">
+        Tell us what you need and we'll prioritize it.
+      </p>
 
-    return (
-        <div className="max-w-2xl mx-auto p-6">
-            <div className="bg-white rounded-lg shadow-md p-8">
-                <h1 className="text-3xl font-bold text-gray-800 mb-2">Request Help</h1>
-                <p className="text-gray-600 mb-6">Fill out this form to request assistance during a crisis</p>
-
-                {success && (
-                    <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-md">
-                        <p className="text-green-800 font-medium">✓ Request submitted successfully!</p>
-                        <p className="text-green-700 text-sm mt-1">We'll prioritize your request and connect you with help soon.</p>
-                    </div>
-                )}
-
-                {error && (
-                    <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-md">
-                        <p className="text-red-800">{error}</p>
-                    </div>
-                )}
-
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    {/* Name (optional) */}
-                    <div>
-                        <label htmlFor="submitterName" className="block text-sm font-medium text-gray-700 mb-2">
-                            Your Name (Optional)
-                        </label>
-                        <input
-                            type="text"
-                            id="submitterName"
-                            name="submitterName"
-                            value={formData.submitterName}
-                            onChange={handleChange}
-                            placeholder="Enter your name"
-                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                        <p className="text-xs text-gray-500 mt-1">You can submit anonymously</p>
-                    </div>
-
-                    {/* Category */}
-                    <div>
-                        <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
-                            Category <span className="text-red-500">*</span>
-                        </label>
-                        <select
-                            id="category"
-                            name="category"
-                            value={formData.category}
-                            onChange={handleChange}
-                            required
-                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        >
-                            <option value="">Select a category</option>
-                            <option value="Food">Food</option>
-                            <option value="Shelter">Shelter</option>
-                            <option value="Medical">Medical</option>
-                            <option value="Transport">Transportation</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </div>
-
-                    {/* Urgency */}
-                    <div>
-                        <label htmlFor="urgency" className="block text-sm font-medium text-gray-700 mb-2">
-                            Urgency Level <span className="text-red-500">*</span>
-                        </label>
-                        <select
-                            id="urgency"
-                            name="urgency"
-                            value={formData.urgency}
-                            onChange={handleChange}
-                            required
-                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        >
-                            <option value="">Select urgency level</option>
-                            <option value="Low">Low - Can wait a few days</option>
-                            <option value="Medium">Medium - Needed within 24 hours</option>
-                            <option value="High">High - Needed within a few hours</option>
-                            <option value="Critical">Critical - Immediate assistance needed</option>
-                        </select>
-                    </div>
-
-                    {/* Location */}
-                    <div>
-                        <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-2">
-                            Location <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                            type="text"
-                            id="location"
-                            name="location"
-                            value={formData.location}
-                            onChange={handleChange}
-                            placeholder="City, zip code, or address"
-                            required
-                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                    </div>
-
-                    {/* Description */}
-                    <div>
-                        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-                            Description <span className="text-red-500">*</span>
-                        </label>
-                        <textarea
-                            id="description"
-                            name="description"
-                            value={formData.description}
-                            onChange={handleChange}
-                            placeholder="Describe what help you need..."
-                            required
-                            rows="4"
-                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                    </div>
-
-                    {/* Submit Button */}
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full bg-blue-600 text-white py-3 px-6 rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-                    >
-                        {loading ? 'Submitting...' : 'Submit Request'}
-                    </button>
-                </form>
-            </div>
+      {success && (
+        <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 rounded-xl">
+          <p className="text-green-800 dark:text-green-300 text-sm font-medium">✓ Request submitted!</p>
         </div>
-    );
+      )}
+      {error && (
+        <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-xl">
+          <p className="text-red-800 dark:text-red-300 text-sm">{error}</p>
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label htmlFor="category" className={label}>Category <span className="text-[#c84444]">*</span></label>
+          <select id="category" name="category" value={formData.category} onChange={handleChange} required className={field}>
+            <option value="">Select a category</option>
+            <option value="Food">Food</option>
+            <option value="Shelter">Shelter</option>
+            <option value="Medical">Medical</option>
+            <option value="Transport">Transportation</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div>
+          <label htmlFor="urgency" className={label}>Urgency <span className="text-[#c84444]">*</span></label>
+          <select id="urgency" name="urgency" value={formData.urgency} onChange={handleChange} required className={field}>
+            <option value="">Select urgency level</option>
+            <option value="Low">Low — Can wait a few days</option>
+            <option value="Medium">Medium — Within 24 hours</option>
+            <option value="High">High — Within a few hours</option>
+            <option value="Critical">Critical — Immediate</option>
+          </select>
+        </div>
+
+        <div>
+          <label htmlFor="location" className={label}>Location <span className="text-[#c84444]">*</span></label>
+          <input type="text" id="location" name="location" value={formData.location} onChange={handleChange}
+            placeholder="City, zip code, or address" required className={field} />
+        </div>
+
+        <div>
+          <label htmlFor="description" className={label}>Description <span className="text-[#c84444]">*</span></label>
+          <textarea id="description" name="description" value={formData.description} onChange={handleChange}
+            placeholder="Describe what help you need..." required rows={compact ? 3 : 4} className={field} />
+        </div>
+
+        <button type="submit" disabled={loading}
+          className="w-full bg-[#1C2A16] dark:bg-[#7F9764] text-white py-3 px-6 rounded-xl font-semibold uppercase text-sm tracking-wide hover:opacity-90 transition-opacity disabled:bg-gray-400 disabled:cursor-not-allowed">
+          {loading ? 'Submitting…' : 'Submit Request'}
+        </button>
+      </form>
+    </div>
+  );
 };
 
 export default HelpRequestForm;

@@ -51,3 +51,23 @@ export async function requireAuth(req, res, next) {
     });
   }
 }
+
+/**
+ * attachUserIfPresent: soft version of requireAuth.
+ * If a valid token is present, attach req.user. If not, just continue
+ * (used for routes that work for both logged-in and anonymous users).
+ */
+export async function attachUserIfPresent(req, res, next) {
+  try {
+    const authHeader = req.headers.authorization;
+    if (authHeader?.startsWith('Bearer ')) {
+      const token = authHeader.split(' ')[1];
+      const payload = verifyToken(token);
+      const user = await prisma.user.findUnique({ where: { id: payload.userId } });
+      if (user) req.user = user;
+    }
+  } catch (error) {
+    // Bad/expired token on an optional route — ignore and continue anonymously.
+  }
+  next();
+}
