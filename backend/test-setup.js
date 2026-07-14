@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-console.log('\n🔍 Testing Crisis360 Backend Setup...\n');
+console.log('\n🔍 Testing MapResponse Backend Setup...\n');
 
 // Check environment variables
 console.log('✅ Environment Variables:');

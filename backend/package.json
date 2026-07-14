@@ -1,7 +1,7 @@
 {
-  "name": "crisis360-backend",
+  "name": "mapresponse-backend",
   "version": "1.0.0",
-  "description": "Crisis360 Backend API",
+  "description": "MapResponse Backend API",
   "type": "module",
   "main": "server.js",
   "scripts": {

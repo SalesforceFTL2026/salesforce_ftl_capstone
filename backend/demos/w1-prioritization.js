@@ -11,7 +11,7 @@ const prisma = new PrismaClient();
  * Creates sample requests and shows how the AI prioritizes them
  */
 async function demo() {
-  console.log('Crisis360 - AI Prioritization Engine Demo\n');
+  console.log('MapResponse - AI Prioritization Engine Demo\n');
   console.log('='.repeat(70));
 
   // Check API keys
