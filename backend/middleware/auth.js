@@ -51,3 +51,33 @@ export async function requireAuth(req, res, next) {
     });
   }
 }
+
+/**
+ * requireRole: restrict a route to specific user roles.
+ *
+ * Use it AFTER requireAuth so req.user is already set, e.g.
+ *   router.get('/organization', requireAuth, requireRole('organization'), handler)
+ *
+ * @param {...string} allowedRoles - the roles permitted to continue
+ * @returns {import('express').RequestHandler} middleware enforcing the roles
+ */
+export function requireRole(...allowedRoles) {
+  return (req, res, next) => {
+    // requireAuth should have set req.user. If it didn't, fail closed.
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'You must be logged in to do that.',
+      });
+    }
+
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).json({
+        success: false,
+        message: 'You do not have permission to access this resource.',
+      });
+    }
+
+    next();
+  };
+}

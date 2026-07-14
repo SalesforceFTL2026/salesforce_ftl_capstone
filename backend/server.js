@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import prioritizeRoutes from './routes/prioritize.js';
 import authRoutes from './routes/auth.js';
 import requestRoutes from './routes/requests.js';
+import dashboardRoutes from './routes/dashboard.js';
 
 dotenv.config();
 
@@ -31,6 +32,7 @@ app.get('/health', (req, res) => {
 app.use('/api/requests', requestRoutes);
 app.use('/api/prioritize', prioritizeRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -47,6 +49,6 @@ app.use((req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://calhost:${PORT}`);
-  console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });
