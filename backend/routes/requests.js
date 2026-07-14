@@ -25,6 +25,10 @@ router.get('/prioritized', requestController.getPrioritizedRequests);
 // GET /api/requests/:id
 router.get('/:id', requestController.getRequestById);
 
+// Express interest in a request (volunteer "I can help with this")
+// POST /api/requests/:id/interact
+router.post('/:id/interact', requireAuth, requestController.interactWithRequest);
+
 // Update request status
 // PATCH /api/requests/:id/status
 router.patch('/:id/status', requestController.updateRequestStatus);

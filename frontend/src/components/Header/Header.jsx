@@ -1,6 +1,6 @@
 import { useTheme } from '../../context/ThemeContext';
 
-function Header() {
+const Header = ({ currentUser, onSignInClick, onSignOutClick }) => {
   const { isDark, toggleTheme } = useTheme();
 
   return (
@@ -41,8 +41,28 @@ function Header() {
             </a>
           </nav>
 
-          {/* Right side - Search and Theme Toggle */}
+          {/* Right side - Sign In, Search and Theme Toggle */}
           <div className="flex items-center gap-3">
+            {currentUser ? (
+              <>
+                <span className="hidden sm:inline text-[#1C2A16] dark:text-white text-sm font-medium">
+                  Hi, {currentUser.name}
+                </span>
+                <button
+                  onClick={onSignOutClick}
+                  className="text-[#1C2A16] dark:text-white text-sm font-medium hover:opacity-70 transition-opacity"
+                >
+                  SIGN OUT
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={onSignInClick}
+                className="text-[#1C2A16] dark:text-white text-sm font-medium hover:opacity-70 transition-opacity"
+              >
+                SIGN IN
+              </button>
+            )}
             <button
               className="p-2 text-[#1C2A16] dark:text-white hover:opacity-70 transition-opacity"
               aria-label="Search"

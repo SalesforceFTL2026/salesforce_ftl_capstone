@@ -1,4 +1,5 @@
 import * as requestModel from '../models/requestModel.js';
+import prisma from '../services/database/prisma.js';
 
 /**
  * Request Controller
@@ -197,11 +198,80 @@ export const deleteRequest = async (req, res) => {
   }
 };
 
+// Express interest in a request (volunteer clicks "I can help with this")
+// POST /api/requests/:id/interact
+// Creates a Response linking the logged-in volunteer to the request.
+// This is what later shows up in GET /api/dashboard/volunteer ("My Interests").
+export const interactWithRequest = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { notes } = req.body;
+
+    // Only volunteers can express interest this way.
+    if (req.user.role !== 'volunteer') {
+      return res.status(403).json({
+        success: false,
+        message: 'Only volunteers can express interest in a request.'
+      });
+    }
+
+    // Make sure the request actually exists before responding to it.
+    const request = await requestModel.getRequestById(id);
+    if (!request) {
+      return res.status(404).json({
+        success: false,
+        message: 'Request not found'
+      });
+    }
+
+    // Don't let the same volunteer express interest twice on one request.
+    const existing = await prisma.response.findFirst({
+      where: {
+        requestId: id,
+        responderId: req.user.id,
+        responderType: 'volunteer'
+      }
+    });
+
+    if (existing) {
+      return res.status(200).json({
+        success: true,
+        message: 'You have already expressed interest in this request.',
+        data: existing
+      });
+    }
+
+    const response = await prisma.response.create({
+      data: {
+        requestId: id,
+        responderId: req.user.id,
+        responderType: 'volunteer',
+        status: 'offered',
+        notes: notes || null
+      }
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Interest recorded. Thanks for stepping up to help!',
+      data: response
+    });
+  } catch (error) {
+    console.error('Error recording interest in request:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to record interest',
+      error: error.message
+    });
+  }
+};
+
 export default {
   createRequest,
   getAllRequests,
   getRequestById,
   getPrioritizedRequests,
   updateRequestStatus,
-  deleteRequest
+  deleteRequest,
+  interactWithRequest
 };

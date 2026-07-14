@@ -1,4 +1,4 @@
-function WhatWeDoSection() {
+const WhatWeDoSection = () => {
   return (
     <section className="py-24 bg-[#7F9764] dark:bg-[#1a2f1a] transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-6">

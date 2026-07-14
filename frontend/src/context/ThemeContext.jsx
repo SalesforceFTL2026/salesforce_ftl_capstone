@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect } from 'react';
 
 const ThemeContext = createContext();
 
-export function ThemeProvider({ children }) {
+export const ThemeProvider = ({ children }) => {
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
@@ -23,12 +23,15 @@ export function ThemeProvider({ children }) {
       {children}
     </ThemeContext.Provider>
   );
-}
+};
 
-export function useTheme() {
+// Co-located with ThemeProvider by design. This only trips react-refresh's
+// "components-only file" rule, which is a dev-time HMR nicety, not a bug.
+// eslint-disable-next-line react-refresh/only-export-components
+export const useTheme = () => {
   const context = useContext(ThemeContext);
   if (!context) {
     throw new Error('useTheme must be used within ThemeProvider');
   }
   return context;
-}
+};
