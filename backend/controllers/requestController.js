@@ -7,9 +7,19 @@ import prisma from '../services/database/prisma.js';
  */
 
 // Create a new help request
+// Requires authentication: the submitter's identity comes from the logged-in
+// user (req.user), NOT from the request body, so clients can't spoof who they are.
 export const createRequest = async (req, res) => {
   try {
-    const { submitterName, category, urgency, location, description } = req.body;
+    // Only help-seekers can submit help requests.
+    if (req.user.role !== 'help-seeker') {
+      return res.status(403).json({
+        success: false,
+        message: 'Only help-seekers can submit a help request.'
+      });
+    }
+
+    const { category, urgency, location, description } = req.body;
 
     // Validation
     if (!category || !urgency || !location || !description) {
@@ -37,9 +47,11 @@ export const createRequest = async (req, res) => {
       });
     }
 
-    // Create request
+    // Create request, stamping it with the logged-in user's real identity.
     const newRequest = await requestModel.createRequest({
-      submitterName,
+      userId: req.user.id,
+      submitterName: req.user.name,
+      submitterRole: req.user.role,
       category,
       urgency,
       location,
