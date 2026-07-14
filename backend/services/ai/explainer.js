@@ -1,5 +1,10 @@
 import { anthropic } from './clients.js';
 
+// Claude model used for priority explanations. Configurable via env so it can
+// be pointed at whatever model id our API gateway currently accepts without a
+// code change. Must be a valid id for the key's endpoint (query /v1/models).
+const EXPLANATION_MODEL = process.env.CLAUDE_MODEL || 'claude-haiku-4-5-20251001';
+
 /**
  * Generate Claude explanation for why a request has its priority score
  *
@@ -19,7 +24,7 @@ export async function generatePriorityExplanation(
 
   try {
     const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-5',
+      model: EXPLANATION_MODEL,
       max_tokens: 150,
       messages: [
         {
