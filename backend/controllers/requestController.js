@@ -102,6 +102,25 @@ export const getAllRequests = async (req, res) => {
   }
 };
 
+// Get the logged-in user's own requests
+export const getMyRequests = async (req, res) => {
+  try {
+    const requests = await requestModel.getRequestsByUser(req.user.id);
+
+    res.status(200).json({
+      success: true,
+      data: requests
+    });
+  } catch (error) {
+    console.error('Error fetching user requests:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch your requests',
+      error: error.message
+    });
+  }
+};
+
 // Get request by ID
 export const getRequestById = async (req, res) => {
   try {
@@ -387,6 +406,7 @@ export const interactWithRequest = async (req, res) => {
 
 export default {
   createRequest,
+  getMyRequests,
   getAllRequests,
   getRequestById,
   getPrioritizedRequests,

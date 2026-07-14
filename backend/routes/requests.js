@@ -21,6 +21,10 @@ router.get('/', requireAuth, requestController.getAllRequests);
 // GET /api/requests/prioritized
 router.get('/prioritized', requireAuth, requestController.getPrioritizedRequests);
 
+// Get the logged-in user's own requests (protected)
+// GET /api/requests/my-requests  (must come before /:id so it isn't treated as an id)
+router.get('/my-requests', requireAuth, requestController.getMyRequests);
+
 // Get single request by ID (must be logged in)
 // GET /api/requests/:id
 router.get('/:id', requireAuth, requestController.getRequestById);

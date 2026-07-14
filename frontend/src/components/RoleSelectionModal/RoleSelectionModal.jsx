@@ -11,7 +11,7 @@ import { signup, authErrorMessage } from '../../utils/auth';
 // @param {string} role - the role the user picked ('help-seeker' | 'volunteer' | 'organization')
 // @param {() => void} onClose - close the modal without registering
 // @param {(user: object) => void} onSubmit - called with the signed-in user on success
-const RoleSelectionModal = ({ role, onClose, onSubmit }) => {
+const RoleSelectionModal = ({ role, embedded = false, onClose, onSubmit }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -58,23 +58,8 @@ const RoleSelectionModal = ({ role, onClose, onSubmit }) => {
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl p-10 max-w-lg w-full mx-4 shadow-2xl">
-        <div className="flex justify-between items-start mb-8">
-          <h2 className="text-3xl font-bold text-black">
-            Welcome, {roleLabels[role]}!
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-3xl leading-none -mt-2"
-            aria-label="Close"
-          >
-            ×
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+  const formBody = (
+    <form onSubmit={handleSubmit} className="space-y-6" noValidate>
           <div>
             <label htmlFor="name" className="block text-sm font-bold text-gray-800 mb-2 uppercase tracking-wide">
               Name <span className="text-red-500">*</span>
@@ -159,7 +144,29 @@ const RoleSelectionModal = ({ role, onClose, onSubmit }) => {
               {loading ? 'Creating account…' : 'Continue'}
             </button>
           </div>
-        </form>
+    </form>
+  );
+
+  // Embedded inside AuthModal: it provides the popup shell + title/tabs.
+  if (embedded) return formBody;
+
+  // Standalone: render our own popup shell + title.
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+      <div className="bg-white rounded-2xl p-10 max-w-lg w-full mx-4 shadow-2xl">
+        <div className="flex justify-between items-start mb-8">
+          <h2 className="text-3xl font-bold text-black">
+            Welcome, {roleLabels[role]}!
+          </h2>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 text-3xl leading-none -mt-2"
+            aria-label="Close"
+          >
+            ×
+          </button>
+        </div>
+        {formBody}
       </div>
     </div>
   );

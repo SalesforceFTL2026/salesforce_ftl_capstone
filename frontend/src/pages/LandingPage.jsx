@@ -8,41 +8,34 @@ import GetInvolvedSection from '../components/GetInvolvedSection/GetInvolvedSect
 import PartnerSection from '../components/PartnerSection/PartnerSection';
 import MapResponseOneLiner from '../components/MapResponseOneLiner/MapResponseOneLiner';
 import Footer from '../components/Footer/Footer';
-import RoleSelectionModal from '../components/RoleSelectionModal/RoleSelectionModal';
-import SignInModal from '../components/SignInModal/SignInModal';
+import AuthModal from '../components/AuthModal/AuthModal';
 import { pathForRole } from '../utils/roleRedirect';
 import { getCurrentUser, logout } from '../utils/auth';
 
 const LandingPage = () => {
-  const navigate = useNavigate();
-  const [selectedRole, setSelectedRole] = useState(null);
-  const [showSignIn, setShowSignIn] = useState(false);
+  // Which auth popup to show. null = closed. Otherwise { role, mode }.
+  // role labels the signup form; mode is which tab opens first ('signup'|'login').
+  const [authModal, setAuthModal] = useState(null);
   // Seed from storage so a page refresh keeps the user signed in.
   const [currentUser, setCurrentUser] = useState(getCurrentUser);
+  const navigate = useNavigate();
 
+  // Clicking a role card opens the auth popup on the Sign Up tab.
   const handleRoleSelect = (role) => {
-    setSelectedRole(role);
+    setAuthModal({ role, mode: 'signup' });
   };
 
-  const handleModalClose = () => {
-    setSelectedRole(null);
+  // The header "Sign In" opens the popup on the Log In tab (no role needed).
+  const handleSignInClick = () => {
+    setAuthModal({ role: null, mode: 'login' });
   };
 
-  // A new user registered and was signed in. Route them by role.
-  const handleFormSubmit = (user) => {
-    setSelectedRole(null);
-    goToRoleHome(user);
-  };
+  const closeAuthModal = () => setAuthModal(null);
 
-  // A returning user signed in. Route them by role.
-  const handleSignInSuccess = (user) => {
-    setShowSignIn(false);
-    goToRoleHome(user);
-  };
-
-  // Role comes from the server on the user object, never chosen in the UI, so
-  // we route based on it. Shared by both sign-up and sign-in.
-  const goToRoleHome = (user) => {
+  // Fired on successful signup OR login. Route by the account's role.
+  // Role comes from the server on the user object, never chosen in the UI.
+  const handleAuthenticated = (user) => {
+    setAuthModal(null);
     setCurrentUser(user);
     navigate(pathForRole(user.role));
   };
@@ -57,7 +50,7 @@ const LandingPage = () => {
     <div className="min-h-screen">
       <Header
         currentUser={currentUser}
-        onSignInClick={() => setShowSignIn(true)}
+        onSignInClick={handleSignInClick}
         onSignOutClick={handleLogout}
       />
       <div className="pt-[70px]">
@@ -70,18 +63,12 @@ const LandingPage = () => {
         <Footer />
       </div>
 
-      {selectedRole && (
-        <RoleSelectionModal
-          role={selectedRole}
-          onClose={handleModalClose}
-          onSubmit={handleFormSubmit}
-        />
-      )}
-
-      {showSignIn && (
-        <SignInModal
-          onClose={() => setShowSignIn(false)}
-          onSuccess={handleSignInSuccess}
+      {authModal && (
+        <AuthModal
+          role={authModal.role}
+          initialMode={authModal.mode}
+          onClose={closeAuthModal}
+          onAuthenticated={handleAuthenticated}
         />
       )}
     </div>

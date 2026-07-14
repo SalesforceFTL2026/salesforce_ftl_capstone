@@ -1,18 +1,25 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
+import HelpSeekerDashboard from './pages/HelpSeekerDashboard';
 import VolunteerDashboard from './pages/VolunteerDashboard';
+import ComingSoon from './pages/ComingSoon';
 
 const App = () => {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        {/* Volunteer dashboard. Help-seeker and organization dashboards are
-            separate routes/pages built in their own issues. */}
-        <Route path="/dashboard" element={<VolunteerDashboard />} />
-      </Routes>
-    </BrowserRouter>
+    <Routes>
+      {/* Public landing page with the role cards + sign-in */}
+      <Route path="/" element={<LandingPage />} />
+
+      {/* Help-seeker dashboard: their requests + a compact request form */}
+      <Route path="/requests/new" element={<HelpSeekerDashboard />} />
+
+      {/* Volunteer dashboard: Priority Feed + My Interests */}
+      <Route path="/dashboard" element={<VolunteerDashboard />} />
+
+      {/* Organization destination (placeholder for teammates) */}
+      <Route path="/feed" element={<ComingSoon title="Volunteer Feed" />} />
+    </Routes>
   );
-};
+}
 
 export default App;

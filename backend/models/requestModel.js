@@ -13,7 +13,7 @@ export const createRequest = async (requestData) => {
 
   return await prisma.request.create({
     data: {
-      userId: userId || null,
+      userId: userId || null,          // link to the logged-in user when present
       submitterName: submitterName || null,
       submitterRole: submitterRole || null,
       category,
@@ -23,6 +23,14 @@ export const createRequest = async (requestData) => {
       status: 'pending',
       priorityScore: 0
     }
+  });
+};
+
+// Get all requests submitted by a specific user (newest first)
+export const getRequestsByUser = async (userId) => {
+  return await prisma.request.findMany({
+    where: { userId },
+    orderBy: { createdAt: 'desc' }
   });
 };
 
@@ -157,6 +165,7 @@ export const getRequestsByLocation = async (location) => {
 
 export default {
   createRequest,
+  getRequestsByUser,
   getAllRequests,
   getRequestById,
   getPrioritizedRequests,
