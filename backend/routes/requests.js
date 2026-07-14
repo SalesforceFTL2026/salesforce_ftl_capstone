@@ -1,5 +1,6 @@
 import express from 'express';
 import * as requestController from '../controllers/requestController.js';
+import { requireAuth } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -8,9 +9,9 @@ const router = express.Router();
  * Base path: /api/requests
  */
 
-// Create a new help request
+// Create a new help request (must be logged in)
 // POST /api/requests
-router.post('/', requestController.createRequest);
+router.post('/', requireAuth, requestController.createRequest);
 
 // Get all requests
 // GET /api/requests
