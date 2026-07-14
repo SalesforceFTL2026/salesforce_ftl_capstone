@@ -6,10 +6,11 @@
 //
 // @param {string} role - the role string returned by the API (e.g. 'volunteer')
 // @returns {string} the path to navigate to; falls back to '/' for unknown roles
+// Each persona has its own dashboard route/page, built separately.
 const ROLE_PATHS = {
   'help-seeker': '/requests/new',
-  'volunteer': '/feed',
-  'organization': '/dashboard',
+  'volunteer': '/dashboard',
+  'organization': '/organization',
 };
 
 export const pathForRole = (role) => ROLE_PATHS[role] || '/';
