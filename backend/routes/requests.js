@@ -13,28 +13,32 @@ const router = express.Router();
 // POST /api/requests
 router.post('/', requireAuth, requestController.createRequest);
 
-// Get all requests
+// Get all requests (must be logged in)
 // GET /api/requests
-router.get('/', requestController.getAllRequests);
+router.get('/', requireAuth, requestController.getAllRequests);
 
-// Get prioritized requests (sorted by AI priority score)
+// Get prioritized requests (sorted by AI priority score) (must be logged in)
 // GET /api/requests/prioritized
-router.get('/prioritized', requestController.getPrioritizedRequests);
+router.get('/prioritized', requireAuth, requestController.getPrioritizedRequests);
 
-// Get single request by ID
+// Get single request by ID (must be logged in)
 // GET /api/requests/:id
-router.get('/:id', requestController.getRequestById);
+router.get('/:id', requireAuth, requestController.getRequestById);
 
 // Express interest in a request (volunteer "I can help with this")
 // POST /api/requests/:id/interact
 router.post('/:id/interact', requireAuth, requestController.interactWithRequest);
 
-// Update request status
-// PATCH /api/requests/:id/status
-router.patch('/:id/status', requestController.updateRequestStatus);
+// Categorize / add detail to a request (organizations only)
+// PATCH /api/requests/:id
+router.patch('/:id', requireAuth, requestController.updateRequestDetails);
 
-// Delete request
+// Update request status (orgs, or the help-seeker who owns the request)
+// PATCH /api/requests/:id/status
+router.patch('/:id/status', requireAuth, requestController.updateRequestStatus);
+
+// Delete request (orgs, or the help-seeker who owns the request)
 // DELETE /api/requests/:id
-router.delete('/:id', requestController.deleteRequest);
+router.delete('/:id', requireAuth, requestController.deleteRequest);
 
 export default router;
