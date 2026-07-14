@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import HeroSection from '../components/HeroSection/HeroSection';
 import ImpactSection from '../components/ImpactSection/ImpactSection';
@@ -13,6 +14,7 @@ import { pathForRole } from '../utils/roleRedirect';
 import { getCurrentUser, logout } from '../utils/auth';
 
 const LandingPage = () => {
+  const navigate = useNavigate();
   const [selectedRole, setSelectedRole] = useState(null);
   const [showSignIn, setShowSignIn] = useState(false);
   // Seed from storage so a page refresh keeps the user signed in.
@@ -42,9 +44,7 @@ const LandingPage = () => {
   // we route based on it. Shared by both sign-up and sign-in.
   const goToRoleHome = (user) => {
     setCurrentUser(user);
-    const destination = pathForRole(user.role);
-    console.log('Signed in as', user.role, '→', destination);
-    // TODO: navigate to `destination` once routing is set up.
+    navigate(pathForRole(user.role));
   };
 
   // Clear the stored session and update the UI back to signed-out.

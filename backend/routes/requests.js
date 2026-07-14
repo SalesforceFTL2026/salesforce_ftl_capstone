@@ -1,5 +1,6 @@
 import express from 'express';
 import * as requestController from '../controllers/requestController.js';
+import { requireAuth } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -23,6 +24,10 @@ router.get('/prioritized', requestController.getPrioritizedRequests);
 // Get single request by ID
 // GET /api/requests/:id
 router.get('/:id', requestController.getRequestById);
+
+// Express interest in a request (volunteer "I can help with this")
+// POST /api/requests/:id/interact
+router.post('/:id/interact', requireAuth, requestController.interactWithRequest);
 
 // Update request status
 // PATCH /api/requests/:id/status
