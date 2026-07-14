@@ -38,8 +38,21 @@ const URGENCY_DOT = {
   Critical: 'bg-[#c84444]',
 };
 
+// Color the priority score by how urgent the AI ranked it, so the highest
+// scores read as the most pressing at a glance.
+const priorityScoreClass = (score) => {
+  if (score >= 80) return 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300';
+  if (score >= 60) return 'bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300';
+  if (score >= 40) return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300';
+  return 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300';
+};
+
 const RequestCard = ({ request, onInteract, interacting, confirmation }) => {
-  const { category, urgency, location, description, status, createdAt, reasoning, responseStatus } = request;
+  const { category, urgency, location, description, status, createdAt, reasoning, responseStatus, priorityScore } = request;
+
+  // Only show the AI priority score once the request has actually been scored
+  // (score > 0). Help-seeker "My Requests" cards stay unscored and hide it.
+  const hasPriorityScore = typeof priorityScore === 'number' && priorityScore > 0;
 
   const dotClass = URGENCY_DOT[urgency] || 'bg-gray-400';
   // Help-seeker cards carry a status; volunteer cards fall back to urgency.
@@ -59,9 +72,20 @@ const RequestCard = ({ request, onInteract, interacting, confirmation }) => {
           <span className={`w-2.5 h-2.5 rounded-full ${dotClass}`} aria-hidden="true" />
           <h3 className="font-bold text-black dark:text-white">{category}</h3>
         </div>
-        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full capitalize ${badgeClass}`}>
-          {status || urgency}
-        </span>
+        <div className="flex items-center gap-2">
+          {/* AI priority score — the headline signal on the volunteer feed. */}
+          {hasPriorityScore && (
+            <span
+              className={`text-xs font-bold px-2.5 py-1 rounded-full ${priorityScoreClass(priorityScore)}`}
+              title="AI-calculated priority score (0–100)"
+            >
+              Priority {Math.round(priorityScore)}
+            </span>
+          )}
+          <span className={`text-xs font-semibold px-2.5 py-1 rounded-full capitalize ${badgeClass}`}>
+            {status || urgency}
+          </span>
+        </div>
       </div>
 
       <p className="text-gray-700 dark:text-gray-300 text-sm">{description}</p>
