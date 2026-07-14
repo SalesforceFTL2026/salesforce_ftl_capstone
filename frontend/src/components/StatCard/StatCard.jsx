@@ -14,7 +14,7 @@ const StatCard = ({ number, description }) => {
         <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white dark:text-[#B0BF9F] mb-1 transition-colors duration-300">
           STATISTIC #{number}
         </h3>
-        <p className="text-base sm:text-lg md:text-xl text-white dark:text-[#B0BF9F] transition-colors duration-300">Fact</p>
+        <p className="text-base sm:text-lg md:text-xl text-white dark:text-[#B0BF9F] transition-colors duration-300">{description}</p>
       </div>
     </div>
   );
