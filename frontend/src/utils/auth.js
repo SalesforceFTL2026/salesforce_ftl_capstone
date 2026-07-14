@@ -49,7 +49,20 @@ export const signup = async ({ name, email, password, role, location }) => {
   return login({ email, password });
 };
 
-// Clear the stored session (used by a future "sign out" button).
+// Read the signed-in user saved at login, or null if nobody is signed in.
+// Used to restore the session when the app first loads.
+export const getCurrentUser = () => {
+  const stored = localStorage.getItem(USER_KEY);
+  if (!stored) return null;
+  try {
+    return JSON.parse(stored);
+  } catch {
+    // Corrupted value — treat as signed out.
+    return null;
+  }
+};
+
+// Clear the stored session so the user is signed out.
 export const logout = () => {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(USER_KEY);

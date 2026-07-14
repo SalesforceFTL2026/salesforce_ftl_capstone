@@ -50,14 +50,44 @@ export const getRequestById = async (id) => {
 };
 
 // Get prioritized requests (sorted by priority score)
+// Issue #17: Include status and interaction counts
 export const getPrioritizedRequests = async () => {
-  return await prisma.request.findMany({
+  const requests = await prisma.request.findMany({
     where: {
-      status: 'pending'
+      status: {
+        in: ['pending', 'in-progress'], // Only show active requests
+      },
+    },
+    include: {
+      responses: {
+        select: {
+          responderType: true,
+        },
+      },
     },
     orderBy: {
-      priorityScore: 'desc'
-    }
+      priorityScore: 'desc',
+    },
+  });
+
+  // Add interaction counts to each request
+  return requests.map((request) => {
+    const volunteerInterestCount = request.responses.filter(
+      (r) => r.responderType === 'volunteer'
+    ).length;
+
+    const organizationRespondingCount = request.responses.filter(
+      (r) => r.responderType === 'organization'
+    ).length;
+
+    // Remove the responses array and replace with counts
+    const { responses, ...requestWithoutResponses } = request;
+
+    return {
+      ...requestWithoutResponses,
+      volunteerInterestCount,
+      organizationRespondingCount,
+    };
   });
 };
 
