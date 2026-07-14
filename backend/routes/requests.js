@@ -1,6 +1,6 @@
 import express from 'express';
 import * as requestController from '../controllers/requestController.js';
-import { requireAuth, attachUserIfPresent } from '../middleware/auth.js';
+import { requireAuth } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -9,9 +9,9 @@ const router = express.Router();
  * Base path: /api/requests
  */
 
-// Create a new help request (attaches userId if the user is logged in)
+// Create a new help request (must be logged in)
 // POST /api/requests
-router.post('/', attachUserIfPresent, requestController.createRequest);
+router.post('/', requireAuth, requestController.createRequest);
 
 // Get all requests
 // GET /api/requests
@@ -28,6 +28,10 @@ router.get('/my-requests', requireAuth, requestController.getMyRequests);
 // Get single request by ID
 // GET /api/requests/:id
 router.get('/:id', requestController.getRequestById);
+
+// Express interest in a request (volunteer "I can help with this")
+// POST /api/requests/:id/interact
+router.post('/:id/interact', requireAuth, requestController.interactWithRequest);
 
 // Update request status
 // PATCH /api/requests/:id/status

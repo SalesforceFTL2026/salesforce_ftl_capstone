@@ -25,6 +25,9 @@ export const ThemeProvider = ({ children }) => {
   );
 };
 
+// Co-located with ThemeProvider by design. This only trips react-refresh's
+// "components-only file" rule, which is a dev-time HMR nicety, not a bug.
+// eslint-disable-next-line react-refresh/only-export-components
 export const useTheme = () => {
   const context = useContext(ThemeContext);
   if (!context) {

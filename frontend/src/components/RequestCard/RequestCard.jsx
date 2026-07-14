@@ -1,5 +1,19 @@
-// A single help-request card for the "My Requests" list.
-// Color-codes the status badge per the Week 2 sprint plan.
+// A single help-request card, reused by both dashboards.
+//
+// Help-seeker "My Requests" list: pass only `request` (with `status` +
+//   `createdAt`); the card color-codes a status badge.
+// Volunteer "Priority Feed": pass `onInteract` to show the "I can help"
+//   button; "My Interests" shows `request.responseStatus` instead.
+//
+// @param {object} request - request object from the API
+// @param {(request) => void} [onInteract] - called when the help button is
+//   clicked; if omitted, the button is hidden (e.g. on the My Interests tab)
+// @param {boolean} [interacting] - true while this card's interact call is in
+//   flight, so the button can show a loading state and stay disabled
+// @param {string} [confirmation] - a short confirmation message to show after
+//   a successful interaction on this card
+
+// Status badge colors for the help-seeker list.
 const STATUS_STYLES = {
   pending:       'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300',
   'in-progress': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300',
@@ -8,7 +22,15 @@ const STATUS_STYLES = {
   closed:        'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
 };
 
-// Urgency accent color (a small dot), so critical items stand out.
+// Urgency badge colors (used when there's no status to show).
+const URGENCY_STYLES = {
+  Critical: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300',
+  High: 'bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300',
+  Medium: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300',
+  Low: 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300',
+};
+
+// Urgency accent dot, so critical items stand out.
 const URGENCY_DOT = {
   Low: 'bg-gray-400',
   Medium: 'bg-blue-500',
@@ -16,34 +38,74 @@ const URGENCY_DOT = {
   Critical: 'bg-[#c84444]',
 };
 
-const RequestCard = ({ request }) => {
-  const { category, urgency, location, description, status, createdAt } = request;
+const RequestCard = ({ request, onInteract, interacting, confirmation }) => {
+  const { category, urgency, location, description, status, createdAt, reasoning, responseStatus } = request;
 
-  const statusClass = STATUS_STYLES[status] || STATUS_STYLES.pending;
   const dotClass = URGENCY_DOT[urgency] || 'bg-gray-400';
-  const when = new Date(createdAt).toLocaleDateString(undefined, {
-    month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
-  });
+  // Help-seeker cards carry a status; volunteer cards fall back to urgency.
+  const badgeClass = status
+    ? (STATUS_STYLES[status] || STATUS_STYLES.pending)
+    : (URGENCY_STYLES[urgency] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300');
+  const when = createdAt
+    ? new Date(createdAt).toLocaleDateString(undefined, {
+        month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
+      })
+    : null;
 
   return (
-    <div className="bg-white dark:bg-[#273A20] rounded-2xl shadow-md p-5 transition-colors duration-300">
-      <div className="flex items-start justify-between mb-2">
+    <article className="bg-white dark:bg-[#273A20] rounded-2xl shadow-md p-5 flex flex-col gap-4 transition-colors duration-300">
+      <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-2">
           <span className={`w-2.5 h-2.5 rounded-full ${dotClass}`} aria-hidden="true" />
           <h3 className="font-bold text-black dark:text-white">{category}</h3>
         </div>
-        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full capitalize ${statusClass}`}>
-          {status}
+        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full capitalize ${badgeClass}`}>
+          {status || urgency}
         </span>
       </div>
 
-      <p className="text-gray-700 dark:text-gray-300 text-sm mb-3">{description}</p>
+      <p className="text-gray-700 dark:text-gray-300 text-sm">{description}</p>
+
+      {/* AI reasoning, only shown when the prioritizer has explained the score */}
+      {reasoning && (
+        <p className="text-sm text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 rounded-lg p-3 border border-gray-100 dark:border-gray-700">
+          <span className="font-semibold">Why this is prioritized: </span>
+          {reasoning}
+        </p>
+      )}
 
       <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
         <span>📍 {location}</span>
-        <span>{urgency} · {when}</span>
+        {when && <span>{urgency} · {when}</span>}
       </div>
-    </div>
+
+      {/* On the My Interests tab, show the volunteer's response status. */}
+      {responseStatus && (
+        <p className="text-sm font-medium text-[#6ba3d3]">
+          Status: {responseStatus}
+        </p>
+      )}
+
+      {/* On the Priority Feed tab, show the "I can help" button. */}
+      {onInteract && (
+        <div className="mt-auto">
+          {confirmation ? (
+            <p className="text-sm font-semibold text-green-700" role="status">
+              {confirmation}
+            </p>
+          ) : (
+            <button
+              type="button"
+              onClick={() => onInteract(request)}
+              disabled={interacting}
+              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#6ba3d3] text-white font-semibold hover:bg-[#5a92c2] focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/40 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+            >
+              {interacting ? 'Saving…' : 'I can help with this'}
+            </button>
+          )}
+        </div>
+      )}
+    </article>
   );
 };
 

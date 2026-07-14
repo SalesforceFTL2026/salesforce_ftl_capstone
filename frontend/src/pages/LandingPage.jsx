@@ -37,8 +37,7 @@ const LandingPage = () => {
   const handleAuthenticated = (user) => {
     setAuthModal(null);
     setCurrentUser(user);
-    const destination = pathForRole(user.role);
-    navigate(destination);
+    navigate(pathForRole(user.role));
   };
 
   // Clear the stored session and update the UI back to signed-out.

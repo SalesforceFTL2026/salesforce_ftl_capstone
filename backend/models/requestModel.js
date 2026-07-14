@@ -9,12 +9,13 @@ const prisma = new PrismaClient();
 
 // Create a new help request
 export const createRequest = async (requestData) => {
-  const { submitterName, category, urgency, location, description, userId } = requestData;
+  const { userId, submitterName, submitterRole, category, urgency, location, description } = requestData;
 
   return await prisma.request.create({
     data: {
-      submitterName: submitterName || null,
       userId: userId || null,          // link to the logged-in user when present
+      submitterName: submitterName || null,
+      submitterRole: submitterRole || null,
       category,
       urgency,
       location,

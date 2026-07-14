@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
 import HelpSeekerDashboard from './pages/HelpSeekerDashboard';
+import VolunteerDashboard from './pages/VolunteerDashboard';
 import ComingSoon from './pages/ComingSoon';
 
 const App = () => {
@@ -12,9 +13,11 @@ const App = () => {
       {/* Help-seeker dashboard: their requests + a compact request form */}
       <Route path="/requests/new" element={<HelpSeekerDashboard />} />
 
-      {/* Volunteer + organization destinations (placeholders for teammates) */}
+      {/* Volunteer dashboard: Priority Feed + My Interests */}
+      <Route path="/dashboard" element={<VolunteerDashboard />} />
+
+      {/* Organization destination (placeholder for teammates) */}
       <Route path="/feed" element={<ComingSoon title="Volunteer Feed" />} />
-      <Route path="/dashboard" element={<ComingSoon title="Organization Dashboard" />} />
     </Routes>
   );
 }
