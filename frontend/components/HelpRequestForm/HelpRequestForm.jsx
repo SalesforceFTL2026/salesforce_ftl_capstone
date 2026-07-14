@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import api from '../../src/utils/api';
+import './HelpRequestForm.css';
 
 // Compact, theme-coherent help request form.
 // - `compact` trims padding/spacing so it fits a dashboard column.
@@ -51,12 +52,13 @@ const HelpRequestForm = ({ compact = false, onCreated }) => {
 
   // Shared input styling — sage focus ring + dark mode, matching the project.
   const field =
-    'w-full px-4 py-2 rounded-xl border-2 border-gray-300 dark:border-[#3a4f30] ' +
+    'w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-[#3a4f30] ' +
     'bg-white dark:bg-[#1a2f1a] text-gray-900 dark:text-white ' +
     'focus:outline-none focus:border-[#7F9764] focus:ring-2 focus:ring-[#7F9764]/30 transition-all';
   const label = 'block text-sm font-bold text-gray-800 dark:text-gray-200 mb-2';
 
   return (
+    <div className="help-request-form-wrapper">
     <div className={`bg-white dark:bg-[#273A20] rounded-2xl shadow-md transition-colors duration-300 ${compact ? 'p-6' : 'p-8'}`}>
       <h2 className={`font-bold text-black dark:text-white mb-1 ${compact ? 'text-xl' : 'text-2xl'}`}>
         Request Help
@@ -76,7 +78,7 @@ const HelpRequestForm = ({ compact = false, onCreated }) => {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-5">
         <div>
           <label htmlFor="category" className={label}>Category <span className="text-[#c84444]">*</span></label>
           <select id="category" name="category" value={formData.category} onChange={handleChange} required className={field}>
@@ -113,10 +115,11 @@ const HelpRequestForm = ({ compact = false, onCreated }) => {
         </div>
 
         <button type="submit" disabled={loading}
-          className="w-full bg-[#1C2A16] dark:bg-[#7F9764] text-white py-3 px-6 rounded-xl font-semibold uppercase text-sm tracking-wide hover:opacity-90 transition-opacity disabled:bg-gray-400 disabled:cursor-not-allowed">
+          className="w-full mt-2 bg-[#1C2A16] dark:bg-[#7F9764] text-white py-3.5 px-6 rounded-xl font-semibold uppercase text-sm tracking-wide hover:opacity-90 transition-opacity disabled:bg-gray-400 disabled:cursor-not-allowed">
           {loading ? 'Submitting…' : 'Submit Request'}
         </button>
       </form>
+    </div>
     </div>
   );
 };

@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import HelpRequestForm from '../../components/HelpRequestForm/HelpRequestForm';
 import RequestCard from '../components/RequestCard/RequestCard';
 import api from '../utils/api';
+import { getCurrentUser, logout } from '../utils/auth';
 
 // Help-Seeker Dashboard: your submitted requests (main area) + a compact
 // "Request Help" form (side column). Matches the project's sage/green theme.
@@ -10,6 +12,15 @@ const HelpSeekerDashboard = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  // Who is signed in, so the header can greet them and show "Sign out".
+  const [currentUser] = useState(getCurrentUser);
+  const navigate = useNavigate();
+
+  // Clear the saved session, then send the user back to the landing page.
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   // Load the logged-in user's requests. Wrapped in useCallback so the form's
   // onCreated can re-run it after a new submission.
@@ -32,16 +43,16 @@ const HelpSeekerDashboard = () => {
 
   return (
     <div className="min-h-screen bg-[#f4f6f1] dark:bg-[#0f1a0f] transition-colors duration-300">
-      <Header />
+      <Header currentUser={currentUser} onSignOutClick={handleLogout} />
       <div className="pt-[90px] pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-3xl font-bold text-[#1C2A16] dark:text-white mb-8">
             My Dashboard
           </h1>
 
-          <div className="grid lg:grid-cols-3 gap-8">
+          <div className="grid lg:grid-cols-5 gap-8">
             {/* Main column: My Requests */}
-            <section className="lg:col-span-2">
+            <section className="lg:col-span-3">
               <h2 className="text-sm font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-4">
                 My Requests
               </h2>
@@ -76,9 +87,9 @@ const HelpSeekerDashboard = () => {
               )}
             </section>
 
-            {/* Side column: compact request form */}
-            <aside className="lg:col-span-1">
-              <HelpRequestForm compact onCreated={loadRequests} />
+            {/* Side column: request form */}
+            <aside className="lg:col-span-2">
+              <HelpRequestForm onCreated={loadRequests} />
             </aside>
           </div>
         </div>
