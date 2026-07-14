@@ -1,10 +1,10 @@
 # ARCHITECTURE.md
 
-# Crisis360 Technical Architecture
+# MapResponse Technical Architecture
 
 ## Overview
 
-Crisis360 is a full-stack AI-powered crisis coordination platform built with:
+MapResponse is a full-stack AI-powered crisis coordination platform built with:
 
 - React + Vite
 - Node.js + Express

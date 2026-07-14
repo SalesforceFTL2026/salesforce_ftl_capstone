@@ -1,4 +1,4 @@
-# Project Proposal: Crisis360
+# Project Proposal: MapResponse
 
 ## Pod Members
 Monika Basnet, Ava Flanigan, & Jennifer Ye

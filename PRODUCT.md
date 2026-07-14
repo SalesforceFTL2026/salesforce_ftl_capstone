@@ -1,12 +1,12 @@
 # PRODUCT.md
 
-# Crisis360
+# MapResponse
 
 ## Product Vision
 
-Crisis360 is an AI-powered crisis coordination platform that connects help-seekers, volunteers, and organizations through a shared intelligence layer.
+MapResponse is an AI-powered crisis coordination platform that connects help-seekers, volunteers, and organizations through a shared intelligence layer.
 
-Rather than simply collecting requests for assistance, Crisis360 continuously analyzes incoming needs, detects emerging crisis patterns, prioritizes requests, and explains why certain requests require immediate attention.
+Rather than simply collecting requests for assistance, MapResponse continuously analyzes incoming needs, detects emerging crisis patterns, prioritizes requests, and explains why certain requests require immediate attention.
 
 The platform exists to help organizations allocate limited resources more effectively while helping volunteers identify where they can make the greatest impact.
 
@@ -35,7 +35,7 @@ Volunteers lack visibility into where they can help.
 
 People requesting help rarely know whether anyone has seen their request.
 
-Crisis360 centralizes these signals into one intelligent platform.
+MapResponse centralizes these signals into one intelligent platform.
 
 ---
 
@@ -117,7 +117,7 @@ Specifically:
 - prioritization
 - explainability
 
-Without the AI engine, Crisis360 loses its primary value proposition.
+Without the AI engine, MapResponse loses its primary value proposition.
 
 ---
 
@@ -341,7 +341,7 @@ Display
 
 # Non-Goals
 
-Crisis360 is NOT
+MapResponse is NOT
 
 - a social network
 - a donation platform
@@ -429,7 +429,7 @@ Every explanation should reference real signals such as
 
 # Definition of Success
 
-A successful Crisis360 user should be able to:
+A successful MapResponse user should be able to:
 
 - submit a request in under two minutes
 - understand why requests are prioritized

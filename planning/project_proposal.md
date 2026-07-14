@@ -1,6 +1,6 @@
 # Project Proposal
 
-## Crisis360
+## MapResponse
 
 ### Team Name
 MAJic
@@ -35,9 +35,9 @@ Information exists, but it is fragmented across forms, posts, spreadsheets, and 
 
 ## Description
 
-Crisis360 is an AI-powered crisis coordination platform that connects people in need, volunteers, and nonprofits through a shared intelligence layer.
+MapResponse is an AI-powered crisis coordination platform that connects people in need, volunteers, and nonprofits through a shared intelligence layer.
 
-Individuals submit help requests, nonprofits manage and validate needs at scale, and volunteers receive AI-ranked recommendations for where they can contribute most effectively. Instead of acting as a chatbot, Crisis360 acts as a decision-support system that prioritizes, clusters, and explains crisis needs in real time.
+Individuals submit help requests, nonprofits manage and validate needs at scale, and volunteers receive AI-ranked recommendations for where they can contribute most effectively. Instead of acting as a chatbot, MapResponse acts as a decision-support system that prioritizes, clusters, and explains crisis needs in real time.
 
 ---
 
@@ -133,7 +133,7 @@ Individuals submit help requests, nonprofits manage and validate needs at scale,
   - ii. urgency
   - iii. location
   - iv. optional description/photo
-- **b.** These requests become nodes in the Crisis360 crisis clustering engine
+- **b.** These requests become nodes in the MapResponse crisis clustering engine
 
 #### 2. My Requests Dashboard
 - **a.** Status tracking:
@@ -188,7 +188,7 @@ Individuals submit help requests, nonprofits manage and validate needs at scale,
 
 ### 1. AI Need Clustering & Prioritization Engine
 
-Instead of treating each request independently, Crisis360:
+Instead of treating each request independently, MapResponse:
 - Converts help requests into embeddings
 - Clusters similar needs together (e.g., "food insecurity" vs "temporary housing")
 - Assigns dynamic urgency scores based on:
@@ -268,7 +268,7 @@ Several existing platforms partially address aspects of crisis coordination, tre
 
 One notable real-world application that inspired this project is **Good360's use of Salesforce Agentforce** to automate resource matching for disaster relief. Good360 is a nonprofit that connects corporate donations with nonprofits serving communities in need. By leveraging AI agents (Salesforce Agentforce) and a unified data layer, Good360's system triples the speed of matching donated goods to communities and reduces operational overhead, freeing humans to focus on high-value coordination tasks. Agentforce analyzes donor, partner, inventory, and logistics data to recommend optimal matches and supports real-time updates and routing during disaster events.
 
-Unlike Good360's resource-matching use case, which focuses on optimizing physical goods distribution, Crisis360 extends the idea of AI-assisted coordination into signal aggregation, trend intelligence, and priority-aware need recommendations across general crises. It aims not just to route goods among nonprofits but to provide all stakeholders (people seeking help, volunteers, and organizations) with a shared intelligence layer that unifies needs, sentiment, urgency, and resource suggestions in a coherent interface.
+Unlike Good360's resource-matching use case, which focuses on optimizing physical goods distribution, MapResponse extends the idea of AI-assisted coordination into signal aggregation, trend intelligence, and priority-aware need recommendations across general crises. It aims not just to route goods among nonprofits but to provide all stakeholders (people seeking help, volunteers, and organizations) with a shared intelligence layer that unifies needs, sentiment, urgency, and resource suggestions in a coherent interface.
 
 ---
 

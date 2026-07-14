@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-# Crisis360
+# MapResponse
 
 AI-powered crisis coordination platform built for the Salesforce Futureforce Tech Launchpad Capstone.
 
@@ -17,13 +17,13 @@ Duration:
 
 # Project Vision
 
-Crisis360 connects three groups during disasters and emergencies:
+MapResponse connects three groups during disasters and emergencies:
 
 1. Help-seekers
 2. Volunteers
 3. Organizations
 
-Unlike traditional crisis platforms, Crisis360 uses AI to prioritize and explain which requests deserve immediate attention.
+Unlike traditional crisis platforms, MapResponse uses AI to prioritize and explain which requests deserve immediate attention.
 
 The primary innovation is **AI-assisted prioritization**, not simply displaying requests.
 
