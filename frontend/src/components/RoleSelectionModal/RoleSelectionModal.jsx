@@ -15,6 +15,7 @@ const RoleSelectionModal = ({ role, embedded = false, onClose, onSubmit }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [location, setLocation] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -34,8 +35,17 @@ const RoleSelectionModal = ({ role, embedded = false, onClose, onSubmit }) => {
       setError('Name, email, and password are required.');
       return;
     }
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters long.');
+    // Mirror the backend policy so users get feedback before we call the API.
+    if (password.length < 12) {
+      setError('Password must be at least 12 characters long.');
+      return;
+    }
+    if (password.length > 72) {
+      setError('Password must be 72 characters or fewer.');
+      return;
+    }
+    if (!/[a-z]/.test(password) || !/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
+      setError('Password must include an uppercase letter, a lowercase letter, and a number.');
       return;
     }
 
@@ -96,16 +106,26 @@ const RoleSelectionModal = ({ role, embedded = false, onClose, onSubmit }) => {
             <label htmlFor="password" className="block text-sm font-bold text-gray-800 mb-2 uppercase tracking-wide">
               Password <span className="text-red-500">*</span>
             </label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete="new-password"
-              className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-[#6ba3d3] focus:ring-2 focus:ring-[#6ba3d3]/20 transition-all"
-              placeholder="At least 8 characters"
-              required
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="new-password"
+                className="w-full px-4 py-3 pr-16 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-[#6ba3d3] focus:ring-2 focus:ring-[#6ba3d3]/20 transition-all"
+                placeholder="12+ chars, with a capital & number"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                className="absolute inset-y-0 right-0 px-4 flex items-center text-sm font-medium text-[#6ba3d3]"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? 'Hide' : 'Show'}
+              </button>
+            </div>
           </div>
 
           <div>
