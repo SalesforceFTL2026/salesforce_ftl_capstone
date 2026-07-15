@@ -111,6 +111,16 @@ export const updateRequestStatus = async (id, status) => {
   });
 };
 
+// Update a request's category and/or description.
+// Used by organizations to categorize requests and add detail to them.
+// Only the fields provided in `fields` are changed; anything omitted is left as-is.
+export const updateRequestDetails = async (id, fields) => {
+  return await prisma.request.update({
+    where: { id },
+    data: fields
+  });
+};
+
 // Delete request
 export const deleteRequest = async (id) => {
   return await prisma.request.delete({
@@ -161,6 +171,7 @@ export default {
   getPrioritizedRequests,
   updateRequestPriority,
   updateRequestStatus,
+  updateRequestDetails,
   deleteRequest,
   getRequestsByCategory,
   getRequestsByUrgency,

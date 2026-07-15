@@ -6,6 +6,16 @@ import prisma from '../services/database/prisma.js';
  * Handles business logic for help request endpoints
  */
 
+// Decides whether a logged-in user is allowed to manage (update/delete) a request.
+// The rule: organizations can manage any request, and a help-seeker can manage
+// only the request they submitted themselves. Everyone else is not allowed.
+const canManageRequest = (user, request) => {
+  if (user.role === 'organization') {
+    return true;
+  }
+  return user.role === 'help-seeker' && request.userId === user.id;
+};
+
 // Create a new help request
 // Requires authentication: the submitter's identity comes from the logged-in
 // user (req.user), NOT from the request body, so clients can't spoof who they are.
@@ -159,6 +169,7 @@ export const getPrioritizedRequests = async (req, res) => {
 };
 
 // Update request status
+// Allowed for organizations, or the help-seeker who owns the request.
 export const updateRequestStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -176,6 +187,22 @@ export const updateRequestStatus = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: 'Invalid status'
+      });
+    }
+
+    // Load the request so we can check the caller is allowed to manage it.
+    const request = await requestModel.getRequestById(id);
+    if (!request) {
+      return res.status(404).json({
+        success: false,
+        message: 'Request not found'
+      });
+    }
+
+    if (!canManageRequest(req.user, request)) {
+      return res.status(403).json({
+        success: false,
+        message: 'You are not allowed to update this request.'
       });
     }
 
@@ -197,9 +224,26 @@ export const updateRequestStatus = async (req, res) => {
 };
 
 // Delete request
+// Allowed for organizations, or the help-seeker who owns the request.
 export const deleteRequest = async (req, res) => {
   try {
     const { id } = req.params;
+
+    // Load the request so we can check the caller is allowed to manage it.
+    const request = await requestModel.getRequestById(id);
+    if (!request) {
+      return res.status(404).json({
+        success: false,
+        message: 'Request not found'
+      });
+    }
+
+    if (!canManageRequest(req.user, request)) {
+      return res.status(403).json({
+        success: false,
+        message: 'You are not allowed to delete this request.'
+      });
+    }
 
     await requestModel.deleteRequest(id);
 
@@ -212,6 +256,81 @@ export const deleteRequest = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to delete request',
+      error: error.message
+    });
+  }
+};
+
+// Categorize a request and/or add detail to its description (organizations only).
+// PATCH /api/requests/:id
+// Organizations triage incoming requests: they can correct the category and
+// append extra context to the description as they learn more.
+export const updateRequestDetails = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { category, description } = req.body;
+
+    // Only organizations may categorize or add detail to requests.
+    if (req.user.role !== 'organization') {
+      return res.status(403).json({
+        success: false,
+        message: 'Only organizations can categorize or add detail to a request.'
+      });
+    }
+
+    // The caller must actually be changing something.
+    if (category === undefined && description === undefined) {
+      return res.status(400).json({
+        success: false,
+        message: 'Provide a category and/or description to update.'
+      });
+    }
+
+    // Build the set of fields to change; only include what was provided.
+    const fields = {};
+
+    if (category !== undefined) {
+      const validCategories = ['Food', 'Shelter', 'Medical', 'Transport', 'Other'];
+      if (!validCategories.includes(category)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid category. Must be one of: Food, Shelter, Medical, Transport, Other'
+        });
+      }
+      fields.category = category;
+    }
+
+    if (description !== undefined) {
+      if (typeof description !== 'string' || description.trim() === '') {
+        return res.status(400).json({
+          success: false,
+          message: 'Description must be a non-empty string.'
+        });
+      }
+      fields.description = description;
+    }
+
+    // Make sure the request exists before trying to update it.
+    const request = await requestModel.getRequestById(id);
+    if (!request) {
+      return res.status(404).json({
+        success: false,
+        message: 'Request not found'
+      });
+    }
+
+    const updatedRequest = await requestModel.updateRequestDetails(id, fields);
+
+    res.status(200).json({
+      success: true,
+      message: 'Request updated successfully',
+      data: updatedRequest
+    });
+  } catch (error) {
+    console.error('Error updating request details:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update request',
       error: error.message
     });
   }
@@ -292,6 +411,7 @@ export default {
   getRequestById,
   getPrioritizedRequests,
   updateRequestStatus,
+  updateRequestDetails,
   deleteRequest,
   interactWithRequest
 };
