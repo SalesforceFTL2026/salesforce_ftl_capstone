@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
 import HelpSeekerDashboard from './pages/HelpSeekerDashboard';
 import VolunteerDashboard from './pages/VolunteerDashboard';
+import OrganizationDashboard from './pages/OrganizationDashboard';
 import ComingSoon from './pages/ComingSoon';
 
 const App = () => {
@@ -15,6 +16,9 @@ const App = () => {
 
       {/* Volunteer dashboard: Priority Feed + My Interests */}
       <Route path="/dashboard" element={<VolunteerDashboard />} />
+
+      {/* Organization dashboard: Priority Feed + Active Responses */}
+      <Route path="/organization" element={<OrganizationDashboard />} />
 
       {/* Organization destination (placeholder for teammates) */}
       <Route path="/feed" element={<ComingSoon title="Volunteer Feed" />} />
