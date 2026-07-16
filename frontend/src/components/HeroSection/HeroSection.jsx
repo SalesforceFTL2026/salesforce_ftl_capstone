@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react';
+import MRLogo from '../../assets/logos/MRLogo.png';
+import MRLogoMini from '../../assets/logos/MRLogoMini.png';
+import fireImg from '../../assets/hero_disaster_pictures/fire.jpeg';
+import floodImg from '../../assets/hero_disaster_pictures/flood.jpeg';
+import rubbleImg from '../../assets/hero_disaster_pictures/rubble.jpg';
+import foodImg from '../../assets/hero_disaster_pictures/food.jpeg';
+
+// Imported so Vite bundles them and gives us resolved URLs. Add more here.
+const disasterImages = [fireImg, floodImg, rubbleImg, foodImg];
 
 const HeroSection = ({ onRoleSelect }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
-  // Array of disaster images - add more image paths here
-  const disasterImages = [
-    '/hero-disaster-1.jpg',
-    '/hero-disaster-2.jpg',
-    '/hero-disaster-3.jpg',
-    '/hero-disaster-4.jpg',
-  ];
 
   // Rotate images every 5 seconds
   useEffect(() => {
@@ -46,23 +47,15 @@ const HeroSection = ({ onRoleSelect }) => {
 
       {/* Content */}
       <div className="relative z-10 text-center px-4 sm:px-6 max-w-6xl mx-auto">
-        {/* Logo */}
-        <div className="mb-4 sm:mb-6 flex items-center justify-center">
-          <svg width="80" height="80" viewBox="0 0 120 120" className="sm:w-[120px] sm:h-[120px]">
-            <circle cx="60" cy="60" r="55" fill="#a8c5a8" />
-            <text x="60" y="50" textAnchor="middle" className="text-[#1e5a3a] font-bold" style={{ fontSize: '48px' }}>M</text>
-            <text x="60" y="85" textAnchor="middle" className="text-[#c84444] font-bold" style={{ fontSize: '40px' }}>R</text>
-            <circle cx="78" cy="35" r="10" fill="#c84444" />
-          </svg>
-        </div>
-
         {/* Heading */}
-        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-3 sm:mb-4 leading-tight">
-          WELCOME TO{' '}
-          <span className="block sm:inline-block mt-1 sm:mt-0">
-            <span className="text-[#7F9764]">Map</span>
-            <span className="text-[#E57373]">Response</span>!
-          </span>
+        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-3 sm:mb-4 leading-tight flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4">
+          <span>WELCOME TO</span>
+          <img
+            src={MRLogo}
+            alt="MapResponse"
+            className="h-12 sm:h-16 md:h-20 lg:h-24 w-auto object-contain"
+          />
+          <span>!</span>
         </h1>
 
         {/* Subtitle */}
