@@ -25,11 +25,26 @@ export async function signup(req, res) {
       });
     }
 
-    // 3. Validate: password must be at least 8 characters (per sprint plan).
-    if (password.length < 8) {
+    // 3. Validate: password must meet our security policy.
+    //    - at least 12 characters (length matters most)
+    //    - a mix of upper, lower, and a number
+    //    - no longer than 72 bytes, since bcrypt silently ignores the rest
+    if (password.length < 12) {
       return res.status(400).json({
         success: false,
-        message: 'Password must be at least 8 characters long.',
+        message: 'Password must be at least 12 characters long.',
+      });
+    }
+    if (password.length > 72) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be 72 characters or fewer.',
+      });
+    }
+    if (!/[a-z]/.test(password) || !/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must include an uppercase letter, a lowercase letter, and a number.',
       });
     }
 
