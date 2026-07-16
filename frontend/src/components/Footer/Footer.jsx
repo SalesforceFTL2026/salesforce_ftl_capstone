@@ -1,24 +1,21 @@
+import MRLogo from '../../assets/logos/MRLogo.png';
+
 const Footer = () => {
   return (
     <footer className="bg-[#79A7ED] dark:bg-[#1a2332] py-12 transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-6">
+      <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
           {/* Logo and Description */}
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-4">
-              <svg width="70" height="70" viewBox="0 0 70 70">
-                <circle cx="35" cy="35" r="33" fill="white" />
-                <text x="35" y="28" textAnchor="middle" className="text-[#1e5a3a] font-bold" style={{ fontSize: '28px' }}>M</text>
-                <text x="35" y="48" textAnchor="middle" className="text-[#c84444] font-bold" style={{ fontSize: '24px' }}>R</text>
-                <circle cx="45" cy="22" r="6" fill="#c84444" />
-              </svg>
-              <div className="leading-tight">
-                <h3 className="text-3xl font-bold text-white">Map</h3>
-                <h3 className="text-3xl font-bold text-[#c84444]">Response</h3>
-              </div>
+              <img
+                src={MRLogo}
+                alt="MapResponse logo"
+                className="w-[200px] object-contain"
+              />
             </div>
-            <p className="text-[#1C2A16] dark:text-gray-300 text-sm font-semibold mb-2 transition-colors duration-300">(555) 234-1092</p>
-            <p className="text-[#1C2A16] dark:text-gray-300 text-sm max-w-xs transition-colors duration-300">
+            <p className="text-[#1C2A16] dark:text-gray-300 text-[20px] font-semibold mb-2 transition-colors duration-300">(555) 234-1092</p>
+            <p className="text-[#1C2A16] dark:text-gray-300 text-[20px] max-w-xs transition-colors duration-300">
               Description
             </p>
           </div>
