@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import OrgSidebar from '../components/organization/OrgSidebar';
-import OrgTopBar from '../components/organization/OrgTopBar';
+import PortalShell from '../components/portal/PortalShell';
 import DashboardView from '../components/organization/DashboardView';
 import RequestsView from '../components/organization/RequestsView';
 import { getCurrentUser, logout } from '../utils/auth';
@@ -12,9 +11,30 @@ import {
   requestErrorMessage,
 } from '../utils/requests';
 
-// Organization portal, built from the product wireframes: a persistent sage
-// sidebar + top bar, with switchable views. "Dashboard" and "Requests" are
-// fully built; the remaining nav items land on a friendly placeholder.
+// Organization portal, built from the product wireframes. Shares the sidebar +
+// top bar chrome with the help-seeker portal (PortalShell). "Dashboard" and
+// "Requests" are fully built; other nav items land on a friendly placeholder.
+const NAV_GROUPS = [
+  {
+    heading: 'General',
+    items: [
+      { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
+      { id: 'requests', label: 'Requests', icon: 'requests' },
+      { id: 'metrics', label: 'Metrics', icon: 'metrics' },
+      { id: 'resources', label: 'Resources', icon: 'resources' },
+      { id: 'volunteers', label: 'Volunteers', icon: 'volunteers' },
+    ],
+  },
+  {
+    heading: 'Tools',
+    items: [
+      { id: 'chat', label: 'Chat', icon: 'chat' },
+      { id: 'documents', label: 'Documents', icon: 'documents' },
+      { id: 'settings', label: 'Settings', icon: 'settings' },
+    ],
+  },
+];
+
 const VIEW_TITLES = {
   dashboard: 'Dashboard',
   requests: 'Requests',
@@ -129,35 +149,35 @@ const OrganizationDashboard = () => {
   }, [unfiltered]);
 
   return (
-    <div className="min-h-screen flex bg-[#c9d6c2] dark:bg-[#0f1a0f] transition-colors duration-300">
-      <OrgSidebar activeView={view} onNavigate={setView} />
+    <PortalShell
+      personaLabel="Organization"
+      navGroups={NAV_GROUPS}
+      activeView={view}
+      onNavigate={setView}
+      title={VIEW_TITLES[view]}
+      currentUser={currentUser}
+      onSignOut={handleLogout}
+    >
+      {view === 'dashboard' && (
+        <DashboardView currentUser={currentUser} stats={dashboardStats} tasks={tasks} />
+      )}
 
-      <div className="flex-1 flex flex-col min-w-0">
-        <OrgTopBar title={VIEW_TITLES[view]} currentUser={currentUser} onSignOut={handleLogout} />
+      {view === 'requests' && (
+        <RequestsView
+          yourRequests={responses}
+          unfiltered={unfiltered}
+          loading={loading}
+          error={error}
+          onRetry={loadData}
+          onStatusChange={handleStatusChange}
+          updatingId={updatingId}
+        />
+      )}
 
-        <main className="flex-1 p-4 sm:p-6 overflow-x-hidden">
-          {view === 'dashboard' && (
-            <DashboardView currentUser={currentUser} stats={dashboardStats} tasks={tasks} />
-          )}
-
-          {view === 'requests' && (
-            <RequestsView
-              yourRequests={responses}
-              unfiltered={unfiltered}
-              loading={loading}
-              error={error}
-              onRetry={loadData}
-              onStatusChange={handleStatusChange}
-              updatingId={updatingId}
-            />
-          )}
-
-          {!['dashboard', 'requests'].includes(view) && (
-            <ComingSoonPanel title={VIEW_TITLES[view]} />
-          )}
-        </main>
-      </div>
-    </div>
+      {!['dashboard', 'requests'].includes(view) && (
+        <ComingSoonPanel title={VIEW_TITLES[view]} />
+      )}
+    </PortalShell>
   );
 };
 
