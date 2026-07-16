@@ -44,7 +44,7 @@ const HelpSeekerDashboard = () => {
   return (
     <div className="min-h-screen bg-[#f4f6f1] dark:bg-[#0f1a0f] transition-colors duration-300">
       <Header currentUser={currentUser} onSignOutClick={handleLogout} />
-      <div className="pt-[90px] pb-16 px-4 sm:px-6 lg:px-8">
+      <div className="pt-[80px] sm:pt-[140px] pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-3xl font-bold text-[#1C2A16] dark:text-white mb-8">
             My Dashboard

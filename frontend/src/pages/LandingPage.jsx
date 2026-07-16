@@ -53,7 +53,7 @@ const LandingPage = () => {
         onSignInClick={handleSignInClick}
         onSignOutClick={handleLogout}
       />
-      <div className="pt-[70px]">
+      <div className="pt-[64px] sm:pt-[124px]">
         <HeroSection onRoleSelect={handleRoleSelect} />
         <ImpactSection />
         <WhatWeDoSection />
