@@ -2,15 +2,15 @@ import { useTheme } from '../../context/ThemeContext';
 import lightModeToggle from '../../assets/light_mode_toggle.png';
 import darkModeToggle from '../../assets/dark_mode_toggle.png';
 
-// Top bar for the organization portal: page title on the left, a search box,
-// theme toggle, notification bell, and the signed-in org's name on the right.
+// Shared top bar for both portals: page title, search, theme toggle,
+// notification bell, and the signed-in user's name/avatar.
 //
 // @param {string} title - the current view's title (e.g. "Dashboard")
-// @param {object} [currentUser] - signed-in user, for the org name + sign out
-// @param {() => void} [onSignOut] - called when the org name menu signs out
-const OrgTopBar = ({ title, currentUser, onSignOut }) => {
+// @param {object} [currentUser] - signed-in user, for the name + sign out
+// @param {() => void} [onSignOut]
+const PortalTopBar = ({ title, currentUser, onSignOut }) => {
   const { isDark, toggleTheme } = useTheme();
-  const orgName = currentUser?.name || 'Org Name';
+  const name = currentUser?.name || 'Name';
 
   return (
     <header className="bg-[#7f9976] dark:bg-[#141d11] px-4 sm:px-6 py-4 flex items-center gap-4 transition-colors duration-300">
@@ -63,13 +63,12 @@ const OrgTopBar = ({ title, currentUser, onSignOut }) => {
           </span>
         </button>
 
-        {/* Org identity + sign out */}
         <div className="flex items-center gap-2">
           <span className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-[#1a2332] dark:text-white font-bold">
-            {orgName.charAt(0).toUpperCase()}
+            {name.charAt(0).toUpperCase()}
           </span>
           <div className="hidden sm:flex flex-col leading-tight">
-            <span className="text-[#1C2A16] dark:text-white font-semibold">{orgName}</span>
+            <span className="text-[#1C2A16] dark:text-white font-semibold">{name}</span>
             {onSignOut && (
               <button
                 onClick={onSignOut}
@@ -85,4 +84,4 @@ const OrgTopBar = ({ title, currentUser, onSignOut }) => {
   );
 };
 
-export default OrgTopBar;
+export default PortalTopBar;
