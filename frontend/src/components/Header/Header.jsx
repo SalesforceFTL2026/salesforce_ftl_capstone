@@ -27,7 +27,7 @@ const Header = ({ currentUser, onSignInClick, onSignOutClick }) => {
   }, []);
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-100 bg-[#79A7ED]/86 dark:bg-[#1a2332] shadow-sm transition-[transform,background-color] duration-300 ${hidden ? '-translate-y-full' : 'translate-y-0'}`}>
+    <header className={`fixed top-0 left-0 right-0 z-50 bg-[#79A7ED]/86 dark:bg-[#1a2332] shadow-sm transition-[transform,background-color] duration-300 ${hidden ? '-translate-y-full' : 'translate-y-0'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
         <div className="flex items-center justify-between">
           {/* Logo */}
