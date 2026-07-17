@@ -15,6 +15,8 @@
 // @param {(request) => void} [onDelete] - called when the delete (trash) button
 //   is clicked; if omitted, the button is hidden (e.g. on the volunteer views)
 // @param {boolean} [deleting] - true while this card's delete call is in flight
+// @param {(request) => void} [onEdit] - called when the edit (pencil) button is
+//   clicked; if omitted, the button is hidden (e.g. on the volunteer views)
 
 // Status badge colors for the help-seeker list.
 const STATUS_STYLES = {
@@ -50,7 +52,7 @@ const priorityScoreClass = (score) => {
   return 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300';
 };
 
-const RequestCard = ({ request, onInteract, interacting, confirmation, onDelete, deleting }) => {
+const RequestCard = ({ request, onInteract, interacting, confirmation, onDelete, deleting, onEdit }) => {
   const { category, urgency, location, description, status, createdAt, reasoning, responseStatus, priorityScore } = request;
 
   // Only show the AI priority score once the request has actually been scored
@@ -88,6 +90,19 @@ const RequestCard = ({ request, onInteract, interacting, confirmation, onDelete,
           <span className={`text-xs font-semibold px-2.5 py-1 rounded-full capitalize ${badgeClass}`}>
             {status || urgency}
           </span>
+          {onEdit && (
+            <button
+              type="button"
+              onClick={() => onEdit(request)}
+              disabled={deleting}
+              aria-label="Edit request"
+              className="p-1.5 rounded-lg text-gray-400 hover:text-[#6ba3d3] hover:bg-blue-50 dark:hover:bg-blue-900/30 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+            </button>
+          )}
           {onDelete && (
             <button
               type="button"

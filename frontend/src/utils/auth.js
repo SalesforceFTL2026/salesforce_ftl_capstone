@@ -49,6 +49,27 @@ export const signup = async ({ name, email, password, role, location }) => {
   return login({ email, password });
 };
 
+// Overwrite the stored user (keeping the existing token), so UI that reads
+// getCurrentUser() picks up profile changes after a page refresh too.
+export const setCurrentUser = (user) => {
+  localStorage.setItem(USER_KEY, JSON.stringify(user));
+};
+
+// Update the logged-in user's profile (currently just the display name).
+// Persists the returned user and returns it. Throws with a friendly message.
+export const updateName = async (name) => {
+  const { data } = await api.patch('/api/auth/me', { name });
+
+  if (!data?.success) {
+    throw new Error(data?.message || 'Could not update your name.');
+  }
+
+  // Merge the updated fields into the stored user so the session stays current.
+  const merged = { ...getCurrentUser(), ...data.data };
+  setCurrentUser(merged);
+  return merged;
+};
+
 // Read the signed-in user saved at login, or null if nobody is signed in.
 // Used to restore the session when the app first loads.
 export const getCurrentUser = () => {

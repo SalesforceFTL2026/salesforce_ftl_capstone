@@ -172,3 +172,50 @@ export async function me(req, res) {
     },
   });
 }
+
+/**
+ * Update the logged-in user's profile.
+ * PATCH /api/auth/me  (protected)
+ * Currently supports changing the display name. Returns the updated safe fields.
+ */
+export async function updateProfile(req, res) {
+  try {
+    const { name } = req.body;
+
+    // Validate: a name change must be a real, non-empty string.
+    if (name === undefined) {
+      return res.status(400).json({
+        success: false,
+        message: 'Provide a name to update.',
+      });
+    }
+    if (typeof name !== 'string' || name.trim() === '') {
+      return res.status(400).json({
+        success: false,
+        message: 'Name must not be empty.',
+      });
+    }
+
+    const updated = await prisma.user.update({
+      where: { id: req.user.id },
+      data: { name: name.trim() },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Profile updated successfully',
+      data: {
+        id: updated.id,
+        name: updated.name,
+        email: updated.email,
+        role: updated.role,
+      },
+    });
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to update your profile. Please try again.',
+    });
+  }
+}

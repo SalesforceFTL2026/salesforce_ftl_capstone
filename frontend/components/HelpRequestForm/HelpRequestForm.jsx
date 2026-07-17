@@ -4,15 +4,19 @@ import './HelpRequestForm.css';
 
 // Compact, theme-coherent help request form.
 // - `compact` trims padding/spacing so it fits a dashboard column.
-// - `onCreated` (optional) fires after a successful submit so a parent
+// - `onCreated` (optional) fires after a successful create so a parent
 //   (e.g. the dashboard) can refresh its "My Requests" list.
-const HelpRequestForm = ({ compact = false, onCreated }) => {
+// - `request` (optional) puts the form in edit mode: fields pre-fill from it
+//   and submitting PATCHes that request instead of creating a new one.
+// - `onSaved` (optional) fires after a successful edit with the updated request.
+const HelpRequestForm = ({ compact = false, onCreated, onSaved, request }) => {
+  const isEditing = Boolean(request);
   const [formData, setFormData] = useState({
     submitterName: '',
-    category: '',
-    urgency: '',
-    location: '',
-    description: '',
+    category: request?.category || '',
+    urgency: request?.urgency || '',
+    location: request?.location || '',
+    description: request?.description || '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -37,11 +41,19 @@ const HelpRequestForm = ({ compact = false, onCreated }) => {
 
     try {
       // api sends the saved token, so the request is linked to this user.
-      const { data } = await api.post('/api/requests', formData);
-      if (data.success) {
-        setSuccess(true);
-        setFormData({ submitterName: '', category: '', urgency: '', location: '', description: '' });
-        onCreated?.(data.data);   // let the dashboard refresh its list
+      if (isEditing) {
+        const { data } = await api.patch(`/api/requests/${request.id}`, formData);
+        if (data.success) {
+          setSuccess(true);
+          onSaved?.(data.data);   // let the dashboard refresh its list
+        }
+      } else {
+        const { data } = await api.post('/api/requests', formData);
+        if (data.success) {
+          setSuccess(true);
+          setFormData({ submitterName: '', category: '', urgency: '', location: '', description: '' });
+          onCreated?.(data.data);   // let the dashboard refresh its list
+        }
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to submit request. Please try again.');
@@ -61,15 +73,19 @@ const HelpRequestForm = ({ compact = false, onCreated }) => {
     <div className="help-request-form-wrapper">
     <div className={`bg-white dark:bg-[#273A20] rounded-2xl shadow-md transition-colors duration-300 ${compact ? 'p-6' : 'p-8'}`}>
       <h2 className={`font-bold text-black dark:text-white mb-1 ${compact ? 'text-xl' : 'text-2xl'}`}>
-        Request Help
+        {isEditing ? 'Edit Request' : 'Request Help'}
       </h2>
       <p className="text-gray-600 dark:text-gray-400 text-sm mb-5">
-        Tell us what you need and we'll prioritize it.
+        {isEditing
+          ? 'Update the details of your request below.'
+          : "Tell us what you need and we'll prioritize it."}
       </p>
 
       {success && (
         <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 rounded-xl">
-          <p className="text-green-800 dark:text-green-300 text-sm font-medium">✓ Request submitted!</p>
+          <p className="text-green-800 dark:text-green-300 text-sm font-medium">
+            {isEditing ? '✓ Changes saved!' : '✓ Request submitted!'}
+          </p>
         </div>
       )}
       {error && (
@@ -116,7 +132,9 @@ const HelpRequestForm = ({ compact = false, onCreated }) => {
 
         <button type="submit" disabled={loading}
           className="w-full mt-2 bg-[#1C2A16] dark:bg-[#7F9764] text-white py-3.5 px-6 rounded-xl font-semibold uppercase text-sm tracking-wide hover:opacity-90 transition-opacity disabled:bg-gray-400 disabled:cursor-not-allowed">
-          {loading ? 'Submitting…' : 'Submit Request'}
+          {loading
+            ? (isEditing ? 'Saving…' : 'Submitting…')
+            : (isEditing ? 'Save Changes' : 'Submit Request')}
         </button>
       </form>
     </div>
