@@ -20,6 +20,10 @@ const PATHS = {
   resources: 'M4 7l8-4 8 4-8 4-8-4zm0 5l8 4 8-4M4 17l8 4 8-4',
   chat: 'M8 10h8M8 14h5m-9 6l3.5-3H18a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12z',
   documents: 'M9 12h6m-6 4h6m2 4H7a2 2 0 01-2-2V6a2 2 0 012-2h6l6 6v10a2 2 0 01-2 2z',
+  // Volunteer nav glyphs.
+  tasks: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-7 6l2 2 4-4',
+  skills: 'M9.66 18h4.68M12 3a6 6 0 00-3.6 10.8c.4.3.6.77.6 1.27V15a1 1 0 001 1h4a1 1 0 001-1v.07c0-.5.2-.97.6-1.27A6 6 0 0012 3z',
+  groups: 'M17 20h5v-1a4 4 0 00-3-3.87M9 20H4v-1a4 4 0 013-3.87m6-1.13a4 4 0 10-4-4 4 4 0 004 4zm6-2a3 3 0 10-2-5.24M7 9.76A3 3 0 105 7',
 };
 
 // Settings has two paths, so it gets its own renderer.
