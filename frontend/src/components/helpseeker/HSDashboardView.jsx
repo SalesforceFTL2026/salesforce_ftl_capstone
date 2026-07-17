@@ -10,10 +10,11 @@
 // @param {string|null} deletingId
 // @param {(request) => void} onDelete
 // @param {() => void} onNewRequest
+// @param {() => void} onChat - open the AI chat assistant
 // @param {object[]} nonprofits - sample nearby orgs
 
 const HSDashboardView = ({
-  currentUser, requests, loading, error, deletingId, onDelete, onNewRequest, nonprofits,
+  currentUser, requests, loading, error, deletingId, onDelete, onNewRequest, onChat, nonprofits,
 }) => {
   const firstName = currentUser?.name?.split(' ')[0] || 'Name';
 
@@ -24,7 +25,25 @@ const HSDashboardView = ({
         <h2 className="text-2xl sm:text-3xl font-bold text-[#1C2A16] dark:text-white mb-1">
           Hello, {firstName}!
         </h2>
-        <h3 className="text-lg font-bold text-[#1C2A16] dark:text-white mt-4">Help Requests</h3>
+
+        {/* Profile card */}
+        <div className="bg-[#5b8bb0] dark:bg-[#1a3a52] rounded-2xl p-5 text-white mt-4">
+          <div className="flex items-center gap-5">
+            <div className="flex flex-col items-center gap-2">
+              <span className="font-bold uppercase text-sm">Profile</span>
+              <div className="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center text-[#1a2740] text-xl font-bold">
+                {(currentUser?.name?.[0] || '?').toUpperCase()}
+              </div>
+            </div>
+            <div className="flex-1 space-y-2 text-sm min-w-0">
+              <ProfileField label="Name" value={currentUser?.name} />
+              <ProfileField label="Phone Number" placeholder="Not set yet" />
+              <ProfileField label="# in Household" placeholder="Not set yet" />
+            </div>
+          </div>
+        </div>
+
+        <h3 className="text-lg font-bold text-[#1C2A16] dark:text-white mt-6">Active Requests</h3>
         <div className="grid grid-cols-[auto_1fr] gap-x-4 text-[10px] font-semibold uppercase tracking-wide text-[#3a4a30] dark:text-gray-400 mb-2 px-1">
           <span>Expected Fulfillment</span>
           <span>Type of Request</span>
@@ -33,7 +52,7 @@ const HSDashboardView = ({
         {loading && <p className="text-gray-500 dark:text-gray-400" role="status">Loading your requests…</p>}
         {!loading && error && <p className="text-red-700 dark:text-red-300">{error}</p>}
         {!loading && !error && requests.length === 0 && (
-          <p className="text-gray-600 dark:text-gray-300">You haven't submitted any requests yet.</p>
+          <p className="text-gray-600 dark:text-gray-300">You have no active requests right now.</p>
         )}
 
         {!loading && !error && requests.length > 0 && (
@@ -49,35 +68,27 @@ const HSDashboardView = ({
           </ul>
         )}
 
-        {/* Make New Request */}
-        <div className="flex justify-center my-8">
+        {/* Primary actions: make a request, or chat with the assistant. */}
+        <div className="flex flex-col sm:flex-row justify-center items-stretch gap-3 my-8">
           <button
             type="button"
             onClick={onNewRequest}
-            className="px-12 py-4 bg-[#1a2740] text-white font-bold rounded-full text-lg hover:bg-[#14203a] focus:outline-none focus:ring-2 focus:ring-[#1a2740]/40 transition-colors shadow-md"
+            className="px-10 py-4 bg-[#1a2740] text-white font-bold rounded-full text-lg hover:bg-[#14203a] focus:outline-none focus:ring-2 focus:ring-[#1a2740]/40 transition-colors shadow-md"
           >
             Make New Request
           </button>
-        </div>
-
-        {/* Profile card */}
-        <div className="bg-[#5b8bb0] dark:bg-[#1a3a52] rounded-2xl p-5 text-white">
-          <div className="flex items-center gap-5">
-            <div className="flex flex-col items-center gap-2">
-              <span className="font-bold uppercase text-sm">Profile</span>
-              <div className="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center text-[#1a2740] text-xl font-bold">
-                {(currentUser?.name?.[0] || '?').toUpperCase()}
-              </div>
-            </div>
-            <div className="flex-1 space-y-2 text-sm min-w-0">
-              <ProfileField label="Name" value={currentUser?.name} />
-              <ProfileField label="Phone Number" placeholder="Not set yet" />
-              <ProfileField label="# in Household" placeholder="Not set yet" />
-            </div>
-            <button className="self-end bg-[#c9d6a0] text-[#1C2A16] text-xs font-bold uppercase px-4 py-2 rounded-lg hover:opacity-90 transition-opacity">
-              Edit
+          {onChat && (
+            <button
+              type="button"
+              onClick={onChat}
+              className="px-10 py-4 bg-[#1a2740] text-white font-bold rounded-full text-lg hover:bg-[#14203a] focus:outline-none focus:ring-2 focus:ring-[#1a2740]/40 transition-colors shadow-md inline-flex items-center justify-center gap-2"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12a8 8 0 01-8 8 8.5 8.5 0 01-3.5-.75L3 21l1.5-4A8 8 0 1121 12z" />
+              </svg>
+              Chat with Assistant
             </button>
-          </div>
+          )}
         </div>
       </div>
 
@@ -123,7 +134,6 @@ const RequestRow = ({ request, deleting, onDelete }) => {
         <span className="flex-1 font-bold uppercase truncate">
           {request.category || 'Request'} Request
         </span>
-        <span className="text-sm font-semibold uppercase opacity-80">Expand</span>
       </div>
       <button
         type="button"

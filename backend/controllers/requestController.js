@@ -261,28 +261,31 @@ export const deleteRequest = async (req, res) => {
   }
 };
 
-// Categorize a request and/or add detail to its description (organizations only).
+// Edit a request's details.
 // PATCH /api/requests/:id
-// Organizations triage incoming requests: they can correct the category and
-// append extra context to the description as they learn more.
+// Organizations triage incoming requests (correcting category, adding detail),
+// and a help-seeker can edit the requests they submitted themselves. Any of
+// category, urgency, location, and description may be changed; omitted fields
+// are left as-is.
 export const updateRequestDetails = async (req, res) => {
   try {
     const { id } = req.params;
-    const { category, description } = req.body;
+    const { category, urgency, location, description } = req.body;
 
-    // Only organizations may categorize or add detail to requests.
-    if (req.user.role !== 'organization') {
-      return res.status(403).json({
+    // Make sure the request exists before we check ownership or update it.
+    const request = await requestModel.getRequestById(id);
+    if (!request) {
+      return res.status(404).json({
         success: false,
-        message: 'Only organizations can categorize or add detail to a request.'
+        message: 'Request not found'
       });
     }
 
-    // The caller must actually be changing something.
-    if (category === undefined && description === undefined) {
-      return res.status(400).json({
+    // Orgs can edit any request; a help-seeker can edit only their own.
+    if (!canManageRequest(req.user, request)) {
+      return res.status(403).json({
         success: false,
-        message: 'Provide a category and/or description to update.'
+        message: 'You do not have permission to edit this request.'
       });
     }
 
@@ -300,6 +303,27 @@ export const updateRequestDetails = async (req, res) => {
       fields.category = category;
     }
 
+    if (urgency !== undefined) {
+      const validUrgencies = ['Low', 'Medium', 'High', 'Critical'];
+      if (!validUrgencies.includes(urgency)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid urgency. Must be one of: Low, Medium, High, Critical'
+        });
+      }
+      fields.urgency = urgency;
+    }
+
+    if (location !== undefined) {
+      if (typeof location !== 'string' || location.trim() === '') {
+        return res.status(400).json({
+          success: false,
+          message: 'Location must be a non-empty string.'
+        });
+      }
+      fields.location = location;
+    }
+
     if (description !== undefined) {
       if (typeof description !== 'string' || description.trim() === '') {
         return res.status(400).json({
@@ -310,12 +334,11 @@ export const updateRequestDetails = async (req, res) => {
       fields.description = description;
     }
 
-    // Make sure the request exists before trying to update it.
-    const request = await requestModel.getRequestById(id);
-    if (!request) {
-      return res.status(404).json({
+    // The caller must actually be changing something.
+    if (Object.keys(fields).length === 0) {
+      return res.status(400).json({
         success: false,
-        message: 'Request not found'
+        message: 'Provide at least one field to update.'
       });
     }
 
