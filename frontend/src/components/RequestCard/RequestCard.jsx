@@ -17,6 +17,15 @@
 // @param {boolean} [deleting] - true while this card's delete call is in flight
 // @param {(request) => void} [onEdit] - called when the edit (pencil) button is
 //   clicked; if omitted, the button is hidden (e.g. on the volunteer views)
+//
+// Organization dashboard: pass `onStatusChange` to show a status dropdown so an
+//   org can move a request through its lifecycle. `updating` disables it while
+//   the change is in flight. Interaction counts (volunteerInterestCount /
+//   organizationRespondingCount) are shown automatically when present.
+
+// The lifecycle states an organization can move a request through. Mirrors the
+// backend's validStatuses in updateRequestStatus.
+const STATUS_OPTIONS = ['pending', 'in-progress', 'matched', 'fulfilled', 'closed'];
 
 // Status badge colors for the help-seeker list.
 const STATUS_STYLES = {
@@ -52,8 +61,11 @@ const priorityScoreClass = (score) => {
   return 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300';
 };
 
-const RequestCard = ({ request, onInteract, interacting, confirmation, onDelete, deleting, onEdit }) => {
-  const { category, urgency, location, description, status, createdAt, reasoning, responseStatus, priorityScore } = request;
+const RequestCard = ({ request, onInteract, interacting, confirmation, onDelete, deleting, onEdit, onStatusChange, updating }) => {
+  const {
+    category, urgency, location, description, status, createdAt, reasoning,
+    responseStatus, priorityScore, volunteerInterestCount, organizationRespondingCount,
+  } = request;
 
   // Only show the AI priority score once the request has actually been scored
   // (score > 0). Help-seeker "My Requests" cards stay unscored and hide it.
@@ -133,6 +145,54 @@ const RequestCard = ({ request, onInteract, interacting, confirmation, onDelete,
         <span>📍 {location}</span>
         {when && <span>{urgency} · {when}</span>}
       </div>
+
+      {/* Interaction counts — how much attention a request has already drawn.
+          Helps organizations spot needs that still have no coverage. */}
+      {(typeof volunteerInterestCount === 'number' ||
+        typeof organizationRespondingCount === 'number') && (
+        <div className="flex flex-wrap gap-2 text-xs">
+          {typeof volunteerInterestCount === 'number' && (
+            <span className="px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 font-medium">
+              🙋 {volunteerInterestCount} volunteer{volunteerInterestCount === 1 ? '' : 's'} interested
+            </span>
+          )}
+          {typeof organizationRespondingCount === 'number' && (
+            <span className="px-2.5 py-1 rounded-full bg-green-50 text-green-700 dark:bg-green-900/40 dark:text-green-300 font-medium">
+              🏢 {organizationRespondingCount} org{organizationRespondingCount === 1 ? '' : 's'} responding
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Organization control: move a request through its lifecycle. */}
+      {onStatusChange && (
+        <div className="mt-auto flex items-center gap-2">
+          <label
+            htmlFor={`status-${request.id}`}
+            className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400"
+          >
+            Status
+          </label>
+          <select
+            id={`status-${request.id}`}
+            value={status || 'pending'}
+            disabled={updating}
+            onChange={(e) => onStatusChange(request, e.target.value)}
+            className="text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#1f2d18] text-gray-800 dark:text-gray-100 px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/40 disabled:opacity-60 capitalize"
+          >
+            {STATUS_OPTIONS.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+          {updating && (
+            <span className="text-xs text-gray-500 dark:text-gray-400" role="status">
+              Saving…
+            </span>
+          )}
+        </div>
+      )}
 
       {/* On the My Interests tab, show the volunteer's response status. */}
       {responseStatus && (

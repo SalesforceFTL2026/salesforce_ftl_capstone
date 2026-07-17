@@ -32,6 +32,46 @@ export const getVolunteerInterests = async () => {
   return data.data;
 };
 
+// Fetch the requests the signed-in organization is responding to / tracking.
+// Returns the array of requests on success; throws on failure.
+export const getOrganizationResponses = async () => {
+  const { data } = await api.get('/api/dashboard/organization');
+
+  if (!data?.success) {
+    throw new Error(data?.message || 'Could not load your active responses.');
+  }
+
+  return data.data;
+};
+
+// Update a request's status (organizations, or the help-seeker who owns it).
+// Returns the updated request on success; throws on failure.
+export const updateRequestStatus = async (requestId, status) => {
+  const { data } = await api.patch(`/api/requests/${requestId}/status`, {
+    status,
+  });
+
+  if (!data?.success) {
+    throw new Error(data?.message || 'Could not update the request status.');
+  }
+
+  return data.data;
+};
+
+// Re-categorize a request (organizations only).
+// Returns the updated request on success; throws on failure.
+export const updateRequestCategory = async (requestId, category) => {
+  const { data } = await api.patch(`/api/requests/${requestId}`, {
+    category,
+  });
+
+  if (!data?.success) {
+    throw new Error(data?.message || 'Could not update the request category.');
+  }
+
+  return data.data;
+};
+
 // Express interest in a request ("I can help with this").
 // Returns the created/existing response on success; throws on failure.
 export const expressInterest = async (requestId, notes) => {
