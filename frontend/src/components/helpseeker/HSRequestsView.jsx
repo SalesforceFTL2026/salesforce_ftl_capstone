@@ -10,13 +10,14 @@ import RequestCard from '../RequestCard/RequestCard';
 // @param {string} error
 // @param {string|null} deletingId
 // @param {(request) => void} onDelete
+// @param {(request) => void} [onEdit] - open the edit form for a request
 const SUB_TABS = [
   { id: 'calendar', label: 'Calendar', icon: CalendarIcon },
   { id: 'list', label: 'List', icon: ListIcon },
   { id: 'cards', label: 'Cards', icon: CardsIcon },
 ];
 
-const HSRequestsView = ({ requests, loading, error, deletingId, onDelete }) => {
+const HSRequestsView = ({ requests, loading, error, deletingId, onDelete, onEdit }) => {
   const [tab, setTab] = useState('list');
 
   return (
@@ -62,6 +63,7 @@ const HSRequestsView = ({ requests, loading, error, deletingId, onDelete }) => {
                   request={r}
                   onDelete={onDelete}
                   deleting={deletingId === r.id}
+                  onEdit={onEdit}
                 />
               ))}
             </div>

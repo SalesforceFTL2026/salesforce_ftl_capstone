@@ -21,4 +21,8 @@ router.post('/login', authController.login);
 // GET /api/auth/me
 router.get('/me', requireAuth, authController.me);
 
+// Update the logged-in user's profile (e.g. display name) (protected route)
+// PATCH /api/auth/me
+router.patch('/me', requireAuth, authController.updateProfile);
+
 export default router;
