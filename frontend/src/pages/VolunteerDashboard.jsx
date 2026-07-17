@@ -1,6 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
-import TabNav from '../components/TabNav/TabNav';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import PortalShell from '../components/portal/PortalShell';
+import VolunteerDashboardView from '../components/volunteer/VolunteerDashboardView';
+import VolunteerRequestsView from '../components/volunteer/VolunteerRequestsView';
 import RequestCard from '../components/RequestCard/RequestCard';
+import { getCurrentUser, logout } from '../utils/auth';
 import {
   getPrioritizedRequests,
   getVolunteerInterests,
@@ -8,18 +12,51 @@ import {
   requestErrorMessage,
 } from '../utils/requests';
 
-// The two tabs a volunteer sees. "feed" is the AI priority feed of open
-// requests; "interests" is the list they've already offered to help with.
-const TABS = [
-  { id: 'feed', label: 'Priority Feed' },
-  { id: 'interests', label: 'My Interests' },
+// Volunteer portal, built from the product wireframes. Shares the sidebar +
+// top bar chrome with the help-seeker and organization portals (PortalShell).
+// "Dashboard" and "Requests" are fully built; "My Interests" tracks requests
+// the volunteer has offered to help with; other nav items land on a friendly
+// placeholder. This change is front-end only — the same data calls are used.
+const NAV_GROUPS = [
+  {
+    heading: 'General',
+    items: [
+      { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
+      { id: 'requests', label: 'Requests', icon: 'requests' },
+      { id: 'tasks', label: 'Tasks', icon: 'tasks' },
+      { id: 'skills', label: 'Skills', icon: 'skills' },
+      { id: 'groups', label: 'Groups', icon: 'groups' },
+    ],
+  },
+  {
+    heading: 'Tools',
+    items: [
+      { id: 'chat', label: 'Chat', icon: 'chat' },
+      { id: 'documents', label: 'Documents', icon: 'documents' },
+      { id: 'settings', label: 'Settings', icon: 'settings' },
+    ],
+  },
 ];
 
-const VolunteerDashboard = () => {
-  const [activeTab, setActiveTab] = useState('feed');
+const VIEW_TITLES = {
+  dashboard: 'Dashboard',
+  requests: 'Active Help Requests',
+  tasks: 'Tasks',
+  skills: 'My Interests',
+  groups: 'Groups',
+  chat: 'Chat',
+  documents: 'Documents',
+  settings: 'Settings',
+};
 
-  // Each tab loads its own list. We keep them separate so switching tabs
-  // doesn't refetch or clobber the other tab's data.
+const VolunteerDashboard = () => {
+  const [currentUser] = useState(getCurrentUser);
+  const navigate = useNavigate();
+
+  const [view, setView] = useState('dashboard');
+
+  // The AI priority feed of open requests, and the requests this volunteer has
+  // already offered to help with. Loaded once; both views read from them.
   const [feed, setFeed] = useState([]);
   const [interests, setInterests] = useState([]);
 
@@ -32,27 +69,33 @@ const VolunteerDashboard = () => {
   // Maps request id -> confirmation message after a successful interaction.
   const [confirmations, setConfirmations] = useState({});
 
-  // Load whichever tab is active. Wrapped in useCallback so the effect below
-  // has a stable dependency.
-  const loadActiveTab = useCallback(async () => {
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+
+  // Load the priority feed and (if signed in) the volunteer's interests. A
+  // failure loading interests is treated as "none yet" so the feed still shows.
+  const loadData = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
-      if (activeTab === 'feed') {
-        setFeed(await getPrioritizedRequests());
-      } else {
+      setFeed(await getPrioritizedRequests());
+      try {
         setInterests(await getVolunteerInterests());
+      } catch {
+        setInterests([]);
       }
     } catch (err) {
-      setError(requestErrorMessage(err, 'Something went wrong loading this view.'));
+      setError(requestErrorMessage(err, 'Something went wrong loading requests.'));
     } finally {
       setLoading(false);
     }
-  }, [activeTab]);
+  }, []);
 
   useEffect(() => {
-    loadActiveTab();
-  }, [loadActiveTab]);
+    loadData();
+  }, [loadData]);
 
   // Volunteer clicked "I can help with this" on a feed card.
   const handleInteract = async (request) => {
@@ -71,74 +114,107 @@ const VolunteerDashboard = () => {
     }
   };
 
-  const activeList = activeTab === 'feed' ? feed : interests;
-  const emptyMessage =
-    activeTab === 'feed'
-      ? 'No open requests right now. Check back soon.'
-      : "You haven't offered to help with any requests yet. Head to the Priority Feed to get started.";
+  // Headline dashboard stats. Where we have real data we compute it; the
+  // people-helped / skillset figures are illustrative until those endpoints
+  // exist, matching the wireframe's summary pills.
+  const dashboardStats = useMemo(() => {
+    const total = feed.length;
+    const done = feed.filter((r) => ['fulfilled', 'closed'].includes(r.status)).length;
+    const completedPct = total ? `${Math.round((done / total) * 100)}%` : '0%';
+    return {
+      completedPct,
+      peopleHelped: '30k',
+      skillWays: '10',
+    };
+  }, [feed]);
+
+  // Surface the top open requests as upcoming "tasks" with dated chips.
+  const tasks = useMemo(() => {
+    return feed.slice(0, 2).map((r) => {
+      const d = r.createdAt ? new Date(r.createdAt) : null;
+      return {
+        date: d ? d.getDate() : '—',
+        month: d ? d.toLocaleString(undefined, { month: 'short' }) : '',
+        title: r.category || r.description?.slice(0, 40) || 'Request',
+      };
+    });
+  }, [feed]);
 
   return (
-    <main className="min-h-screen bg-gray-50 px-4 py-8 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto">
-        <header className="mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-            Volunteer Dashboard
-          </h1>
-          <p className="text-gray-600 mt-1">
-            Find people who need help and track the requests you've offered to
-            support.
-          </p>
-        </header>
+    <PortalShell
+      personaLabel="Volunteer"
+      navGroups={NAV_GROUPS}
+      activeView={view}
+      onNavigate={setView}
+      title={VIEW_TITLES[view]}
+      currentUser={currentUser}
+      onSignOut={handleLogout}
+    >
+      {view === 'dashboard' && (
+        <VolunteerDashboardView currentUser={currentUser} stats={dashboardStats} tasks={tasks} />
+      )}
 
-        <TabNav tabs={TABS} activeTab={activeTab} onTabChange={setActiveTab} />
+      {view === 'requests' && (
+        <VolunteerRequestsView
+          requests={feed}
+          loading={loading}
+          error={error}
+          onRetry={loadData}
+          onInteract={handleInteract}
+          interactingId={interactingId}
+          confirmations={confirmations}
+        />
+      )}
 
-        <section
-          id={`panel-${activeTab}`}
-          role="tabpanel"
-          aria-labelledby={`tab-${activeTab}`}
-          className="mt-6"
-        >
-          {loading && (
-            <p className="text-gray-500" role="status">
-              Loading…
-            </p>
-          )}
+      {view === 'skills' && (
+        <InterestsView interests={interests} loading={loading} error={error} onRetry={loadData} />
+      )}
 
-          {!loading && error && (
-            <div className="bg-red-50 border border-red-200 text-red-800 rounded-xl p-4">
-              <p className="font-semibold">{error}</p>
-              <button
-                type="button"
-                onClick={loadActiveTab}
-                className="mt-2 text-sm font-semibold underline hover:no-underline"
-              >
-                Try again
-              </button>
-            </div>
-          )}
-
-          {!loading && !error && activeList.length === 0 && (
-            <p className="text-gray-500">{emptyMessage}</p>
-          )}
-
-          {!loading && !error && activeList.length > 0 && (
-            <div className="flex flex-col gap-4">
-              {activeList.map((request) => (
-                <RequestCard
-                  key={request.id}
-                  request={request}
-                  // Only the Priority Feed shows the help button.
-                  onInteract={activeTab === 'feed' ? handleInteract : undefined}
-                  interacting={interactingId === request.id}
-                  confirmation={confirmations[request.id]}
-                />
-              ))}
-            </div>
-          )}
-        </section>
-      </div>
-    </main>
+      {!['dashboard', 'requests', 'skills'].includes(view) && (
+        <ComingSoonPanel title={VIEW_TITLES[view]} />
+      )}
+    </PortalShell>
   );
 };
+
+// The requests this volunteer has offered to help with.
+const InterestsView = ({ interests, loading, error, onRetry }) => {
+  if (loading) {
+    return <p className="text-[#1C2A16] dark:text-gray-300" role="status">Loading…</p>;
+  }
+  if (error) {
+    return (
+      <div className="bg-red-50 border border-red-200 text-red-800 rounded-2xl p-4">
+        <p className="font-semibold">{error}</p>
+        <button onClick={onRetry} className="mt-2 text-sm font-semibold underline hover:no-underline">
+          Try again
+        </button>
+      </div>
+    );
+  }
+  if (interests.length === 0) {
+    return (
+      <ComingSoonPanel
+        title="No interests yet"
+        subtitle="Head to Requests to find people who need help."
+      />
+    );
+  }
+  return (
+    <div className="flex flex-col gap-4 max-w-3xl">
+      {interests.map((request) => (
+        <RequestCard key={request.id} request={request} />
+      ))}
+    </div>
+  );
+};
+
+// Placeholder for nav items not yet built (Skills, Groups, etc.).
+const ComingSoonPanel = ({ title, subtitle }) => (
+  <div className="bg-white dark:bg-[#16233a] rounded-3xl p-12 text-center shadow-md">
+    <h2 className="text-2xl font-bold text-[#1C2A16] dark:text-white mb-2">{title}</h2>
+    <p className="text-gray-500 dark:text-gray-400">{subtitle || 'This section is coming soon.'}</p>
+  </div>
+);
 
 export default VolunteerDashboard;
