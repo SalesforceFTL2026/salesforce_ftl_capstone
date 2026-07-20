@@ -7,7 +7,7 @@ import HeatMap from '../organization/HeatMap';
 // fall back to representative figures otherwise — this is a front-end view only.
 //
 // @param {object} [currentUser] - to greet the volunteer by name
-// @param {object} stats - { completedPct, peopleHelped, skillWays }
+// @param {object} stats - { completedCount, peopleHelped, skillWays }
 // @param {{date: string, month: string, title: string}[]} tasks - upcoming tasks
 const VolunteerDashboardView = ({ currentUser, stats, tasks }) => {
   const name = currentUser?.name || 'Name';
@@ -16,7 +16,7 @@ const VolunteerDashboardView = ({ currentUser, stats, tasks }) => {
     <div className="grid lg:grid-cols-[1fr_minmax(320px,420px)] gap-6">
       {/* Left column */}
       <div className="bg-[#dce8f7] dark:bg-[#16233a] rounded-3xl p-6 sm:p-8 transition-colors duration-300">
-        <h2 className="text-2xl sm:text-3xl font-bold text-[#1C2A16] dark:text-white mb-6">
+        <h2 className="text-3xl sm:text-4xl font-bold text-[#1C2A16] dark:text-white mb-6">
           Hello, {name}!
         </h2>
 
@@ -40,7 +40,7 @@ const VolunteerDashboardView = ({ currentUser, stats, tasks }) => {
 
           {/* Stat pills */}
           <div className="flex flex-row md:flex-col gap-4 justify-center">
-            <StatPill value={stats.completedPct} label="Requests Completed" tone="sage" />
+            <StatPill value={stats.completedCount} label="Requests Completed" tone="sage" />
             <StatPill value={stats.peopleHelped} label="People Helped" tone="navy" />
             <StatPill value={stats.skillWays} label="Ways to Expand your Skillset" tone="forest" />
           </div>
@@ -71,10 +71,10 @@ const VolunteerDashboardView = ({ currentUser, stats, tasks }) => {
               className="flex items-center gap-4 bg-[#7a2e2e] rounded-2xl p-3 text-white"
             >
               <div className="w-14 h-14 rounded-xl bg-[#efe9dd] text-[#1C2A16] flex flex-col items-center justify-center leading-none shrink-0">
-                <span className="text-lg font-bold">{task.date}</span>
-                <span className="text-[10px] font-semibold uppercase">{task.month}</span>
+                <span className="text-xl font-bold">{task.date}</span>
+                <span className="text-xs font-semibold uppercase">{task.month}</span>
               </div>
-              <span className="font-semibold">{task.title}</span>
+              <span className="font-semibold text-lg">{task.title}</span>
             </li>
           ))}
         </ul>
@@ -94,8 +94,8 @@ const StatPill = ({ value, label, tone }) => (
   <div className="relative">
     <span className="absolute -top-2 left-1/2 -translate-x-1/2 w-9 h-9 rounded-full bg-black/20" />
     <div className={`relative ${PILL_TONES[tone]} rounded-3xl px-6 py-4 text-center text-white shadow-md min-w-[130px]`}>
-      <p className="text-2xl font-bold">{value}</p>
-      <p className="text-xs font-semibold uppercase underline decoration-1 underline-offset-2 mt-1">
+      <p className="text-3xl font-bold">{value}</p>
+      <p className="text-sm font-semibold uppercase underline decoration-1 underline-offset-2 mt-1">
         {label}
       </p>
     </div>

@@ -29,7 +29,7 @@ const PortalSidebar = ({ label, groups, activeView, onNavigate }) => {
       <nav className="flex-1 px-2 lg:px-3 py-4 overflow-y-auto">
         {groups.map((group, i) => (
           <div key={group.heading} className={i > 0 ? 'mt-6' : ''}>
-            <p className="hidden lg:block text-[#3a4a30] dark:text-gray-400 text-sm font-semibold mb-2 px-2">
+            <p className="hidden lg:block text-[#3a4a30] dark:text-gray-400 text-base font-semibold mb-2 px-2">
               {group.heading}
             </p>
             <ul className="flex flex-col gap-1">
@@ -48,7 +48,7 @@ const PortalSidebar = ({ label, groups, activeView, onNavigate }) => {
                       }`}
                     >
                       <PortalIcon name={icon || id} />
-                      <span className="hidden lg:inline font-semibold">{itemLabel}</span>
+                      <span className="hidden lg:inline font-semibold text-lg">{itemLabel}</span>
                     </button>
                   </li>
                 );

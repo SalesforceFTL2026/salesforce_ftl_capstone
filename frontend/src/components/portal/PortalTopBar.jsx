@@ -25,12 +25,12 @@ const PortalTopBar = ({ title, currentUser, onSignOut }) => {
         <input
           type="search"
           placeholder="Search..."
-          className="w-full rounded-full bg-white/90 dark:bg-[#1f2d18] text-gray-800 dark:text-gray-100 pl-12 pr-4 py-2.5 shadow-inner focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/50"
+          className="w-full rounded-full bg-white/90 dark:bg-[#1f2d18] text-gray-800 dark:text-gray-100 text-lg pl-12 pr-4 py-2.5 shadow-inner focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/50"
         />
       </div>
 
       {/* Page title — hidden on small screens where space is tight */}
-      <h1 className="hidden md:block text-2xl font-bold text-[#1C2A16] dark:text-white flex-1">
+      <h1 className="hidden md:block text-3xl font-bold text-[#1C2A16] dark:text-white flex-1">
         {title}
       </h1>
 

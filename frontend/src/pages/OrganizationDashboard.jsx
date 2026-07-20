@@ -3,10 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import PortalShell from '../components/portal/PortalShell';
 import DashboardView from '../components/organization/DashboardView';
 import RequestsView from '../components/organization/RequestsView';
+import ResourcesView from '../components/organization/ResourcesView';
 import { getCurrentUser, logout } from '../utils/auth';
 import {
   getPrioritizedRequests,
   getOrganizationResponses,
+  getOrganizationResources,
+  addOrganizationResource,
+  setResourceAvailability,
+  deleteOrganizationResource,
   updateRequestStatus,
   requestErrorMessage,
 } from '../utils/requests';
@@ -49,6 +54,10 @@ const VIEW_TITLES = {
 // A request is "open" (unclaimed) while pending/in-progress with no org yet.
 const OPEN_STATUSES = ['pending', 'in-progress'];
 
+// Assumed people per household, used only as a fallback for completed requests
+// that don't have a real householdSize recorded.
+const AVG_HOUSEHOLD_SIZE = 3;
+
 const OrganizationDashboard = () => {
   const [currentUser] = useState(getCurrentUser);
   const navigate = useNavigate();
@@ -58,6 +67,8 @@ const OrganizationDashboard = () => {
   // Priority feed (all active requests) and this org's tracked responses.
   const [feed, setFeed] = useState([]);
   const [responses, setResponses] = useState([]);
+  // The org's inventory of resources (food, wood, health care kits, ...).
+  const [resources, setResources] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [updatingId, setUpdatingId] = useState(null);
@@ -80,6 +91,11 @@ const OrganizationDashboard = () => {
         setResponses(await getOrganizationResponses());
       } catch {
         setResponses([]);
+      }
+      try {
+        setResources(await getOrganizationResources());
+      } catch {
+        setResources([]);
       }
     } catch (err) {
       setError(requestErrorMessage(err, 'Something went wrong loading requests.'));
@@ -109,6 +125,32 @@ const OrganizationDashboard = () => {
     }
   };
 
+  // --- Resource inventory handlers ---
+  // Each optimistically updates the local list after the API call succeeds.
+  const handleAddResource = async (resource) => {
+    const created = await addOrganizationResource(resource);
+    setResources((prev) => [created, ...prev]);
+    return created;
+  };
+
+  const handleToggleResource = async (id, available) => {
+    try {
+      const updated = await setResourceAvailability(id, available);
+      setResources((prev) => prev.map((r) => (r.id === id ? { ...r, ...updated } : r)));
+    } catch (err) {
+      setError(requestErrorMessage(err, 'Could not update the resource.'));
+    }
+  };
+
+  const handleDeleteResource = async (id) => {
+    try {
+      await deleteOrganizationResource(id);
+      setResources((prev) => prev.filter((r) => r.id !== id));
+    } catch (err) {
+      setError(requestErrorMessage(err, 'Could not remove the resource.'));
+    }
+  };
+
   // Requests the org is responding to vs. still-open ("unfiltered") ones.
   const respondingIds = useMemo(
     () => new Set(responses.map((r) => r.id)),
@@ -122,19 +164,33 @@ const OrganizationDashboard = () => {
     [feed, respondingIds]
   );
 
-  // Headline dashboard stats. Where we have real data we compute it; the
-  // people-helped / resources figures are illustrative until those endpoints
-  // exist, matching the wireframe's summary pills.
+  // Headline dashboard stats, all derived from the org's own data:
+  // - Requests Completed: % of the requests this org is tracking that are done
+  //   (the request is fulfilled/closed, or the org's response is completed).
+  // - People Helped: sum of household sizes across those completed requests,
+  //   falling back to an assumed average where no household size was recorded.
+  // - Resources Available: count of resources the org has marked available.
   const dashboardStats = useMemo(() => {
-    const total = feed.length;
-    const done = feed.filter((r) => ['fulfilled', 'closed'].includes(r.status)).length;
-    const completedPct = total ? `${Math.round((done / total) * 100)}%` : '0%';
+    const isCompleted = (r) =>
+      r.responseStatus === 'completed' || ['fulfilled', 'closed'].includes(r.status);
+    const completed = responses.filter(isCompleted);
+
+    const total = responses.length;
+    const completedPct = total ? `${Math.round((completed.length / total) * 100)}%` : '0%';
+
+    const peopleHelped = completed.reduce(
+      (sum, r) => sum + (r.householdSize > 0 ? r.householdSize : AVG_HOUSEHOLD_SIZE),
+      0,
+    );
+
+    const resourcesAvailable = resources.filter((r) => r.available).length;
+
     return {
       completedPct,
-      peopleHelped: '30k',
-      resourcesAvailable: '95k',
+      peopleHelped: String(peopleHelped),
+      resourcesAvailable: String(resourcesAvailable),
     };
-  }, [feed]);
+  }, [responses, resources]);
 
   const tasks = useMemo(() => {
     // Surface the top open requests as upcoming "tasks" with dated chips.
@@ -174,7 +230,19 @@ const OrganizationDashboard = () => {
         />
       )}
 
-      {!['dashboard', 'requests'].includes(view) && (
+      {view === 'resources' && (
+        <ResourcesView
+          resources={resources}
+          loading={loading}
+          error={error}
+          onRetry={loadData}
+          onAdd={handleAddResource}
+          onToggle={handleToggleResource}
+          onDelete={handleDeleteResource}
+        />
+      )}
+
+      {!['dashboard', 'requests', 'resources'].includes(view) && (
         <ComingSoonPanel title={VIEW_TITLES[view]} />
       )}
     </PortalShell>
