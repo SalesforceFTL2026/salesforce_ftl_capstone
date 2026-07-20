@@ -104,6 +104,60 @@ export const deleteOrganizationResource = async (resourceId) => {
   return true;
 };
 
+// --- Resource allocation (assigning resources to help requests) ---
+
+// List the resources currently allocated to a request.
+// Returns the array of allocations on success; throws on failure.
+export const getRequestAllocations = async (requestId) => {
+  const { data } = await api.get(`/api/resources/requests/${requestId}/allocations`);
+
+  if (!data?.success) {
+    throw new Error(data?.message || 'Could not load allocations.');
+  }
+
+  return data.data;
+};
+
+// Ask the AI advisor which resources to allocate to a request, and how much.
+// Returns an array of { resourceId, quantity, reason }; throws on failure.
+export const getAllocationSuggestions = async (requestId) => {
+  const { data } = await api.get(`/api/resources/requests/${requestId}/suggestions`);
+
+  if (!data?.success) {
+    throw new Error(data?.message || 'Could not load suggestions.');
+  }
+
+  return data.data;
+};
+
+// Allocate a quantity of a resource to a request.
+// Returns the created allocation on success; throws on failure.
+export const allocateResource = async (requestId, { resourceId, quantity, note }) => {
+  const { data } = await api.post(`/api/resources/requests/${requestId}/allocations`, {
+    resourceId,
+    quantity,
+    note,
+  });
+
+  if (!data?.success) {
+    throw new Error(data?.message || 'Could not allocate the resource.');
+  }
+
+  return data.data;
+};
+
+// Remove an allocation, returning its quantity to the resource.
+// Resolves on success; throws on failure.
+export const deallocateResource = async (allocationId) => {
+  const { data } = await api.delete(`/api/resources/allocations/${allocationId}`);
+
+  if (!data?.success) {
+    throw new Error(data?.message || 'Could not remove the allocation.');
+  }
+
+  return true;
+};
+
 // Update a request's status (organizations, or the help-seeker who owns it).
 // Returns the updated request on success; throws on failure.
 export const updateRequestStatus = async (requestId, status) => {
