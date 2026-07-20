@@ -125,6 +125,16 @@ const OrganizationDashboard = () => {
     }
   };
 
+  // Reload just the resource inventory (used after allocations change on-hand
+  // quantities, so the list and the "Resources Available" pill stay accurate).
+  const refreshResources = useCallback(async () => {
+    try {
+      setResources(await getOrganizationResources());
+    } catch {
+      // A failed refresh shouldn't blow away what's already on screen.
+    }
+  }, []);
+
   // --- Resource inventory handlers ---
   // Each optimistically updates the local list after the API call succeeds.
   const handleAddResource = async (resource) => {
@@ -227,6 +237,8 @@ const OrganizationDashboard = () => {
           onRetry={loadData}
           onStatusChange={handleStatusChange}
           updatingId={updatingId}
+          resources={resources}
+          onAllocationsChanged={refreshResources}
         />
       )}
 

@@ -32,6 +32,7 @@ model Request {
   matches       Match[]
   votes         Vote[]
   crisisEvents  RequestEvent[]
+  allocations   ResourceAllocation[]
 
   @@index([priorityScore])
   @@index([category])
@@ -128,10 +129,30 @@ model Resource {
   updatedAt       DateTime @updatedAt
 
   organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  allocations     ResourceAllocation[]
 
   @@index([organizationId])
   @@index([resourceType])
   @@index([available])
+}
+
+// WEEK 3: Allocations — an amount of a Resource assigned to a help Request.
+// Assigning decrements the resource's on-hand quantity; removing an allocation
+// returns it. This is how an org earmarks "5 meals -> this family's request".
+model ResourceAllocation {
+  id              String   @id @default(cuid())
+  resourceId      String
+  requestId       String
+  quantity        Int      // how many units of the resource are assigned
+  note            String?  // optional context (e.g. "AI-suggested", delivery notes)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  resource        Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  request         Request  @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  @@index([resourceId])
+  @@index([requestId])
 }
 
 // WEEK 2-3: Responses to requests (volunteer/org claiming to help)

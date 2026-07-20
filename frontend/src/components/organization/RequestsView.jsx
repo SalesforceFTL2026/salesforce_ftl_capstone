@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import HeatMap from './HeatMap';
+import AllocationPanel from './AllocationPanel';
 
 // Requests view for an organization, matching the wireframe:
 //  - "Your Requests": requests this org is already responding to.
@@ -14,8 +15,11 @@ import HeatMap from './HeatMap';
 // @param {() => void} onRetry
 // @param {(request, status) => void} onStatusChange
 // @param {string|null} updatingId
+// @param {object[]} resources - the org's inventory, for allocating to requests
+// @param {() => void} onAllocationsChanged - refresh resources after allocating
 const RequestsView = ({
   yourRequests, unfiltered, loading, error, onRetry, onStatusChange, updatingId,
+  resources = [], onAllocationsChanged,
 }) => {
   // Which request's details show in the bottom-right panel.
   const [selected, setSelected] = useState(null);
@@ -59,6 +63,8 @@ const RequestsView = ({
           request={selected}
           onStatusChange={onStatusChange}
           updating={selected && updatingId === selected.id}
+          resources={resources}
+          onAllocationsChanged={onAllocationsChanged}
         />
       </div>
     </div>
@@ -102,7 +108,7 @@ const RequestTable = ({ title, requests, loading, error, onRetry, selectedId, on
             }`}
           >
             <span className="text-[#1C2A16] dark:text-gray-100 font-medium truncate">
-              {r.requesterName || r.name || 'Help Seeker'}
+              {r.submitterName || r.requesterName || r.name || 'Help Seeker'}
             </span>
             <PriorityLabel request={r} />
           </button>
@@ -134,7 +140,7 @@ const PriorityLabel = ({ request }) => {
 // --- Detail panel (bottom right) ---
 const STATUS_OPTIONS = ['pending', 'in-progress', 'matched', 'fulfilled', 'closed'];
 
-const RequestDetail = ({ request, onStatusChange, updating }) => {
+const RequestDetail = ({ request, onStatusChange, updating, resources, onAllocationsChanged }) => {
   if (!request) {
     return (
       <div className="bg-[#bcd4f1] dark:bg-[#16233a] rounded-3xl p-8 shadow-md text-center text-[#1C2A16] dark:text-gray-300 transition-colors duration-300">
@@ -216,6 +222,13 @@ const RequestDetail = ({ request, onStatusChange, updating }) => {
             {updating && <span className="text-xs" role="status">Saving…</span>}
           </div>
         )}
+
+        {/* Assign resources from the org's inventory to this request */}
+        <AllocationPanel
+          request={request}
+          resources={resources}
+          onChanged={onAllocationsChanged}
+        />
       </div>
     </div>
   );
