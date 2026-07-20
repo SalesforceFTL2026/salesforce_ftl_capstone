@@ -20,6 +20,42 @@ router.get('/', requireAuth, resourceController.getMyResources);
 // POST /api/resources
 router.post('/', requireAuth, resourceController.createResource);
 
+// --- Allocations: assigning resources to help requests ---
+// (declared before the /:id routes so the static "requests"/"allocations"
+// prefixes aren't captured as a resource id)
+
+// AI-suggested allocations for a request
+// GET /api/resources/requests/:requestId/suggestions
+router.get(
+  '/requests/:requestId/suggestions',
+  requireAuth,
+  resourceController.getAllocationSuggestions
+);
+
+// List resources allocated to a request
+// GET /api/resources/requests/:requestId/allocations
+router.get(
+  '/requests/:requestId/allocations',
+  requireAuth,
+  resourceController.getRequestAllocations
+);
+
+// Allocate a resource to a request
+// POST /api/resources/requests/:requestId/allocations
+router.post(
+  '/requests/:requestId/allocations',
+  requireAuth,
+  resourceController.allocateResource
+);
+
+// Remove an allocation (returns the quantity to the resource)
+// DELETE /api/resources/allocations/:id
+router.delete(
+  '/allocations/:id',
+  requireAuth,
+  resourceController.deallocateResource
+);
+
 // Toggle a resource's availability
 // PATCH /api/resources/:id
 router.patch('/:id', requireAuth, resourceController.updateResourceAvailability);
