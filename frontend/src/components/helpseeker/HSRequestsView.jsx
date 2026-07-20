@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import RequestCard from '../RequestCard/RequestCard';
+import { estimateFulfillment } from '../../utils/fulfillment';
 
 // Help-seeker Requests view, matching the wireframe: a Calendar / List / Cards
 // tab switcher over the user's requests. "List" renders a table; "Cards" reuses
-// the shared RequestCard; "Calendar" is a friendly placeholder for now.
+// the shared RequestCard; "Calendar" plots each request on its estimated
+// expected-fulfillment date (derived from urgency).
 //
 // @param {object[]} requests
 // @param {boolean} loading
@@ -68,13 +70,143 @@ const HSRequestsView = ({ requests, loading, error, deletingId, onDelete, onEdit
               ))}
             </div>
           )}
-          {tab === 'calendar' && (
-            <div className="bg-white dark:bg-[#16233a] rounded-3xl p-12 text-center text-gray-500 dark:text-gray-400">
-              Calendar view is coming soon.
-            </div>
-          )}
+          {tab === 'calendar' && <RequestsCalendar requests={requests} />}
         </>
       )}
+    </div>
+  );
+};
+
+// Urgency → dot color, so the calendar reads at a glance.
+const URGENCY_DOT = {
+  Critical: 'bg-red-500',
+  High: 'bg-orange-500',
+  Medium: 'bg-yellow-500',
+  Low: 'bg-green-500',
+};
+
+const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const MONTHS = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
+
+// A month calendar that plots each request on its estimated expected-fulfillment
+// date (derived from urgency). Users can page between months.
+const RequestsCalendar = ({ requests }) => {
+  // Group requests by their fulfillment day, keyed "YYYY-M-D" for quick lookup.
+  const byDay = {};
+  for (const r of requests) {
+    const date = estimateFulfillment(r);
+    if (!date) continue;
+    const key = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+    (byDay[key] ||= []).push({ request: r, date });
+  }
+
+  // Start the calendar on the month of the soonest upcoming fulfillment, or the
+  // current month if there are none.
+  const allDates = requests.map(estimateFulfillment).filter(Boolean).sort((a, b) => a - b);
+  const initial = allDates[0] || new Date();
+  const [cursor, setCursor] = useState(new Date(initial.getFullYear(), initial.getMonth(), 1));
+
+  const today = new Date();
+  const year = cursor.getFullYear();
+  const month = cursor.getMonth();
+  const firstWeekday = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  // Build the grid cells: leading blanks for the first week, then each day.
+  const cells = [];
+  for (let i = 0; i < firstWeekday; i++) cells.push(null);
+  for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+
+  const changeMonth = (delta) => setCursor(new Date(year, month + delta, 1));
+
+  const isToday = (d) =>
+    d === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+
+  return (
+    <div className="bg-white dark:bg-[#16233a] rounded-3xl shadow-md p-4 sm:p-6 transition-colors duration-300">
+      {/* Month header + nav */}
+      <div className="flex items-center justify-between mb-4">
+        <button
+          type="button"
+          onClick={() => changeMonth(-1)}
+          aria-label="Previous month"
+          className="w-9 h-9 rounded-full flex items-center justify-center text-[#1C2A16] dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
+        >
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <h3 className="text-lg font-bold text-[#1C2A16] dark:text-white">
+          {MONTHS[month]} {year}
+        </h3>
+        <button
+          type="button"
+          onClick={() => changeMonth(1)}
+          aria-label="Next month"
+          className="w-9 h-9 rounded-full flex items-center justify-center text-[#1C2A16] dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
+        >
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Weekday labels */}
+      <div className="grid grid-cols-7 gap-1 mb-1">
+        {WEEKDAYS.map((w) => (
+          <div key={w} className="text-center text-[11px] font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400 py-1">
+            {w}
+          </div>
+        ))}
+      </div>
+
+      {/* Day grid */}
+      <div className="grid grid-cols-7 gap-1">
+        {cells.map((d, i) => {
+          if (d === null) return <div key={`blank-${i}`} className="min-h-[76px]" />;
+          const items = byDay[`${year}-${month}-${d}`] || [];
+          return (
+            <div
+              key={d}
+              className={`min-h-[76px] rounded-xl border p-1.5 flex flex-col gap-1 ${
+                isToday(d)
+                  ? 'border-[#6ba3d3] bg-[#eef4fb] dark:bg-[#22304a]'
+                  : 'border-gray-100 dark:border-white/10'
+              }`}
+            >
+              <span className={`text-xs font-semibold ${isToday(d) ? 'text-[#1e3a5f] dark:text-[#6ba3d3]' : 'text-gray-500 dark:text-gray-400'}`}>
+                {d}
+              </span>
+              {items.map(({ request }) => (
+                <div
+                  key={request.id}
+                  title={`${request.category} (${request.urgency}) — expected ~this day`}
+                  className="flex items-center gap-1 text-[10px] leading-tight text-[#1C2A16] dark:text-gray-100 bg-gray-100 dark:bg-white/10 rounded px-1 py-0.5 truncate"
+                >
+                  <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${URGENCY_DOT[request.urgency] || 'bg-gray-400'}`} />
+                  <span className="truncate">{request.category}</span>
+                </div>
+              ))}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Legend + note */}
+      <div className="flex flex-wrap items-center gap-4 mt-4 text-xs text-gray-500 dark:text-gray-400">
+        {Object.entries(URGENCY_DOT).map(([label, dot]) => (
+          <span key={label} className="flex items-center gap-1.5">
+            <span className={`w-2 h-2 rounded-full ${dot}`} />
+            {label}
+          </span>
+        ))}
+      </div>
+      <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-2 italic">
+        Expected fulfillment is estimated from each request's urgency until organizations provide exact dates.
+      </p>
     </div>
   );
 };

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import api from '../../utils/api';
 
 // A reference "manual" for help-seekers: who to call in an emergency, and
 // what to do before / during / after common disasters. Content is static
@@ -169,6 +170,38 @@ const SafetyManual = () => {
   // first so the section doesn't look empty on load.
   const [openId, setOpenId] = useState(DISASTER_GUIDES[0].id);
 
+  // Zipcode lookup: resolves a US zip to its city/state and area-tailored
+  // contacts. Until a search succeeds, we show the national defaults.
+  const [zip, setZip] = useState('');
+  const [zipLoading, setZipLoading] = useState(false);
+  const [zipError, setZipError] = useState('');
+  const [localResult, setLocalResult] = useState(null); // { location, contacts }
+
+  const handleZipSearch = async (e) => {
+    e.preventDefault();
+    const trimmed = zip.trim();
+    setZipError('');
+
+    if (!/^\d{5}$/.test(trimmed)) {
+      setZipError('Please enter a valid 5-digit US zipcode.');
+      return;
+    }
+
+    setZipLoading(true);
+    try {
+      const { data } = await api.get(`/api/emergency/${trimmed}`);
+      setLocalResult(data.data);
+    } catch (err) {
+      setLocalResult(null);
+      setZipError(err.response?.data?.message || 'Could not look up that zipcode. Please try again.');
+    } finally {
+      setZipLoading(false);
+    }
+  };
+
+  // Show area-tailored contacts once a lookup succeeds, else national defaults.
+  const contacts = localResult?.contacts || EMERGENCY_CONTACTS;
+
   return (
     <div>
       <h1 className="text-3xl font-bold text-[#1C2A16] dark:text-white mb-1">
@@ -184,11 +217,61 @@ const SafetyManual = () => {
         <h2 className="text-sm font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-4">
           Emergency Contacts
         </h2>
+
+        {/* Zipcode search — find local (211) help for a specific area. */}
+        <form onSubmit={handleZipSearch} className="flex flex-wrap items-end gap-3 mb-4">
+          <div>
+            <label htmlFor="zip" className="block text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-1">
+              Find local help by zipcode
+            </label>
+            <input
+              id="zip"
+              type="text"
+              inputMode="numeric"
+              value={zip}
+              onChange={(e) => { setZip(e.target.value); setZipError(''); }}
+              placeholder="e.g. 78701"
+              maxLength={5}
+              className="w-40 px-4 py-2.5 rounded-xl border-2 border-gray-300 dark:border-[#3a4f30] bg-white dark:bg-[#1a2f1a] text-gray-900 dark:text-white focus:outline-none focus:border-[#6ba3d3] focus:ring-2 focus:ring-[#6ba3d3]/30 transition-all"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={zipLoading}
+            className="px-6 py-2.5 rounded-xl bg-[#1e3a5f] text-white font-semibold hover:bg-[#182f4d] focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/40 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {zipLoading ? 'Searching…' : 'Search'}
+          </button>
+          {localResult && (
+            <button
+              type="button"
+              onClick={() => { setLocalResult(null); setZip(''); setZipError(''); }}
+              className="px-4 py-2.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
+            >
+              Clear
+            </button>
+          )}
+        </form>
+
+        {zipError && (
+          <p className="text-sm text-red-600 dark:text-red-400 mb-4">{zipError}</p>
+        )}
+        {localResult && (
+          <p className="text-sm text-gray-700 dark:text-gray-300 mb-4">
+            Showing contacts for{' '}
+            <span className="font-bold">
+              {localResult.location.city}, {localResult.location.stateAbbreviation} {localResult.location.zipcode}
+            </span>
+          </p>
+        )}
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {EMERGENCY_CONTACTS.map((c) => (
+          {contacts.map((c) => (
             <div
               key={c.label}
-              className="bg-white dark:bg-[#273A20] rounded-2xl shadow-md p-5 transition-colors duration-300"
+              className={`bg-white dark:bg-[#273A20] rounded-2xl shadow-md p-5 transition-colors duration-300 ${
+                c.local ? 'ring-2 ring-[#6ba3d3]' : ''
+              }`}
             >
               <p className="text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                 {c.label}
