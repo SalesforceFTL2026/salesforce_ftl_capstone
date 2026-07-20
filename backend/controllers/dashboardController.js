@@ -59,6 +59,56 @@ export async function getVolunteerDashboard(req, res) {
 }
 
 /**
+ * GET /api/dashboard/volunteer/profile
+ * Returns the signed-in volunteer's profile skills, so the dashboard can show
+ * which disaster-response skill areas they already list.
+ *
+ * `skills` is stored as a JSON array string on the Volunteer profile. We parse
+ * it into an array here. A volunteer with no profile row yet (or no skills)
+ * simply gets an empty array — this is not an error.
+ */
+export async function getVolunteerProfile(req, res) {
+  try {
+    if (req.user.role !== 'volunteer') {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. This endpoint is for volunteers only.',
+      });
+    }
+
+    const profile = await prisma.volunteer.findUnique({
+      where: { userId: req.user.id },
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        skills: parseSkills(profile?.skills),
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching volunteer profile:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to fetch volunteer profile',
+      error: error.message,
+    });
+  }
+}
+
+// Safely turn the stored skills JSON string into an array of strings. Returns
+// [] for missing or malformed data so callers never have to guard against it.
+function parseSkills(skillsJson) {
+  if (!skillsJson) return [];
+  try {
+    const parsed = JSON.parse(skillsJson);
+    return Array.isArray(parsed) ? parsed.filter((s) => typeof s === 'string') : [];
+  } catch {
+    return [];
+  }
+}
+
+/**
  * GET /api/dashboard/organization
  * Returns requests that the organization is responding to or has fulfilled
  */

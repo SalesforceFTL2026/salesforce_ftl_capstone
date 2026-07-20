@@ -86,20 +86,20 @@ const RequestCard = ({ request, onInteract, interacting, confirmation, onDelete,
     <article className="bg-white dark:bg-[#273A20] rounded-2xl shadow-md p-5 flex flex-col gap-4 transition-colors duration-300">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-2">
-          <span className={`w-2.5 h-2.5 rounded-full ${dotClass}`} aria-hidden="true" />
-          <h3 className="font-bold text-black dark:text-white">{category}</h3>
+          <span className={`w-3 h-3 rounded-full ${dotClass}`} aria-hidden="true" />
+          <h3 className="font-bold text-xl text-black dark:text-white">{category}</h3>
         </div>
         <div className="flex items-center gap-2">
           {/* AI priority score — the headline signal on the volunteer feed. */}
           {hasPriorityScore && (
             <span
-              className={`text-xs font-bold px-2.5 py-1 rounded-full ${priorityScoreClass(priorityScore)}`}
+              className={`text-sm font-bold px-3 py-1.5 rounded-full ${priorityScoreClass(priorityScore)}`}
               title="AI-calculated priority score (0–100)"
             >
               Priority {Math.round(priorityScore)}
             </span>
           )}
-          <span className={`text-xs font-semibold px-2.5 py-1 rounded-full capitalize ${badgeClass}`}>
+          <span className={`text-sm font-semibold px-3 py-1.5 rounded-full capitalize ${badgeClass}`}>
             {status || urgency}
           </span>
           {onEdit && (
@@ -131,17 +131,17 @@ const RequestCard = ({ request, onInteract, interacting, confirmation, onDelete,
         </div>
       </div>
 
-      <p className="text-gray-700 dark:text-gray-300 text-sm">{description}</p>
+      <p className="text-gray-700 dark:text-gray-300 text-base">{description}</p>
 
       {/* AI reasoning, only shown when the prioritizer has explained the score */}
       {reasoning && (
-        <p className="text-sm text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 rounded-lg p-3 border border-gray-100 dark:border-gray-700">
+        <p className="text-base text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 rounded-lg p-3 border border-gray-100 dark:border-gray-700">
           <span className="font-semibold">Why this is prioritized: </span>
           {reasoning}
         </p>
       )}
 
-      <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+      <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
         <span>📍 {location}</span>
         {when && <span>{urgency} · {when}</span>}
       </div>
@@ -150,14 +150,14 @@ const RequestCard = ({ request, onInteract, interacting, confirmation, onDelete,
           Helps organizations spot needs that still have no coverage. */}
       {(typeof volunteerInterestCount === 'number' ||
         typeof organizationRespondingCount === 'number') && (
-        <div className="flex flex-wrap gap-2 text-xs">
+        <div className="flex flex-wrap gap-2 text-sm">
           {typeof volunteerInterestCount === 'number' && (
-            <span className="px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 font-medium">
+            <span className="px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 font-medium">
               🙋 {volunteerInterestCount} volunteer{volunteerInterestCount === 1 ? '' : 's'} interested
             </span>
           )}
           {typeof organizationRespondingCount === 'number' && (
-            <span className="px-2.5 py-1 rounded-full bg-green-50 text-green-700 dark:bg-green-900/40 dark:text-green-300 font-medium">
+            <span className="px-3 py-1.5 rounded-full bg-green-50 text-green-700 dark:bg-green-900/40 dark:text-green-300 font-medium">
               🏢 {organizationRespondingCount} org{organizationRespondingCount === 1 ? '' : 's'} responding
             </span>
           )}
@@ -196,7 +196,7 @@ const RequestCard = ({ request, onInteract, interacting, confirmation, onDelete,
 
       {/* On the My Interests tab, show the volunteer's response status. */}
       {responseStatus && (
-        <p className="text-sm font-medium text-[#6ba3d3]">
+        <p className="text-base font-medium text-[#6ba3d3]">
           Status: {responseStatus}
         </p>
       )}
@@ -205,7 +205,7 @@ const RequestCard = ({ request, onInteract, interacting, confirmation, onDelete,
       {onInteract && (
         <div className="mt-auto">
           {confirmation ? (
-            <p className="text-sm font-semibold text-green-700" role="status">
+            <p className="text-base font-semibold text-green-700" role="status">
               {confirmation}
             </p>
           ) : (
@@ -213,7 +213,7 @@ const RequestCard = ({ request, onInteract, interacting, confirmation, onDelete,
               type="button"
               onClick={() => onInteract(request)}
               disabled={interacting}
-              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#6ba3d3] text-white font-semibold hover:bg-[#5a92c2] focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/40 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#6ba3d3] text-white font-semibold text-lg hover:bg-[#5a92c2] focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/40 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
             >
               {interacting ? 'Saving…' : 'I can help with this'}
             </button>
