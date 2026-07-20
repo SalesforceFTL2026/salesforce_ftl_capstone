@@ -8,6 +8,7 @@ import authRoutes from './routes/auth.js';
 import requestRoutes from './routes/requests.js';
 import dashboardRoutes from './routes/dashboard.js';
 import chatRoutes from './routes/chat.js';
+import emergencyRoutes from './routes/emergency.js';
 
 dotenv.config();
 
@@ -35,6 +36,7 @@ app.use('/api/prioritize', prioritizeRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/emergency', emergencyRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
