@@ -32,6 +32,18 @@ export const getVolunteerInterests = async () => {
   return data.data;
 };
 
+// Fetch the signed-in volunteer's profile skills (an array of skill strings).
+// Returns [] if the volunteer has no skills listed yet; throws on failure.
+export const getVolunteerSkills = async () => {
+  const { data } = await api.get('/api/dashboard/volunteer/profile');
+
+  if (!data?.success) {
+    throw new Error(data?.message || 'Could not load your profile skills.');
+  }
+
+  return data.data.skills || [];
+};
+
 // Fetch the requests the signed-in organization is responding to / tracking.
 // Returns the array of requests on success; throws on failure.
 export const getOrganizationResponses = async () => {

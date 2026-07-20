@@ -17,6 +17,9 @@ const HelpRequestForm = ({ compact = false, onCreated, onSaved, request }) => {
     urgency: request?.urgency || '',
     location: request?.location || '',
     description: request?.description || '',
+    // Store as a string for the input; blank means "not provided".
+    householdSize:
+      request?.householdSize != null ? String(request.householdSize) : '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -33,7 +36,7 @@ const HelpRequestForm = ({ compact = false, onCreated, onSaved, request }) => {
     setError('');
     setSuccess(false);
 
-    if (!formData.category || !formData.urgency || !formData.location || !formData.description) {
+    if (!formData.category || !formData.urgency || !formData.location || !formData.description || !formData.householdSize) {
       setError('Please fill in all required fields');
       setLoading(false);
       return;
@@ -51,7 +54,7 @@ const HelpRequestForm = ({ compact = false, onCreated, onSaved, request }) => {
         const { data } = await api.post('/api/requests', formData);
         if (data.success) {
           setSuccess(true);
-          setFormData({ submitterName: '', category: '', urgency: '', location: '', description: '' });
+          setFormData({ submitterName: '', category: '', urgency: '', location: '', description: '', householdSize: '' });
           onCreated?.(data.data);   // let the dashboard refresh its list
         }
       }
@@ -122,6 +125,13 @@ const HelpRequestForm = ({ compact = false, onCreated, onSaved, request }) => {
           <label htmlFor="location" className={label}>Location <span className="text-[#c84444]">*</span></label>
           <input type="text" id="location" name="location" value={formData.location} onChange={handleChange}
             placeholder="City, zip code, or address" required className={field} />
+        </div>
+
+        <div>
+          <label htmlFor="householdSize" className={label}>People in Household <span className="text-[#c84444]">*</span></label>
+          <input type="number" id="householdSize" name="householdSize" min="1" step="1"
+            value={formData.householdSize} onChange={handleChange}
+            placeholder="How many people need help?" required className={field} />
         </div>
 
         <div>

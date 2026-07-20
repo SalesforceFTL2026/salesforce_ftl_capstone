@@ -7,7 +7,7 @@ import HeatMap from '../organization/HeatMap';
 // fall back to representative figures otherwise — this is a front-end view only.
 //
 // @param {object} [currentUser] - to greet the volunteer by name
-// @param {object} stats - { completedPct, peopleHelped, skillWays }
+// @param {object} stats - { completedCount, peopleHelped, skillWays }
 // @param {{date: string, month: string, title: string}[]} tasks - upcoming tasks
 const VolunteerDashboardView = ({ currentUser, stats, tasks }) => {
   const name = currentUser?.name || 'Name';
@@ -40,7 +40,7 @@ const VolunteerDashboardView = ({ currentUser, stats, tasks }) => {
 
           {/* Stat pills */}
           <div className="flex flex-row md:flex-col gap-4 justify-center">
-            <StatPill value={stats.completedPct} label="Requests Completed" tone="sage" />
+            <StatPill value={stats.completedCount} label="Requests Completed" tone="sage" />
             <StatPill value={stats.peopleHelped} label="People Helped" tone="navy" />
             <StatPill value={stats.skillWays} label="Ways to Expand your Skillset" tone="forest" />
           </div>
