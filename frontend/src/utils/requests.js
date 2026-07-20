@@ -56,6 +56,54 @@ export const getOrganizationResponses = async () => {
   return data.data;
 };
 
+// Fetch the signed-in organization's inventory of resources.
+// Returns the array of resources on success; throws on failure.
+export const getOrganizationResources = async () => {
+  const { data } = await api.get('/api/resources');
+
+  if (!data?.success) {
+    throw new Error(data?.message || 'Could not load your resources.');
+  }
+
+  return data.data;
+};
+
+// Add a resource to the organization's inventory.
+// Returns the created resource on success; throws on failure.
+export const addOrganizationResource = async (resource) => {
+  const { data } = await api.post('/api/resources', resource);
+
+  if (!data?.success) {
+    throw new Error(data?.message || 'Could not add the resource.');
+  }
+
+  return data.data;
+};
+
+// Toggle whether a resource is currently available.
+// Returns the updated resource on success; throws on failure.
+export const setResourceAvailability = async (resourceId, available) => {
+  const { data } = await api.patch(`/api/resources/${resourceId}`, { available });
+
+  if (!data?.success) {
+    throw new Error(data?.message || 'Could not update the resource.');
+  }
+
+  return data.data;
+};
+
+// Remove a resource from the organization's inventory.
+// Resolves on success; throws on failure.
+export const deleteOrganizationResource = async (resourceId) => {
+  const { data } = await api.delete(`/api/resources/${resourceId}`);
+
+  if (!data?.success) {
+    throw new Error(data?.message || 'Could not remove the resource.');
+  }
+
+  return true;
+};
+
 // Update a request's status (organizations, or the help-seeker who owns it).
 // Returns the updated request on success; throws on failure.
 export const updateRequestStatus = async (requestId, status) => {
