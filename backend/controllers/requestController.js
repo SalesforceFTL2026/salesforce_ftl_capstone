@@ -6,6 +6,24 @@ import prisma from '../services/database/prisma.js';
  * Handles business logic for help request endpoints
  */
 
+// Sentinel returned by parseHouseholdSize when the value can't be used, so we
+// can tell "not provided" (null) apart from "provided but invalid".
+const INVALID_HOUSEHOLD_SIZE = Symbol('invalid-household-size');
+
+// Normalize an incoming householdSize into: null (not provided / blank),
+// a positive integer, or INVALID_HOUSEHOLD_SIZE. Accepts numbers or numeric
+// strings from form submissions.
+const parseHouseholdSize = (value) => {
+  if (value === undefined || value === null || value === '') {
+    return null;
+  }
+  const n = Number(value);
+  if (!Number.isInteger(n) || n < 1) {
+    return INVALID_HOUSEHOLD_SIZE;
+  }
+  return n;
+};
+
 // Decides whether a logged-in user is allowed to manage (update/delete) a request.
 // The rule: organizations can manage any request, and a help-seeker can manage
 // only the request they submitted themselves. Everyone else is not allowed.
@@ -29,13 +47,28 @@ export const createRequest = async (req, res) => {
       });
     }
 
-    const { category, urgency, location, description } = req.body;
+    const { category, urgency, location, description, householdSize } = req.body;
 
     // Validation
     if (!category || !urgency || !location || !description) {
       return res.status(400).json({
         success: false,
         message: 'Missing required fields: category, urgency, location, and description are required'
+      });
+    }
+
+    // Household size is required and must be a positive whole number.
+    const parsedHouseholdSize = parseHouseholdSize(householdSize);
+    if (parsedHouseholdSize === null) {
+      return res.status(400).json({
+        success: false,
+        message: 'Household size is required.'
+      });
+    }
+    if (parsedHouseholdSize === INVALID_HOUSEHOLD_SIZE) {
+      return res.status(400).json({
+        success: false,
+        message: 'Household size must be a whole number of 1 or more.'
       });
     }
 
@@ -65,7 +98,8 @@ export const createRequest = async (req, res) => {
       category,
       urgency,
       location,
-      description
+      description,
+      householdSize: parsedHouseholdSize
     });
 
     res.status(201).json({
@@ -270,7 +304,7 @@ export const deleteRequest = async (req, res) => {
 export const updateRequestDetails = async (req, res) => {
   try {
     const { id } = req.params;
-    const { category, urgency, location, description } = req.body;
+    const { category, urgency, location, description, householdSize } = req.body;
 
     // Make sure the request exists before we check ownership or update it.
     const request = await requestModel.getRequestById(id);
@@ -332,6 +366,17 @@ export const updateRequestDetails = async (req, res) => {
         });
       }
       fields.description = description;
+    }
+
+    if (householdSize !== undefined) {
+      const parsedHouseholdSize = parseHouseholdSize(householdSize);
+      if (parsedHouseholdSize === INVALID_HOUSEHOLD_SIZE) {
+        return res.status(400).json({
+          success: false,
+          message: 'Household size must be a whole number of 1 or more.'
+        });
+      }
+      fields.householdSize = parsedHouseholdSize;
     }
 
     // The caller must actually be changing something.

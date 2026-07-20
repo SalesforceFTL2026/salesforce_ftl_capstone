@@ -8,6 +8,7 @@ import { getCurrentUser, logout } from '../utils/auth';
 import {
   getPrioritizedRequests,
   getVolunteerInterests,
+  getVolunteerSkills,
   expressInterest,
   requestErrorMessage,
 } from '../utils/requests';
@@ -49,6 +50,51 @@ const VIEW_TITLES = {
   settings: 'Settings',
 };
 
+// Canonical skill areas that natural-disaster volunteering typically calls for.
+// We use this list to estimate how many *new* skill areas a volunteer could
+// still pick up, based on the categories of requests they've helped with.
+const DISASTER_SKILLS = [
+  'First Aid & CPR',
+  'Search & Rescue',
+  'Water Rescue',
+  'Debris Removal & Cleanup',
+  'Shelter Management',
+  'Food & Water Distribution',
+  'Medical Support',
+  'Transportation & Logistics',
+  'Emergency Communications',
+  'Translation & Interpretation',
+  'Emotional & Psychological Support',
+  'Damage Assessment',
+];
+
+// Which skill areas each request category exercises. Lets us mark a skill as
+// "already practiced" once a volunteer has engaged a request in that category.
+const CATEGORY_SKILLS = {
+  Food: ['Food & Water Distribution'],
+  Shelter: ['Shelter Management', 'Damage Assessment'],
+  Medical: ['First Aid & CPR', 'Medical Support'],
+  Transport: ['Transportation & Logistics'],
+  Other: ['Emergency Communications'],
+};
+
+// Match a skill string from the volunteer's profile to a canonical skill area.
+// Profiles store free-form skills (e.g. "medical", "cpr", "translation"), so we
+// match loosely by keyword. Returns the canonical name, or null if none fits.
+const canonicalizeSkill = (raw) => {
+  const s = String(raw).toLowerCase();
+  return (
+    DISASTER_SKILLS.find((skill) => {
+      const name = skill.toLowerCase();
+      return name.includes(s) || s.includes(name.split(' ')[0]);
+    }) || null
+  );
+};
+
+// Assumed people per household, used only as a fallback for completed requests
+// that don't have a real householdSize recorded.
+const AVG_HOUSEHOLD_SIZE = 3;
+
 const VolunteerDashboard = () => {
   const [currentUser] = useState(getCurrentUser);
   const navigate = useNavigate();
@@ -59,6 +105,8 @@ const VolunteerDashboard = () => {
   // already offered to help with. Loaded once; both views read from them.
   const [feed, setFeed] = useState([]);
   const [interests, setInterests] = useState([]);
+  // Skill areas this volunteer lists on their profile (from the Volunteer row).
+  const [skills, setSkills] = useState([]);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -85,6 +133,11 @@ const VolunteerDashboard = () => {
         setInterests(await getVolunteerInterests());
       } catch {
         setInterests([]);
+      }
+      try {
+        setSkills(await getVolunteerSkills());
+      } catch {
+        setSkills([]);
       }
     } catch (err) {
       setError(requestErrorMessage(err, 'Something went wrong loading requests.'));
@@ -114,19 +167,47 @@ const VolunteerDashboard = () => {
     }
   };
 
-  // Headline dashboard stats. Where we have real data we compute it; the
-  // people-helped / skillset figures are illustrative until those endpoints
-  // exist, matching the wireframe's summary pills.
+  // Headline dashboard stats, derived from the volunteer's own activity
+  // (the requests they've offered to help with — `interests`) plus their
+  // profile skills.
+  //
+  // - Requests Completed: interests the volunteer finished, or whose underlying
+  //   request has been fulfilled/closed.
+  // - People Helped: sum of each completed request's householdSize, falling
+  //   back to an assumed average for requests with no household size recorded.
+  // - Ways to Expand your Skillset: disaster-volunteer skill areas the
+  //   volunteer hasn't covered yet — counting both skills they list on their
+  //   profile and skills implied by the request categories they've engaged with.
   const dashboardStats = useMemo(() => {
-    const total = feed.length;
-    const done = feed.filter((r) => ['fulfilled', 'closed'].includes(r.status)).length;
-    const completedPct = total ? `${Math.round((done / total) * 100)}%` : '0%';
+    const isCompleted = (r) =>
+      r.responseStatus === 'completed' || ['fulfilled', 'closed'].includes(r.status);
+    const completed = interests.filter(isCompleted);
+    const completedCount = completed.length;
+
+    // Real people helped: sum household sizes, using the average where unknown.
+    const peopleHelped = completed.reduce(
+      (sum, r) => sum + (r.householdSize > 0 ? r.householdSize : AVG_HOUSEHOLD_SIZE),
+      0,
+    );
+
+    // Skill areas the volunteer has already covered: those listed on their
+    // profile, plus those implied by the categories they've engaged with.
+    const covered = new Set();
+    skills.forEach((raw) => {
+      const skill = canonicalizeSkill(raw);
+      if (skill) covered.add(skill);
+    });
+    interests.forEach((r) => {
+      (CATEGORY_SKILLS[r.category] || []).forEach((skill) => covered.add(skill));
+    });
+    const skillWays = DISASTER_SKILLS.filter((skill) => !covered.has(skill)).length;
+
     return {
-      completedPct,
-      peopleHelped: '30k',
-      skillWays: '10',
+      completedCount: String(completedCount),
+      peopleHelped: String(peopleHelped),
+      skillWays: String(skillWays),
     };
-  }, [feed]);
+  }, [interests, skills]);
 
   // Surface the top open requests as upcoming "tasks" with dated chips.
   const tasks = useMemo(() => {

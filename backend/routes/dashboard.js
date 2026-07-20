@@ -15,6 +15,10 @@ const router = express.Router();
 // GET /api/dashboard/volunteer
 router.get('/volunteer', requireAuth, dashboardController.getVolunteerDashboard);
 
+// Get the volunteer's profile skills (for the dashboard's skillset metric)
+// GET /api/dashboard/volunteer/profile
+router.get('/volunteer/profile', requireAuth, dashboardController.getVolunteerProfile);
+
 // Get organization's active responses
 // GET /api/dashboard/organization
 router.get('/organization', requireAuth, dashboardController.getOrganizationDashboard);
