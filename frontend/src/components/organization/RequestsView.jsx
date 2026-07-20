@@ -144,7 +144,7 @@ const RequestDetail = ({ request, onStatusChange, updating }) => {
   }
 
   const {
-    requesterName, name, phone, householdSize, description, category,
+    submitterName, requesterName, name, phone, householdSize, description, category,
     urgency, location, priorityScore, status,
   } = request;
 
@@ -152,7 +152,7 @@ const RequestDetail = ({ request, onStatusChange, updating }) => {
     <div className="bg-[#bcd4f1] dark:bg-[#16233a] rounded-3xl p-5 shadow-md flex flex-col sm:flex-row gap-4 transition-colors duration-300">
       {/* Requester card */}
       <div className="bg-[#9db29a] dark:bg-[#1f3320] rounded-2xl p-4 text-center text-[#1C2A16] dark:text-white sm:w-44 shrink-0">
-        <p className="font-bold text-sm mb-2">{requesterName || name || 'Help Seeker'}</p>
+        <p className="font-bold text-sm mb-2">{submitterName || requesterName || name || 'Help Seeker'}</p>
         <div className="w-16 h-16 mx-auto rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center mb-2">
           <svg className="w-8 h-8 text-gray-600 dark:text-gray-300" fill="currentColor" viewBox="0 0 24 24">
             <path d="M12 12a5 5 0 100-10 5 5 0 000 10zm0 2c-4 0-8 2-8 6v2h16v-2c0-4-4-6-8-6z" />
