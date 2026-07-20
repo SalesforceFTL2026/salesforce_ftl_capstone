@@ -9,7 +9,7 @@ const prisma = new PrismaClient();
 
 // Create a new help request
 export const createRequest = async (requestData) => {
-  const { userId, submitterName, submitterRole, category, urgency, location, description } = requestData;
+  const { userId, submitterName, submitterRole, category, urgency, location, description, householdSize } = requestData;
 
   return await prisma.request.create({
     data: {
@@ -20,6 +20,7 @@ export const createRequest = async (requestData) => {
       urgency,
       location,
       description,
+      householdSize: householdSize ?? null,  // optional; drives "people helped" on the volunteer dashboard
       status: 'pending',
       priorityScore: 0
     }
