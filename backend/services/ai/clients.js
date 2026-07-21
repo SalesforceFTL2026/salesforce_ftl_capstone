@@ -1,6 +1,7 @@
 import OpenAI from 'openai';
 import Anthropic from '@anthropic-ai/sdk';
 import { CohereClient } from 'cohere-ai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 /**
  * Initialize OpenAI client for embeddings and Whisper transcription.
@@ -31,4 +32,14 @@ export const anthropic = new Anthropic({
  */
 export const cohere = process.env.COHERE_API_KEY
   ? new CohereClient({ token: process.env.COHERE_API_KEY })
+  : null;
+
+/**
+ * Initialize Google Gemini client. Used as a free fallback for chat/extraction
+ * when OpenRouter's free tier is rate-limited — Gemini's free tier is a
+ * separate daily quota, so the two rarely run dry at the same time. Null when
+ * no key is configured, so callers can detect and skip the fallback.
+ */
+export const gemini = process.env.GOOGLE_API_KEY
+  ? new GoogleGenerativeAI(process.env.GOOGLE_API_KEY)
   : null;
