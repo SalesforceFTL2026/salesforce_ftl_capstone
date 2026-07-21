@@ -40,7 +40,7 @@ function normalizeSkills(skills) {
 export async function signup(req, res) {
   try {
     // 1. Pull the fields the browser sent in the request body.
-    //    `location` is optional for everyone. `skills` only matters for
+    //    `location` is required for everyone. `skills` only matters for
     //    volunteers — it seeds their Volunteer profile (see step 7).
     const { name, email, password, role, location, skills } = req.body;
 
@@ -49,6 +49,17 @@ export async function signup(req, res) {
       return res.status(400).json({
         success: false,
         message: 'Name, email, password, and role are all required.',
+      });
+    }
+
+    // 2b. Location is required for all users so requests and resources can be
+    //     matched geographically ("Near me").
+    const trimmedLocation =
+      typeof location === 'string' ? location.trim() : '';
+    if (!trimmedLocation) {
+      return res.status(400).json({
+        success: false,
+        message: 'Location is required.',
       });
     }
 
@@ -106,10 +117,6 @@ export async function signup(req, res) {
 
     // 6. Scramble the password BEFORE saving it. We never store plain text.
     const passwordHash = await hashPassword(password);
-
-    // Only save a location if one was actually provided (it's optional).
-    const trimmedLocation =
-      typeof location === 'string' && location.trim() ? location.trim() : null;
 
     // 7. Save the new user. For volunteers we also create their Volunteer
     //    profile in the SAME transaction so a user never exists without the
@@ -264,15 +271,15 @@ export async function updateProfile(req, res) {
       data.name = name.trim();
     }
 
-    // Location (if provided) is optional to clear: a blank string unsets it.
+    // Location (if provided) can be changed but not cleared — it's required.
     if (location !== undefined) {
-      if (typeof location !== 'string') {
+      if (typeof location !== 'string' || location.trim() === '') {
         return res.status(400).json({
           success: false,
-          message: 'Location must be text.',
+          message: 'Location is required and cannot be cleared.',
         });
       }
-      data.location = location.trim() || null;
+      data.location = location.trim();
     }
 
     const updated = await prisma.user.update({
