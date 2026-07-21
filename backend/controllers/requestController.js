@@ -1,6 +1,7 @@
 import * as requestModel from '../models/requestModel.js';
 import prisma from '../services/database/prisma.js';
-import { geocodeLocation } from '../services/geocoding/geocoder.js';
+import { prioritizeRequest } from '../services/ai/prioritizer.js';
+import { geocodeLocation, haversineMiles } from '../services/geocoding/geocoder.js';
 import { parseRadiusFilter, filterWithinRadius } from '../services/geocoding/distance.js';
 
 /**
@@ -110,10 +111,22 @@ export const createRequest = async (req, res) => {
       householdSize: parsedHouseholdSize
     });
 
+    // Run the AI prioritization pipeline so the request gets a real priority
+    // score (and reasoning) right away. This is best-effort: if scoring fails
+    // the request is still created — it just stays at its default score of 0
+    // until something re-prioritizes it.
+    let scored = newRequest;
+    try {
+      const { priorityScore, reasoning } = await prioritizeRequest(newRequest.id);
+      scored = { ...newRequest, priorityScore, reasoning };
+    } catch (scoreError) {
+      console.error('Prioritization failed for new request:', scoreError.message);
+    }
+
     res.status(201).json({
       success: true,
       message: 'Help request submitted successfully',
-      data: newRequest
+      data: scored
     });
   } catch (error) {
     console.error('Error creating request:', error);
@@ -224,6 +237,59 @@ export const getPrioritizedRequests = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch prioritized requests',
+      error: error.message
+    });
+  }
+};
+
+// Get the distance (in miles) from a given origin to each active request.
+// GET /api/requests/distances?origin=<free-text location>
+// Used by organizations to sort the request feed by "nearest". We geocode only
+// the origin here; each request's coordinates are already stored on the row
+// (geocoded at creation), so no per-request network calls are needed. Requests
+// without stored coordinates come back with distanceMiles: null (unknown).
+export const getRequestDistances = async (req, res) => {
+  try {
+    const { origin } = req.query;
+
+    if (!origin || origin.trim() === '') {
+      return res.status(400).json({
+        success: false,
+        message: 'An origin location is required to measure distance.'
+      });
+    }
+
+    const originCoords = await geocodeLocation(origin);
+    if (!originCoords) {
+      return res.status(422).json({
+        success: false,
+        message: `Could not find the location "${origin}".`
+      });
+    }
+
+    // Only measure distance for the active feed (what the org actually sorts).
+    const requests = await requestModel.getPrioritizedRequests();
+
+    const distances = requests.map((request) => {
+      const hasCoords =
+        typeof request.latitude === 'number' && typeof request.longitude === 'number';
+      return {
+        id: request.id,
+        distanceMiles: hasCoords
+          ? Math.round(haversineMiles(originCoords, request) * 10) / 10
+          : null
+      };
+    });
+
+    res.status(200).json({
+      success: true,
+      data: distances
+    });
+  } catch (error) {
+    console.error('Error computing request distances:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to compute distances',
       error: error.message
     });
   }
@@ -510,6 +576,7 @@ export default {
   getAllRequests,
   getRequestById,
   getPrioritizedRequests,
+  getRequestDistances,
   updateRequestStatus,
   updateRequestDetails,
   deleteRequest,

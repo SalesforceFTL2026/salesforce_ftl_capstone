@@ -4,7 +4,7 @@ import PortalShell from '../components/portal/PortalShell';
 import DashboardView from '../components/organization/DashboardView';
 import RequestsView from '../components/organization/RequestsView';
 import ResourcesView from '../components/organization/ResourcesView';
-import { getCurrentUser, logout } from '../utils/auth';
+import { getCurrentUser, logout, updateProfile } from '../utils/auth';
 import {
   getPrioritizedRequests,
   getOrganizationResponses,
@@ -59,7 +59,8 @@ const OPEN_STATUSES = ['pending', 'in-progress'];
 const AVG_HOUSEHOLD_SIZE = 3;
 
 const OrganizationDashboard = () => {
-  const [currentUser] = useState(getCurrentUser);
+  // Kept in state (not a constant) so profile edits like location re-render.
+  const [currentUser, setCurrentUser] = useState(getCurrentUser);
   const navigate = useNavigate();
 
   const [view, setView] = useState('dashboard');
@@ -131,6 +132,13 @@ const OrganizationDashboard = () => {
       setUpdatingId(null);
     }
   };
+
+  // Save the org's location (the origin "nearest" measures from) and reflect it
+  // in the session so the change sticks across the app and a page refresh.
+  const handleOrgLocationChange = useCallback(async (location) => {
+    const updated = await updateProfile({ location });
+    setCurrentUser(updated);
+  }, []);
 
   // Reload just the resource inventory (used after allocations change on-hand
   // quantities, so the list and the "Resources Available" pill stay accurate).
@@ -244,6 +252,8 @@ const OrganizationDashboard = () => {
           onRetry={loadData}
           onStatusChange={handleStatusChange}
           updatingId={updatingId}
+          orgLocation={currentUser?.location}
+          onOrgLocationChange={handleOrgLocationChange}
           resources={resources}
           onAllocationsChanged={refreshResources}
           near={near}
