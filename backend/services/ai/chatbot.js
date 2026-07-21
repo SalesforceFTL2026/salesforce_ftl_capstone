@@ -4,9 +4,17 @@ import OpenAI from 'openai';
 // it at OpenRouter's base URL and authenticate with the OpenRouter key in .env.
 const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1';
 
+// Use Node's native fetch: the OpenAI v4 SDK bundles an older node-fetch that
+// fails on gzipped responses under Node 24 ("Gunzip ... Premature close").
+// (Native fetch needs duplex:'half' for streamed request bodies; harmless here
+// since chat calls send plain JSON, but included to match the shared client.)
+const nativeFetch = (url, init = {}) =>
+  globalThis.fetch(url, init.body ? { duplex: 'half', ...init } : init);
+
 const client = new OpenAI({
   apiKey: process.env.OPENROUTER_API_KEY,
   baseURL: OPENROUTER_BASE_URL,
+  fetch: nativeFetch,
 });
 
 // How many free models to try before giving up. Free models share a global

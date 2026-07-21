@@ -1,71 +1,16 @@
-import { anthropic } from './clients.js';
-
-// Claude model used to extract structured request fields from a voice
-// transcript. Configurable via env so it can track whatever model id the key's
-// endpoint accepts without a code change.
-const EXTRACTION_MODEL = process.env.CLAUDE_MODEL || 'claude-haiku-4-5-20251001';
+import { askChatbot } from './chatbot.js';
 
 // These MUST stay in sync with the validation in requestController.createRequest.
 const VALID_CATEGORIES = ['Food', 'Shelter', 'Medical', 'Transport', 'Other'];
 const VALID_URGENCIES = ['Low', 'Medium', 'High', 'Critical'];
 
-// Tool schema forces Claude to return a well-formed object instead of prose we
-// would have to parse. Every field is required so the model can't silently drop
-// one; unknown values are represented explicitly (null / "Other").
-const EXTRACTION_TOOL = {
-  name: 'record_help_request',
-  description:
-    'Record the structured help-request fields extracted from what the caller said.',
-  input_schema: {
-    type: 'object',
-    properties: {
-      category: {
-        type: 'string',
-        enum: VALID_CATEGORIES,
-        description:
-          'The kind of help needed. Use "Other" if it does not clearly fit the rest.',
-      },
-      urgency: {
-        type: 'string',
-        enum: VALID_URGENCIES,
-        description:
-          'How time-critical the need is. Critical = life-threatening/immediate.',
-      },
-      location: {
-        type: 'string',
-        description:
-          'Where help is needed, as spoken (address, cross-streets, city, or landmark). Empty string if the caller gave none.',
-      },
-      description: {
-        type: 'string',
-        description:
-          'A concise 1-2 sentence summary of the need, in plain language.',
-      },
-      householdSize: {
-        type: ['integer', 'null'],
-        description:
-          'Number of people affected, if stated. null if not mentioned.',
-      },
-      confidence: {
-        type: 'object',
-        description:
-          'Confidence 0-1 for each extracted field, so a human can review low-confidence values before submitting.',
-        properties: {
-          category: { type: 'number' },
-          urgency: { type: 'number' },
-          location: { type: 'number' },
-          description: { type: 'number' },
-          householdSize: { type: 'number' },
-        },
-        required: ['category', 'urgency', 'location', 'description', 'householdSize'],
-      },
-    },
-    required: ['category', 'urgency', 'location', 'description', 'householdSize', 'confidence'],
-  },
-};
-
 /**
- * Extract structured help-request fields from a voice transcript via Claude.
+ * Extract structured help-request fields from a voice transcript.
+ *
+ * We go through OpenRouter (via askChatbot) rather than the Anthropic SDK
+ * directly: the deployment only has an OpenRouter key, and OpenRouter's free
+ * models speak the OpenAI chat format, not Anthropic tool-use. So instead of
+ * forcing a tool call we ask for a strict JSON object and parse it defensively.
  *
  * The returned object mirrors the shape createRequest expects, plus a per-field
  * `confidence` map that the frontend "confirm what we heard" step (#156) uses to
@@ -73,9 +18,8 @@ const EXTRACTION_TOOL = {
  *
  * @param {string} transcript - Transcribed text of what the caller said
  * @returns {Promise<{category: string, urgency: string, location: string,
- *   description: string, householdSize: number|null,
- *   confidence: Object}>}
- * @throws {Error} - If the transcript is empty or Claude returns no tool call
+ *   description: string, householdSize: number|null, confidence: Object}>}
+ * @throws {Error} - If the transcript is empty or no usable JSON comes back
  */
 export async function extractRequestFields(transcript) {
   const text = (transcript || '').trim();
@@ -83,26 +27,18 @@ export async function extractRequestFields(transcript) {
     throw new Error('Cannot extract fields from an empty transcript');
   }
 
-  const response = await anthropic.messages.create({
-    model: EXTRACTION_MODEL,
-    max_tokens: 500,
-    tools: [EXTRACTION_TOOL],
-    // Force the model to call our tool rather than reply with prose.
-    tool_choice: { type: 'tool', name: EXTRACTION_TOOL.name },
-    messages: [
-      {
-        role: 'user',
-        content: buildExtractionPrompt(text),
-      },
-    ],
+  const reply = await askChatbot(buildExtractionPrompt(text), {
+    systemPrompt:
+      'You extract structured data from crisis help-request transcripts. ' +
+      'You reply with ONLY a single JSON object and no other text, code fences, or commentary.',
   });
 
-  const toolUse = response.content.find((block) => block.type === 'tool_use');
-  if (!toolUse) {
-    throw new Error('Claude did not return structured request fields');
+  const parsed = parseJsonObject(reply);
+  if (!parsed) {
+    throw new Error('Model did not return parseable JSON request fields');
   }
 
-  return normalizeExtraction(toolUse.input);
+  return normalizeExtraction(parsed);
 }
 
 /**
@@ -112,16 +48,24 @@ export async function extractRequestFields(transcript) {
  * @returns {string}
  */
 function buildExtractionPrompt(transcript) {
-  return `You are helping intake a crisis help request from a phone call. Below is a transcript of what the caller said. Extract the structured fields by calling the record_help_request tool.
+  return `Extract the help-request fields from this crisis call transcript and return them as JSON.
+
+Return ONLY a JSON object with exactly these keys:
+{
+  "category": one of ${JSON.stringify(VALID_CATEGORIES)},
+  "urgency": one of ${JSON.stringify(VALID_URGENCIES)},
+  "location": string (where help is needed, exactly as said; "" if none given),
+  "description": string (a neutral 1-2 sentence summary of the need),
+  "householdSize": integer number of people affected, or null if not stated,
+  "confidence": { "category": 0-1, "urgency": 0-1, "location": 0-1, "description": 0-1, "householdSize": 0-1 }
+}
 
 Rules:
 - Only use information actually present in the transcript. Do NOT invent details.
-- category must be one of: ${VALID_CATEGORIES.join(', ')}. Use "Other" if unclear.
-- urgency must be one of: ${VALID_URGENCIES.join(', ')}. Infer from tone and content (e.g. "trapped", "no water", "injured" => higher urgency).
-- location: capture exactly what the caller said about where they are. Use an empty string if they gave none.
-- description: a neutral 1-2 sentence summary of the need. No emotional embellishment.
-- householdSize: only fill in if a number of people is stated; otherwise null.
-- confidence: give an honest 0-1 score per field. Use a low score when you had to guess or the transcript was vague/garbled.
+- category: use "Other" if it does not clearly fit the rest.
+- urgency: infer from tone and content (e.g. "trapped", "no water", "injured" => higher urgency).
+- confidence: give an honest 0-1 score per field; use a low score (below 0.6) when you had to guess or the transcript was vague or garbled.
+- Output the JSON object only — no markdown, no code fences, no explanation.
 
 Transcript:
 """
@@ -130,10 +74,43 @@ ${transcript}
 }
 
 /**
- * Defensively coerce Claude's tool input into the exact contract, in case the
- * model returns an out-of-enum value or malformed confidence map.
+ * Pull the first JSON object out of a model reply. Free models sometimes wrap
+ * the JSON in prose or ```json fences, so we locate the outermost braces rather
+ * than trusting the whole string to be clean JSON.
  *
- * @param {Object} input - Raw tool_use input from Claude
+ * @param {string} reply - Raw model text
+ * @returns {Object|null} - Parsed object, or null if none could be parsed
+ */
+function parseJsonObject(reply) {
+  if (!reply || typeof reply !== 'string') return null;
+
+  // Strip common code-fence wrappers first.
+  const unfenced = reply.replace(/```(?:json)?/gi, '').trim();
+
+  // Try the whole thing, then fall back to the outermost { ... } slice.
+  const candidates = [unfenced];
+  const first = unfenced.indexOf('{');
+  const last = unfenced.lastIndexOf('}');
+  if (first !== -1 && last > first) {
+    candidates.push(unfenced.slice(first, last + 1));
+  }
+
+  for (const candidate of candidates) {
+    try {
+      const obj = JSON.parse(candidate);
+      if (obj && typeof obj === 'object') return obj;
+    } catch {
+      // try the next candidate
+    }
+  }
+  return null;
+}
+
+/**
+ * Defensively coerce the parsed JSON into the exact contract, in case the model
+ * returns an out-of-enum value or malformed confidence map.
+ *
+ * @param {Object} input - Parsed model output
  * @returns {Object} - Normalized fields
  */
 function normalizeExtraction(input = {}) {
@@ -145,13 +122,16 @@ function normalizeExtraction(input = {}) {
     : 'Medium';
 
   let householdSize = null;
-  if (Number.isInteger(input.householdSize) && input.householdSize > 0) {
-    householdSize = input.householdSize;
+  const n = Number(input.householdSize);
+  if (Number.isInteger(n) && n > 0) {
+    householdSize = n;
   }
 
   const rawConfidence = input.confidence || {};
-  const clamp = (n) =>
-    typeof n === 'number' && n >= 0 && n <= 1 ? n : 0;
+  const clamp = (value) => {
+    const num = Number(value);
+    return Number.isFinite(num) && num >= 0 && num <= 1 ? num : 0;
+  };
 
   return {
     category,
