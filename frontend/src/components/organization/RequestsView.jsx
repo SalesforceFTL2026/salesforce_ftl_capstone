@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import HeatMap from './HeatMap';
 import RequestMap from '../map/RequestMap';
+import NearMeToggle from '../map/NearMeToggle';
 import AllocationPanel from './AllocationPanel';
 
 // Requests view for an organization, matching the wireframe:
@@ -20,7 +21,7 @@ import AllocationPanel from './AllocationPanel';
 // @param {() => void} onAllocationsChanged - refresh resources after allocating
 const RequestsView = ({
   yourRequests, unfiltered, loading, error, onRetry, onStatusChange, updatingId,
-  resources = [], onAllocationsChanged,
+  resources = [], onAllocationsChanged, near, onNearChange,
 }) => {
   // Which request's details show in the bottom-right panel.
   const [selected, setSelected] = useState(null);
@@ -67,6 +68,17 @@ const RequestsView = ({
       {/* Right: heat map / pin map + detail panel */}
       <div className="flex flex-col gap-6">
         <div className="bg-white dark:bg-[#16233a] rounded-3xl p-5 shadow-md transition-colors duration-300">
+          {/* "Near me" geo-radius filter (issue #116). Narrows the open feed —
+              and therefore the heat/pin map — to the org's area. */}
+          {onNearChange && (
+            <div className="mb-3">
+              <NearMeToggle
+                onChange={onNearChange}
+                active={Boolean(near)}
+                count={near ? unfiltered.length : null}
+              />
+            </div>
+          )}
           <div className="flex items-center justify-between mb-3 gap-3">
             <h2 className="text-xl font-bold text-[#1C2A16] dark:text-white">
               {geoView === 'heat' ? 'Request Heat Map' : 'Request Map'}

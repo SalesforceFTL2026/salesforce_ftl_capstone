@@ -93,6 +93,9 @@ const VolunteerDashboard = () => {
   // already offered to help with. Loaded once; both views read from them.
   const [feed, setFeed] = useState([]);
   const [interests, setInterests] = useState([]);
+  // "Near me" geo-radius filter (issue #116): null = show everything, otherwise
+  // { lat, lng, radiusMiles }. When set, the feed is re-fetched filtered to it.
+  const [near, setNear] = useState(null);
   // Skill areas this volunteer lists on their profile (from the Volunteer row).
   const [skills, setSkills] = useState([]);
 
@@ -116,7 +119,8 @@ const VolunteerDashboard = () => {
     setLoading(true);
     setError('');
     try {
-      setFeed(await getPrioritizedRequests());
+      // When "Near me" is on, ask the backend to geo-radius filter the feed.
+      setFeed(await getPrioritizedRequests(near));
       try {
         setInterests(await getVolunteerInterests());
       } catch {
@@ -132,7 +136,7 @@ const VolunteerDashboard = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [near]);
 
   useEffect(() => {
     loadData();
@@ -232,6 +236,8 @@ const VolunteerDashboard = () => {
           onInteract={handleInteract}
           interactingId={interactingId}
           confirmations={confirmations}
+          near={near}
+          onNearChange={setNear}
         />
       )}
 

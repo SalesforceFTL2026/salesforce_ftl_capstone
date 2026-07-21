@@ -67,6 +67,9 @@ const OrganizationDashboard = () => {
   // Priority feed (all active requests) and this org's tracked responses.
   const [feed, setFeed] = useState([]);
   const [responses, setResponses] = useState([]);
+  // "Near me" geo-radius filter (issue #116): null = show everything, otherwise
+  // { lat, lng, radiusMiles }. When set, the feed is re-fetched filtered to it.
+  const [near, setNear] = useState(null);
   // The org's inventory of resources (food, wood, health care kits, ...).
   const [resources, setResources] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -85,7 +88,8 @@ const OrganizationDashboard = () => {
     setLoading(true);
     setError('');
     try {
-      const feedData = await getPrioritizedRequests();
+      // When "Near me" is on, ask the backend to geo-radius filter the feed.
+      const feedData = await getPrioritizedRequests(near);
       setFeed(feedData);
       try {
         setResponses(await getOrganizationResponses());
@@ -102,11 +106,14 @@ const OrganizationDashboard = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [near]);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  // Re-fetch the feed whenever the "Near me" filter changes (on/off or radius).
+  // loadData closes over `near`, so it's a fresh callback each time `near` moves.
 
   // Optimistically move a request through its lifecycle, then reconcile.
   const handleStatusChange = async (request, status) => {
@@ -239,6 +246,8 @@ const OrganizationDashboard = () => {
           updatingId={updatingId}
           resources={resources}
           onAllocationsChanged={refreshResources}
+          near={near}
+          onNearChange={setNear}
         />
       )}
 
