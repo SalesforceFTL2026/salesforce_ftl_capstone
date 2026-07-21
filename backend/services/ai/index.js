@@ -4,3 +4,5 @@ export { findSimilarRequests } from './vectorSearch.js';
 export { calculatePriorityScore, getScoreBreakdown } from './scoring.js';
 export { generatePriorityExplanation } from './explainer.js';
 export { suggestAllocations } from './resourceAdvisor.js';
+export { transcribeAudio } from './transcriber.js';
+export { extractRequestFields } from './extractor.js';
