@@ -1,6 +1,8 @@
 import { useState, useMemo } from 'react';
 import RequestCard from '../RequestCard/RequestCard';
 import RequestMap from '../map/RequestMap';
+import NearMeToggle from '../map/NearMeToggle';
+import HeatMap from '../organization/HeatMap';
 
 // Active Help Requests view for a volunteer, built from the product wireframe.
 // A view switcher (Calendar / List / Cards / Map) sits above the requests. The
@@ -26,12 +28,14 @@ const VIEWS = [
   { id: 'list', label: 'List', icon: 'list' },
   { id: 'cards', label: 'Cards', icon: 'cards' },
   { id: 'map', label: 'Map', icon: 'map' },
+  { id: 'heat', label: 'Heat', icon: 'heat' },
 ];
 
 const URGENCY_ORDER = { Critical: 0, High: 1, Medium: 2, Low: 3 };
 
 const VolunteerRequestsView = ({
   requests, loading, error, onRetry, onInteract, interactingId, confirmations,
+  near, onNearChange,
 }) => {
   const [activeView, setActiveView] = useState('list');
   // Which rows the volunteer has checked in the List view.
@@ -74,27 +78,36 @@ const VolunteerRequestsView = ({
 
   return (
     <div className="flex flex-col gap-5">
-      {/* View switcher */}
-      <div className="bg-[#c3d3ae] dark:bg-[#1f3320] rounded-3xl px-4 sm:px-6 py-3 flex flex-wrap gap-2 transition-colors duration-300">
-        {VIEWS.map((v) => {
-          const isActive = v.id === activeView;
-          return (
-            <button
-              key={v.id}
-              type="button"
-              onClick={() => setActiveView(v.id)}
-              aria-pressed={isActive}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-lg transition-colors focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/40 ${
-                isActive
-                  ? 'bg-white/80 dark:bg-[#0f1a0f] text-[#1C2A16] dark:text-white border-b-2 border-[#6ba3d3]'
-                  : 'text-[#1C2A16] dark:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5'
-              }`}
-            >
-              <ViewIcon name={v.icon} />
-              <span>{v.label}</span>
-            </button>
-          );
-        })}
+      {/* View switcher + "Near me" geo-radius filter (issue #116). */}
+      <div className="bg-[#c3d3ae] dark:bg-[#1f3320] rounded-3xl px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3 transition-colors duration-300">
+        <div className="flex flex-wrap gap-2">
+          {VIEWS.map((v) => {
+            const isActive = v.id === activeView;
+            return (
+              <button
+                key={v.id}
+                type="button"
+                onClick={() => setActiveView(v.id)}
+                aria-pressed={isActive}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-lg transition-colors focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/40 ${
+                  isActive
+                    ? 'bg-white/80 dark:bg-[#0f1a0f] text-[#1C2A16] dark:text-white border-b-2 border-[#6ba3d3]'
+                    : 'text-[#1C2A16] dark:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5'
+                }`}
+              >
+                <ViewIcon name={v.icon} />
+                <span>{v.label}</span>
+              </button>
+            );
+          })}
+        </div>
+        {onNearChange && (
+          <NearMeToggle
+            onChange={onNearChange}
+            active={Boolean(near)}
+            count={near ? requests.length : null}
+          />
+        )}
       </div>
 
       {loading && (
@@ -157,6 +170,15 @@ const VolunteerRequestsView = ({
             interactingId={interactingId}
             confirmations={confirmations}
           />
+        </div>
+      )}
+
+      {!loading && !error && activeView === 'heat' && (
+        <div className="bg-white dark:bg-[#16233a] rounded-3xl p-6 shadow-md transition-colors duration-300">
+          <h2 className="text-xl font-bold text-[#1C2A16] dark:text-white text-center mb-3">
+            Where needs are concentrated
+          </h2>
+          <HeatMap requests={rows} caption="Shaded by where requests cluster" />
         </div>
       )}
 
@@ -573,6 +595,7 @@ const ViewIcon = ({ name }) => {
     list: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-7 6l2 2 4-4',
     cards: 'M4 5h6v6H4V5zm10 0h6v6h-6V5zM4 13h6v6H4v-6zm10 0h6v6h-6v-6z',
     map: 'M9 20l-5.4 1.8A1 1 0 013 20.9V6.6a1 1 0 01.7-1L9 4m0 16l6-2m-6 2V4m6 14l5.4 1.8A1 1 0 0021 20.9V6.6a1 1 0 00-.7-1L15 4m0 14V4m0 0L9 6',
+    heat: 'M4 6h4v4H4V6zm0 8h4v4H4v-4zm6-8h4v4h-4V6zm0 8h4v4h-4v-4zm6-8h4v4h-4V6zm0 8h4v4h-4v-4z',
   };
   return (
     <svg {...base}>
