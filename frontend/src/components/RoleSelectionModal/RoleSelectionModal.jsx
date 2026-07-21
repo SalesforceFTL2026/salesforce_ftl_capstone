@@ -20,6 +20,8 @@ const RoleSelectionModal = ({ role, embedded = false, onClose, onSubmit }) => {
   const [location, setLocation] = useState('');
   // Skills only apply to volunteers; ignored for other roles.
   const [skills, setSkills] = useState([]);
+  // The skills list is long, so keep it collapsed until the user opens it.
+  const [skillsOpen, setSkillsOpen] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -62,6 +64,7 @@ const RoleSelectionModal = ({ role, embedded = false, onClose, onSubmit }) => {
     }
     // Volunteers must pick at least one skill (mirrors the backend policy).
     if (isVolunteer && skills.length === 0) {
+      setSkillsOpen(true); // reveal the picker so they can act on the error
       setError('Please select at least one skill you can help with.');
       return;
     }
@@ -164,32 +167,53 @@ const RoleSelectionModal = ({ role, embedded = false, onClose, onSubmit }) => {
               seed their profile and feed the dashboard's "My Interests" view. */}
           {isVolunteer && (
             <div>
-              <label className="block text-sm font-bold text-gray-800 mb-2 uppercase tracking-wide">
-                Skills <span className="text-red-500">*</span>
-                <span className="ml-2 text-gray-400 text-xs font-normal normal-case tracking-normal">
-                  Select all that apply
+              <button
+                type="button"
+                onClick={() => setSkillsOpen((v) => !v)}
+                aria-expanded={skillsOpen}
+                className="flex w-full items-center justify-between text-left"
+              >
+                <span className="block text-sm font-bold text-gray-800 uppercase tracking-wide">
+                  Skills <span className="text-red-500">*</span>
+                  <span className="ml-2 text-gray-400 text-xs font-normal normal-case tracking-normal">
+                    {skills.length > 0
+                      ? `${skills.length} selected`
+                      : 'Select all that apply'}
+                  </span>
                 </span>
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {DISASTER_SKILLS.map((skill) => {
-                  const selected = skills.includes(skill);
-                  return (
-                    <button
-                      key={skill}
-                      type="button"
-                      onClick={() => toggleSkill(skill)}
-                      aria-pressed={selected}
-                      className={`px-3 py-2 rounded-full border-2 text-sm font-medium transition-colors ${
-                        selected
-                          ? 'bg-[#6ba3d3] border-[#6ba3d3] text-white'
-                          : 'bg-transparent border-gray-300 text-gray-700 hover:border-[#6ba3d3]'
-                      }`}
-                    >
-                      {skill}
-                    </button>
-                  );
-                })}
-              </div>
+                {/* Chevron rotates to point down when the section is open. */}
+                <svg
+                  className={`h-4 w-4 text-gray-500 transition-transform ${skillsOpen ? 'rotate-180' : ''}`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {skillsOpen && (
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {DISASTER_SKILLS.map((skill) => {
+                    const selected = skills.includes(skill);
+                    return (
+                      <button
+                        key={skill}
+                        type="button"
+                        onClick={() => toggleSkill(skill)}
+                        aria-pressed={selected}
+                        className={`px-3 py-2 rounded-full border-2 text-sm font-medium transition-colors ${
+                          selected
+                            ? 'bg-[#6ba3d3] border-[#6ba3d3] text-white'
+                            : 'bg-transparent border-gray-300 text-gray-700 hover:border-[#6ba3d3]'
+                        }`}
+                      >
+                        {skill}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
 
@@ -223,8 +247,15 @@ const RoleSelectionModal = ({ role, embedded = false, onClose, onSubmit }) => {
 
   // Standalone: render our own popup shell + title.
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl p-10 max-w-lg w-full mx-4 shadow-2xl">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 sm:p-6"
+    >
+      {/* Stop clicks inside the modal from bubbling up to the backdrop's close. */}
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="bg-white rounded-2xl p-10 max-w-lg w-full shadow-2xl max-h-full overflow-y-auto"
+      >
         <div className="flex justify-between items-start mb-8">
           <h2 className="text-3xl font-bold text-black">
             Welcome, {roleLabels[role]}!
