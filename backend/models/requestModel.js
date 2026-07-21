@@ -9,7 +9,7 @@ const prisma = new PrismaClient();
 
 // Create a new help request
 export const createRequest = async (requestData) => {
-  const { userId, submitterName, submitterRole, category, urgency, location, description, householdSize } = requestData;
+  const { userId, submitterName, submitterRole, category, urgency, location, latitude, longitude, description, householdSize } = requestData;
 
   return await prisma.request.create({
     data: {
@@ -19,6 +19,8 @@ export const createRequest = async (requestData) => {
       category,
       urgency,
       location,
+      latitude: latitude ?? null,      // geocoded from `location`; drives the map view
+      longitude: longitude ?? null,
       description,
       householdSize: householdSize ?? null,  // optional; drives "people helped" on the volunteer dashboard
       status: 'pending',
