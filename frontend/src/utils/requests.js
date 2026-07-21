@@ -78,7 +78,9 @@ export const getVolunteerInterests = async () => {
   return data.data;
 };
 
-// Fetch the signed-in volunteer's profile skills (an array of skill strings).
+// Fetch the signed-in volunteer's profile skill names (an array of strings).
+// The API returns { name, level } objects; this flattens to names for callers
+// that only care about which skill areas are covered (e.g. dashboard stats).
 // Returns [] if the volunteer has no skills listed yet; throws on failure.
 export const getVolunteerSkills = async () => {
   const { data } = await api.get('/api/dashboard/volunteer/profile');
@@ -87,7 +89,7 @@ export const getVolunteerSkills = async () => {
     throw new Error(data?.message || 'Could not load your profile skills.');
   }
 
-  return data.data.skills || [];
+  return (data.data.skills || []).map((s) => (typeof s === 'string' ? s : s.name));
 };
 
 // Fetch the requests the signed-in organization is responding to / tracking.
@@ -282,6 +284,43 @@ export const markRequestHelped = async (requestId) => {
   }
 
   return data.data;
+};
+
+// Withdraw the signed-in volunteer's interest in a request ("un-sign up").
+// Resolves on success; throws on failure.
+export const withdrawInterest = async (requestId) => {
+  const { data } = await api.delete(`/api/requests/${requestId}/interact`);
+
+  if (!data?.success) {
+    throw new Error(data?.message || 'Could not withdraw your interest.');
+  }
+
+  return true;
+};
+
+// Fetch the signed-in volunteer's skills with self-rated proficiency.
+// Returns an array of { name, level } on success; throws on failure.
+export const getVolunteerSkillsDetailed = async () => {
+  const { data } = await api.get('/api/dashboard/volunteer/profile');
+
+  if (!data?.success) {
+    throw new Error(data?.message || 'Could not load your skills.');
+  }
+
+  return data.data.skills || [];
+};
+
+// Replace the signed-in volunteer's skills. `skills` is an array of
+// { name, level } where level is a 1–5 self-rating.
+// Returns the saved array of { name, level } on success; throws on failure.
+export const updateVolunteerSkills = async (skills) => {
+  const { data } = await api.put('/api/dashboard/volunteer/profile/skills', { skills });
+
+  if (!data?.success) {
+    throw new Error(data?.message || 'Could not save your skills.');
+  }
+
+  return data.data.skills || [];
 };
 
 // Voice intake: upload a recorded audio clip and get back the transcript plus

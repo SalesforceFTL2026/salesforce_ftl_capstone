@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import PortalShell from '../components/portal/PortalShell';
 import VolunteerDashboardView from '../components/volunteer/VolunteerDashboardView';
 import VolunteerRequestsView from '../components/volunteer/VolunteerRequestsView';
-import RequestCard from '../components/RequestCard/RequestCard';
+import VolunteerTasksView from '../components/volunteer/VolunteerTasksView';
+import VolunteerSkillsView from '../components/volunteer/VolunteerSkillsView';
 import { getCurrentUser, logout } from '../utils/auth';
 import { usePolling } from '../hooks/usePolling';
 import { DISASTER_SKILLS } from '../utils/skills';
@@ -11,8 +12,11 @@ import {
   getPrioritizedRequests,
   getVolunteerInterests,
   getVolunteerSkills,
+  getVolunteerSkillsDetailed,
+  updateVolunteerSkills,
   expressInterest,
   markRequestHelped,
+  withdrawInterest,
   requestErrorMessage,
 } from '../utils/requests';
 
@@ -46,7 +50,7 @@ const VIEW_TITLES = {
   dashboard: 'Dashboard',
   requests: 'Active Help Requests',
   tasks: 'Tasks',
-  skills: 'My Interests',
+  skills: 'My Skills',
   groups: 'Groups',
   chat: 'Chat',
   documents: 'Documents',
@@ -99,7 +103,11 @@ const VolunteerDashboard = () => {
   // { lat, lng, radiusMiles }. When set, the feed is re-fetched filtered to it.
   const [near, setNear] = useState(null);
   // Skill areas this volunteer lists on their profile (from the Volunteer row).
+  // `skills` is the flat list of names used by dashboard stats; `skillsDetailed`
+  // holds the { name, level } objects the Skills view edits.
   const [skills, setSkills] = useState([]);
+  const [skillsDetailed, setSkillsDetailed] = useState([]);
+  const [savingSkills, setSavingSkills] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -107,6 +115,8 @@ const VolunteerDashboard = () => {
   // Tracks the request id currently being submitted, so we can show a loading
   // state on just that card's button.
   const [interactingId, setInteractingId] = useState(null);
+  // Request id currently being withdrawn ("un-sign up") from the Tasks list.
+  const [withdrawingId, setWithdrawingId] = useState(null);
   // Maps request id -> confirmation message after a successful interaction.
   const [confirmations, setConfirmations] = useState({});
   // Tracks the interest currently being marked as helped, for its button state.
@@ -137,6 +147,11 @@ const VolunteerDashboard = () => {
         setSkills(await getVolunteerSkills());
       } catch {
         setSkills([]);
+      }
+      try {
+        setSkillsDetailed(await getVolunteerSkillsDetailed());
+      } catch {
+        setSkillsDetailed([]);
       }
     } catch (err) {
       setError(requestErrorMessage(err, 'Something went wrong loading requests.'));
@@ -170,8 +185,8 @@ const VolunteerDashboard = () => {
     }
   };
 
-  // Volunteer clicked "Mark as helped" on a My Interests card. Completes the
-  // request, then reloads so the card reflects its new completed status.
+  // Volunteer clicked "Mark as helped" on a task. Completes the request, then
+  // reloads so the card reflects its new completed status.
   const handleMarkHelped = async (request) => {
     setMarkingId(request.id);
     setError('');
@@ -182,6 +197,40 @@ const VolunteerDashboard = () => {
       setError(requestErrorMessage(err, 'Could not mark the request as helped. Please try again.'));
     } finally {
       setMarkingId(null);
+    }
+  };
+
+  // Volunteer clicked "Un-sign up" on a task. Withdraw interest, then drop it
+  // from the local interests list so the Tasks view updates immediately.
+  const handleWithdraw = async (request) => {
+    setWithdrawingId(request.id);
+    setError('');
+    try {
+      await withdrawInterest(request.id);
+      setInterests((prev) => prev.filter((r) => r.id !== request.id));
+      // Also clear any "interest recorded" confirmation so the feed card resets.
+      setConfirmations((prev) => {
+        const next = { ...prev };
+        delete next[request.id];
+        return next;
+      });
+    } catch (err) {
+      setError(requestErrorMessage(err, 'Could not withdraw your interest. Please try again.'));
+    } finally {
+      setWithdrawingId(null);
+    }
+  };
+
+  // Save the volunteer's edited skills (names + 1–5 proficiency). On success we
+  // update both the detailed list and the flat name list the stats use.
+  const handleSaveSkills = async (nextSkills) => {
+    setSavingSkills(true);
+    try {
+      const saved = await updateVolunteerSkills(nextSkills);
+      setSkillsDetailed(saved);
+      setSkills(saved.map((s) => s.name));
+    } finally {
+      setSavingSkills(false);
     }
   };
 
@@ -267,62 +316,38 @@ const VolunteerDashboard = () => {
         />
       )}
 
-      {view === 'skills' && (
-        <InterestsView
+      {view === 'tasks' && (
+        <VolunteerTasksView
           interests={interests}
           loading={loading}
           error={error}
           onRetry={loadData}
+          onWithdraw={handleWithdraw}
+          withdrawingId={withdrawingId}
           onMarkHelped={handleMarkHelped}
           markingId={markingId}
         />
       )}
 
-      {!['dashboard', 'requests', 'skills'].includes(view) && (
+      {view === 'skills' && (
+        <VolunteerSkillsView
+          skills={skillsDetailed}
+          loading={loading}
+          error={error}
+          onRetry={loadData}
+          onSave={handleSaveSkills}
+          saving={savingSkills}
+        />
+      )}
+
+      {!['dashboard', 'requests', 'tasks', 'skills'].includes(view) && (
         <ComingSoonPanel title={VIEW_TITLES[view]} />
       )}
     </PortalShell>
   );
 };
 
-// The requests this volunteer has offered to help with.
-const InterestsView = ({ interests, loading, error, onRetry, onMarkHelped, markingId }) => {
-  if (loading) {
-    return <p className="text-[#1C2A16] dark:text-gray-300" role="status">Loading…</p>;
-  }
-  if (error) {
-    return (
-      <div className="bg-red-50 border border-red-200 text-red-800 rounded-2xl p-4">
-        <p className="font-semibold">{error}</p>
-        <button onClick={onRetry} className="mt-2 text-sm font-semibold underline hover:no-underline">
-          Try again
-        </button>
-      </div>
-    );
-  }
-  if (interests.length === 0) {
-    return (
-      <ComingSoonPanel
-        title="No interests yet"
-        subtitle="Head to Requests to find people who need help."
-      />
-    );
-  }
-  return (
-    <div className="flex flex-col gap-4 max-w-3xl">
-      {interests.map((request) => (
-        <RequestCard
-          key={request.id}
-          request={request}
-          onMarkHelped={onMarkHelped}
-          marking={markingId === request.id}
-        />
-      ))}
-    </div>
-  );
-};
-
-// Placeholder for nav items not yet built (Skills, Groups, etc.).
+// Placeholder for nav items not yet built (Groups, etc.).
 const ComingSoonPanel = ({ title, subtitle }) => (
   <div className="bg-white dark:bg-[#16233a] rounded-3xl p-12 text-center shadow-md">
     <h2 className="text-2xl font-bold text-[#1C2A16] dark:text-white mb-2">{title}</h2>

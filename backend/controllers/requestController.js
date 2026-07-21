@@ -642,6 +642,44 @@ export const completeRequest = async (req, res) => {
   }
 };
 
+// Withdraw a volunteer's interest in a request ("un-sign up").
+// DELETE /api/requests/:id/interact
+// Removes this volunteer's Response for the request, so it drops off their
+// Tasks list. Only affects the signed-in volunteer's own interest. Idempotent —
+// withdrawing when there's nothing to withdraw still succeeds.
+export const withdrawInterest = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (req.user.role !== 'volunteer') {
+      return res.status(403).json({
+        success: false,
+        message: 'Only volunteers can withdraw interest in a request.'
+      });
+    }
+
+    await prisma.response.deleteMany({
+      where: {
+        requestId: id,
+        responderId: req.user.id,
+        responderType: 'volunteer'
+      }
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'You are no longer signed up for this request.'
+    });
+  } catch (error) {
+    console.error('Error withdrawing interest in request:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to withdraw interest',
+      error: error.message
+    });
+  }
+};
+
 // Voice intake: accept a recorded audio clip, transcribe it, and extract the
 // help-request fields with Claude. This does NOT create the request — it returns
 // the draft fields + transcript so the frontend can show a "confirm what we
@@ -834,6 +872,7 @@ export default {
   deleteRequest,
   interactWithRequest,
   completeRequest,
+  withdrawInterest,
   assignToRequest,
   unassignFromRequest
 };
