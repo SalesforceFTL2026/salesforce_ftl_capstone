@@ -2,6 +2,7 @@ import * as requestModel from '../models/requestModel.js';
 import prisma from '../services/database/prisma.js';
 import { geocodeLocation } from '../services/geocoding/geocoder.js';
 import { parseRadiusFilter, filterWithinRadius } from '../services/geocoding/distance.js';
+import { transcribeAudio, extractRequestFields } from '../services/ai/index.js';
 
 /**
  * Request Controller
@@ -504,8 +505,82 @@ export const interactWithRequest = async (req, res) => {
   }
 };
 
+// Voice intake: accept a recorded audio clip, transcribe it, and extract the
+// help-request fields with Claude. This does NOT create the request — it returns
+// the draft fields + transcript so the frontend can show a "confirm what we
+// heard" review step (#156) before the user submits through createRequest.
+// Requires authentication; only help-seekers can file requests.
+export const transcribeVoiceRequest = async (req, res) => {
+  try {
+    if (req.user.role !== 'help-seeker') {
+      return res.status(403).json({
+        success: false,
+        message: 'Only help-seekers can submit help requests'
+      });
+    }
+
+    if (!req.file || !req.file.buffer?.length) {
+      return res.status(400).json({
+        success: false,
+        message: 'No audio file was uploaded'
+      });
+    }
+
+    // Step 1: speech-to-text via Whisper.
+    let transcript;
+    try {
+      transcript = await transcribeAudio(req.file.buffer, req.file.originalname);
+    } catch (error) {
+      console.error('Voice intake transcription failed:', error);
+      return res.status(502).json({
+        success: false,
+        message: 'Could not transcribe the audio. Please try recording again.'
+      });
+    }
+
+    if (!transcript) {
+      return res.status(422).json({
+        success: false,
+        message: "We couldn't hear anything in that recording. Please try again."
+      });
+    }
+
+    // Step 2: pull structured fields out of the transcript via Claude.
+    let fields;
+    try {
+      fields = await extractRequestFields(transcript);
+    } catch (error) {
+      console.error('Voice intake field extraction failed:', error);
+      return res.status(502).json({
+        success: false,
+        message: 'Could not understand the request details. Please try again or fill the form manually.',
+        // Still hand back the transcript so the user doesn't lose what they said.
+        data: { transcript }
+      });
+    }
+
+    // Return a draft for review — nothing is saved yet.
+    return res.status(200).json({
+      success: true,
+      message: 'Transcribed and extracted request details for review',
+      data: {
+        transcript,
+        fields
+      }
+    });
+  } catch (error) {
+    console.error('Error handling voice intake:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to process voice intake',
+      error: error.message
+    });
+  }
+};
+
 export default {
   createRequest,
+  transcribeVoiceRequest,
   getMyRequests,
   getAllRequests,
   getRequestById,
