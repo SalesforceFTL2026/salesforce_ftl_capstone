@@ -30,6 +30,42 @@ export const getPrioritizedRequests = async (near) => {
   return data.data;
 };
 
+// Fetch every request in the system (any status: pending, in-progress,
+// fulfilled, closed). Organizations use this to browse all requests, whether
+// or not they've assigned themselves to any. Returns the array on success.
+//
+// Pass an optional { lat, lng, radiusMiles } to geo-filter by distance from a
+// point ("Near me"). The backend handles invalid/missing filters by returning
+// the full list.
+export const getAllRequests = async (near) => {
+  const params =
+    near && near.lat != null && near.lng != null && near.radiusMiles != null
+      ? { lat: near.lat, lng: near.lng, radius: near.radiusMiles }
+      : undefined;
+  const { data } = await api.get('/api/requests', { params });
+
+  if (!data?.success) {
+    throw new Error(data?.message || 'Could not load requests.');
+  }
+
+  return data.data;
+};
+
+// Fetch the distance (miles) from an origin location to each active request.
+// Returns a map of { [requestId]: distanceMiles | null }; throws on failure.
+export const getRequestDistances = async (origin) => {
+  const { data } = await api.get('/api/requests/distances', {
+    params: { origin },
+  });
+
+  if (!data?.success) {
+    throw new Error(data?.message || 'Could not compute distances.');
+  }
+
+  // Reshape the array into a quick lookup by request id.
+  return Object.fromEntries(data.data.map((d) => [d.id, d.distanceMiles]));
+};
+
 // Fetch the requests the signed-in volunteer has expressed interest in.
 // Returns the array of requests on success; throws on failure.
 export const getVolunteerInterests = async () => {
@@ -194,6 +230,31 @@ export const updateRequestCategory = async (requestId, category) => {
   }
 
   return data.data;
+};
+
+// Assign a request to the signed-in organization ("we'll help with this").
+// This is what unlocks allocating resources to the request. Idempotent.
+// Returns the response payload on success; throws on failure.
+export const assignRequest = async (requestId) => {
+  const { data } = await api.post(`/api/requests/${requestId}/assign`);
+
+  if (!data?.success) {
+    throw new Error(data?.message || 'Could not assign the request.');
+  }
+
+  return data;
+};
+
+// Remove the signed-in organization's assignment from a request.
+// Resolves on success; throws on failure.
+export const unassignRequest = async (requestId) => {
+  const { data } = await api.delete(`/api/requests/${requestId}/assign`);
+
+  if (!data?.success) {
+    throw new Error(data?.message || 'Could not unassign the request.');
+  }
+
+  return true;
 };
 
 // Express interest in a request ("I can help with this").

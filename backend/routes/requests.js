@@ -46,6 +46,10 @@ router.get('/prioritized', requireAuth, requestController.getPrioritizedRequests
 // GET /api/requests/my-requests  (must come before /:id so it isn't treated as an id)
 router.get('/my-requests', requireAuth, requestController.getMyRequests);
 
+// Get distance (miles) from an origin to each active request (must be logged in)
+// GET /api/requests/distances?origin=<location>  (before /:id so it isn't an id)
+router.get('/distances', requireAuth, requestController.getRequestDistances);
+
 // Get single request by ID (must be logged in)
 // GET /api/requests/:id
 router.get('/:id', requireAuth, requestController.getRequestById);
@@ -53,6 +57,14 @@ router.get('/:id', requireAuth, requestController.getRequestById);
 // Express interest in a request (volunteer "I can help with this")
 // POST /api/requests/:id/interact
 router.post('/:id/interact', requireAuth, requestController.interactWithRequest);
+
+// Assign a request to the signed-in organization (organizations only)
+// POST /api/requests/:id/assign
+router.post('/:id/assign', requireAuth, requestController.assignToRequest);
+
+// Remove the signed-in organization's assignment from a request (orgs only)
+// DELETE /api/requests/:id/assign
+router.delete('/:id/assign', requireAuth, requestController.unassignFromRequest);
 
 // Categorize / add detail to a request (organizations only)
 // PATCH /api/requests/:id
