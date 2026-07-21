@@ -12,6 +12,7 @@ import {
   getVolunteerInterests,
   getVolunteerSkills,
   expressInterest,
+  markRequestHelped,
   requestErrorMessage,
 } from '../utils/requests';
 
@@ -108,6 +109,8 @@ const VolunteerDashboard = () => {
   const [interactingId, setInteractingId] = useState(null);
   // Maps request id -> confirmation message after a successful interaction.
   const [confirmations, setConfirmations] = useState({});
+  // Tracks the interest currently being marked as helped, for its button state.
+  const [markingId, setMarkingId] = useState(null);
 
   const handleLogout = () => {
     logout();
@@ -164,6 +167,21 @@ const VolunteerDashboard = () => {
       setError(requestErrorMessage(err, 'Could not record your interest. Please try again.'));
     } finally {
       setInteractingId(null);
+    }
+  };
+
+  // Volunteer clicked "Mark as helped" on a My Interests card. Completes the
+  // request, then reloads so the card reflects its new completed status.
+  const handleMarkHelped = async (request) => {
+    setMarkingId(request.id);
+    setError('');
+    try {
+      await markRequestHelped(request.id);
+      await loadData({ silent: true });
+    } catch (err) {
+      setError(requestErrorMessage(err, 'Could not mark the request as helped. Please try again.'));
+    } finally {
+      setMarkingId(null);
     }
   };
 
@@ -250,7 +268,14 @@ const VolunteerDashboard = () => {
       )}
 
       {view === 'skills' && (
-        <InterestsView interests={interests} loading={loading} error={error} onRetry={loadData} />
+        <InterestsView
+          interests={interests}
+          loading={loading}
+          error={error}
+          onRetry={loadData}
+          onMarkHelped={handleMarkHelped}
+          markingId={markingId}
+        />
       )}
 
       {!['dashboard', 'requests', 'skills'].includes(view) && (
@@ -261,7 +286,7 @@ const VolunteerDashboard = () => {
 };
 
 // The requests this volunteer has offered to help with.
-const InterestsView = ({ interests, loading, error, onRetry }) => {
+const InterestsView = ({ interests, loading, error, onRetry, onMarkHelped, markingId }) => {
   if (loading) {
     return <p className="text-[#1C2A16] dark:text-gray-300" role="status">Loading…</p>;
   }
@@ -286,7 +311,12 @@ const InterestsView = ({ interests, loading, error, onRetry }) => {
   return (
     <div className="flex flex-col gap-4 max-w-3xl">
       {interests.map((request) => (
-        <RequestCard key={request.id} request={request} />
+        <RequestCard
+          key={request.id}
+          request={request}
+          onMarkHelped={onMarkHelped}
+          marking={markingId === request.id}
+        />
       ))}
     </div>
   );

@@ -271,6 +271,19 @@ export const expressInterest = async (requestId, notes) => {
   return data;
 };
 
+// Mark a claimed request as helped (volunteers). The volunteer must already
+// have expressed interest in the request. Returns the updated request on
+// success; throws on failure.
+export const markRequestHelped = async (requestId) => {
+  const { data } = await api.post(`/api/requests/${requestId}/complete`);
+
+  if (!data?.success) {
+    throw new Error(data?.message || 'Could not mark the request as helped.');
+  }
+
+  return data.data;
+};
+
 // Voice intake: upload a recorded audio clip and get back the transcript plus
 // the request fields Claude extracted from it, for the user to review before
 // submitting (issues #152–156). Does NOT create the request — the confirm step

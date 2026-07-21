@@ -58,6 +58,10 @@ router.get('/:id', requireAuth, requestController.getRequestById);
 // POST /api/requests/:id/interact
 router.post('/:id/interact', requireAuth, requestController.interactWithRequest);
 
+// Mark a claimed request as helped (volunteer "I've helped with this")
+// POST /api/requests/:id/complete
+router.post('/:id/complete', requireAuth, requestController.completeRequest);
+
 // Assign a request to the signed-in organization (organizations only)
 // POST /api/requests/:id/assign
 router.post('/:id/assign', requireAuth, requestController.assignToRequest);
