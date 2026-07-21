@@ -228,6 +228,7 @@ export async function me(req, res) {
       name: user.name,
       email: user.email,
       role: user.role,
+      location: user.location,
     },
   });
 }
@@ -235,29 +236,48 @@ export async function me(req, res) {
 /**
  * Update the logged-in user's profile.
  * PATCH /api/auth/me  (protected)
- * Currently supports changing the display name. Returns the updated safe fields.
+ * Supports changing the display name and/or location. Only the fields provided
+ * are changed; at least one must be present. Returns the updated safe fields.
  */
 export async function updateProfile(req, res) {
   try {
-    const { name } = req.body;
+    const { name, location } = req.body;
 
-    // Validate: a name change must be a real, non-empty string.
-    if (name === undefined) {
+    // At least one editable field must be provided.
+    if (name === undefined && location === undefined) {
       return res.status(400).json({
         success: false,
-        message: 'Provide a name to update.',
+        message: 'Provide a name or location to update.',
       });
     }
-    if (typeof name !== 'string' || name.trim() === '') {
-      return res.status(400).json({
-        success: false,
-        message: 'Name must not be empty.',
-      });
+
+    const data = {};
+
+    // Name (if provided) must be a real, non-empty string.
+    if (name !== undefined) {
+      if (typeof name !== 'string' || name.trim() === '') {
+        return res.status(400).json({
+          success: false,
+          message: 'Name must not be empty.',
+        });
+      }
+      data.name = name.trim();
+    }
+
+    // Location (if provided) is optional to clear: a blank string unsets it.
+    if (location !== undefined) {
+      if (typeof location !== 'string') {
+        return res.status(400).json({
+          success: false,
+          message: 'Location must be text.',
+        });
+      }
+      data.location = location.trim() || null;
     }
 
     const updated = await prisma.user.update({
       where: { id: req.user.id },
-      data: { name: name.trim() },
+      data,
     });
 
     return res.status(200).json({
@@ -268,6 +288,7 @@ export async function updateProfile(req, res) {
         name: updated.name,
         email: updated.email,
         role: updated.role,
+        location: updated.location,
       },
     });
   } catch (error) {

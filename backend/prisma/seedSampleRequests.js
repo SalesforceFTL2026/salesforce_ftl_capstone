@@ -6,12 +6,15 @@
 // Safe to re-run: it deletes any prior requests it created for this user
 // (matched by the "[sample]" marker in the description) before re-inserting.
 import { PrismaClient } from '@prisma/client';
+import { prioritizeRequest } from '../services/ai/prioritizer.js';
 import { geocodeLocation } from '../services/geocoding/geocoder.js';
 
 const prisma = new PrismaClient();
 
-// The help-seeker these sample requests belong to (mbasnet50@salesforce.com).
-const USER_ID = 'cmrmo890500050h8g65vw8fh7';
+// The help-seeker these sample requests belong to. Falls back to the first
+// help-seeker in the database if this exact id isn't found, so the seed keeps
+// working after the DB is reset and ids change.
+const USER_ID = 'cmro46my500022d9hfxutihjs';
 
 const SAMPLE_REQUESTS = [
   {
@@ -52,23 +55,27 @@ const SAMPLE_REQUESTS = [
 ];
 
 async function main() {
-  const user = await prisma.user.findUnique({ where: { id: USER_ID } });
+  // Prefer the configured user; otherwise grab any help-seeker so the seed
+  // survives a database reset (where the hardcoded id no longer exists).
+  const user =
+    (await prisma.user.findUnique({ where: { id: USER_ID } })) ||
+    (await prisma.user.findFirst({ where: { role: 'help-seeker' } }));
   if (!user) {
-    throw new Error(`User ${USER_ID} not found. Update USER_ID in this script.`);
+    throw new Error('No help-seeker found. Register one, then re-run this seed.');
   }
 
   // Clear previously-seeded samples for this user so re-runs don't duplicate.
   const { count } = await prisma.request.deleteMany({
-    where: { userId: USER_ID, description: { contains: '[sample]' } },
+    where: { userId: user.id, description: { contains: '[sample]' } },
   });
   if (count) console.log(`Removed ${count} previously-seeded sample request(s).`);
 
   for (const r of SAMPLE_REQUESTS) {
     // Geocode the sample location so it appears on the map view.
     const coords = await geocodeLocation(r.location);
-    await prisma.request.create({
+    const created = await prisma.request.create({
       data: {
-        userId: USER_ID,
+        userId: user.id,
         submitterName: user.name,
         submitterRole: 'help-seeker',
         category: r.category,
@@ -81,6 +88,15 @@ async function main() {
         priorityScore: 0,
       },
     });
+
+    // Run the real AI prioritization pipeline so each seeded request gets a
+    // genuine priority score + reasoning (same path a live request takes).
+    try {
+      const { priorityScore } = await prioritizeRequest(created.id);
+      console.log(`  ${r.category} (${r.urgency}) -> score ${priorityScore}`);
+    } catch (e) {
+      console.error(`  Could not score ${r.category} request:`, e.message);
+    }
   }
 
   console.log(`Seeded ${SAMPLE_REQUESTS.length} sample requests for ${user.email}.`);

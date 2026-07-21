@@ -30,6 +30,21 @@ export const getPrioritizedRequests = async (near) => {
   return data.data;
 };
 
+// Fetch the distance (miles) from an origin location to each active request.
+// Returns a map of { [requestId]: distanceMiles | null }; throws on failure.
+export const getRequestDistances = async (origin) => {
+  const { data } = await api.get('/api/requests/distances', {
+    params: { origin },
+  });
+
+  if (!data?.success) {
+    throw new Error(data?.message || 'Could not compute distances.');
+  }
+
+  // Reshape the array into a quick lookup by request id.
+  return Object.fromEntries(data.data.map((d) => [d.id, d.distanceMiles]));
+};
+
 // Fetch the requests the signed-in volunteer has expressed interest in.
 // Returns the array of requests on success; throws on failure.
 export const getVolunteerInterests = async () => {
