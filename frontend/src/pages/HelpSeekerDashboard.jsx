@@ -6,8 +6,10 @@ import HSRequestsView from '../components/helpseeker/HSRequestsView';
 import SafetyManual from '../components/SafetyManual/SafetyManual';
 import ChatAssistant from '../components/ChatAssistant/ChatAssistant';
 import HelpRequestForm from '../../components/HelpRequestForm/HelpRequestForm';
+import VoiceIntakeFlow from '../components/VoiceIntake/VoiceIntakeFlow';
 import api from '../utils/api';
 import { getCurrentUser, logout, updateName } from '../utils/auth';
+import { usePolling } from '../hooks/usePolling';
 
 // Sidebar nav for the help-seeker portal, matching the wireframe.
 const NAV_GROUPS = [
@@ -59,6 +61,8 @@ const HelpSeekerDashboard = () => {
   const [error, setError] = useState('');
   const [deletingId, setDeletingId] = useState(null);
   const [showForm, setShowForm] = useState(false);
+  // Whether the voice intake modal (record → review → submit) is open.
+  const [showVoice, setShowVoice] = useState(false);
   // When set, the modal shows the form in edit mode for this request.
   const [editingRequest, setEditingRequest] = useState(null);
   // Controls the AI chat assistant panel (opened from the inline button).
@@ -110,8 +114,11 @@ const HelpSeekerDashboard = () => {
 
   // Load the logged-in user's requests. useCallback so the form's onCreated
   // can re-run it after a new submission.
-  const loadRequests = useCallback(async () => {
-    setLoading(true);
+  //
+  // Pass { silent: true } for background polling refreshes so the list updates
+  // in place without flashing the loading spinner.
+  const loadRequests = useCallback(async ({ silent = false } = {}) => {
+    if (!silent) setLoading(true);
     setError('');
     try {
       const { data } = await api.get('/api/requests/my-requests');
@@ -119,13 +126,17 @@ const HelpSeekerDashboard = () => {
     } catch (err) {
       setError(err.response?.data?.message || 'Could not load your requests.');
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, []);
 
   useEffect(() => {
     loadRequests();
   }, [loadRequests]);
+
+  // Auto-refresh so newly submitted requests (including voice ones) appear
+  // without a manual reload (#157). Silent so it doesn't flash the spinner.
+  usePolling(useCallback(() => loadRequests({ silent: true }), [loadRequests]));
 
   // Delete a request, then drop it from the list without a full refetch.
   const handleDelete = async (request) => {
@@ -163,6 +174,7 @@ const HelpSeekerDashboard = () => {
           deletingId={deletingId}
           onDelete={handleDelete}
           onNewRequest={() => setShowForm(true)}
+          onVoiceRequest={() => setShowVoice(true)}
           onChat={() => setChatOpen(true)}
           nonprofits={SAMPLE_NONPROFITS}
         />
@@ -331,6 +343,29 @@ const HelpSeekerDashboard = () => {
                 loadRequests();
                 setEditingRequest(null);
               }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Voice intake modal: record → review → submit */}
+      {showVoice && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="w-full max-w-lg relative">
+            <button
+              type="button"
+              onClick={() => setShowVoice(false)}
+              aria-label="Close"
+              className="absolute -top-3 -right-3 z-10 w-9 h-9 rounded-full bg-white text-gray-600 hover:text-gray-900 shadow-md text-2xl leading-none"
+            >
+              ×
+            </button>
+            <VoiceIntakeFlow
+              onSubmitted={() => {
+                loadRequests();
+                setShowVoice(false);
+              }}
+              onCancel={() => setShowVoice(false)}
             />
           </div>
         </div>

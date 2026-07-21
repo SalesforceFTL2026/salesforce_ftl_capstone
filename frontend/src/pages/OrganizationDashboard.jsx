@@ -5,6 +5,7 @@ import DashboardView from '../components/organization/DashboardView';
 import RequestsView from '../components/organization/RequestsView';
 import ResourcesView from '../components/organization/ResourcesView';
 import { getCurrentUser, logout } from '../utils/auth';
+import { usePolling } from '../hooks/usePolling';
 import {
   getPrioritizedRequests,
   getOrganizationResponses,
@@ -84,8 +85,11 @@ const OrganizationDashboard = () => {
   // Load both lists. The responses call needs auth and may 404 if the org has
   // none yet — we treat a failure there as "no responses" rather than a hard
   // error, so the dashboard still renders from the priority feed.
-  const loadData = useCallback(async () => {
-    setLoading(true);
+  //
+  // Pass { silent: true } for background polling refreshes so the feed updates
+  // in place without flashing the loading spinner.
+  const loadData = useCallback(async ({ silent = false } = {}) => {
+    if (!silent) setLoading(true);
     setError('');
     try {
       // When "Near me" is on, ask the backend to geo-radius filter the feed.
@@ -104,13 +108,17 @@ const OrganizationDashboard = () => {
     } catch (err) {
       setError(requestErrorMessage(err, 'Something went wrong loading requests.'));
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, [near]);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  // Auto-refresh the priority feed so new requests appear live (#157). Silent
+  // so background refreshes don't flash the spinner.
+  usePolling(useCallback(() => loadData({ silent: true }), [loadData]));
 
   // Re-fetch the feed whenever the "Near me" filter changes (on/off or radius).
   // loadData closes over `near`, so it's a fresh callback each time `near` moves.
