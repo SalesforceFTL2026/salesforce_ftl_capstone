@@ -47,11 +47,15 @@ const sortRequests = (requests, sortBy, distances) => {
 // @param {(request, status) => void} onStatusChange
 // @param {string|null} updatingId
 // @param {string} orgLocation - the org's location, used as the "nearest" origin
+// @param {() => void} onOrgLocationChange - persist a new org location
+// @param {object|null} near - active "Near me" geo-radius filter (issue #116)
+// @param {(near) => void} onNearChange - toggle/update the "Near me" filter
 // @param {object[]} resources - the org's inventory, for allocating to requests
 // @param {() => void} onAllocationsChanged - refresh resources after allocating
 const RequestsView = ({
   yourRequests, unfiltered, loading, error, onRetry, onStatusChange, updatingId,
   orgLocation, onOrgLocationChange,
+  near, onNearChange,
   resources = [], onAllocationsChanged,
 }) => {
   // Which request's details show in the bottom-right panel.

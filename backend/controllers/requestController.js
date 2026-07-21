@@ -2,6 +2,7 @@ import * as requestModel from '../models/requestModel.js';
 import prisma from '../services/database/prisma.js';
 import { prioritizeRequest } from '../services/ai/prioritizer.js';
 import { geocodeLocation, haversineMiles } from '../services/geocoding/geocoder.js';
+import { parseRadiusFilter, filterWithinRadius } from '../services/geocoding/distance.js';
 
 /**
  * Request Controller
