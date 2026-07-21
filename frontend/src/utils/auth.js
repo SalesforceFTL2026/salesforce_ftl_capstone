@@ -32,13 +32,16 @@ export const login = async ({ email, password }) => {
 
 // Register a new user, then log them in so we get a token (signup itself
 // returns no token). Returns the logged-in user object.
-export const signup = async ({ name, email, password, role, location }) => {
+export const signup = async ({ name, email, password, role, location, skills }) => {
   const { data } = await api.post('/api/auth/signup', {
     name,
     email,
     password,
     role,
     location,
+    // Only volunteers pick skills; other roles send an empty list, which the
+    // backend ignores.
+    skills: skills ?? [],
   });
 
   if (!data?.success) {
