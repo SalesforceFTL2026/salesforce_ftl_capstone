@@ -6,6 +6,7 @@
 // Safe to re-run: it deletes any prior requests it created for this user
 // (matched by the "[sample]" marker in the description) before re-inserting.
 import { PrismaClient } from '@prisma/client';
+import { geocodeLocation } from '../services/geocoding/geocoder.js';
 
 const prisma = new PrismaClient();
 
@@ -63,6 +64,8 @@ async function main() {
   if (count) console.log(`Removed ${count} previously-seeded sample request(s).`);
 
   for (const r of SAMPLE_REQUESTS) {
+    // Geocode the sample location so it appears on the map view.
+    const coords = await geocodeLocation(r.location);
     await prisma.request.create({
       data: {
         userId: USER_ID,
@@ -71,6 +74,8 @@ async function main() {
         category: r.category,
         urgency: r.urgency,
         location: r.location,
+        latitude: coords?.latitude ?? null,
+        longitude: coords?.longitude ?? null,
         description: r.description,
         status: r.status,
         priorityScore: 0,

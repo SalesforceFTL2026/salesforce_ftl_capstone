@@ -1,5 +1,6 @@
 import * as requestModel from '../models/requestModel.js';
 import prisma from '../services/database/prisma.js';
+import { geocodeLocation } from '../services/geocoding/geocoder.js';
 
 /**
  * Request Controller
@@ -90,6 +91,10 @@ export const createRequest = async (req, res) => {
       });
     }
 
+    // Best-effort geocode so the request can be plotted on the map. A location
+    // we can't resolve just saves without coordinates (never blocks creation).
+    const coords = await geocodeLocation(location);
+
     // Create request, stamping it with the logged-in user's real identity.
     const newRequest = await requestModel.createRequest({
       userId: req.user.id,
@@ -98,6 +103,8 @@ export const createRequest = async (req, res) => {
       category,
       urgency,
       location,
+      latitude: coords?.latitude ?? null,
+      longitude: coords?.longitude ?? null,
       description,
       householdSize: parsedHouseholdSize
     });
@@ -356,6 +363,11 @@ export const updateRequestDetails = async (req, res) => {
         });
       }
       fields.location = location;
+      // Location changed, so its map coordinates are stale — re-geocode. A
+      // location we can't resolve clears the coordinates (falls off the map).
+      const coords = await geocodeLocation(location);
+      fields.latitude = coords?.latitude ?? null;
+      fields.longitude = coords?.longitude ?? null;
     }
 
     if (description !== undefined) {
