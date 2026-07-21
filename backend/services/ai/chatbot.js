@@ -22,6 +22,12 @@ const client = new OpenAI({
 // the next one that OpenRouter reports as free.
 const MAX_MODELS_TO_TRY = 5;
 
+// Model ids that are unsuitable for general chat / structured extraction, even
+// though they output text: code models, safety/guard classifiers, vision/audio
+// multimodal models, embedding/rerank models. Matched against the model id.
+const SPECIALIZED_MODEL =
+  /(code|coder|safety|guard|moderation|vision|embed|rerank|tts|stt|asr|whisper|omni|image|audio)/i;
+
 // Cache the discovered free-model list so we only hit the /models endpoint once
 // per server run instead of on every chat message.
 let cachedFreeModels = null;
@@ -52,7 +58,13 @@ async function getFreeModels() {
         Number(m.pricing.completion) === 0;
       // Chat = the model can output text (drops image/audio-only models).
       const outputsText = m.architecture?.output_modalities?.includes('text');
-      return isFree && outputsText;
+      // Drop models that are structurally wrong for general chat / structured
+      // extraction: code, safety/guard classifiers, vision/audio, embeddings.
+      // These are in the free list but won't follow "reply with JSON" prompts
+      // (e.g. a content-safety model returns a label, not request fields), which
+      // made extraction fail non-deterministically depending on ordering.
+      const isSpecialized = SPECIALIZED_MODEL.test(m.id);
+      return isFree && outputsText && !isSpecialized;
     })
     .map((m) => m.id);
 
@@ -65,14 +77,18 @@ async function getFreeModels() {
 
 // Ask the chatbot a question and get back its text answer.
 // Discovers the currently-free models and tries them in order; if one is rate
-// limited (429), it falls back to the next. Throws only if all attempts fail.
+// limited (429) — or returns a reply that fails the optional `validate` check —
+// it falls back to the next. Throws only if all attempts fail.
 // @param {string} message - the user's latest question
 // @param {object} [options]
 // @param {string} [options.systemPrompt] - context/persona given to the model
 // @param {Array<{role: string, content: string}>} [options.history] - prior
 //   turns of the conversation, oldest first, so replies stay in context
+// @param {(reply: string) => boolean} [options.validate] - return false to
+//   reject a reply and try the next model (e.g. "must be parseable JSON"). Lets
+//   callers that need structured output skip models that reply with prose.
 // @returns {Promise<string>} the AI's reply
-export async function askChatbot(message, { systemPrompt, history = [] } = {}) {
+export async function askChatbot(message, { systemPrompt, history = [], validate } = {}) {
   const freeModels = await getFreeModels();
   const modelsToTry = freeModels.slice(0, MAX_MODELS_TO_TRY);
 
@@ -91,7 +107,17 @@ export async function askChatbot(message, { systemPrompt, history = [] } = {}) {
         model,
         messages,
       });
-      return completion.choices[0].message.content;
+      const reply = completion.choices[0].message.content;
+
+      // If the caller needs a specific shape (e.g. JSON) and this model didn't
+      // produce it, treat it like a failure and fall through to the next model
+      // rather than returning something the caller can't use.
+      if (validate && !validate(reply)) {
+        lastError = new Error(`Model ${model} returned a reply that failed validation`);
+        continue;
+      }
+
+      return reply;
     } catch (err) {
       lastError = err;
 

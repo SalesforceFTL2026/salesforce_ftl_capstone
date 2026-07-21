@@ -31,6 +31,9 @@ export async function extractRequestFields(transcript) {
     systemPrompt:
       'You extract structured data from crisis help-request transcripts. ' +
       'You reply with ONLY a single JSON object and no other text, code fences, or commentary.',
+    // Reject any model whose reply we can't parse as a JSON object, so
+    // askChatbot falls through to the next free model instead of us failing.
+    validate: (r) => parseJsonObject(r) !== null,
   });
 
   const parsed = parseJsonObject(reply);
