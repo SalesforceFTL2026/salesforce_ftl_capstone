@@ -9,13 +9,40 @@ import { hashPassword, comparePassword, createToken } from '../services/auth/aut
 const VALID_ROLES = ['help-seeker', 'volunteer', 'organization'];
 
 /**
+ * Clean up the skills a volunteer submits at signup.
+ * Accepts an array of strings (anything else becomes an empty list), then
+ * trims each entry, drops blanks, and removes case-insensitive duplicates.
+ * The result is stored as a JSON array string on the Volunteer profile.
+ *
+ * @param {unknown} skills - raw value from the request body
+ * @returns {string[]} a cleaned, de-duplicated list of skill labels
+ */
+function normalizeSkills(skills) {
+  if (!Array.isArray(skills)) return [];
+  const seen = new Set();
+  const cleaned = [];
+  for (const skill of skills) {
+    if (typeof skill !== 'string') continue;
+    const trimmed = skill.trim();
+    if (!trimmed) continue;
+    const key = trimmed.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    cleaned.push(trimmed);
+  }
+  return cleaned;
+}
+
+/**
  * Handle POST /api/auth/signup
  * Creates a new user account with a hashed password.
  */
 export async function signup(req, res) {
   try {
     // 1. Pull the fields the browser sent in the request body.
-    const { name, email, password, role } = req.body;
+    //    `location` is optional for everyone. `skills` only matters for
+    //    volunteers — it seeds their Volunteer profile (see step 7).
+    const { name, email, password, role, location, skills } = req.body;
 
     // 2. Validate: make sure nothing important is missing.
     if (!name || !email || !password || !role) {
@@ -56,6 +83,18 @@ export async function signup(req, res) {
       });
     }
 
+    // 4b. Volunteers must tell us what they can help with. Skills power the
+    //     dashboard's "My Interests" view and (later) AI matching, so we
+    //     require at least one for the volunteer role. Everyone else may omit
+    //     it. `normalizeSkills` trims, de-dupes, and drops blanks.
+    const cleanSkills = normalizeSkills(skills);
+    if (role === 'volunteer' && cleanSkills.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Volunteers must select at least one skill.',
+      });
+    }
+
     // 5. Check the email isn't already taken.
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
@@ -68,9 +107,29 @@ export async function signup(req, res) {
     // 6. Scramble the password BEFORE saving it. We never store plain text.
     const passwordHash = await hashPassword(password);
 
-    // 7. Save the new user in the database.
+    // Only save a location if one was actually provided (it's optional).
+    const trimmedLocation =
+      typeof location === 'string' && location.trim() ? location.trim() : null;
+
+    // 7. Save the new user. For volunteers we also create their Volunteer
+    //    profile in the SAME transaction so a user never exists without the
+    //    profile the dashboard expects. Skills are stored as a JSON array
+    //    string, matching how getVolunteerProfile() reads them back.
     const user = await prisma.user.create({
-      data: { name, email, role, passwordHash },
+      data: {
+        name,
+        email,
+        role,
+        passwordHash,
+        location: trimmedLocation,
+        ...(role === 'volunteer'
+          ? {
+              volunteerProfile: {
+                create: { skills: JSON.stringify(cleanSkills) },
+              },
+            }
+          : {}),
+      },
     });
 
     // 8. Respond WITHOUT the password hash — never send that to the browser.

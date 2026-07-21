@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { signup, authErrorMessage } from '../../utils/auth';
+import { DISASTER_SKILLS } from '../../utils/skills';
 
 // New-user registration form. Opened when someone picks a role on the landing
 // page (help-seeker / volunteer / organization). The role is passed in, so it
@@ -17,13 +18,24 @@ const RoleSelectionModal = ({ role, embedded = false, onClose, onSubmit }) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [location, setLocation] = useState('');
+  // Skills only apply to volunteers; ignored for other roles.
+  const [skills, setSkills] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const isVolunteer = role === 'volunteer';
 
   const roleLabels = {
     'help-seeker': 'Help Seeker',
     'volunteer': 'Volunteer',
     'organization': 'Organization'
+  };
+
+  // Toggle a skill in/out of the selected list.
+  const toggleSkill = (skill) => {
+    setSkills((prev) =>
+      prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill]
+    );
   };
 
   const handleSubmit = async (e) => {
@@ -48,6 +60,11 @@ const RoleSelectionModal = ({ role, embedded = false, onClose, onSubmit }) => {
       setError('Password must include an uppercase letter, a lowercase letter, and a number.');
       return;
     }
+    // Volunteers must pick at least one skill (mirrors the backend policy).
+    if (isVolunteer && skills.length === 0) {
+      setError('Please select at least one skill you can help with.');
+      return;
+    }
 
     setLoading(true);
     try {
@@ -58,6 +75,7 @@ const RoleSelectionModal = ({ role, embedded = false, onClose, onSubmit }) => {
         password,
         role,
         location: location.trim(),
+        skills: isVolunteer ? skills : [],
       });
       onSubmit?.(user);
     } catch (err) {
@@ -141,6 +159,39 @@ const RoleSelectionModal = ({ role, embedded = false, onClose, onSubmit }) => {
               placeholder="City, State or Zip Code"
             />
           </div>
+
+          {/* Volunteers pick the disaster-response skills they can offer. These
+              seed their profile and feed the dashboard's "My Interests" view. */}
+          {isVolunteer && (
+            <div>
+              <label className="block text-sm font-bold text-gray-800 mb-2 uppercase tracking-wide">
+                Skills <span className="text-red-500">*</span>
+                <span className="ml-2 text-gray-400 text-xs font-normal normal-case tracking-normal">
+                  Select all that apply
+                </span>
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {DISASTER_SKILLS.map((skill) => {
+                  const selected = skills.includes(skill);
+                  return (
+                    <button
+                      key={skill}
+                      type="button"
+                      onClick={() => toggleSkill(skill)}
+                      aria-pressed={selected}
+                      className={`px-3 py-2 rounded-full border-2 text-sm font-medium transition-colors ${
+                        selected
+                          ? 'bg-[#6ba3d3] border-[#6ba3d3] text-white'
+                          : 'bg-transparent border-gray-300 text-gray-700 hover:border-[#6ba3d3]'
+                      }`}
+                    >
+                      {skill}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {error && (
             <p role="alert" className="text-sm font-medium text-red-600">
