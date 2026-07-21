@@ -273,6 +273,19 @@ export const expressInterest = async (requestId, notes) => {
   return data;
 };
 
+// Mark a claimed request as helped (volunteers). The volunteer must already
+// have expressed interest in the request. Returns the updated request on
+// success; throws on failure.
+export const markRequestHelped = async (requestId) => {
+  const { data } = await api.post(`/api/requests/${requestId}/complete`);
+
+  if (!data?.success) {
+    throw new Error(data?.message || 'Could not mark the request as helped.');
+  }
+
+  return data.data;
+};
+
 // Withdraw the signed-in volunteer's interest in a request ("un-sign up").
 // Resolves on success; throws on failure.
 export const withdrawInterest = async (requestId) => {

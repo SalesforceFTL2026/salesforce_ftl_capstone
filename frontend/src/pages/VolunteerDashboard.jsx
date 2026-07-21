@@ -15,6 +15,7 @@ import {
   getVolunteerSkillsDetailed,
   updateVolunteerSkills,
   expressInterest,
+  markRequestHelped,
   withdrawInterest,
   requestErrorMessage,
 } from '../utils/requests';
@@ -118,6 +119,8 @@ const VolunteerDashboard = () => {
   const [withdrawingId, setWithdrawingId] = useState(null);
   // Maps request id -> confirmation message after a successful interaction.
   const [confirmations, setConfirmations] = useState({});
+  // Tracks the interest currently being marked as helped, for its button state.
+  const [markingId, setMarkingId] = useState(null);
 
   const handleLogout = () => {
     logout();
@@ -179,6 +182,21 @@ const VolunteerDashboard = () => {
       setError(requestErrorMessage(err, 'Could not record your interest. Please try again.'));
     } finally {
       setInteractingId(null);
+    }
+  };
+
+  // Volunteer clicked "Mark as helped" on a task. Completes the request, then
+  // reloads so the card reflects its new completed status.
+  const handleMarkHelped = async (request) => {
+    setMarkingId(request.id);
+    setError('');
+    try {
+      await markRequestHelped(request.id);
+      await loadData({ silent: true });
+    } catch (err) {
+      setError(requestErrorMessage(err, 'Could not mark the request as helped. Please try again.'));
+    } finally {
+      setMarkingId(null);
     }
   };
 
@@ -306,6 +324,8 @@ const VolunteerDashboard = () => {
           onRetry={loadData}
           onWithdraw={handleWithdraw}
           withdrawingId={withdrawingId}
+          onMarkHelped={handleMarkHelped}
+          markingId={markingId}
         />
       )}
 

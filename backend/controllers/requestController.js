@@ -310,7 +310,7 @@ export const updateRequestStatus = async (req, res) => {
       });
     }
 
-    const validStatuses = ['pending', 'in-progress', 'matched', 'fulfilled', 'closed'];
+    const validStatuses = ['pending', 'assigned', 'in-progress', 'matched', 'completed', 'fulfilled', 'closed'];
     if (!validStatuses.includes(status)) {
       return res.status(400).json({
         success: false,
@@ -556,6 +556,13 @@ export const interactWithRequest = async (req, res) => {
       }
     });
 
+    // A volunteer stepping up moves the request from pending to assigned so the
+    // help-seeker sees someone is on it. Only upgrade from pending — don't
+    // override a status an organization has already advanced.
+    if (request.status === 'pending') {
+      await requestModel.updateRequestStatus(id, 'assigned');
+    }
+
     res.status(201).json({
       success: true,
       message: 'Interest recorded. Thanks for stepping up to help!',
@@ -566,6 +573,70 @@ export const interactWithRequest = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to record interest',
+      error: error.message
+    });
+  }
+};
+
+// Volunteer marks a request they claimed as helped ("I've helped with this").
+// POST /api/requests/:id/complete
+// Requires the volunteer to already have a Response on the request. Sets both
+// their Response and the request itself to completed.
+export const completeRequest = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Only volunteers can mark a request as helped.
+    if (req.user.role !== 'volunteer') {
+      return res.status(403).json({
+        success: false,
+        message: 'Only volunteers can mark a request as helped.'
+      });
+    }
+
+    // The request must exist before we can complete it.
+    const request = await requestModel.getRequestById(id);
+    if (!request) {
+      return res.status(404).json({
+        success: false,
+        message: 'Request not found'
+      });
+    }
+
+    // The volunteer can only complete a request they actually offered to help
+    // with, so we look up their existing interest first.
+    const existing = await prisma.response.findFirst({
+      where: {
+        requestId: id,
+        responderId: req.user.id,
+        responderType: 'volunteer'
+      }
+    });
+
+    if (!existing) {
+      return res.status(403).json({
+        success: false,
+        message: 'You can only complete a request you offered to help with.'
+      });
+    }
+
+    // Mark both the volunteer's response and the request itself as completed.
+    await prisma.response.update({
+      where: { id: existing.id },
+      data: { status: 'completed' }
+    });
+    const updated = await requestModel.updateRequestStatus(id, 'completed');
+
+    res.status(200).json({
+      success: true,
+      message: 'Marked as helped. Thank you!',
+      data: updated
+    });
+  } catch (error) {
+    console.error('Error completing request:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to mark as helped',
       error: error.message
     });
   }
@@ -800,6 +871,7 @@ export default {
   updateRequestDetails,
   deleteRequest,
   interactWithRequest,
+  completeRequest,
   withdrawInterest,
   assignToRequest,
   unassignFromRequest

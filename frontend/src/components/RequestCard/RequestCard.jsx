@@ -25,13 +25,15 @@
 
 // The lifecycle states an organization can move a request through. Mirrors the
 // backend's validStatuses in updateRequestStatus.
-const STATUS_OPTIONS = ['pending', 'in-progress', 'matched', 'fulfilled', 'closed'];
+const STATUS_OPTIONS = ['pending', 'assigned', 'in-progress', 'matched', 'completed', 'fulfilled', 'closed'];
 
 // Status badge colors for the help-seeker list.
 const STATUS_STYLES = {
   pending:       'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300',
+  assigned:      'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300',
   'in-progress': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300',
   matched:       'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300',
+  completed:     'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300',
   fulfilled:     'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300',
   closed:        'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
 };
@@ -61,7 +63,7 @@ const priorityScoreClass = (score) => {
   return 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300';
 };
 
-const RequestCard = ({ request, onInteract, interacting, confirmation, onDelete, deleting, onEdit, onStatusChange, updating }) => {
+const RequestCard = ({ request, onInteract, interacting, confirmation, onDelete, deleting, onEdit, onStatusChange, updating, onMarkHelped, marking }) => {
   const {
     category, urgency, location, description, status, createdAt, reasoning,
     responseStatus, priorityScore, volunteerInterestCount, organizationRespondingCount,
@@ -199,6 +201,27 @@ const RequestCard = ({ request, onInteract, interacting, confirmation, onDelete,
         <p className="text-base font-medium text-[#6ba3d3]">
           Status: {responseStatus}
         </p>
+      )}
+
+      {/* On the My Interests tab, let the volunteer mark a claimed request as
+          helped — unless it's already been completed. */}
+      {onMarkHelped && (
+        <div className="mt-auto">
+          {status === 'completed' || responseStatus === 'completed' ? (
+            <p className="text-base font-semibold text-green-700 dark:text-green-400" role="status">
+              ✓ Helped
+            </p>
+          ) : (
+            <button
+              type="button"
+              onClick={() => onMarkHelped(request)}
+              disabled={marking}
+              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-green-600 text-white font-semibold text-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-600/40 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+            >
+              {marking ? 'Saving…' : 'Mark as helped'}
+            </button>
+          )}
+        </div>
       )}
 
       {/* On the Priority Feed tab, show the "I can help" button. */}

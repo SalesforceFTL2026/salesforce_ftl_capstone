@@ -43,7 +43,7 @@ const BUILT_VIEWS = new Set(['dashboard', 'requests', 'household', 'documents', 
 
 // A request is "active" until it's been fulfilled or closed. The dashboard shows
 // only these; the Requests tab shows every request the user has made.
-const ACTIVE_STATUSES = ['pending', 'in-progress', 'matched'];
+const ACTIVE_STATUSES = ['pending', 'assigned', 'in-progress', 'matched'];
 
 // Placeholder data for "Participating Non-Profits Near You" — no endpoint yet.
 const SAMPLE_NONPROFITS = [
