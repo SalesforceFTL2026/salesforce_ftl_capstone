@@ -1,6 +1,7 @@
 import * as requestModel from '../models/requestModel.js';
 import prisma from '../services/database/prisma.js';
 import { geocodeLocation } from '../services/geocoding/geocoder.js';
+import { parseRadiusFilter, filterWithinRadius } from '../services/geocoding/distance.js';
 
 /**
  * Request Controller
@@ -125,9 +126,18 @@ export const createRequest = async (req, res) => {
 };
 
 // Get all requests
+// Optional geo-radius filter (issue #115): pass ?lat=&lng=&radius= (radius in
+// miles) to keep only requests within that distance of the point. Each returned
+// request is annotated with `distanceMiles`. An absent or malformed filter is
+// ignored and all requests are returned.
 export const getAllRequests = async (req, res) => {
   try {
-    const requests = await requestModel.getAllRequests();
+    let requests = await requestModel.getAllRequests();
+
+    const radiusFilter = parseRadiusFilter(req.query);
+    if (radiusFilter) {
+      requests = filterWithinRadius(requests, radiusFilter);
+    }
 
     res.status(200).json({
       success: true,
@@ -191,9 +201,19 @@ export const getRequestById = async (req, res) => {
 };
 
 // Get prioritized requests
+// Optional geo-radius filter (issue #115): pass ?lat=&lng=&radius= (radius in
+// miles) to keep only requests within that distance — this is what the "Near
+// me" toggle (issue #116) on the volunteer/org feeds calls. Each returned
+// request is annotated with `distanceMiles`. An absent or malformed filter is
+// ignored and the full prioritized feed is returned.
 export const getPrioritizedRequests = async (req, res) => {
   try {
-    const requests = await requestModel.getPrioritizedRequests();
+    let requests = await requestModel.getPrioritizedRequests();
+
+    const radiusFilter = parseRadiusFilter(req.query);
+    if (radiusFilter) {
+      requests = filterWithinRadius(requests, radiusFilter);
+    }
 
     res.status(200).json({
       success: true,
