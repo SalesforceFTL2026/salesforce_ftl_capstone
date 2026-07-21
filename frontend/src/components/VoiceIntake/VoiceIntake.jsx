@@ -12,6 +12,10 @@ import { submitVoiceIntake, requestErrorMessage } from '../../utils/requests';
 // @param {(result: {transcript: string, fields: object}) => void} onTranscribed
 // @param {() => void} [onCancel] - close the screen without recording
 
+// Bundled demo recording served from public/. Respects Vite's base URL so it
+// resolves correctly whether the app is hosted at the root or a sub-path.
+const SAMPLE_AUDIO_URL = `${import.meta.env.BASE_URL}samples/demo-request.m4a`;
+
 // Recording lifecycle: idle -> recording -> processing (upload + AI) -> error.
 const STATUS = {
   IDLE: 'idle',
@@ -133,12 +137,35 @@ const VoiceIntake = ({ onTranscribed, onCancel }) => {
       return;
     }
 
+    processBlob(blob, `recording.${extensionFor(mimeType)}`);
+  };
+
+  // Upload an audio blob through the intake pipeline and hand the result up.
+  // Shared by live recordings and the pre-recorded demo sample.
+  const processBlob = async (blob, filename) => {
+    setStatus(STATUS.PROCESSING);
     try {
-      const result = await submitVoiceIntake(blob, `recording.${extensionFor(mimeType)}`);
+      const result = await submitVoiceIntake(blob, filename);
       onTranscribed?.(result);
     } catch (err) {
       setStatus(STATUS.ERROR);
       setError(requestErrorMessage(err, 'Could not process the recording. Please try again.'));
+    }
+  };
+
+  // Demo fallback (#158): run a bundled sample recording through the real
+  // pipeline, so the flow can be shown without a working mic or a quiet room.
+  const useSampleRecording = async () => {
+    setError('');
+    setStatus(STATUS.PROCESSING);
+    try {
+      const res = await fetch(SAMPLE_AUDIO_URL);
+      if (!res.ok) throw new Error('sample fetch failed');
+      const blob = await res.blob();
+      await processBlob(blob, 'demo-request.m4a');
+    } catch {
+      setStatus(STATUS.ERROR);
+      setError('Could not load the sample recording.');
     }
   };
 
@@ -191,6 +218,20 @@ const VoiceIntake = ({ onTranscribed, onCancel }) => {
             : 'Tap the microphone to start'}
         </p>
       </div>
+
+      {/* Demo fallback: skip the mic and run a bundled sample through the flow.
+          Only offered when not actively recording/processing. */}
+      {!isRecording && !isProcessing && (
+        <div className="mb-3">
+          <button
+            type="button"
+            onClick={useSampleRecording}
+            className="text-xs font-medium text-[#7F9764] hover:text-[#6b8354] underline underline-offset-2 transition-colors"
+          >
+            Use a sample recording instead
+          </button>
+        </div>
+      )}
 
       {onCancel && (
         <button
