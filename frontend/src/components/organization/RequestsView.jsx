@@ -3,13 +3,14 @@ import HeatMap from './HeatMap';
 import AllocationPanel from './AllocationPanel';
 
 // Requests view for an organization, matching the wireframe:
-//  - "Your Requests": requests this org is already responding to.
-//  - "Unfiltered Requests": the open priority feed (not yet claimed).
+//  - "Your Requests": requests this org has assigned to itself.
+//  - "All Requests": every other request in the system (any status), which the
+//    org can browse but not allocate resources to until it assigns them.
 //  - Request heat map (top right).
 //  - A detail panel (bottom right) for the selected request.
 //
-// @param {object[]} yourRequests - requests the org is responding to
-// @param {object[]} unfiltered - open/unclaimed priority-feed requests
+// @param {object[]} yourRequests - requests the org has assigned to itself
+// @param {object[]} unfiltered - all other requests the org can browse
 // @param {boolean} loading
 // @param {string} error
 // @param {() => void} onRetry
@@ -17,9 +18,13 @@ import AllocationPanel from './AllocationPanel';
 // @param {string|null} updatingId
 // @param {object[]} resources - the org's inventory, for allocating to requests
 // @param {() => void} onAllocationsChanged - refresh resources after allocating
+// @param {Set<string>} assignedIds - ids of requests assigned to this org
+// @param {(request, assign) => void} onToggleAssign - assign/unassign a request
+// @param {string|null} assigningId - request id currently being (un)assigned
 const RequestsView = ({
   yourRequests, unfiltered, loading, error, onRetry, onStatusChange, updatingId,
   resources = [], onAllocationsChanged,
+  assignedIds = new Set(), onToggleAssign, assigningId,
 }) => {
   // Which request's details show in the bottom-right panel.
   const [selected, setSelected] = useState(null);
@@ -39,14 +44,14 @@ const RequestsView = ({
           emptyText="You aren't responding to any requests yet."
         />
         <RequestTable
-          title="Unfiltered Requests"
+          title="All Requests"
           requests={unfiltered}
           loading={loading}
           error={error}
           onRetry={onRetry}
           selectedId={selected?.id}
           onSelect={setSelected}
-          emptyText="No open requests right now."
+          emptyText="No other requests right now."
         />
       </div>
 
@@ -65,6 +70,9 @@ const RequestsView = ({
           updating={selected && updatingId === selected.id}
           resources={resources}
           onAllocationsChanged={onAllocationsChanged}
+          isAssigned={selected ? assignedIds.has(selected.id) : false}
+          onToggleAssign={onToggleAssign}
+          assigning={selected && assigningId === selected.id}
         />
       </div>
     </div>
@@ -140,7 +148,10 @@ const PriorityLabel = ({ request }) => {
 // --- Detail panel (bottom right) ---
 const STATUS_OPTIONS = ['pending', 'in-progress', 'matched', 'fulfilled', 'closed'];
 
-const RequestDetail = ({ request, onStatusChange, updating, resources, onAllocationsChanged }) => {
+const RequestDetail = ({
+  request, onStatusChange, updating, resources, onAllocationsChanged,
+  isAssigned, onToggleAssign, assigning,
+}) => {
   if (!request) {
     return (
       <div className="bg-[#bcd4f1] dark:bg-[#16233a] rounded-3xl p-8 shadow-md text-center text-[#1C2A16] dark:text-gray-300 transition-colors duration-300">
@@ -223,12 +234,48 @@ const RequestDetail = ({ request, onStatusChange, updating, resources, onAllocat
           </div>
         )}
 
-        {/* Assign resources from the org's inventory to this request */}
-        <AllocationPanel
-          request={request}
-          resources={resources}
-          onChanged={onAllocationsChanged}
-        />
+        {/* Assign / unassign this request to the organization. Assigning is what
+            unlocks allocating resources below; other orgs can assign the same
+            request independently. */}
+        {onToggleAssign && (
+          <div className="mt-3 flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => onToggleAssign(request, !isAssigned)}
+              disabled={assigning}
+              className={`text-sm font-semibold px-4 py-1.5 rounded-lg hover:opacity-90 disabled:opacity-60 ${
+                isAssigned
+                  ? 'bg-white/70 dark:bg-black/20 text-[#1C2A16] dark:text-white border border-[#1C2A16]/30 dark:border-white/20'
+                  : 'bg-[#1C2A16] dark:bg-[#7F9764] text-white'
+              }`}
+            >
+              {assigning
+                ? 'Saving…'
+                : isAssigned
+                  ? 'Unassign from us'
+                  : 'Assign to us'}
+            </button>
+            {isAssigned && (
+              <span className="text-xs font-semibold text-green-700 dark:text-green-400">
+                Assigned to your organization
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Assign resources from the org's inventory to this request — only once
+            the request is assigned to this organization. */}
+        {isAssigned ? (
+          <AllocationPanel
+            request={request}
+            resources={resources}
+            onChanged={onAllocationsChanged}
+          />
+        ) : (
+          <p className="mt-4 pt-4 border-t border-white/40 dark:border-white/10 text-xs text-gray-600 dark:text-gray-300">
+            Assign this request to your organization to allocate resources to it.
+          </p>
+        )}
       </div>
     </div>
   );

@@ -33,6 +33,14 @@ router.get('/:id', requireAuth, requestController.getRequestById);
 // POST /api/requests/:id/interact
 router.post('/:id/interact', requireAuth, requestController.interactWithRequest);
 
+// Assign a request to the signed-in organization (organizations only)
+// POST /api/requests/:id/assign
+router.post('/:id/assign', requireAuth, requestController.assignToRequest);
+
+// Remove the signed-in organization's assignment from a request (orgs only)
+// DELETE /api/requests/:id/assign
+router.delete('/:id/assign', requireAuth, requestController.unassignFromRequest);
+
 // Categorize / add detail to a request (organizations only)
 // PATCH /api/requests/:id
 router.patch('/:id', requireAuth, requestController.updateRequestDetails);

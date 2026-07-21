@@ -20,6 +20,19 @@ export const getPrioritizedRequests = async () => {
   return data.data;
 };
 
+// Fetch every request in the system (any status: pending, in-progress,
+// fulfilled, closed). Organizations use this to browse all requests, whether
+// or not they've assigned themselves to any. Returns the array on success.
+export const getAllRequests = async () => {
+  const { data } = await api.get('/api/requests');
+
+  if (!data?.success) {
+    throw new Error(data?.message || 'Could not load requests.');
+  }
+
+  return data.data;
+};
+
 // Fetch the requests the signed-in volunteer has expressed interest in.
 // Returns the array of requests on success; throws on failure.
 export const getVolunteerInterests = async () => {
@@ -184,6 +197,31 @@ export const updateRequestCategory = async (requestId, category) => {
   }
 
   return data.data;
+};
+
+// Assign a request to the signed-in organization ("we'll help with this").
+// This is what unlocks allocating resources to the request. Idempotent.
+// Returns the response payload on success; throws on failure.
+export const assignRequest = async (requestId) => {
+  const { data } = await api.post(`/api/requests/${requestId}/assign`);
+
+  if (!data?.success) {
+    throw new Error(data?.message || 'Could not assign the request.');
+  }
+
+  return data;
+};
+
+// Remove the signed-in organization's assignment from a request.
+// Resolves on success; throws on failure.
+export const unassignRequest = async (requestId) => {
+  const { data } = await api.delete(`/api/requests/${requestId}/assign`);
+
+  if (!data?.success) {
+    throw new Error(data?.message || 'Could not unassign the request.');
+  }
+
+  return true;
 };
 
 // Express interest in a request ("I can help with this").
