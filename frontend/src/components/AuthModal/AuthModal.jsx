@@ -25,8 +25,15 @@ const AuthModal = ({ role, initialMode = 'signup', onClose, onAuthenticated }) =
     }`;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="bg-white dark:bg-[#273A20] rounded-2xl p-8 max-w-lg w-full mx-4 shadow-2xl">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 sm:p-6"
+    >
+      {/* Stop clicks inside the modal from bubbling up to the backdrop's close. */}
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="bg-white dark:bg-[#273A20] rounded-2xl p-8 max-w-lg w-full shadow-2xl max-h-full overflow-y-auto"
+      >
         {/* Title + close */}
         <div className="flex justify-between items-start mb-6">
           <h2 className="text-2xl font-bold text-black dark:text-white">{title}</h2>
