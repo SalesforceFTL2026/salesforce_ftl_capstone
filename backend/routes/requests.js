@@ -58,6 +58,10 @@ router.get('/:id', requireAuth, requestController.getRequestById);
 // POST /api/requests/:id/interact
 router.post('/:id/interact', requireAuth, requestController.interactWithRequest);
 
+// Withdraw a volunteer's interest in a request ("un-sign up")
+// DELETE /api/requests/:id/interact
+router.delete('/:id/interact', requireAuth, requestController.withdrawInterest);
+
 // Assign a request to the signed-in organization (organizations only)
 // POST /api/requests/:id/assign
 router.post('/:id/assign', requireAuth, requestController.assignToRequest);
