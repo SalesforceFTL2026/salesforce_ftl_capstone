@@ -210,6 +210,33 @@ export const expressInterest = async (requestId, notes) => {
   return data;
 };
 
+// Voice intake: upload a recorded audio clip and get back the transcript plus
+// the request fields Claude extracted from it, for the user to review before
+// submitting (issues #152–156). Does NOT create the request — the confirm step
+// posts the reviewed fields to POST /api/requests like the manual form.
+//
+// @param {Blob} audioBlob - the recorded audio (e.g. from MediaRecorder)
+// @param {string} [filename] - name w/ extension so Whisper infers the format
+// @returns {Promise<{transcript: string, fields: object}>}
+export const submitVoiceIntake = async (audioBlob, filename = 'recording.webm') => {
+  const form = new FormData();
+  form.append('audio', audioBlob, filename);
+
+  const { data } = await api.post('/api/requests/voice', form, {
+    // Let the browser set multipart/form-data with the correct boundary; the
+    // shared api instance otherwise defaults to application/json.
+    headers: { 'Content-Type': undefined },
+    // Transcription + extraction is slower than a normal call; give it room.
+    timeout: 60000,
+  });
+
+  if (!data?.success) {
+    throw new Error(data?.message || 'Could not process the recording.');
+  }
+
+  return data.data;
+};
+
 // Turn any request error (axios or thrown Error) into a safe message to show.
 export const requestErrorMessage = (err, fallback) =>
   err.response?.data?.message || err.message || fallback;
