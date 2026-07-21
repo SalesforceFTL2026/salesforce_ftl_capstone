@@ -1,6 +1,37 @@
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import HeatMap from './HeatMap';
+import RequestMap from '../map/RequestMap';
+import NearMeToggle from '../map/NearMeToggle';
 import AllocationPanel from './AllocationPanel';
+import { getRequestDistances, requestErrorMessage } from '../../utils/requests';
+
+// How the request tables can be ordered.
+const SORT_OPTIONS = [
+  { id: 'priority', label: 'Priority (high → low)' },
+  { id: 'newest', label: 'Newest first' },
+  { id: 'nearest', label: 'Nearest to you' },
+];
+
+// Return a copy of `requests` ordered by the chosen sort. For "nearest" we use
+// the distances map ({ id: miles | null }); requests with an unknown distance
+// (null / not yet loaded) sort to the end so real distances come first.
+const sortRequests = (requests, sortBy, distances) => {
+  const copy = [...requests];
+  if (sortBy === 'newest') {
+    copy.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  } else if (sortBy === 'nearest') {
+    const far = Number.POSITIVE_INFINITY;
+    const miles = (r) => {
+      const d = distances[r.id];
+      return typeof d === 'number' ? d : far;
+    };
+    copy.sort((a, b) => miles(a) - miles(b));
+  } else {
+    // Default: priority score, highest first.
+    copy.sort((a, b) => (b.priorityScore || 0) - (a.priorityScore || 0));
+  }
+  return copy;
+};
 
 // Requests view for an organization, matching the wireframe:
 //  - "Your Requests": requests this org has assigned to itself.
@@ -16,6 +47,10 @@ import AllocationPanel from './AllocationPanel';
 // @param {() => void} onRetry
 // @param {(request, status) => void} onStatusChange
 // @param {string|null} updatingId
+// @param {string} orgLocation - the org's location, used as the "nearest" origin
+// @param {() => void} onOrgLocationChange - persist a new org location
+// @param {object|null} near - active "Near me" geo-radius filter (issue #116)
+// @param {(near) => void} onNearChange - toggle/update the "Near me" filter
 // @param {object[]} resources - the org's inventory, for allocating to requests
 // @param {() => void} onAllocationsChanged - refresh resources after allocating
 // @param {Set<string>} assignedIds - ids of requests assigned to this org
@@ -23,45 +58,225 @@ import AllocationPanel from './AllocationPanel';
 // @param {string|null} assigningId - request id currently being (un)assigned
 const RequestsView = ({
   yourRequests, unfiltered, loading, error, onRetry, onStatusChange, updatingId,
+  orgLocation, onOrgLocationChange,
+  near, onNearChange,
   resources = [], onAllocationsChanged,
   assignedIds = new Set(), onToggleAssign, assigningId,
 }) => {
   // Which request's details show in the bottom-right panel.
   const [selected, setSelected] = useState(null);
+  // Top-right panel view: the density heat map, or the interactive pin map.
+  const [geoView, setGeoView] = useState('heat');
+
+  // Every request the org can see (its own + the open feed), for the heat map
+  // and pin map. De-duplicated so a request the org is responding to that also
+  // appears in the open feed is only plotted once.
+  const allRequests = useMemo(() => {
+    const byId = new Map();
+    for (const r of [...yourRequests, ...unfiltered]) {
+      if (!byId.has(r.id)) byId.set(r.id, r);
+    }
+    return [...byId.values()];
+  }, [yourRequests, unfiltered]);
+
+  // Sorting: how the tables are ordered, plus the distance data "nearest" needs.
+  const [sortBy, setSortBy] = useState('priority');
+  const [distances, setDistances] = useState({});
+  const [distanceLoading, setDistanceLoading] = useState(false);
+  const [distanceError, setDistanceError] = useState('');
+
+  // Inline editor for the org's own location (the origin "nearest" measures from).
+  const [editingLocation, setEditingLocation] = useState(false);
+  const [locationInput, setLocationInput] = useState(orgLocation || '');
+  const [savingLocation, setSavingLocation] = useState(false);
+  const [locationError, setLocationError] = useState('');
+
+  const saveLocation = async () => {
+    setSavingLocation(true);
+    setLocationError('');
+    try {
+      await onOrgLocationChange?.(locationInput.trim());
+      setEditingLocation(false);
+    } catch (err) {
+      setLocationError(requestErrorMessage(err, 'Could not save your location.'));
+    } finally {
+      setSavingLocation(false);
+    }
+  };
+
+  // When the org picks "nearest", fetch distances from its location (once we
+  // have one). We key off orgLocation so switching orgs re-fetches.
+  useEffect(() => {
+    if (sortBy !== 'nearest') return;
+
+    if (!orgLocation) {
+      setDistanceError('Add a location to your organization profile to sort by distance.');
+      return;
+    }
+
+    let cancelled = false;
+    setDistanceLoading(true);
+    setDistanceError('');
+    getRequestDistances(orgLocation)
+      .then((map) => { if (!cancelled) setDistances(map); })
+      .catch((err) => {
+        if (!cancelled) setDistanceError(requestErrorMessage(err, 'Could not sort by distance.'));
+      })
+      .finally(() => { if (!cancelled) setDistanceLoading(false); });
+
+    return () => { cancelled = true; };
+  }, [sortBy, orgLocation]);
+
+  const sortedYours = useMemo(
+    () => sortRequests(yourRequests, sortBy, distances),
+    [yourRequests, sortBy, distances]
+  );
+  const sortedUnfiltered = useMemo(
+    () => sortRequests(unfiltered, sortBy, distances),
+    [unfiltered, sortBy, distances]
+  );
 
   return (
     <div className="grid lg:grid-cols-2 gap-6">
-      {/* Left: two request tables */}
+      {/* Left: sort control + two request tables */}
       <div className="flex flex-col gap-6">
+        <div className="bg-white dark:bg-[#16233a] rounded-2xl px-5 py-3 shadow-md flex flex-wrap items-center gap-2 transition-colors duration-300">
+          <label htmlFor="sort-requests" className="text-sm font-semibold text-[#1C2A16] dark:text-white">
+            Sort by
+          </label>
+          <select
+            id="sort-requests"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#1f2d18] text-gray-800 dark:text-gray-100 px-3 py-1.5"
+          >
+            {SORT_OPTIONS.map((o) => (
+              <option key={o.id} value={o.id}>{o.label}</option>
+            ))}
+          </select>
+          {sortBy === 'nearest' && distanceLoading && (
+            <span className="text-xs text-gray-500 dark:text-gray-400" role="status">Measuring distances…</span>
+          )}
+
+          {/* Your location — the origin "nearest" measures from. Editable inline. */}
+          <div className="ml-auto flex items-center gap-2">
+            {editingLocation ? (
+              <>
+                <input
+                  type="text"
+                  value={locationInput}
+                  onChange={(e) => setLocationInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') saveLocation(); }}
+                  placeholder="City, ST or ZIP"
+                  autoFocus
+                  className="text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#1f2d18] text-gray-800 dark:text-gray-100 px-2 py-1.5 w-40"
+                />
+                <button
+                  type="button"
+                  onClick={saveLocation}
+                  disabled={savingLocation}
+                  className="text-xs font-semibold bg-[#1C2A16] dark:bg-[#7F9764] text-white px-3 py-1.5 rounded-lg hover:opacity-90 disabled:opacity-60"
+                >
+                  {savingLocation ? 'Saving…' : 'Save'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setEditingLocation(false); setLocationError(''); }}
+                  className="text-xs font-semibold text-gray-600 dark:text-gray-300 hover:underline"
+                >
+                  Cancel
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={() => { setLocationInput(orgLocation || ''); setEditingLocation(true); }}
+                className="text-xs font-semibold text-[#1C2A16] dark:text-gray-200 hover:underline"
+                title="Set the location distances are measured from"
+              >
+                📍 {orgLocation ? `Your location: ${orgLocation}` : 'Set your location'}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {(locationError || (sortBy === 'nearest' && distanceError)) && (
+          <p className="text-xs text-amber-700 dark:text-amber-400 -mt-4">
+            {locationError || distanceError}
+          </p>
+        )}
+
         <RequestTable
           title="Your Requests"
-          requests={yourRequests}
+          requests={sortedYours}
           loading={loading}
           error={error}
           onRetry={onRetry}
           selectedId={selected?.id}
           onSelect={setSelected}
           emptyText="You aren't responding to any requests yet."
+          sortBy={sortBy}
+          distances={distances}
         />
         <RequestTable
-          title="All Requests"
-          requests={unfiltered}
+          title="Unfiltered Requests"
+          requests={sortedUnfiltered}
           loading={loading}
           error={error}
           onRetry={onRetry}
           selectedId={selected?.id}
           onSelect={setSelected}
-          emptyText="No other requests right now."
+          emptyText="No open requests right now."
+          sortBy={sortBy}
+          distances={distances}
         />
       </div>
 
-      {/* Right: heat map + detail panel */}
+      {/* Right: heat map / pin map + detail panel */}
       <div className="flex flex-col gap-6">
         <div className="bg-white dark:bg-[#16233a] rounded-3xl p-5 shadow-md transition-colors duration-300">
-          <h2 className="text-xl font-bold text-[#1C2A16] dark:text-white text-center mb-3">
-            Request Heat Map
-          </h2>
-          <HeatMap caption="Last updated 8 min ago" />
+          {/* "Near me" geo-radius filter (issue #116). Narrows the open feed —
+              and therefore the heat/pin map — to the org's area. */}
+          {onNearChange && (
+            <div className="mb-3">
+              <NearMeToggle
+                onChange={onNearChange}
+                active={Boolean(near)}
+                count={near ? unfiltered.length : null}
+              />
+            </div>
+          )}
+          <div className="flex items-center justify-between mb-3 gap-3">
+            <h2 className="text-xl font-bold text-[#1C2A16] dark:text-white">
+              {geoView === 'heat' ? 'Request Heat Map' : 'Request Map'}
+            </h2>
+            {/* Toggle between the density heat map and the interactive pin map. */}
+            <div className="flex rounded-xl bg-black/5 dark:bg-white/10 p-1">
+              {[
+                { id: 'heat', label: 'Heat' },
+                { id: 'map', label: 'Map' },
+              ].map((opt) => (
+                <button
+                  key={opt.id}
+                  type="button"
+                  onClick={() => setGeoView(opt.id)}
+                  aria-pressed={geoView === opt.id}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/40 ${
+                    geoView === opt.id
+                      ? 'bg-[#6ba3d3] text-white'
+                      : 'text-[#1C2A16] dark:text-gray-200 hover:bg-black/5 dark:hover:bg-white/10'
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          {geoView === 'heat' ? (
+            <HeatMap requests={allRequests} caption="Shaded by where needs cluster" />
+          ) : (
+            <RequestMap requests={allRequests} />
+          )}
         </div>
 
         <RequestDetail
@@ -79,8 +294,16 @@ const RequestsView = ({
   );
 };
 
+// Column label + per-row value for the right-hand column, which follows the
+// active sort: priority label, request date, or distance from the org.
+const secondColumnHeader = (sortBy) =>
+  sortBy === 'newest' ? 'Date' : sortBy === 'nearest' ? 'Distance' : 'Priority';
+
 // --- Request table ---
-const RequestTable = ({ title, requests, loading, error, onRetry, selectedId, onSelect, emptyText }) => (
+const RequestTable = ({
+  title, requests, loading, error, onRetry, selectedId, onSelect, emptyText,
+  sortBy = 'priority', distances = {},
+}) => (
   <div>
     <div className="inline-block bg-[#9db29a] dark:bg-[#1f3320] text-[#1C2A16] dark:text-white font-bold rounded-t-2xl px-6 py-2 mb-[-8px] relative z-10">
       {title}
@@ -89,7 +312,7 @@ const RequestTable = ({ title, requests, loading, error, onRetry, selectedId, on
       {/* Header row */}
       <div className="grid grid-cols-[1fr_auto] gap-4 bg-[#c5d9ef] dark:bg-[#22304a] px-5 py-3 font-bold text-[#1C2A16] dark:text-white">
         <span>Name</span>
-        <span>Priority</span>
+        <span>{secondColumnHeader(sortBy)}</span>
       </div>
 
       {loading && (
@@ -118,13 +341,37 @@ const RequestTable = ({ title, requests, loading, error, onRetry, selectedId, on
             <span className="text-[#1C2A16] dark:text-gray-100 font-medium truncate">
               {r.submitterName || r.requesterName || r.name || 'Help Seeker'}
             </span>
-            <PriorityLabel request={r} />
+            <SecondColumn request={r} sortBy={sortBy} distances={distances} />
           </button>
         );
       })}
     </div>
   </div>
 );
+
+// Right-hand column value for a row, matching the active sort: the priority
+// label, the request's date, or its distance from the org.
+const SecondColumn = ({ request, sortBy, distances }) => {
+  if (sortBy === 'newest') {
+    const d = request.createdAt ? new Date(request.createdAt) : null;
+    return (
+      <span className="text-sm text-gray-700 dark:text-gray-300 whitespace-nowrap">
+        {d ? d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '—'}
+      </span>
+    );
+  }
+
+  if (sortBy === 'nearest') {
+    const miles = distances[request.id];
+    return (
+      <span className="text-sm text-gray-700 dark:text-gray-300 whitespace-nowrap">
+        {typeof miles === 'number' ? `${miles} mi` : '—'}
+      </span>
+    );
+  }
+
+  return <PriorityLabel request={request} />;
+};
 
 // Turn an urgency / priority score into the wireframe's "Low / High / Not set".
 const PriorityLabel = ({ request }) => {

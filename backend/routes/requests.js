@@ -25,6 +25,10 @@ router.get('/prioritized', requireAuth, requestController.getPrioritizedRequests
 // GET /api/requests/my-requests  (must come before /:id so it isn't treated as an id)
 router.get('/my-requests', requireAuth, requestController.getMyRequests);
 
+// Get distance (miles) from an origin to each active request (must be logged in)
+// GET /api/requests/distances?origin=<location>  (before /:id so it isn't an id)
+router.get('/distances', requireAuth, requestController.getRequestDistances);
+
 // Get single request by ID (must be logged in)
 // GET /api/requests/:id
 router.get('/:id', requireAuth, requestController.getRequestById);

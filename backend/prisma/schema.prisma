@@ -16,6 +16,8 @@ model Request {
   category      String   // Food, Shelter, Medical, Transport, Other
   urgency       String   // Low, Medium, High, Critical
   location      String   // City, zip code, or coordinates
+  latitude      Float?   // Geocoded from `location`; drives the map view
+  longitude     Float?   // Geocoded from `location`; drives the map view
   description   String   // Brief description of need
   householdSize Int?     // Number of people in the requester's household (drives "people helped")
   embeddingJson String?  // AI-generated vector embeddings (JSON)

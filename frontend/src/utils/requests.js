@@ -10,8 +10,18 @@ import api from './api';
 
 // Fetch the AI-prioritized feed of active requests (highest priority first).
 // Returns the array of requests on success; throws on failure.
-export const getPrioritizedRequests = async () => {
-  const { data } = await api.get('/api/requests/prioritized');
+//
+// Pass an optional { lat, lng, radiusMiles } to only get requests within that
+// distance of a point ("Near me", issue #116). The backend (issue #115) filters
+// by the geo-radius and annotates each request with `distanceMiles`. Omit the
+// filter (or leave any field undefined) to get the full feed.
+export const getPrioritizedRequests = async (near) => {
+  const params =
+    near && near.lat != null && near.lng != null && near.radiusMiles != null
+      ? { lat: near.lat, lng: near.lng, radius: near.radiusMiles }
+      : undefined;
+
+  const { data } = await api.get('/api/requests/prioritized', { params });
 
   if (!data?.success) {
     throw new Error(data?.message || 'Could not load the priority feed.');
@@ -23,14 +33,37 @@ export const getPrioritizedRequests = async () => {
 // Fetch every request in the system (any status: pending, in-progress,
 // fulfilled, closed). Organizations use this to browse all requests, whether
 // or not they've assigned themselves to any. Returns the array on success.
-export const getAllRequests = async () => {
-  const { data } = await api.get('/api/requests');
+//
+// Pass an optional { lat, lng, radiusMiles } to geo-filter by distance from a
+// point ("Near me"). The backend handles invalid/missing filters by returning
+// the full list.
+export const getAllRequests = async (near) => {
+  const params =
+    near && near.lat != null && near.lng != null && near.radiusMiles != null
+      ? { lat: near.lat, lng: near.lng, radius: near.radiusMiles }
+      : undefined;
+  const { data } = await api.get('/api/requests', { params });
 
   if (!data?.success) {
     throw new Error(data?.message || 'Could not load requests.');
   }
 
   return data.data;
+};
+
+// Fetch the distance (miles) from an origin location to each active request.
+// Returns a map of { [requestId]: distanceMiles | null }; throws on failure.
+export const getRequestDistances = async (origin) => {
+  const { data } = await api.get('/api/requests/distances', {
+    params: { origin },
+  });
+
+  if (!data?.success) {
+    throw new Error(data?.message || 'Could not compute distances.');
+  }
+
+  // Reshape the array into a quick lookup by request id.
+  return Object.fromEntries(data.data.map((d) => [d.id, d.distanceMiles]));
 };
 
 // Fetch the requests the signed-in volunteer has expressed interest in.

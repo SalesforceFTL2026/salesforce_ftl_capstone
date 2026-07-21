@@ -32,13 +32,16 @@ export const login = async ({ email, password }) => {
 
 // Register a new user, then log them in so we get a token (signup itself
 // returns no token). Returns the logged-in user object.
-export const signup = async ({ name, email, password, role, location }) => {
+export const signup = async ({ name, email, password, role, location, skills }) => {
   const { data } = await api.post('/api/auth/signup', {
     name,
     email,
     password,
     role,
     location,
+    // Only volunteers pick skills; other roles send an empty list, which the
+    // backend ignores.
+    skills: skills ?? [],
   });
 
   if (!data?.success) {
@@ -55,13 +58,14 @@ export const setCurrentUser = (user) => {
   localStorage.setItem(USER_KEY, JSON.stringify(user));
 };
 
-// Update the logged-in user's profile (currently just the display name).
-// Persists the returned user and returns it. Throws with a friendly message.
-export const updateName = async (name) => {
-  const { data } = await api.patch('/api/auth/me', { name });
+// Update the logged-in user's profile. Pass any of { name, location }; only the
+// fields provided are changed. Persists the returned user and returns it.
+// Throws with a friendly message on failure.
+export const updateProfile = async (fields) => {
+  const { data } = await api.patch('/api/auth/me', fields);
 
   if (!data?.success) {
-    throw new Error(data?.message || 'Could not update your name.');
+    throw new Error(data?.message || 'Could not update your profile.');
   }
 
   // Merge the updated fields into the stored user so the session stays current.
@@ -69,6 +73,9 @@ export const updateName = async (name) => {
   setCurrentUser(merged);
   return merged;
 };
+
+// Convenience wrapper for the common case of changing just the display name.
+export const updateName = (name) => updateProfile({ name });
 
 // Read the signed-in user saved at login, or null if nobody is signed in.
 // Used to restore the session when the app first loads.

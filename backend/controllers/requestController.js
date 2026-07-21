@@ -1,5 +1,8 @@
 import * as requestModel from '../models/requestModel.js';
 import prisma from '../services/database/prisma.js';
+import { prioritizeRequest } from '../services/ai/prioritizer.js';
+import { geocodeLocation, haversineMiles } from '../services/geocoding/geocoder.js';
+import { parseRadiusFilter, filterWithinRadius } from '../services/geocoding/distance.js';
 
 /**
  * Request Controller
@@ -90,6 +93,10 @@ export const createRequest = async (req, res) => {
       });
     }
 
+    // Best-effort geocode so the request can be plotted on the map. A location
+    // we can't resolve just saves without coordinates (never blocks creation).
+    const coords = await geocodeLocation(location);
+
     // Create request, stamping it with the logged-in user's real identity.
     const newRequest = await requestModel.createRequest({
       userId: req.user.id,
@@ -98,14 +105,28 @@ export const createRequest = async (req, res) => {
       category,
       urgency,
       location,
+      latitude: coords?.latitude ?? null,
+      longitude: coords?.longitude ?? null,
       description,
       householdSize: parsedHouseholdSize
     });
 
+    // Run the AI prioritization pipeline so the request gets a real priority
+    // score (and reasoning) right away. This is best-effort: if scoring fails
+    // the request is still created — it just stays at its default score of 0
+    // until something re-prioritizes it.
+    let scored = newRequest;
+    try {
+      const { priorityScore, reasoning } = await prioritizeRequest(newRequest.id);
+      scored = { ...newRequest, priorityScore, reasoning };
+    } catch (scoreError) {
+      console.error('Prioritization failed for new request:', scoreError.message);
+    }
+
     res.status(201).json({
       success: true,
       message: 'Help request submitted successfully',
-      data: newRequest
+      data: scored
     });
   } catch (error) {
     console.error('Error creating request:', error);
@@ -118,9 +139,18 @@ export const createRequest = async (req, res) => {
 };
 
 // Get all requests
+// Optional geo-radius filter (issue #115): pass ?lat=&lng=&radius= (radius in
+// miles) to keep only requests within that distance of the point. Each returned
+// request is annotated with `distanceMiles`. An absent or malformed filter is
+// ignored and all requests are returned.
 export const getAllRequests = async (req, res) => {
   try {
-    const requests = await requestModel.getAllRequests();
+    let requests = await requestModel.getAllRequests();
+
+    const radiusFilter = parseRadiusFilter(req.query);
+    if (radiusFilter) {
+      requests = filterWithinRadius(requests, radiusFilter);
+    }
 
     res.status(200).json({
       success: true,
@@ -184,9 +214,19 @@ export const getRequestById = async (req, res) => {
 };
 
 // Get prioritized requests
+// Optional geo-radius filter (issue #115): pass ?lat=&lng=&radius= (radius in
+// miles) to keep only requests within that distance — this is what the "Near
+// me" toggle (issue #116) on the volunteer/org feeds calls. Each returned
+// request is annotated with `distanceMiles`. An absent or malformed filter is
+// ignored and the full prioritized feed is returned.
 export const getPrioritizedRequests = async (req, res) => {
   try {
-    const requests = await requestModel.getPrioritizedRequests();
+    let requests = await requestModel.getPrioritizedRequests();
+
+    const radiusFilter = parseRadiusFilter(req.query);
+    if (radiusFilter) {
+      requests = filterWithinRadius(requests, radiusFilter);
+    }
 
     res.status(200).json({
       success: true,
@@ -197,6 +237,59 @@ export const getPrioritizedRequests = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch prioritized requests',
+      error: error.message
+    });
+  }
+};
+
+// Get the distance (in miles) from a given origin to each active request.
+// GET /api/requests/distances?origin=<free-text location>
+// Used by organizations to sort the request feed by "nearest". We geocode only
+// the origin here; each request's coordinates are already stored on the row
+// (geocoded at creation), so no per-request network calls are needed. Requests
+// without stored coordinates come back with distanceMiles: null (unknown).
+export const getRequestDistances = async (req, res) => {
+  try {
+    const { origin } = req.query;
+
+    if (!origin || origin.trim() === '') {
+      return res.status(400).json({
+        success: false,
+        message: 'An origin location is required to measure distance.'
+      });
+    }
+
+    const originCoords = await geocodeLocation(origin);
+    if (!originCoords) {
+      return res.status(422).json({
+        success: false,
+        message: `Could not find the location "${origin}".`
+      });
+    }
+
+    // Only measure distance for the active feed (what the org actually sorts).
+    const requests = await requestModel.getPrioritizedRequests();
+
+    const distances = requests.map((request) => {
+      const hasCoords =
+        typeof request.latitude === 'number' && typeof request.longitude === 'number';
+      return {
+        id: request.id,
+        distanceMiles: hasCoords
+          ? Math.round(haversineMiles(originCoords, request) * 10) / 10
+          : null
+      };
+    });
+
+    res.status(200).json({
+      success: true,
+      data: distances
+    });
+  } catch (error) {
+    console.error('Error computing request distances:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to compute distances',
       error: error.message
     });
   }
@@ -356,6 +449,11 @@ export const updateRequestDetails = async (req, res) => {
         });
       }
       fields.location = location;
+      // Location changed, so its map coordinates are stale — re-geocode. A
+      // location we can't resolve clears the coordinates (falls off the map).
+      const coords = await geocodeLocation(location);
+      fields.latitude = coords?.latitude ?? null;
+      fields.longitude = coords?.longitude ?? null;
     }
 
     if (description !== undefined) {
@@ -584,6 +682,7 @@ export default {
   getAllRequests,
   getRequestById,
   getPrioritizedRequests,
+  getRequestDistances,
   updateRequestStatus,
   updateRequestDetails,
   deleteRequest,

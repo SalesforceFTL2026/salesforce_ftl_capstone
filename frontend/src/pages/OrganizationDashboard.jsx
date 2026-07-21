@@ -4,7 +4,7 @@ import PortalShell from '../components/portal/PortalShell';
 import DashboardView from '../components/organization/DashboardView';
 import RequestsView from '../components/organization/RequestsView';
 import ResourcesView from '../components/organization/ResourcesView';
-import { getCurrentUser, logout } from '../utils/auth';
+import { getCurrentUser, logout, updateProfile } from '../utils/auth';
 import {
   getAllRequests,
   getOrganizationResponses,
@@ -58,7 +58,8 @@ const VIEW_TITLES = {
 const AVG_HOUSEHOLD_SIZE = 3;
 
 const OrganizationDashboard = () => {
-  const [currentUser] = useState(getCurrentUser);
+  // Kept in state (not a constant) so profile edits like location re-render.
+  const [currentUser, setCurrentUser] = useState(getCurrentUser);
   const navigate = useNavigate();
 
   const [view, setView] = useState('dashboard');
@@ -67,6 +68,9 @@ const OrganizationDashboard = () => {
   const [feed, setFeed] = useState([]);
   const [responses, setResponses] = useState([]);
   const [assigningId, setAssigningId] = useState(null);
+  // "Near me" geo-radius filter (issue #116): null = show everything, otherwise
+  // { lat, lng, radiusMiles }. When set, the feed is re-fetched filtered to it.
+  const [near, setNear] = useState(null);
   // The org's inventory of resources (food, wood, health care kits, ...).
   const [resources, setResources] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -85,7 +89,8 @@ const OrganizationDashboard = () => {
     setLoading(true);
     setError('');
     try {
-      const feedData = await getAllRequests();
+      // When "Near me" is on, ask the backend to geo-radius filter the feed.
+      const feedData = await getAllRequests(near);
       setFeed(feedData);
       try {
         setResponses(await getOrganizationResponses());
@@ -102,11 +107,14 @@ const OrganizationDashboard = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [near]);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  // Re-fetch the feed whenever the "Near me" filter changes (on/off or radius).
+  // loadData closes over `near`, so it's a fresh callback each time `near` moves.
 
   // Optimistically move a request through its lifecycle, then reconcile.
   const handleStatusChange = async (request, status) => {
@@ -124,6 +132,13 @@ const OrganizationDashboard = () => {
       setUpdatingId(null);
     }
   };
+
+  // Save the org's location (the origin "nearest" measures from) and reflect it
+  // in the session so the change sticks across the app and a page refresh.
+  const handleOrgLocationChange = useCallback(async (location) => {
+    const updated = await updateProfile({ location });
+    setCurrentUser(updated);
+  }, []);
 
   // Reload just the resource inventory (used after allocations change on-hand
   // quantities, so the list and the "Resources Available" pill stay accurate).
@@ -261,11 +276,15 @@ const OrganizationDashboard = () => {
           onRetry={loadData}
           onStatusChange={handleStatusChange}
           updatingId={updatingId}
+          orgLocation={currentUser?.location}
+          onOrgLocationChange={handleOrgLocationChange}
           resources={resources}
           onAllocationsChanged={refreshResources}
           assignedIds={respondingIds}
           onToggleAssign={handleToggleAssign}
           assigningId={assigningId}
+          near={near}
+          onNearChange={setNear}
         />
       )}
 

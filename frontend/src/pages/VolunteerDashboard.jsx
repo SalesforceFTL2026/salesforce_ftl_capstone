@@ -5,6 +5,7 @@ import VolunteerDashboardView from '../components/volunteer/VolunteerDashboardVi
 import VolunteerRequestsView from '../components/volunteer/VolunteerRequestsView';
 import RequestCard from '../components/RequestCard/RequestCard';
 import { getCurrentUser, logout } from '../utils/auth';
+import { DISASTER_SKILLS } from '../utils/skills';
 import {
   getPrioritizedRequests,
   getVolunteerInterests,
@@ -50,23 +51,10 @@ const VIEW_TITLES = {
   settings: 'Settings',
 };
 
-// Canonical skill areas that natural-disaster volunteering typically calls for.
-// We use this list to estimate how many *new* skill areas a volunteer could
-// still pick up, based on the categories of requests they've helped with.
-const DISASTER_SKILLS = [
-  'First Aid & CPR',
-  'Search & Rescue',
-  'Water Rescue',
-  'Debris Removal & Cleanup',
-  'Shelter Management',
-  'Food & Water Distribution',
-  'Medical Support',
-  'Transportation & Logistics',
-  'Emergency Communications',
-  'Translation & Interpretation',
-  'Emotional & Psychological Support',
-  'Damage Assessment',
-];
+// Canonical skill areas (DISASTER_SKILLS) are shared with the signup form and
+// live in utils/skills.js. We use the list here to estimate how many *new*
+// skill areas a volunteer could still pick up, based on the categories of
+// requests they've helped with.
 
 // Which skill areas each request category exercises. Lets us mark a skill as
 // "already practiced" once a volunteer has engaged a request in that category.
@@ -105,6 +93,9 @@ const VolunteerDashboard = () => {
   // already offered to help with. Loaded once; both views read from them.
   const [feed, setFeed] = useState([]);
   const [interests, setInterests] = useState([]);
+  // "Near me" geo-radius filter (issue #116): null = show everything, otherwise
+  // { lat, lng, radiusMiles }. When set, the feed is re-fetched filtered to it.
+  const [near, setNear] = useState(null);
   // Skill areas this volunteer lists on their profile (from the Volunteer row).
   const [skills, setSkills] = useState([]);
 
@@ -128,7 +119,8 @@ const VolunteerDashboard = () => {
     setLoading(true);
     setError('');
     try {
-      setFeed(await getPrioritizedRequests());
+      // When "Near me" is on, ask the backend to geo-radius filter the feed.
+      setFeed(await getPrioritizedRequests(near));
       try {
         setInterests(await getVolunteerInterests());
       } catch {
@@ -144,7 +136,7 @@ const VolunteerDashboard = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [near]);
 
   useEffect(() => {
     loadData();
@@ -244,6 +236,8 @@ const VolunteerDashboard = () => {
           onInteract={handleInteract}
           interactingId={interactingId}
           confirmations={confirmations}
+          near={near}
+          onNearChange={setNear}
         />
       )}
 
