@@ -92,6 +92,11 @@ const RequestsView = ({
   const [locationError, setLocationError] = useState('');
 
   const saveLocation = async () => {
+    // Location is required — it can be changed but not cleared.
+    if (!locationInput.trim()) {
+      setLocationError('Location is required and cannot be cleared.');
+      return;
+    }
     setSavingLocation(true);
     setLocationError('');
     try {

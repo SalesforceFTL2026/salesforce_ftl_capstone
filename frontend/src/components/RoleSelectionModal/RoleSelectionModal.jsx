@@ -49,6 +49,10 @@ const RoleSelectionModal = ({ role, embedded = false, onClose, onSubmit }) => {
       setError('Name, email, and password are required.');
       return;
     }
+    if (!location.trim()) {
+      setError('Location is required.');
+      return;
+    }
     // Mirror the backend policy so users get feedback before we call the API.
     if (password.length < 12) {
       setError('Password must be at least 12 characters long.');
@@ -151,7 +155,7 @@ const RoleSelectionModal = ({ role, embedded = false, onClose, onSubmit }) => {
 
           <div>
             <label htmlFor="location" className="block text-sm font-bold text-gray-800 mb-2 uppercase tracking-wide">
-              Location <span className="text-gray-400 text-xs font-normal">(optional)</span>
+              Location <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -160,6 +164,7 @@ const RoleSelectionModal = ({ role, embedded = false, onClose, onSubmit }) => {
               onChange={(e) => setLocation(e.target.value)}
               className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-[#6ba3d3] focus:ring-2 focus:ring-[#6ba3d3]/20 transition-all"
               placeholder="City, State or Zip Code"
+              required
             />
           </div>
 
