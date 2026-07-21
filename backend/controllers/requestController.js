@@ -570,6 +570,112 @@ export const interactWithRequest = async (req, res) => {
   }
 };
 
+// Assign a request to the signed-in organization ("we'll help with this").
+// POST /api/requests/:id/assign
+// Creates a Response linking this organization to the request, which is what
+// makes the request show up under the org's "Your Requests" and unlocks
+// allocating resources to it. Idempotent — assigning twice is a no-op. Multiple
+// organizations can assign themselves to the same request so that resources
+// from different places can all be allocated to it.
+export const assignToRequest = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Only organizations can assign requests to themselves.
+    if (req.user.role !== 'organization') {
+      return res.status(403).json({
+        success: false,
+        message: 'Only organizations can assign requests to themselves.'
+      });
+    }
+
+    // The request must exist before we can assign it.
+    const request = await requestModel.getRequestById(id);
+    if (!request) {
+      return res.status(404).json({
+        success: false,
+        message: 'Request not found'
+      });
+    }
+
+    // Don't create a second assignment if this org already claimed it.
+    const existing = await prisma.response.findFirst({
+      where: {
+        requestId: id,
+        responderId: req.user.id,
+        responderType: 'organization'
+      }
+    });
+
+    if (existing) {
+      return res.status(200).json({
+        success: true,
+        message: 'This request is already assigned to your organization.',
+        data: existing
+      });
+    }
+
+    const response = await prisma.response.create({
+      data: {
+        requestId: id,
+        responderId: req.user.id,
+        responderType: 'organization',
+        status: 'accepted'
+      }
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Request assigned to your organization.',
+      data: response
+    });
+  } catch (error) {
+    console.error('Error assigning request to organization:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to assign request',
+      error: error.message
+    });
+  }
+};
+
+// Remove the signed-in organization's assignment from a request.
+// DELETE /api/requests/:id/assign
+// Only affects this org's own assignment; other organizations that assigned
+// themselves to the same request are untouched.
+export const unassignFromRequest = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (req.user.role !== 'organization') {
+      return res.status(403).json({
+        success: false,
+        message: 'Only organizations can unassign requests.'
+      });
+    }
+
+    await prisma.response.deleteMany({
+      where: {
+        requestId: id,
+        responderId: req.user.id,
+        responderType: 'organization'
+      }
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Request unassigned from your organization.'
+    });
+  } catch (error) {
+    console.error('Error unassigning request:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to unassign request',
+      error: error.message
+    });
+  }
+};
+
 export default {
   createRequest,
   getMyRequests,
@@ -580,5 +686,7 @@ export default {
   updateRequestStatus,
   updateRequestDetails,
   deleteRequest,
-  interactWithRequest
+  interactWithRequest,
+  assignToRequest,
+  unassignFromRequest
 };

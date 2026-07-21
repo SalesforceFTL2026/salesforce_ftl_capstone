@@ -6,13 +6,15 @@ import RequestsView from '../components/organization/RequestsView';
 import ResourcesView from '../components/organization/ResourcesView';
 import { getCurrentUser, logout, updateProfile } from '../utils/auth';
 import {
-  getPrioritizedRequests,
+  getAllRequests,
   getOrganizationResponses,
   getOrganizationResources,
   addOrganizationResource,
   setResourceAvailability,
   deleteOrganizationResource,
   updateRequestStatus,
+  assignRequest,
+  unassignRequest,
   requestErrorMessage,
 } from '../utils/requests';
 
@@ -51,9 +53,6 @@ const VIEW_TITLES = {
   settings: 'Settings',
 };
 
-// A request is "open" (unclaimed) while pending/in-progress with no org yet.
-const OPEN_STATUSES = ['pending', 'in-progress'];
-
 // Assumed people per household, used only as a fallback for completed requests
 // that don't have a real householdSize recorded.
 const AVG_HOUSEHOLD_SIZE = 3;
@@ -65,9 +64,10 @@ const OrganizationDashboard = () => {
 
   const [view, setView] = useState('dashboard');
 
-  // Priority feed (all active requests) and this org's tracked responses.
+  // Every request in the system (any status) and this org's assigned responses.
   const [feed, setFeed] = useState([]);
   const [responses, setResponses] = useState([]);
+  const [assigningId, setAssigningId] = useState(null);
   // "Near me" geo-radius filter (issue #116): null = show everything, otherwise
   // { lat, lng, radiusMiles }. When set, the feed is re-fetched filtered to it.
   const [near, setNear] = useState(null);
@@ -90,7 +90,7 @@ const OrganizationDashboard = () => {
     setError('');
     try {
       // When "Near me" is on, ask the backend to geo-radius filter the feed.
-      const feedData = await getPrioritizedRequests(near);
+      const feedData = await getAllRequests(near);
       setFeed(feedData);
       try {
         setResponses(await getOrganizationResponses());
@@ -176,16 +176,40 @@ const OrganizationDashboard = () => {
     }
   };
 
-  // Requests the org is responding to vs. still-open ("unfiltered") ones.
+  // Assign a request to this org (or remove that assignment). Assigning is what
+  // lets the org allocate resources to the request; multiple orgs can assign
+  // themselves to the same request. We reload responses afterward so the
+  // "Your Requests" list and the allocation gating stay in sync.
+  const handleToggleAssign = async (request, assign) => {
+    setAssigningId(request.id);
+    setError('');
+    try {
+      if (assign) {
+        await assignRequest(request.id);
+      } else {
+        await unassignRequest(request.id);
+      }
+      try {
+        setResponses(await getOrganizationResponses());
+      } catch {
+        setResponses([]);
+      }
+    } catch (err) {
+      setError(requestErrorMessage(err, 'Could not update the assignment.'));
+    } finally {
+      setAssigningId(null);
+    }
+  };
+
+  // Requests this org has assigned to itself vs. everything else it can browse
+  // (any status — pending or fulfilled). Orgs can view all requests, but only
+  // allocate resources to the ones they've assigned to themselves.
   const respondingIds = useMemo(
     () => new Set(responses.map((r) => r.id)),
     [responses]
   );
   const unfiltered = useMemo(
-    () =>
-      feed.filter(
-        (r) => !respondingIds.has(r.id) && OPEN_STATUSES.includes(r.status)
-      ),
+    () => feed.filter((r) => !respondingIds.has(r.id)),
     [feed, respondingIds]
   );
 
@@ -256,6 +280,9 @@ const OrganizationDashboard = () => {
           onOrgLocationChange={handleOrgLocationChange}
           resources={resources}
           onAllocationsChanged={refreshResources}
+          assignedIds={respondingIds}
+          onToggleAssign={handleToggleAssign}
+          assigningId={assigningId}
           near={near}
           onNearChange={setNear}
         />

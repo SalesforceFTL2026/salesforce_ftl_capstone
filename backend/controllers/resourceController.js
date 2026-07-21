@@ -1,5 +1,6 @@
 import * as resourceModel from '../models/resourceModel.js';
 import * as requestModel from '../models/requestModel.js';
+import prisma from '../services/database/prisma.js';
 import { suggestAllocations } from '../services/ai/resourceAdvisor.js';
 
 /**
@@ -285,6 +286,22 @@ export const allocateResource = async (req, res) => {
     const request = await requestModel.getRequestById(requestId);
     if (!request) {
       return res.status(404).json({ success: false, message: 'Request not found.' });
+    }
+
+    // An org may only allocate resources to a request it has assigned to itself.
+    // The assignment is a Response row created via POST /api/requests/:id/assign.
+    const assignment = await prisma.response.findFirst({
+      where: {
+        requestId,
+        responderId: req.user.id,
+        responderType: 'organization',
+      },
+    });
+    if (!assignment) {
+      return res.status(403).json({
+        success: false,
+        message: 'Assign this request to your organization before allocating resources to it.',
+      });
     }
 
     // The resource must exist and belong to this organization.
