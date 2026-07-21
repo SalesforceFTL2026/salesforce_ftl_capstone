@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import RequestCard from '../RequestCard/RequestCard';
-import HeatMap from '../organization/HeatMap';
+import RequestMap from '../map/RequestMap';
 
 // Active Help Requests view for a volunteer, built from the product wireframe.
 // A view switcher (Calendar / List / Cards / Map) sits above the requests. The
@@ -9,9 +9,10 @@ import HeatMap from '../organization/HeatMap';
 // "Why?" toggle that expands the AI prioritizer's full reasoning inline. The
 // AI Priority column surfaces the prioritization pipeline's score. Cards reuses
 // the shared RequestCard so a volunteer can still express interest there too.
-// Calendar and Map are placeholders until those data sources exist. This is a
-// front-end presentation layer over the same priority-feed data the dashboard
-// already loads.
+// Map plots geocoded requests on a Leaflet map (RequestMap) where a volunteer
+// can also express interest from a pin's popup. Calendar buckets requests by
+// submission date. This is a front-end presentation layer over the same
+// priority-feed data the dashboard already loads.
 //
 // @param {object[]} requests - the active/prioritized requests
 // @param {boolean} loading
@@ -150,7 +151,12 @@ const VolunteerRequestsView = ({
           <h2 className="text-xl font-bold text-[#1C2A16] dark:text-white text-center mb-3">
             Where help is needed
           </h2>
-          <HeatMap caption="Interactive map coming soon" />
+          <RequestMap
+            requests={rows}
+            onInteract={onInteract}
+            interactingId={interactingId}
+            confirmations={confirmations}
+          />
         </div>
       )}
 

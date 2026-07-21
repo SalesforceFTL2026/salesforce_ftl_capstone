@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import HeatMap from './HeatMap';
+import RequestMap from '../map/RequestMap';
 import AllocationPanel from './AllocationPanel';
 
 // Requests view for an organization, matching the wireframe:
@@ -23,6 +24,19 @@ const RequestsView = ({
 }) => {
   // Which request's details show in the bottom-right panel.
   const [selected, setSelected] = useState(null);
+  // Top-right panel view: the density heat map, or the interactive pin map.
+  const [geoView, setGeoView] = useState('heat');
+
+  // Every request the org can see (its own + the open feed), for the heat map
+  // and pin map. De-duplicated so a request the org is responding to that also
+  // appears in the open feed is only plotted once.
+  const allRequests = useMemo(() => {
+    const byId = new Map();
+    for (const r of [...yourRequests, ...unfiltered]) {
+      if (!byId.has(r.id)) byId.set(r.id, r);
+    }
+    return [...byId.values()];
+  }, [yourRequests, unfiltered]);
 
   return (
     <div className="grid lg:grid-cols-2 gap-6">
@@ -50,13 +64,40 @@ const RequestsView = ({
         />
       </div>
 
-      {/* Right: heat map + detail panel */}
+      {/* Right: heat map / pin map + detail panel */}
       <div className="flex flex-col gap-6">
         <div className="bg-white dark:bg-[#16233a] rounded-3xl p-5 shadow-md transition-colors duration-300">
-          <h2 className="text-xl font-bold text-[#1C2A16] dark:text-white text-center mb-3">
-            Request Heat Map
-          </h2>
-          <HeatMap caption="Last updated 8 min ago" />
+          <div className="flex items-center justify-between mb-3 gap-3">
+            <h2 className="text-xl font-bold text-[#1C2A16] dark:text-white">
+              {geoView === 'heat' ? 'Request Heat Map' : 'Request Map'}
+            </h2>
+            {/* Toggle between the density heat map and the interactive pin map. */}
+            <div className="flex rounded-xl bg-black/5 dark:bg-white/10 p-1">
+              {[
+                { id: 'heat', label: 'Heat' },
+                { id: 'map', label: 'Map' },
+              ].map((opt) => (
+                <button
+                  key={opt.id}
+                  type="button"
+                  onClick={() => setGeoView(opt.id)}
+                  aria-pressed={geoView === opt.id}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/40 ${
+                    geoView === opt.id
+                      ? 'bg-[#6ba3d3] text-white'
+                      : 'text-[#1C2A16] dark:text-gray-200 hover:bg-black/5 dark:hover:bg-white/10'
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          {geoView === 'heat' ? (
+            <HeatMap requests={allRequests} caption="Shaded by where needs cluster" />
+          ) : (
+            <RequestMap requests={allRequests} />
+          )}
         </div>
 
         <RequestDetail
