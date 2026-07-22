@@ -10,7 +10,8 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "prisma:generate": "prisma generate",
-    "seed:real-events": "node prisma/seedRealEvents.js"
+    "seed:real-events": "node prisma/seedRealEvents.js",
+    "ingest:events": "node services/ingestion/ingestEvents.js"
   },
   "keywords": [
     "crisis",

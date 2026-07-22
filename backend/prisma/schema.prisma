@@ -236,12 +236,24 @@ model CrisisEvent {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
+  // Ingestion fields: set when this event was pulled from an external feed
+  // (USGS/NWS/EONET/GDACS/FEMA) rather than detected internally. Null for
+  // internally-clustered crises. (source, externalId) is unique so the daily
+  // ingest job can upsert instead of duplicating.
+  source          String?  // 'usgs' | 'nws' | 'eonet' | 'gdacs' | 'fema'
+  externalId      String?  // stable id from the source feed
+  latitude        Float?   // event coordinates, for the map overlay
+  longitude       Float?
+  url             String?  // canonical link back to the source
+
   requests        RequestEvent[]
 
+  @@unique([source, externalId])
   @@index([active])
   @@index([eventType])
   @@index([severity])
   @@index([startDate])
+  @@index([source])
 }
 
 // WEEK 4: Join table for requests belonging to crisis events

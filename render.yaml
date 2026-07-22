@@ -1,0 +1,60 @@
+# Render Blueprint — infrastructure as code for MapResponse.
+# https://render.com/docs/blueprint-spec
+#
+# Declares three services from this GitHub repo:
+#   - web:  the Express backend API
+#   - cron: the daily real-event ingestion job (services/ingestion/ingestEvents.js)
+#   - db:   managed Postgres
+#
+# Render auto-deploys all three on push to the connected branch. Secrets that
+# can't live in git (API keys, JWT secret) are marked sync:false and must be
+# filled in once via the Render dashboard.
+
+databases:
+  - name: mapresponse-db
+    plan: free # NOTE: Render free Postgres expires 90 days after creation.
+
+services:
+  # --- Backend API ---------------------------------------------------------
+  - type: web
+    name: mapresponse-backend
+    runtime: node
+    plan: free
+    rootDir: backend
+    # migrate deploy applies committed migrations to Render's Postgres on every
+    # deploy (safe/no-op when already applied); generate builds the client.
+    buildCommand: npm install && npx prisma generate && npx prisma migrate deploy
+    startCommand: npm start
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: mapresponse-db
+          property: connectionString
+      - key: NODE_VERSION
+        value: "24"
+      # Secrets — set these in the Render dashboard (never commit them):
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+
+  # --- Daily real-event ingestion -----------------------------------------
+  - type: cron
+    name: ingest-real-events
+    runtime: node
+    plan: free
+    rootDir: backend
+    schedule: "0 8 * * *" # every day at 08:00 UTC
+    buildCommand: npm install && npx prisma generate
+    startCommand: node services/ingestion/ingestEvents.js
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: mapresponse-db
+          property: connectionString
+      - key: NODE_VERSION
+        value: "24"
