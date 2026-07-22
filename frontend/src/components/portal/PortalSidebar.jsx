@@ -1,4 +1,4 @@
-import MRLogoMini from '../../assets/logos/MRLogoMini.png';
+import MRLogo from '../../assets/logos/MRLogo.png';
 import { PortalIcon } from './portalIcons';
 
 // Shared left navigation rail for both the help-seeker and organization
@@ -14,11 +14,11 @@ const PortalSidebar = ({ label, groups, activeView, onNavigate }) => {
     <aside className="w-20 lg:w-60 shrink-0 bg-[#9db29a] dark:bg-[#1a2417] flex flex-col transition-colors duration-300">
       {/* Logo header block */}
       <div className="bg-[#7f9976] dark:bg-[#141d11] px-3 py-4 flex flex-col items-center gap-1 transition-colors duration-300">
-        <div className="bg-white rounded-xl p-1 shadow-sm">
+        <div className="p-1 rounded-xl dark:bg-white/75">
           <img
-            src={MRLogoMini}
+            src={MRLogo}
             alt="MapResponse logo"
-            className="w-12 h-12 lg:w-16 lg:h-16 object-contain"
+            className="h-12 lg:h-16 w-auto object-contain"
           />
         </div>
         <span className="hidden lg:block text-[#1C2A16] dark:text-white font-bold tracking-wide text-lg text-center uppercase">

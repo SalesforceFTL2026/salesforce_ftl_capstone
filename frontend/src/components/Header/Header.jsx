@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTheme } from '../../context/ThemeContext';
-import MRLogoMini from '../../assets/logos/MRLogoMini.png';
+import MRLogo from '../../assets/logos/MRLogo.png';
 import lightModeToggle from '../../assets/light_mode_toggle.png';
 import darkModeToggle from '../../assets/dark_mode_toggle.png';
 
@@ -34,9 +34,9 @@ const Header = ({ currentUser, onSignInClick, onSignOutClick }) => {
           <div className="flex items-center gap-2">
             <div className="relative">
               <img
-                src={MRLogoMini}
+                src={MRLogo}
                 alt="MapResponse logo"
-                className="w-10 h-10 sm:w-[100px] sm:h-[100px] object-contain"
+                className="h-10 sm:h-[80px] w-auto object-contain"
               />
             </div>
           </div>

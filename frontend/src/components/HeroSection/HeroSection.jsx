@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import MRLogo from '../../assets/logos/MRLogo.png';
-import MRLogoMini from '../../assets/logos/MRLogoMini.png';
 import fireImg from '../../assets/hero_disaster_pictures/fire.jpeg';
 import floodImg from '../../assets/hero_disaster_pictures/flood.jpeg';
 import rubbleImg from '../../assets/hero_disaster_pictures/rubble.jpg';
