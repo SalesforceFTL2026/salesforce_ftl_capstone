@@ -1,7 +1,12 @@
-import { useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import {
+  getCountyFeatures,
+  computeCountyIntensities,
+  rampColor,
+} from './countyChoropleth';
 
 // Interactive Leaflet map of help requests. Each request that has been geocoded
 // (latitude/longitude, added in issue #110) drops a pin colored by urgency;
@@ -27,9 +32,39 @@ const URGENCY_COLOR = {
 };
 const DEFAULT_COLOR = '#6ba3d3';
 
+// Urgency -> heat intensity. Divided by the max (4) to give each point a
+// 0–1 weight for the choropleth falloff, so Critical needs burn hottest.
+const URGENCY_WEIGHT = { Critical: 4, High: 3, Medium: 2, Low: 1 };
+
+// Heat gradient, mirroring the ramp used by the standalone HeatMap grid so the
+// visual language stays consistent across the app (cool -> hot).
+const HEAT_GRADIENT = {
+  0.0: '#38bdf8',
+  0.25: '#fde047',
+  0.45: '#fb923c',
+  0.65: '#ef4444',
+  1.0: '#7f1d1d',
+};
+
 // Continental-US center + zoom, used when we have nothing to fit to.
 const US_CENTER = [39.5, -98.35];
 const US_ZOOM = 4;
+
+// The app only serves the US, so we lock the map to the continental US (plus a
+// little slack around the edges). MAX_BOUNDS is a hard pan limit; US_BOUNDS is
+// the tighter box we frame to. MIN_ZOOM stops users zooming out to the globe.
+const US_BOUNDS = [
+  [25.5, -123], // SW (~S. Florida / SoCal)
+  [48.5, -68], // NE (~N. border / Maine)
+];
+// Generous pan clamp — wide enough that the visible frame is always filled
+// with tiles (no grey letterbox gutters) while still stopping users from
+// wandering off to other continents.
+const MAX_BOUNDS = [
+  [5, -150],
+  [60, -50],
+];
+const MIN_ZOOM = 4;
 
 // A request is mappable only once it has real numeric coordinates.
 const hasCoords = (r) =>
@@ -52,57 +87,167 @@ const pinIcon = (urgency) => {
 
 // Pan/zoom the map so all plotted requests are in view whenever they change.
 // A single request centers on it; many requests fit their bounding box.
-const FitBounds = ({ points }) => {
+const FitBounds = ({ points, mode }) => {
   const map = useMap();
   useEffect(() => {
+    // The choropleth fills every county, so we always frame the whole country
+    // rather than zooming into wherever the requests happen to be.
+    // Both modes share the generous pan clamp (MAX_BOUNDS, set on the
+    // MapContainer) so dragging to the edges stays smooth and never hard-walls.
+    if (mode === 'heat') {
+      // Frame tightly on the continental US so it fills the map.
+      map.fitBounds(US_BOUNDS, { padding: [0, 0] });
+      return;
+    }
     if (points.length === 0) return;
     if (points.length === 1) {
-      map.setView(points[0], 11);
+      map.setView(points[0], 10);
     } else {
-      map.fitBounds(points, { padding: [40, 40] });
+      map.fitBounds(points, { padding: [60, 60], maxZoom: 9 });
     }
-  }, [map, points]);
+  }, [map, points, mode]);
+  return null;
+};
+
+// County-level choropleth overlay. Instead of a blurry density blob, EVERY US
+// county polygon is filled with a color, so the whole map reads as one
+// continuous heat field (like the classic county maps). Per-county intensity
+// comes from a smooth Gaussian distance falloff off the real request points
+// (see countyChoropleth.js), so color radiates out from clusters and cools
+// with distance — no isolated "gradient pins".
+const ChoroplethLayer = ({ points, onLoadingChange }) => {
+  const map = useMap();
+  useEffect(() => {
+    let layer = null;
+    let cancelled = false; // guard against unmount/toggle before the load lands
+    onLoadingChange?.(true);
+
+    // County geometry lazy-loads on first open (~840KB), so this is async.
+    getCountyFeatures().then((features) => {
+      if (cancelled) return;
+      const weighted = points.map(([lat, lng, weight]) => ({ lat, lng, weight }));
+      const intensities = computeCountyIntensities(features, weighted);
+
+      layer = L.geoJSON(
+        { type: 'FeatureCollection', features },
+        {
+          style: (f) => {
+            const t = intensities.get(f.id) ?? 0;
+            return {
+              fillColor: rampColor(t),
+              fillOpacity: 0.7,
+              color: '#ffffff', // thin white county borders, like the reference
+              weight: 0.3,
+              opacity: 0.5,
+            };
+          },
+        }
+      ).addTo(map);
+      onLoadingChange?.(false);
+    });
+
+    return () => {
+      cancelled = true;
+      onLoadingChange?.(false);
+      if (layer) map.removeLayer(layer);
+    };
+  }, [map, points, onLoadingChange]);
   return null;
 };
 
 const RequestMap = ({ requests = [], onInteract, interactingId, confirmations = {} }) => {
+  // 'pins' shows urgency markers; 'heat' shows the county choropleth.
+  const [mode, setMode] = useState('pins');
+  // True while the (lazy-loaded) county geometry is downloading/building.
+  const [heatLoading, setHeatLoading] = useState(false);
+  const handleHeatLoading = useCallback((loading) => setHeatLoading(loading), []);
+
   // Only geocoded requests can be plotted.
   const mappable = useMemo(() => requests.filter(hasCoords), [requests]);
   const points = useMemo(
     () => mappable.map((r) => [Number(r.latitude), Number(r.longitude)]),
     [mappable]
   );
+  // [lat, lng, intensity] triples for the heat overlay.
+  const heatPoints = useMemo(
+    () =>
+      mappable.map((r) => [
+        Number(r.latitude),
+        Number(r.longitude),
+        (URGENCY_WEIGHT[r.urgency] || 1) / 4,
+      ]),
+    [mappable]
+  );
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="rounded-2xl overflow-hidden border border-black/10 dark:border-white/10 shadow-md">
+      {/* Pins / Heatmap toggle */}
+      <div className="flex justify-center">
+        <div className="inline-flex gap-1 p-1 rounded-xl bg-black/5 dark:bg-white/10">
+          {[
+            { id: 'pins', label: 'Pins' },
+            { id: 'heat', label: 'Heatmap' },
+          ].map((opt) => (
+            <button
+              key={opt.id}
+              type="button"
+              onClick={() => setMode(opt.id)}
+              aria-pressed={mode === opt.id}
+              className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/40 ${
+                mode === opt.id
+                  ? 'bg-[#6ba3d3] text-white'
+                  : 'text-[#1C2A16] dark:text-gray-200 hover:bg-black/5 dark:hover:bg-white/10'
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="relative rounded-2xl overflow-hidden border border-black/10 dark:border-white/10 shadow-md">
+        {/* Skeleton shown over the map while the county geometry lazy-loads. */}
+        {heatLoading && (
+          <div className="absolute inset-0 z-[1000] flex flex-col items-center justify-center gap-3 bg-white/70 dark:bg-[#16233a]/70 backdrop-blur-sm">
+            <div className="h-8 w-8 rounded-full border-2 border-[#6ba3d3] border-t-transparent animate-spin" />
+            <p className="text-sm font-semibold text-[#1C2A16] dark:text-gray-200">
+              Loading heatmap…
+            </p>
+          </div>
+        )}
         <MapContainer
           center={US_CENTER}
           zoom={US_ZOOM}
+          minZoom={MIN_ZOOM}
+          maxBounds={MAX_BOUNDS}
+          maxBoundsViscosity={1.0}
           scrollWheelZoom={false}
-          style={{ height: '28rem', width: '100%' }}
+          style={{ height: 'min(80vh, 900px)', width: '100%' }}
         >
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            noWrap
           />
-          <FitBounds points={points} />
-          {mappable.map((r) => (
-            <Marker
-              key={r.id}
-              position={[Number(r.latitude), Number(r.longitude)]}
-              icon={pinIcon(r.urgency)}
-            >
-              <Popup>
-                <RequestPopup
-                  request={r}
-                  onInteract={onInteract}
-                  interacting={interactingId === r.id}
-                  confirmation={confirmations[r.id]}
-                />
-              </Popup>
-            </Marker>
-          ))}
+          <FitBounds points={points} mode={mode} />
+          {mode === 'heat' && <ChoroplethLayer points={heatPoints} onLoadingChange={handleHeatLoading} />}
+          {mode === 'pins' &&
+            mappable.map((r) => (
+              <Marker
+                key={r.id}
+                position={[Number(r.latitude), Number(r.longitude)]}
+                icon={pinIcon(r.urgency)}
+              >
+                <Popup>
+                  <RequestPopup
+                    request={r}
+                    onInteract={onInteract}
+                    interacting={interactingId === r.id}
+                    confirmation={confirmations[r.id]}
+                  />
+                </Popup>
+              </Marker>
+            ))}
         </MapContainer>
       </div>
 
@@ -116,15 +261,28 @@ const RequestMap = ({ requests = [], onInteract, interactingId, confirmations = 
         </p>
       )}
 
-      {/* Urgency legend */}
-      <div className="flex items-center justify-center flex-wrap gap-3 text-xs text-gray-600 dark:text-gray-300">
-        {Object.entries(URGENCY_COLOR).map(([label, color]) => (
-          <span key={label} className="flex items-center gap-1.5">
-            <span className="inline-block w-3 h-3 rounded-full" style={{ background: color }} />
-            {label}
-          </span>
-        ))}
-      </div>
+      {/* Legend: urgency colors for pins, a density ramp for the heatmap. */}
+      {mode === 'pins' ? (
+        <div className="flex items-center justify-center flex-wrap gap-3 text-xs text-gray-600 dark:text-gray-300">
+          {Object.entries(URGENCY_COLOR).map(([label, color]) => (
+            <span key={label} className="flex items-center gap-1.5">
+              <span className="inline-block w-3 h-3 rounded-full" style={{ background: color }} />
+              {label}
+            </span>
+          ))}
+        </div>
+      ) : (
+        <div className="flex items-center justify-center gap-2 text-xs text-gray-600 dark:text-gray-300">
+          <span>Fewer needs</span>
+          <span
+            className="inline-block h-2 w-32 rounded-full"
+            style={{
+              background: `linear-gradient(to right, ${Object.values(HEAT_GRADIENT).join(', ')})`,
+            }}
+          />
+          <span>More needs</span>
+        </div>
+      )}
     </div>
   );
 };
