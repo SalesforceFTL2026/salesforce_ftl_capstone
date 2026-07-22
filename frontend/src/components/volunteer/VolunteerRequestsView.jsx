@@ -2,7 +2,6 @@ import { useState, useMemo } from 'react';
 import RequestCard from '../RequestCard/RequestCard';
 import RequestMap from '../map/RequestMap';
 import NearMeToggle from '../map/NearMeToggle';
-import HeatMap from '../organization/HeatMap';
 import RequestFilterBar from '../RequestFilterBar/RequestFilterBar';
 
 // Active Help Requests view for a volunteer, built from the product wireframe.
@@ -29,7 +28,6 @@ const VIEWS = [
   { id: 'list', label: 'List', icon: 'list' },
   { id: 'cards', label: 'Cards', icon: 'cards' },
   { id: 'map', label: 'Map', icon: 'map' },
-  { id: 'heat', label: 'Heat', icon: 'heat' },
 ];
 
 const URGENCY_ORDER = { Critical: 0, High: 1, Medium: 2, Low: 3 };
@@ -182,15 +180,6 @@ const VolunteerRequestsView = ({
             interactingId={interactingId}
             confirmations={confirmations}
           />
-        </div>
-      )}
-
-      {!loading && !error && activeView === 'heat' && (
-        <div className="bg-white dark:bg-[#16233a] rounded-3xl p-6 shadow-md transition-colors duration-300">
-          <h2 className="text-xl font-bold text-[#1C2A16] dark:text-white text-center mb-3">
-            Where needs are concentrated
-          </h2>
-          <HeatMap requests={rows} caption="Shaded by where requests cluster" />
         </div>
       )}
 
@@ -607,7 +596,6 @@ const ViewIcon = ({ name }) => {
     list: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-7 6l2 2 4-4',
     cards: 'M4 5h6v6H4V5zm10 0h6v6h-6V5zM4 13h6v6H4v-6zm10 0h6v6h-6v-6z',
     map: 'M9 20l-5.4 1.8A1 1 0 013 20.9V6.6a1 1 0 01.7-1L9 4m0 16l6-2m-6 2V4m6 14l5.4 1.8A1 1 0 0021 20.9V6.6a1 1 0 00-.7-1L15 4m0 14V4m0 0L9 6',
-    heat: 'M4 6h4v4H4V6zm0 8h4v4H4v-4zm6-8h4v4h-4V6zm0 8h4v4h-4v-4zm6-8h4v4h-4V6zm0 8h4v4h-4v-4z',
   };
   return (
     <svg {...base}>

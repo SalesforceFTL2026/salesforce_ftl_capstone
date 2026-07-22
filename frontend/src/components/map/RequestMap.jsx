@@ -6,6 +6,7 @@ import {
   getCountyFeatures,
   computeCountyIntensities,
   rampColor,
+  sigmaForZoom,
 } from './countyChoropleth';
 
 // Interactive Leaflet map of help requests. Each request that has been geocoded
@@ -36,15 +37,12 @@ const DEFAULT_COLOR = '#6ba3d3';
 // 0–1 weight for the choropleth falloff, so Critical needs burn hottest.
 const URGENCY_WEIGHT = { Critical: 4, High: 3, Medium: 2, Low: 1 };
 
-// Heat gradient, mirroring the ramp used by the standalone HeatMap grid so the
-// visual language stays consistent across the app (cool -> hot).
-const HEAT_GRADIENT = {
-  0.0: '#38bdf8',
-  0.25: '#fde047',
-  0.45: '#fb923c',
-  0.65: '#ef4444',
-  1.0: '#7f1d1d',
-};
+// Heat gradient for the legend, mirroring the RAMP in countyChoropleth.js so
+// the legend matches the map exactly. Steps through neighboring hues (blue ->
+// green -> yellow -> orange -> red) so it reads as one clean cool->hot sweep.
+// An ORDERED array, not an object: numeric-like object keys ("0", "1") get
+// reordered by the JS engine, which would scramble the gradient stops.
+const HEAT_GRADIENT = ['#38bdf8', '#22c55e', '#eab308', '#f97316', '#dc2626'];
 
 // Continental-US center + zoom, used when we have nothing to fit to.
 const US_CENTER = [39.5, -98.35];
@@ -115,6 +113,12 @@ const FitBounds = ({ points, mode }) => {
 // comes from a smooth Gaussian distance falloff off the real request points
 // (see countyChoropleth.js), so color radiates out from clusters and cools
 // with distance — no isolated "gradient pins".
+//
+// The gradient is view-aware: as the user zooms in, the falloff radius shrinks
+// (sigmaForZoom) so clusters resolve into distinct counties, and the color ramp
+// is re-normalized against only the counties currently on screen. So a region
+// that reads as one lukewarm smear at the country level spreads into a full
+// cool→hot gradient once you zoom into it. We restyle on every zoom/pan.
 const ChoroplethLayer = ({ points, onLoadingChange }) => {
   const map = useMap();
   useEffect(() => {
@@ -122,34 +126,55 @@ const ChoroplethLayer = ({ points, onLoadingChange }) => {
     let cancelled = false; // guard against unmount/toggle before the load lands
     onLoadingChange?.(true);
 
+    const weighted = points.map(([lat, lng, weight]) => ({ lat, lng, weight }));
+
+    // Recolor every county for the current zoom + viewport. Cheap enough
+    // (a few thousand counties) to run live on each move.
+    const restyle = (features) => {
+      const b = map.getBounds();
+      const bounds = {
+        minLat: b.getSouth(),
+        maxLat: b.getNorth(),
+        minLng: b.getWest(),
+        maxLng: b.getEast(),
+      };
+      const intensities = computeCountyIntensities(features, weighted, {
+        sigma: sigmaForZoom(map.getZoom()),
+        bounds,
+      });
+      layer?.setStyle((f) => {
+        const t = intensities.get(f.id) ?? 0;
+        return {
+          fillColor: rampColor(t),
+          fillOpacity: 0.7,
+          color: '#ffffff', // thin white county borders, like the reference
+          weight: 0.3,
+          opacity: 0.5,
+        };
+      });
+    };
+
     // County geometry lazy-loads on first open (~840KB), so this is async.
     getCountyFeatures().then((features) => {
       if (cancelled) return;
-      const weighted = points.map(([lat, lng, weight]) => ({ lat, lng, weight }));
-      const intensities = computeCountyIntensities(features, weighted);
+      layer = L.geoJSON({ type: 'FeatureCollection', features }).addTo(map);
+      restyle(features);
 
-      layer = L.geoJSON(
-        { type: 'FeatureCollection', features },
-        {
-          style: (f) => {
-            const t = intensities.get(f.id) ?? 0;
-            return {
-              fillColor: rampColor(t),
-              fillOpacity: 0.7,
-              color: '#ffffff', // thin white county borders, like the reference
-              weight: 0.3,
-              opacity: 0.5,
-            };
-          },
-        }
-      ).addTo(map);
+      // Re-normalize the gradient to whatever is now in view.
+      const onMove = () => restyle(features);
+      map.on('zoomend moveend', onMove);
+      layer._onMove = onMove; // stash so cleanup can detach it
+
       onLoadingChange?.(false);
     });
 
     return () => {
       cancelled = true;
       onLoadingChange?.(false);
-      if (layer) map.removeLayer(layer);
+      if (layer) {
+        if (layer._onMove) map.off('zoomend moveend', layer._onMove);
+        map.removeLayer(layer);
+      }
     };
   }, [map, points, onLoadingChange]);
   return null;
@@ -277,7 +302,7 @@ const RequestMap = ({ requests = [], onInteract, interactingId, confirmations = 
           <span
             className="inline-block h-2 w-32 rounded-full"
             style={{
-              background: `linear-gradient(to right, ${Object.values(HEAT_GRADIENT).join(', ')})`,
+              background: `linear-gradient(to right, ${HEAT_GRADIENT.join(', ')})`,
             }}
           />
           <span>More needs</span>
