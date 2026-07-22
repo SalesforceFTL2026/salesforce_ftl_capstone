@@ -3,6 +3,7 @@ import prisma from '../services/database/prisma.js';
 import { prioritizeRequest } from '../services/ai/prioritizer.js';
 import { geocodeLocation, haversineMiles } from '../services/geocoding/geocoder.js';
 import { parseRadiusFilter, filterWithinRadius } from '../services/geocoding/distance.js';
+import { filterRequestsFromQuery } from '../services/filters/requestFilters.js';
 import { transcribeAudio, extractRequestFields } from '../services/ai/index.js';
 
 /**
@@ -144,6 +145,11 @@ export const createRequest = async (req, res) => {
 // miles) to keep only requests within that distance of the point. Each returned
 // request is annotated with `distanceMiles`. An absent or malformed filter is
 // ignored and all requests are returned.
+//
+// Optional attribute filters (issues #81, #82): pass ?category=, ?urgency=,
+// and/or ?search= to narrow the list by category, urgency, or a free-text
+// keyword (matched against description, location, category, and submitter
+// name). Unknown/blank filter values are ignored. See docs/FILTER_CONTRACT.md.
 export const getAllRequests = async (req, res) => {
   try {
     let requests = await requestModel.getAllRequests();
@@ -152,6 +158,8 @@ export const getAllRequests = async (req, res) => {
     if (radiusFilter) {
       requests = filterWithinRadius(requests, radiusFilter);
     }
+
+    requests = filterRequestsFromQuery(requests, req.query);
 
     res.status(200).json({
       success: true,
@@ -220,6 +228,13 @@ export const getRequestById = async (req, res) => {
 // me" toggle (issue #116) on the volunteer/org feeds calls. Each returned
 // request is annotated with `distanceMiles`. An absent or malformed filter is
 // ignored and the full prioritized feed is returned.
+//
+// Optional attribute filters (issues #81, #82): pass ?category=, ?urgency=,
+// and/or ?search= to narrow the feed by category, urgency, or a free-text
+// keyword (matched against description, location, category, and submitter
+// name). These compose with the geo-radius filter and with each other, and the
+// feed stays sorted by AI priority. Unknown/blank filter values are ignored.
+// See docs/FILTER_CONTRACT.md for the full param contract (issue #83).
 export const getPrioritizedRequests = async (req, res) => {
   try {
     let requests = await requestModel.getPrioritizedRequests();
@@ -228,6 +243,8 @@ export const getPrioritizedRequests = async (req, res) => {
     if (radiusFilter) {
       requests = filterWithinRadius(requests, radiusFilter);
     }
+
+    requests = filterRequestsFromQuery(requests, req.query);
 
     res.status(200).json({
       success: true,
