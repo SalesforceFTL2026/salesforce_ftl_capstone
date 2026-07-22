@@ -1,0 +1,127 @@
+// Seed the database with help requests derived from REAL crisis events.
+//
+// Pipeline:  fetch real events (USGS) -> generate plausible help requests near
+// each -> geocode -> insert -> run the real AI prioritization on each. The
+// result is a feed/map/heatmap populated with geographically coherent, real-
+// world-anchored data instead of hand-written samples.
+//
+// Usage (from backend/):  node prisma/seedRealEvents.js [--events=5] [--per-event=3]
+//
+// Safe to re-run: it deletes any requests it previously created (matched by the
+// "[real-event]" marker in the description) before re-inserting.
+//
+// Design note: we fetch the events ONCE and snapshot the generated requests
+// into the DB. The demo then runs against a stable database — no live network
+// call at demo time. The same adapters can be polled on a schedule in
+// production (see services/ingestion/), but the demo never depends on that.
+
+import { PrismaClient } from '@prisma/client';
+import { prioritizeRequest } from '../services/ai/prioritizer.js';
+import { geocodeLocation } from '../services/geocoding/geocoder.js';
+import { fetchEvents } from '../services/ingestion/usgs.js';
+import { generateRequestsForEvent } from '../services/ingestion/requestGenerator.js';
+
+const prisma = new PrismaClient();
+
+// Marker that identifies requests this seed created, so re-runs are idempotent.
+const MARKER = '[real-event]';
+
+// The help-seeker these requests are attributed to. Falls back to the first
+// help-seeker in the DB if this id is gone (survives a database reset).
+const USER_ID = 'cmro46my500022d9hfxutihjs';
+
+// Simple CLI flag parsing: --events=N and --per-event=N.
+function parseArgs(argv) {
+  const get = (name, fallback) => {
+    const hit = argv.find((a) => a.startsWith(`--${name}=`));
+    if (!hit) return fallback;
+    const n = Number(hit.split('=')[1]);
+    return Number.isFinite(n) && n > 0 ? Math.floor(n) : fallback;
+  };
+  return { events: get('events', 5), perEvent: get('per-event', 3) };
+}
+
+async function main() {
+  const { events: eventLimit, perEvent } = parseArgs(process.argv.slice(2));
+
+  const user =
+    (await prisma.user.findUnique({ where: { id: USER_ID } })) ||
+    (await prisma.user.findFirst({ where: { role: 'help-seeker' } }));
+  if (!user) {
+    throw new Error('No help-seeker found. Register one, then re-run this seed.');
+  }
+
+  // Clear previously-seeded real-event requests for this user.
+  const { count } = await prisma.request.deleteMany({
+    where: { userId: user.id, description: { contains: MARKER } },
+  });
+  if (count) console.log(`Removed ${count} previously-seeded real-event request(s).`);
+
+  // 1. Fetch real events.
+  const events = await fetchEvents({ limit: eventLimit });
+  if (!events.length) {
+    console.error('No events returned from the source; nothing to seed.');
+    return;
+  }
+  console.log(`Fetched ${events.length} real event(s).`);
+
+  let inserted = 0;
+  for (const event of events) {
+    console.log(`\n${event.severity} · ${event.location}`);
+
+    // 2. Generate plausible help requests anchored to this event.
+    const requests = await generateRequestsForEvent(event, { count: perEvent });
+    if (!requests.length) {
+      console.log('  (no requests generated for this event)');
+      continue;
+    }
+
+    for (const r of requests) {
+      // 3. Prefer the event's own coordinates; geocode only if absent.
+      let latitude = r.latitude;
+      let longitude = r.longitude;
+      if (latitude == null || longitude == null) {
+        const coords = await geocodeLocation(r.location);
+        latitude = coords?.latitude ?? null;
+        longitude = coords?.longitude ?? null;
+      }
+
+      const created = await prisma.request.create({
+        data: {
+          userId: user.id,
+          submitterName: user.name,
+          submitterRole: 'help-seeker',
+          category: r.category,
+          urgency: r.urgency,
+          location: r.location,
+          latitude,
+          longitude,
+          // Tag the description so the seed stays idempotent, and note the source.
+          description: `${r.description} ${MARKER} (source: ${event.source})`,
+          status: 'pending',
+          priorityScore: 0,
+        },
+      });
+      inserted += 1;
+
+      // 4. Run the real AI prioritization pipeline (same path a live request takes).
+      try {
+        const { priorityScore } = await prioritizeRequest(created.id);
+        console.log(`  ${r.category} (${r.urgency}) -> score ${priorityScore}`);
+      } catch (e) {
+        console.error(`  Could not score ${r.category} request:`, e.message);
+      }
+    }
+  }
+
+  console.log(`\nSeeded ${inserted} real-event request(s) for ${user.email}.`);
+}
+
+main()
+  .catch((e) => {
+    console.error(e.message);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
