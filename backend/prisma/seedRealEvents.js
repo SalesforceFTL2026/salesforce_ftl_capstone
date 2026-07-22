@@ -1,9 +1,11 @@
+git add backend/services/ingestion/eonet.js backend/services/ingestion/gdacs.js backend/services/ingestion/fema.js backend/services/ingestion/dedupe.js
 // Seed the database with help requests derived from REAL crisis events.
 //
-// Pipeline:  fetch real events (USGS + NWS) -> generate plausible help requests
-// near each -> geocode -> insert -> run the real AI prioritization on each. The
-// result is a feed/map/heatmap populated with geographically coherent, real-
-// world-anchored data instead of hand-written samples.
+// Pipeline:  fetch real events (USGS, NWS, EONET, GDACS, FEMA) -> dedupe across
+// sources -> generate plausible help requests near each -> geocode -> insert ->
+// run the real AI prioritization on each. The result is a feed/map/heatmap
+// populated with geographically coherent, real-world-anchored data instead of
+// hand-written samples.
 //
 // Usage (from backend/):  node prisma/seedRealEvents.js [--events=5] [--per-event=3]
 //   --events    is per-source (each adapter contributes up to this many events)
@@ -22,13 +24,21 @@ import { prioritizeRequest } from '../services/ai/prioritizer.js';
 import { geocodeLocation } from '../services/geocoding/geocoder.js';
 import { fetchEvents as fetchUsgsEvents } from '../services/ingestion/usgs.js';
 import { fetchEvents as fetchNwsEvents } from '../services/ingestion/nws.js';
+import { fetchEvents as fetchEonetEvents } from '../services/ingestion/eonet.js';
+import { fetchEvents as fetchGdacsEvents } from '../services/ingestion/gdacs.js';
+import { fetchEvents as fetchFemaEvents } from '../services/ingestion/fema.js';
+import { dedupeEvents } from '../services/ingestion/dedupe.js';
 import { generateRequestsForEvent } from '../services/ingestion/requestGenerator.js';
 
 // Ingestion sources to seed from. Each just needs a fetchEvents({ limit }) that
-// returns the shared normalized event shape — add NASA EONET / FEMA the same way.
+// returns the shared normalized event shape — add a new source by writing an
+// adapter under services/ingestion/ and appending it here.
 const SOURCES = [
-  { name: 'usgs', fetch: fetchUsgsEvents },
-  { name: 'nws', fetch: fetchNwsEvents },
+  { name: 'usgs', fetch: fetchUsgsEvents },   // earthquakes (global)
+  { name: 'nws', fetch: fetchNwsEvents },     // US weather alerts
+  { name: 'eonet', fetch: fetchEonetEvents }, // wildfires/storms/volcanoes (global)
+  { name: 'gdacs', fetch: fetchGdacsEvents }, // global disaster alerts w/ severity
+  { name: 'fema', fetch: fetchFemaEvents },   // US federal disaster declarations
 ];
 
 const prisma = new PrismaClient();
@@ -68,23 +78,29 @@ async function main() {
   if (count) console.log(`Removed ${count} previously-seeded real-event request(s).`);
 
   // 1. Fetch real events from every configured source (--events is per-source).
-  const events = [];
+  const fetched = [];
   for (const source of SOURCES) {
-    const fetched = await source.fetch({ limit: eventLimit });
-    console.log(`  ${source.name}: ${fetched.length} event(s)`);
-    events.push(...fetched);
+    const rows = await source.fetch({ limit: eventLimit });
+    console.log(`  ${source.name}: ${rows.length} event(s)`);
+    fetched.push(...rows);
   }
-  if (!events.length) {
+  if (!fetched.length) {
     console.error('No events returned from any source; nothing to seed.');
     return;
   }
-  console.log(`Fetched ${events.length} real event(s) across ${SOURCES.length} source(s).`);
+
+  // 2. Collapse cross-source duplicates (same disaster in e.g. GDACS + EONET).
+  const { events, removed } = dedupeEvents(fetched);
+  console.log(
+    `Fetched ${fetched.length} event(s) across ${SOURCES.length} source(s); ` +
+      `${removed} cross-source duplicate(s) merged -> ${events.length} unique.`
+  );
 
   let inserted = 0;
   for (const event of events) {
     console.log(`\n${event.severity} · ${event.location}`);
 
-    // 2. Generate plausible help requests anchored to this event.
+    // 3. Generate plausible help requests anchored to this event.
     const requests = await generateRequestsForEvent(event, { count: perEvent });
     if (!requests.length) {
       console.log('  (no requests generated for this event)');
@@ -92,7 +108,7 @@ async function main() {
     }
 
     for (const r of requests) {
-      // 3. Prefer the event's own coordinates; geocode only if absent.
+      // 4. Prefer the event's own coordinates; geocode only if absent.
       let latitude = r.latitude;
       let longitude = r.longitude;
       if (latitude == null || longitude == null) {
@@ -119,7 +135,7 @@ async function main() {
       });
       inserted += 1;
 
-      // 4. Run the real AI prioritization pipeline (same path a live request takes).
+      // 5. Run the real AI prioritization pipeline (same path a live request takes).
       try {
         const { priorityScore } = await prioritizeRequest(created.id);
         console.log(`  ${r.category} (${r.urgency}) -> score ${priorityScore}`);
