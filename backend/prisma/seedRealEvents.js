@@ -1,11 +1,13 @@
 // Seed the database with help requests derived from REAL crisis events.
 //
-// Pipeline:  fetch real events (USGS) -> generate plausible help requests near
-// each -> geocode -> insert -> run the real AI prioritization on each. The
+// Pipeline:  fetch real events (USGS + NWS) -> generate plausible help requests
+// near each -> geocode -> insert -> run the real AI prioritization on each. The
 // result is a feed/map/heatmap populated with geographically coherent, real-
 // world-anchored data instead of hand-written samples.
 //
 // Usage (from backend/):  node prisma/seedRealEvents.js [--events=5] [--per-event=3]
+//   --events    is per-source (each adapter contributes up to this many events)
+//   --per-event help requests generated per event
 //
 // Safe to re-run: it deletes any requests it previously created (matched by the
 // "[real-event]" marker in the description) before re-inserting.
@@ -18,8 +20,16 @@
 import { PrismaClient } from '@prisma/client';
 import { prioritizeRequest } from '../services/ai/prioritizer.js';
 import { geocodeLocation } from '../services/geocoding/geocoder.js';
-import { fetchEvents } from '../services/ingestion/usgs.js';
+import { fetchEvents as fetchUsgsEvents } from '../services/ingestion/usgs.js';
+import { fetchEvents as fetchNwsEvents } from '../services/ingestion/nws.js';
 import { generateRequestsForEvent } from '../services/ingestion/requestGenerator.js';
+
+// Ingestion sources to seed from. Each just needs a fetchEvents({ limit }) that
+// returns the shared normalized event shape — add NASA EONET / FEMA the same way.
+const SOURCES = [
+  { name: 'usgs', fetch: fetchUsgsEvents },
+  { name: 'nws', fetch: fetchNwsEvents },
+];
 
 const prisma = new PrismaClient();
 
@@ -57,13 +67,18 @@ async function main() {
   });
   if (count) console.log(`Removed ${count} previously-seeded real-event request(s).`);
 
-  // 1. Fetch real events.
-  const events = await fetchEvents({ limit: eventLimit });
+  // 1. Fetch real events from every configured source (--events is per-source).
+  const events = [];
+  for (const source of SOURCES) {
+    const fetched = await source.fetch({ limit: eventLimit });
+    console.log(`  ${source.name}: ${fetched.length} event(s)`);
+    events.push(...fetched);
+  }
   if (!events.length) {
-    console.error('No events returned from the source; nothing to seed.');
+    console.error('No events returned from any source; nothing to seed.');
     return;
   }
-  console.log(`Fetched ${events.length} real event(s).`);
+  console.log(`Fetched ${events.length} real event(s) across ${SOURCES.length} source(s).`);
 
   let inserted = 0;
   for (const event of events) {
