@@ -231,6 +231,86 @@ export const deallocateResource = async (allocationId) => {
   return true;
 };
 
+// --- Volunteer tasks (org posts help tasks for volunteers to sign up for) ---
+
+// Fetch the signed-in organization's volunteer tasks.
+// Returns the array of tasks on success; throws on failure.
+export const getVolunteerTasks = async () => {
+  const { data } = await api.get('/api/volunteer-tasks');
+
+  if (!data?.success) {
+    throw new Error(data?.message || 'Could not load your volunteer tasks.');
+  }
+
+  return data.data;
+};
+
+// Create a volunteer task. `task` is
+// { requestId, title, description, category?, urgency?, skillsNeeded?,
+//   minVolunteers?, maxVolunteers? }. Every task must be linked to an existing
+//   help request. Returns the created task on success; throws on failure.
+export const createVolunteerTask = async (task) => {
+  const { data } = await api.post('/api/volunteer-tasks', task);
+
+  if (!data?.success) {
+    throw new Error(data?.message || 'Could not create the volunteer task.');
+  }
+
+  return data.data;
+};
+
+// Update a volunteer task (partial). `updates` may include any of the mutable
+// fields: details, volunteersConfirmed, resourcesReady, volunteerDate, status.
+// Returns the updated task on success; throws on failure.
+export const updateVolunteerTask = async (taskId, updates) => {
+  const { data } = await api.patch(`/api/volunteer-tasks/${taskId}`, updates);
+
+  if (!data?.success) {
+    throw new Error(data?.message || 'Could not update the volunteer task.');
+  }
+
+  return data.data;
+};
+
+// Remove a volunteer task. Resolves on success; throws on failure.
+export const deleteVolunteerTask = async (taskId) => {
+  const { data } = await api.delete(`/api/volunteer-tasks/${taskId}`);
+
+  if (!data?.success) {
+    throw new Error(data?.message || 'Could not remove the volunteer task.');
+  }
+
+  return true;
+};
+
+// Ask the AI advisor for 2-3 candidate volunteer-day dates for a task.
+// Returns an array of { date: 'YYYY-MM-DD', reason }; throws on failure.
+export const getTaskDateSuggestions = async (taskId) => {
+  const { data } = await api.get(`/api/volunteer-tasks/${taskId}/date-suggestions`);
+
+  if (!data?.success) {
+    throw new Error(data?.message || 'Could not load date suggestions.');
+  }
+
+  return data.data;
+};
+
+// Ask the AI advisor for 2-3 candidate volunteer tasks that would help fulfill
+// a given help request. Returns ready-to-edit task drafts:
+// { title, description, category, urgency, skillsNeeded, minVolunteers,
+//   maxVolunteers }. Does NOT create anything. Throws on failure.
+export const getTaskSuggestions = async (requestId) => {
+  const { data } = await api.get('/api/volunteer-tasks/suggestions', {
+    params: { requestId },
+  });
+
+  if (!data?.success) {
+    throw new Error(data?.message || 'Could not load task suggestions.');
+  }
+
+  return data.data;
+};
+
 // Update a request's status (organizations, or the help-seeker who owns it).
 // Returns the updated request on success; throws on failure.
 export const updateRequestStatus = async (requestId, status) => {

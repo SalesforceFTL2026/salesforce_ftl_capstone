@@ -4,6 +4,7 @@ import PortalShell from '../components/portal/PortalShell';
 import DashboardView from '../components/organization/DashboardView';
 import RequestsView from '../components/organization/RequestsView';
 import ResourcesView from '../components/organization/ResourcesView';
+import TasksView from '../components/organization/TasksView';
 import { getCurrentUser, logout, updateProfile } from '../utils/auth';
 import { usePolling } from '../hooks/usePolling';
 import {
@@ -16,6 +17,12 @@ import {
   updateRequestStatus,
   assignRequest,
   unassignRequest,
+  getVolunteerTasks,
+  createVolunteerTask,
+  updateVolunteerTask,
+  deleteVolunteerTask,
+  getTaskDateSuggestions,
+  getTaskSuggestions,
   requestErrorMessage,
 } from '../utils/requests';
 
@@ -28,6 +35,7 @@ const NAV_GROUPS = [
     items: [
       { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
       { id: 'requests', label: 'Requests', icon: 'requests' },
+      { id: 'tasks', label: 'Tasks', icon: 'tasks' },
       { id: 'metrics', label: 'Metrics', icon: 'metrics' },
       { id: 'resources', label: 'Resources', icon: 'resources' },
       { id: 'volunteers', label: 'Volunteers', icon: 'volunteers' },
@@ -46,6 +54,7 @@ const NAV_GROUPS = [
 const VIEW_TITLES = {
   dashboard: 'Dashboard',
   requests: 'Requests',
+  tasks: 'Tasks',
   metrics: 'Metrics',
   resources: 'Resources',
   volunteers: 'Volunteers',
@@ -74,6 +83,8 @@ const OrganizationDashboard = () => {
   const [near, setNear] = useState(null);
   // The org's inventory of resources (food, wood, health care kits, ...).
   const [resources, setResources] = useState([]);
+  // The org's volunteer tasks (help tasks volunteers can sign up for).
+  const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [updatingId, setUpdatingId] = useState(null);
@@ -105,6 +116,11 @@ const OrganizationDashboard = () => {
         setResources(await getOrganizationResources());
       } catch {
         setResources([]);
+      }
+      try {
+        setTasks(await getVolunteerTasks());
+      } catch {
+        setTasks([]);
       }
     } catch (err) {
       setError(requestErrorMessage(err, 'Something went wrong loading requests.'));
@@ -184,6 +200,25 @@ const OrganizationDashboard = () => {
     }
   };
 
+  // --- Volunteer task handlers ---
+  // Each optimistically updates the local list after the API call succeeds.
+  const handleCreateTask = async (task) => {
+    const created = await createVolunteerTask(task);
+    setTasks((prev) => [created, ...prev]);
+    return created;
+  };
+
+  const handleUpdateTask = async (id, updates) => {
+    const updated = await updateVolunteerTask(id, updates);
+    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, ...updated } : t)));
+    return updated;
+  };
+
+  const handleDeleteTask = async (id) => {
+    await deleteVolunteerTask(id);
+    setTasks((prev) => prev.filter((t) => t.id !== id));
+  };
+
   // Assign a request to this org (or remove that assignment). Assigning is what
   // lets the org allocate resources to the request; multiple orgs can assign
   // themselves to the same request. We reload responses afterward so the
@@ -249,7 +284,7 @@ const OrganizationDashboard = () => {
     };
   }, [responses, resources]);
 
-  const tasks = useMemo(() => {
+  const dashboardTasks = useMemo(() => {
     // Surface the top open requests as upcoming "tasks" with dated chips.
     return unfiltered.slice(0, 2).map((r) => {
       const d = r.createdAt ? new Date(r.createdAt) : null;
@@ -272,7 +307,7 @@ const OrganizationDashboard = () => {
       onSignOut={handleLogout}
     >
       {view === 'dashboard' && (
-        <DashboardView currentUser={currentUser} stats={dashboardStats} tasks={tasks} />
+        <DashboardView currentUser={currentUser} stats={dashboardStats} tasks={dashboardTasks} />
       )}
 
       {view === 'requests' && (
@@ -308,7 +343,22 @@ const OrganizationDashboard = () => {
         />
       )}
 
-      {!['dashboard', 'requests', 'resources'].includes(view) && (
+      {view === 'tasks' && (
+        <TasksView
+          tasks={tasks}
+          requests={responses}
+          loading={loading}
+          error={error}
+          onRetry={loadData}
+          onCreate={handleCreateTask}
+          onUpdate={handleUpdateTask}
+          onDelete={handleDeleteTask}
+          onSuggestDates={getTaskDateSuggestions}
+          onSuggestTasks={getTaskSuggestions}
+        />
+      )}
+
+      {!['dashboard', 'requests', 'resources', 'tasks'].includes(view) && (
         <ComingSoonPanel title={VIEW_TITLES[view]} />
       )}
     </PortalShell>
