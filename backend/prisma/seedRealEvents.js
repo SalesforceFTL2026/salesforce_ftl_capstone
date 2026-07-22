@@ -1,4 +1,3 @@
-git add backend/services/ingestion/eonet.js backend/services/ingestion/gdacs.js backend/services/ingestion/fema.js backend/services/ingestion/dedupe.js
 // Seed the database with help requests derived from REAL crisis events.
 //
 // Pipeline:  fetch real events (USGS, NWS, EONET, GDACS, FEMA) -> dedupe across
