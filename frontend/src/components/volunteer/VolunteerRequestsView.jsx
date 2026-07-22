@@ -3,6 +3,7 @@ import RequestCard from '../RequestCard/RequestCard';
 import RequestMap from '../map/RequestMap';
 import NearMeToggle from '../map/NearMeToggle';
 import HeatMap from '../organization/HeatMap';
+import RequestFilterBar from '../RequestFilterBar/RequestFilterBar';
 
 // Active Help Requests view for a volunteer, built from the product wireframe.
 // A view switcher (Calendar / List / Cards / Map) sits above the requests. The
@@ -35,7 +36,7 @@ const URGENCY_ORDER = { Critical: 0, High: 1, Medium: 2, Low: 3 };
 
 const VolunteerRequestsView = ({
   requests, loading, error, onRetry, onInteract, interactingId, confirmations,
-  near, onNearChange,
+  near, onNearChange, filters, onFiltersChange,
 }) => {
   const [activeView, setActiveView] = useState('list');
   // Which rows the volunteer has checked in the List view.
@@ -78,6 +79,17 @@ const VolunteerRequestsView = ({
 
   return (
     <div className="flex flex-col gap-5">
+      {/* Keyword search + category/urgency filters (issues #81, #82, #85).
+          Filtering happens on the backend, so changing these re-fetches the
+          feed via the dashboard's onFiltersChange handler. */}
+      {onFiltersChange && (
+        <RequestFilterBar
+          value={filters}
+          onChange={onFiltersChange}
+          resultCount={loading ? undefined : requests.length}
+        />
+      )}
+
       {/* View switcher + "Near me" geo-radius filter (issue #116). */}
       <div className="bg-[#c3d3ae] dark:bg-[#1f3320] rounded-3xl px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3 transition-colors duration-300">
         <div className="flex flex-wrap gap-2">

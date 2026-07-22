@@ -8,6 +8,30 @@ import api from './api';
 //   GET  /api/dashboard/volunteer       -> { success, data: [request, ...] }  (auth)
 //   POST /api/requests/:id/interact      -> { success, message, data }        (auth)
 
+// Build the query params for a feed request from the optional "Near me"
+// geo-radius filter (issue #116) and the optional category/urgency/keyword
+// filters (issues #81, #82). Only the params that are actually set are
+// included, so an omitted filter is simply absent from the request. The
+// backend ignores blank/unknown values and returns the un-narrowed feed.
+// See docs/FILTER_CONTRACT.md for the shared contract.
+const buildFeedParams = (near, filters) => {
+  const params = {};
+
+  if (near && near.lat != null && near.lng != null && near.radiusMiles != null) {
+    params.lat = near.lat;
+    params.lng = near.lng;
+    params.radius = near.radiusMiles;
+  }
+
+  if (filters?.category) params.category = filters.category;
+  if (filters?.urgency) params.urgency = filters.urgency;
+  if (filters?.search && filters.search.trim() !== '') {
+    params.search = filters.search.trim();
+  }
+
+  return Object.keys(params).length ? params : undefined;
+};
+
 // Fetch the AI-prioritized feed of active requests (highest priority first).
 // Returns the array of requests on success; throws on failure.
 //
@@ -15,11 +39,12 @@ import api from './api';
 // distance of a point ("Near me", issue #116). The backend (issue #115) filters
 // by the geo-radius and annotates each request with `distanceMiles`. Omit the
 // filter (or leave any field undefined) to get the full feed.
-export const getPrioritizedRequests = async (near) => {
-  const params =
-    near && near.lat != null && near.lng != null && near.radiusMiles != null
-      ? { lat: near.lat, lng: near.lng, radius: near.radiusMiles }
-      : undefined;
+//
+// Pass an optional { category, urgency, search } to narrow the feed by
+// category, urgency, or a free-text keyword (issues #81, #82). These compose
+// with the geo-radius filter, and the feed stays sorted by AI priority.
+export const getPrioritizedRequests = async (near, filters) => {
+  const params = buildFeedParams(near, filters);
 
   const { data } = await api.get('/api/requests/prioritized', { params });
 

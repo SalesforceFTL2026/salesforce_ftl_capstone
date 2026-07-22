@@ -102,6 +102,9 @@ const VolunteerDashboard = () => {
   // "Near me" geo-radius filter (issue #116): null = show everything, otherwise
   // { lat, lng, radiusMiles }. When set, the feed is re-fetched filtered to it.
   const [near, setNear] = useState(null);
+  // Category / urgency / keyword filters (issues #81, #82, #85). Empty strings
+  // mean "no filter"; when any is set the feed is re-fetched narrowed to it.
+  const [filters, setFilters] = useState({ search: '', category: '', urgency: '' });
   // Skill areas this volunteer lists on their profile (from the Volunteer row).
   // `skills` is the flat list of names used by dashboard stats; `skillsDetailed`
   // holds the { name, level } objects the Skills view edits.
@@ -136,8 +139,9 @@ const VolunteerDashboard = () => {
     if (!silent) setLoading(true);
     setError('');
     try {
-      // When "Near me" is on, ask the backend to geo-radius filter the feed.
-      setFeed(await getPrioritizedRequests(near));
+      // When "Near me" is on, ask the backend to geo-radius filter the feed;
+      // category/urgency/keyword filters (issues #81, #82) narrow it further.
+      setFeed(await getPrioritizedRequests(near, filters));
       try {
         setInterests(await getVolunteerInterests());
       } catch {
@@ -158,7 +162,7 @@ const VolunteerDashboard = () => {
     } finally {
       if (!silent) setLoading(false);
     }
-  }, [near]);
+  }, [near, filters]);
 
   useEffect(() => {
     loadData();
@@ -313,6 +317,8 @@ const VolunteerDashboard = () => {
           confirmations={confirmations}
           near={near}
           onNearChange={setNear}
+          filters={filters}
+          onFiltersChange={setFilters}
         />
       )}
 
