@@ -3,6 +3,7 @@ import LandingPage from './pages/LandingPage';
 import HelpSeekerDashboard from './pages/HelpSeekerDashboard';
 import VolunteerDashboard from './pages/VolunteerDashboard';
 import OrganizationDashboard from './pages/OrganizationDashboard';
+import AdminDashboard from './pages/AdminDashboard';
 import ComingSoon from './pages/ComingSoon';
 
 const App = () => {
@@ -19,6 +20,10 @@ const App = () => {
 
       {/* Organization dashboard: Priority Feed + Active Responses */}
       <Route path="/organization" element={<OrganizationDashboard />} />
+
+      {/* Admin demo dashboard: switch between the three persona views and
+          toggle preview-only vs. permanent edits (admin account only). */}
+      <Route path="/admin" element={<AdminDashboard />} />
 
       {/* Organization destination (placeholder for teammates) */}
       <Route path="/feed" element={<ComingSoon title="Volunteer Feed" />} />

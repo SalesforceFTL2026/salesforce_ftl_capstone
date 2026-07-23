@@ -11,6 +11,9 @@ const ROLE_PATHS = {
   'help-seeker': '/requests/new',
   'volunteer': '/dashboard',
   'organization': '/organization',
+  // The demo admin lands on the admin dashboard, where it can switch between
+  // the three persona views (see pages/AdminDashboard.jsx).
+  'admin': '/admin',
 };
 
 export const pathForRole = (role) => ROLE_PATHS[role] || '/';
