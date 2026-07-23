@@ -94,6 +94,14 @@ const HelpSeekerDashboard = () => {
     navigate('/');
   };
 
+  // Close the New Request / Edit modal and return to the dashboard. Used by the
+  // × button, a backdrop click, and the Escape key so a user who changes their
+  // mind mid-form can always back out without submitting.
+  const closeRequestModal = () => {
+    setShowForm(false);
+    setEditingRequest(null);
+  };
+
   // Save the chosen UI language to the user's profile and switch the live UI.
   const handleChangeLanguage = async (e) => {
     const lang = e.target.value;
@@ -162,6 +170,17 @@ const HelpSeekerDashboard = () => {
   useEffect(() => {
     loadRequests();
   }, [loadRequests]);
+
+  // Let Escape close the New Request / Edit modal while it's open, so backing
+  // out of the form is as easy as opening it.
+  useEffect(() => {
+    if (!showForm && !editingRequest) return undefined;
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') closeRequestModal();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [showForm, editingRequest]);
 
   // Auto-refresh so newly submitted requests (including voice ones) appear
   // without a manual reload (#157). Silent so it doesn't flash the spinner.
@@ -383,16 +402,21 @@ const HelpSeekerDashboard = () => {
         hideLauncher
       />
 
-      {/* Make New Request / Edit Request modal */}
+      {/* Make New Request / Edit Request modal. Clicking the dark backdrop
+          closes it (returns to the dashboard); clicking inside the form does
+          not, so a stray click while filling it in won't discard the form. */}
       {(showForm || editingRequest) && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="w-full max-w-lg relative">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+          onClick={closeRequestModal}
+        >
+          <div
+            className="w-full max-w-lg relative"
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
               type="button"
-              onClick={() => {
-                setShowForm(false);
-                setEditingRequest(null);
-              }}
+              onClick={closeRequestModal}
               aria-label={t('common.close')}
               className="absolute -top-3 -right-3 z-10 w-9 h-9 rounded-full bg-white text-gray-600 hover:text-gray-900 shadow-md text-2xl leading-none"
             >
@@ -401,6 +425,7 @@ const HelpSeekerDashboard = () => {
             <HelpRequestForm
               compact
               request={editingRequest}
+              onClose={closeRequestModal}
               onCreated={() => {
                 loadRequests();
                 setShowForm(false);

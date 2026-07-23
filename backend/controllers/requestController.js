@@ -53,13 +53,30 @@ export const createRequest = async (req, res) => {
       });
     }
 
-    const { category, urgency, location, description, householdSize } = req.body;
+    const { category, urgency, categories, location, description, householdSize } = req.body;
 
-    // Validation
-    if (!category || !urgency || !location || !description) {
+    // A help-seeker can now ask for several kinds of help at once (e.g. Food +
+    // Medical), and each becomes its OWN request so it can be prioritized,
+    // tracked, and fulfilled independently. The client sends `categories`, an
+    // array of { category, urgency } pairs. For backward compatibility (the
+    // voice form and edit flow still send a single category/urgency), we fall
+    // back to wrapping those into a one-item array.
+    const items =
+      Array.isArray(categories) && categories.length > 0
+        ? categories
+        : [{ category, urgency }];
+
+    // Shared-field validation (location + description apply to every request).
+    if (!location || !description) {
       return res.status(400).json({
         success: false,
-        message: 'Missing required fields: category, urgency, location, and description are required'
+        message: 'Missing required fields: location and description are required'
+      });
+    }
+    if (items.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Select at least one category.'
       });
     }
 
@@ -78,58 +95,75 @@ export const createRequest = async (req, res) => {
       });
     }
 
-    // Validate category
+    // Validate every category/urgency pair before creating anything, so a bad
+    // pair fails the whole submission instead of leaving partial requests.
     const validCategories = ['Food', 'Shelter', 'Medical', 'Transport', 'Other'];
-    if (!validCategories.includes(category)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid category. Must be one of: Food, Shelter, Medical, Transport, Other'
-      });
-    }
-
-    // Validate urgency
     const validUrgencies = ['Low', 'Medium', 'High', 'Critical'];
-    if (!validUrgencies.includes(urgency)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid urgency. Must be one of: Low, Medium, High, Critical'
-      });
+    for (const item of items) {
+      if (!item?.category || !item?.urgency) {
+        return res.status(400).json({
+          success: false,
+          message: 'Each selected category needs both a category and an urgency.'
+        });
+      }
+      if (!validCategories.includes(item.category)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid category. Must be one of: Food, Shelter, Medical, Transport, Other'
+        });
+      }
+      if (!validUrgencies.includes(item.urgency)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid urgency. Must be one of: Low, Medium, High, Critical'
+        });
+      }
     }
 
     // Best-effort geocode so the request can be plotted on the map. A location
     // we can't resolve just saves without coordinates (never blocks creation).
+    // Location is shared across all the requests, so we only geocode once.
     const coords = await geocodeLocation(location);
 
-    // Create request, stamping it with the logged-in user's real identity.
-    const newRequest = await requestModel.createRequest({
-      userId: req.user.id,
-      submitterName: req.user.name,
-      submitterRole: req.user.role,
-      category,
-      urgency,
-      location,
-      latitude: coords?.latitude ?? null,
-      longitude: coords?.longitude ?? null,
-      description,
-      householdSize: parsedHouseholdSize
-    });
+    // Create + prioritize one request per selected category. Prioritization is
+    // best-effort per request: if scoring one fails, that request is still
+    // created (score stays 0 until something re-prioritizes it) and the rest
+    // continue.
+    const created = [];
+    for (const item of items) {
+      const newRequest = await requestModel.createRequest({
+        userId: req.user.id,
+        submitterName: req.user.name,
+        submitterRole: req.user.role,
+        category: item.category,
+        urgency: item.urgency,
+        location,
+        latitude: coords?.latitude ?? null,
+        longitude: coords?.longitude ?? null,
+        description,
+        householdSize: parsedHouseholdSize
+      });
 
-    // Run the AI prioritization pipeline so the request gets a real priority
-    // score (and reasoning) right away. This is best-effort: if scoring fails
-    // the request is still created — it just stays at its default score of 0
-    // until something re-prioritizes it.
-    let scored = newRequest;
-    try {
-      const { priorityScore, reasoning } = await prioritizeRequest(newRequest.id);
-      scored = { ...newRequest, priorityScore, reasoning };
-    } catch (scoreError) {
-      console.error('Prioritization failed for new request:', scoreError.message);
+      let scored = newRequest;
+      try {
+        const { priorityScore, reasoning } = await prioritizeRequest(newRequest.id);
+        scored = { ...newRequest, priorityScore, reasoning };
+      } catch (scoreError) {
+        console.error('Prioritization failed for new request:', scoreError.message);
+      }
+      created.push(scored);
     }
 
+    // Legacy single-category callers still get a single object back in `data`;
+    // multi-category callers get the full array. `count` is always present.
     res.status(201).json({
       success: true,
-      message: 'Help request submitted successfully',
-      data: scored
+      message:
+        created.length > 1
+          ? `${created.length} help requests submitted successfully`
+          : 'Help request submitted successfully',
+      count: created.length,
+      data: created.length === 1 ? created[0] : created
     });
   } catch (error) {
     console.error('Error creating request:', error);
