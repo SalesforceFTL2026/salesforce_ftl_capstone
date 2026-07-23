@@ -443,7 +443,18 @@
       "signedUp": "✓ Signed up",
       "withdraw": "Withdraw",
       "withdrawing": "Withdrawing…",
-      "notSet": "Not set"
+      "notSet": "Not set",
+      "detail": {
+        "title": "Help request details",
+        "close": "Close details",
+        "viewFrom": "View details for request from {{name}}",
+        "description": "Description",
+        "location": "Location",
+        "submitted": "Time submitted",
+        "householdSize": "Household size",
+        "volunteersInterested": "Volunteers interested",
+        "orgsResponding": "Organizations responding"
+      }
     },
     "calendar": {
       "previousMonth": "Previous month",
