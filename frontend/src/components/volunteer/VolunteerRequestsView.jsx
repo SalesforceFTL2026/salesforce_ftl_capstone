@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import RequestCard from '../RequestCard/RequestCard';
+import RequestDetailsModal from '../RequestCard/RequestDetailsModal';
 import RequestMap from '../map/RequestMap';
 import NearMeToggle from '../map/NearMeToggle';
 import RequestFilterBar from '../RequestFilterBar/RequestFilterBar';
@@ -44,6 +45,8 @@ const VolunteerRequestsView = ({
   const [selectedIds, setSelectedIds] = useState(() => new Set());
   // Sort toggle behind the filter icon: default (priority) vs. by urgency.
   const [sortByUrgency, setSortByUrgency] = useState(false);
+  // The request whose full-details modal is open (List view), or null.
+  const [detailRequest, setDetailRequest] = useState(null);
 
   const rows = useMemo(() => {
     if (!sortByUrgency) return requests;
@@ -151,6 +154,7 @@ const VolunteerRequestsView = ({
           onWithdraw={onWithdraw}
           withdrawingId={withdrawingId}
           onHelpWithSelected={helpWithSelected}
+          onRowClick={setDetailRequest}
         />
       )}
 
@@ -202,6 +206,9 @@ const VolunteerRequestsView = ({
           withdrawingId={withdrawingId}
         />
       )}
+
+      {/* Full-details modal, opened by tapping a row in the List view. */}
+      <RequestDetailsModal request={detailRequest} onClose={() => setDetailRequest(null)} />
     </div>
   );
 };
@@ -390,6 +397,7 @@ const COLS = 'grid-cols-[2.5rem_minmax(8rem,1.5fr)_1fr_1fr_7rem_1.3fr_12rem]';
 const ListView = ({
   rows, allChecked, selectedIds, onToggleAll, onToggleOne, sortByUrgency, onToggleSort,
   onInteract, interactingId, confirmations, onWithdraw, withdrawingId, onHelpWithSelected,
+  onRowClick,
 }) => {
   const { t } = useTranslation();
   // Which rows have their AI reasoning expanded.
@@ -468,11 +476,24 @@ const ListView = ({
           const interacting = interactingId === r.id;
           return (
             <div key={r.id} className="border-t border-white/70 dark:border-white/10">
-              <div className={`grid ${COLS} items-center gap-4 px-5 py-5 text-lg text-[#1C2A16] dark:text-gray-100`}>
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={() => onRowClick?.(r)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onRowClick?.(r);
+                  }
+                }}
+                aria-label={t('volunteer.requests.detail.viewFrom', { name: r.submitterName || r.requesterName || r.name || t('volunteer.requests.helpSeekerLower') })}
+                className={`grid ${COLS} items-center gap-4 px-5 py-5 text-lg text-[#1C2A16] dark:text-gray-100 cursor-pointer hover:bg-white/60 dark:hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#6ba3d3]/40 transition-colors`}
+              >
                 <input
                   type="checkbox"
                   checked={selectedIds.has(r.id)}
                   onChange={() => onToggleOne(r.id)}
+                  onClick={(e) => e.stopPropagation()}
                   aria-label={t('volunteer.requests.selectRequestFrom', { name: r.submitterName || r.requesterName || r.name || t('volunteer.requests.helpSeekerLower') })}
                   className="w-5 h-5 rounded accent-[#6ba3d3]"
                 />
@@ -523,7 +544,7 @@ const ListView = ({
 // Per-row actions: a "Why?" toggle for the AI reasoning and an "I can help"
 // button (which becomes a confirmation once interest is recorded).
 const RowActions = ({ request, expanded, onToggleExpanded, onInteract, interacting, confirmation, onWithdraw, withdrawing, t }) => (
-  <div className="flex items-center gap-2 justify-end">
+  <div className="flex items-center gap-2 justify-end" onClick={(e) => e.stopPropagation()}>
     {request.reasoning && (
       <button
         type="button"
