@@ -1,4 +1,5 @@
 import * as requestModel from '../models/requestModel.js';
+import * as taskModel from '../models/volunteerTaskModel.js';
 import prisma from '../services/database/prisma.js';
 import { prioritizeRequest } from '../services/ai/prioritizer.js';
 import { geocodeLocation, haversineMiles } from '../services/geocoding/geocoder.js';
@@ -682,6 +683,25 @@ export const withdrawInterest = async (req, res) => {
         responderType: 'volunteer'
       }
     });
+
+    // Withdrawing from the request also drops this volunteer from any org tasks
+    // tied to it — a volunteer who's no longer helping with the need shouldn't
+    // stay signed up for its tasks.
+    await taskModel.withdrawFromRequestTasks(id, req.user.id);
+
+    // If no volunteers remain interested, roll the request back to pending so it
+    // returns to the active feed for someone else to pick up. Only step down
+    // from 'assigned' (the status a volunteer's interest set) — never override a
+    // status an organization has advanced past that.
+    const remainingVolunteers = await prisma.response.count({
+      where: { requestId: id, responderType: 'volunteer' }
+    });
+    if (remainingVolunteers === 0) {
+      const request = await requestModel.getRequestById(id);
+      if (request && request.status === 'assigned') {
+        await requestModel.updateRequestStatus(id, 'pending');
+      }
+    }
 
     res.status(200).json({
       success: true,

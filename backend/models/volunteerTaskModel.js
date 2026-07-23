@@ -151,6 +151,24 @@ export const signUpForTask = async (taskId, userId) => {
   });
 };
 
+// Withdraw a volunteer from every task tied to a given help request. Used when
+// the volunteer withdraws their interest in the request itself, so they aren't
+// left signed up for that request's tasks. Reuses withdrawFromTask per task so
+// each task's confirmed count and readiness stamp stay correct. Returns the
+// number of tasks the volunteer was removed from.
+export const withdrawFromRequestTasks = async (requestId, userId) => {
+  const signups = await prisma.taskSignup.findMany({
+    where: { userId, task: { requestId } },
+    select: { taskId: true },
+  });
+
+  for (const { taskId } of signups) {
+    await withdrawFromTask(taskId, userId);
+  }
+
+  return signups.length;
+};
+
 // Withdraw a volunteer from a task. Removes the signup row and decrements the
 // confirmed count (never below zero). Idempotent: withdrawing when not signed
 // up is a no-op.
@@ -240,4 +258,5 @@ export default {
   getAvailableTasks,
   signUpForTask,
   withdrawFromTask,
+  withdrawFromRequestTasks,
 };

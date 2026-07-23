@@ -437,6 +437,9 @@
       "why": "Why?",
       "helping": "✓ Helping",
       "iCanHelp": "I can help",
+      "signedUp": "✓ Signed up",
+      "withdraw": "Withdraw",
+      "withdrawing": "Withdrawing…",
       "notSet": "Not set"
     },
     "calendar": {
@@ -499,7 +502,10 @@
       "statusLabel": "Status:",
       "helped": "✓ Helped",
       "markAsHelped": "Mark as helped",
-      "iCanHelpWithThis": "I can help with this"
+      "iCanHelpWithThis": "I can help with this",
+      "signedUp": "✓ Signed up",
+      "withdraw": "Withdraw",
+      "withdrawing": "Withdrawing…"
     },
     "statusOptions": {
       "pending": "pending",
@@ -610,7 +616,10 @@
         "aiScore": "AI {{score}}",
         "helping": "✓ Helping",
         "saving": "Saving…",
-        "iCanHelp": "I can help"
+        "iCanHelp": "I can help",
+        "signedUp": "✓ Signed up",
+        "withdraw": "Withdraw",
+        "withdrawing": "Withdrawing…"
       }
     }
   },
