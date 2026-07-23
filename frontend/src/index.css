@@ -4,6 +4,18 @@
 
 @layer base {
   body {
-    @apply bg-gray-50 text-gray-900;
+    @apply bg-white text-gray-900;
+    font-family: "Alumni Sans SC", ui-sans-serif, system-ui, sans-serif;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    /* Alumni Sans SC is a condensed small-caps display font, so it reads small.
+       Bump the root size up so all rem-based text is larger and easier to read. */
+    font-size: 118.75%; /* ~19px base instead of the default 16px */
+  }
+
+  html.dark body {
+    @apply bg-black text-gray-100;
   }
 }

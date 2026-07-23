@@ -1,0 +1,13 @@
+/* Outer spacing around the Help Request form so its card doesn't sit flush
+   against the dashboard column edges. This is space OUTSIDE the card. */
+.help-request-form-wrapper {
+  padding: 1.5rem;
+}
+
+/* On small screens the dashboard is a single column, so trim the side padding
+   to keep the form from feeling cramped left-to-right. */
+@media (max-width: 1024px) {
+  .help-request-form-wrapper {
+    padding: 1rem 0;
+  }
+}

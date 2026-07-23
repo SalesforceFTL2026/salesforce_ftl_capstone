@@ -16,7 +16,10 @@ model Request {
   category      String   // Food, Shelter, Medical, Transport, Other
   urgency       String   // Low, Medium, High, Critical
   location      String   // City, zip code, or coordinates
+  latitude      Float?   // Geocoded from `location`; drives the map view
+  longitude     Float?   // Geocoded from `location`; drives the map view
   description   String   // Brief description of need
+  householdSize Int?     // Number of people in the requester's household (drives "people helped")
   embeddingJson String?  // AI-generated vector embeddings (JSON)
   priorityScore Float    @default(0)  // AI-calculated priority (0-100)
   reasoning     String?  // AI explanation for priority
@@ -31,6 +34,8 @@ model Request {
   matches       Match[]
   votes         Vote[]
   crisisEvents  RequestEvent[]
+  allocations   ResourceAllocation[]
+  volunteerTasks VolunteerTask[]
 
   @@index([priorityScore])
   @@index([category])
@@ -49,6 +54,7 @@ model User {
   role              String   // help-seeker, volunteer, organization
   location          String?
   phoneNumber       String?
+  languagePreference String? @default("en")  // UI language: "en" | "es" | "zh"
   verified          Boolean  @default(false)
   active            Boolean  @default(true)
   createdAt         DateTime @default(now())
@@ -65,6 +71,7 @@ model User {
   sentMessages      Message[] @relation("sender")
   receivedMessages  Message[] @relation("receiver")
   votes             Vote[]
+  taskSignups       TaskSignup[]
 
   @@index([email])
   @@index([role])
@@ -107,9 +114,67 @@ model Organization {
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   matches         Match[]
   resources       Resource[]
+  volunteerTasks  VolunteerTask[]
 
   @@index([userId])
   @@index([verified])
+}
+
+// Help tasks an organization posts for volunteers to sign up for. Every task is
+// attributed to an existing help Request (VolunteerTask.requestId -> Request.id)
+// — the request is the need the task addresses. The org sets a min/max number of
+// volunteers; the task can't be marked in-progress until the minimum is met AND
+// the necessary resources are ready. Once both have held for two days, the task
+// auto-advances to in-progress (computed on load).
+//
+// NOTE: the volunteer sign-up side isn't built yet. For now `volunteersConfirmed`
+// is a manual count the org maintains; the future volunteer flow will increment
+// the same field.
+model VolunteerTask {
+  id                  String   @id @default(cuid())
+  organizationId      String
+  requestId           String   // the help request this task addresses
+  title               String
+  description         String
+  category            String?  // Food, Shelter, Medical, Transport, Other
+  urgency             String   @default("Medium")  // Low, Medium, High, Critical — feeds AI date priority
+  skillsNeeded        String?  // JSON array: ["medical", "logistics", "translation"]
+  minVolunteers       Int      @default(1)
+  maxVolunteers       Int?     // null = no cap
+  volunteersConfirmed Int      @default(0)  // manual count until volunteer sign-up ships
+  resourcesReady      Boolean  @default(false)  // org confirms necessary resources are on hand
+  volunteerDate       DateTime?  // the scheduled volunteer day (shown to volunteers later)
+  readySince          DateTime?  // when min volunteers + resources were first both met
+  status              String   @default("open")  // open, in-progress, completed, cancelled
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  organization        Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  request             Request      @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  signups             TaskSignup[]
+
+  @@index([organizationId])
+  @@index([requestId])
+  @@index([status])
+  @@index([volunteerDate])
+}
+
+// A volunteer signing up for a specific org-created VolunteerTask. One row per
+// (task, volunteer); the unique constraint keeps a volunteer from signing up
+// for the same task twice. Signing up bumps the task's volunteersConfirmed
+// count (which feeds the readiness gate); withdrawing decrements it.
+model TaskSignup {
+  id        String   @id @default(cuid())
+  taskId    String
+  userId    String   // the volunteer's User id
+  createdAt DateTime @default(now())
+
+  task      VolunteerTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, userId])
+  @@index([taskId])
+  @@index([userId])
 }
 
 // WEEK 3: Organization resources inventory
@@ -127,10 +192,30 @@ model Resource {
   updatedAt       DateTime @updatedAt
 
   organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  allocations     ResourceAllocation[]
 
   @@index([organizationId])
   @@index([resourceType])
   @@index([available])
+}
+
+// WEEK 3: Allocations — an amount of a Resource assigned to a help Request.
+// Assigning decrements the resource's on-hand quantity; removing an allocation
+// returns it. This is how an org earmarks "5 meals -> this family's request".
+model ResourceAllocation {
+  id              String   @id @default(cuid())
+  resourceId      String
+  requestId       String
+  quantity        Int      // how many units of the resource are assigned
+  note            String?  // optional context (e.g. "AI-suggested", delivery notes)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  resource        Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  request         Request  @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  @@index([resourceId])
+  @@index([requestId])
 }
 
 // WEEK 2-3: Responses to requests (volunteer/org claiming to help)
@@ -212,12 +297,24 @@ model CrisisEvent {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
+  // Ingestion fields: set when this event was pulled from an external feed
+  // (USGS/NWS/EONET/GDACS/FEMA) rather than detected internally. Null for
+  // internally-clustered crises. (source, externalId) is unique so the daily
+  // ingest job can upsert instead of duplicating.
+  source          String?  // 'usgs' | 'nws' | 'eonet' | 'gdacs' | 'fema'
+  externalId      String?  // stable id from the source feed
+  latitude        Float?   // event coordinates, for the map overlay
+  longitude       Float?
+  url             String?  // canonical link back to the source
+
   requests        RequestEvent[]
 
+  @@unique([source, externalId])
   @@index([active])
   @@index([eventType])
   @@index([severity])
   @@index([startDate])
+  @@index([source])
 }
 
 // WEEK 4: Join table for requests belonging to crisis events

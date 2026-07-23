@@ -9,18 +9,31 @@ const prisma = new PrismaClient();
 
 // Create a new help request
 export const createRequest = async (requestData) => {
-  const { submitterName, category, urgency, location, description } = requestData;
+  const { userId, submitterName, submitterRole, category, urgency, location, latitude, longitude, description, householdSize } = requestData;
 
   return await prisma.request.create({
     data: {
+      userId: userId || null,          // link to the logged-in user when present
       submitterName: submitterName || null,
+      submitterRole: submitterRole || null,
       category,
       urgency,
       location,
+      latitude: latitude ?? null,      // geocoded from `location`; drives the map view
+      longitude: longitude ?? null,
       description,
+      householdSize: householdSize ?? null,  // optional; drives "people helped" on the volunteer dashboard
       status: 'pending',
       priorityScore: 0
     }
+  });
+};
+
+// Get all requests submitted by a specific user (newest first)
+export const getRequestsByUser = async (userId) => {
+  return await prisma.request.findMany({
+    where: { userId },
+    orderBy: { createdAt: 'desc' }
   });
 };
 
@@ -41,14 +54,44 @@ export const getRequestById = async (id) => {
 };
 
 // Get prioritized requests (sorted by priority score)
+// Issue #17: Include status and interaction counts
 export const getPrioritizedRequests = async () => {
-  return await prisma.request.findMany({
+  const requests = await prisma.request.findMany({
     where: {
-      status: 'pending'
+      status: {
+        in: ['pending', 'in-progress'], // Only show active requests
+      },
+    },
+    include: {
+      responses: {
+        select: {
+          responderType: true,
+        },
+      },
     },
     orderBy: {
-      priorityScore: 'desc'
-    }
+      priorityScore: 'desc',
+    },
+  });
+
+  // Add interaction counts to each request
+  return requests.map((request) => {
+    const volunteerInterestCount = request.responses.filter(
+      (r) => r.responderType === 'volunteer'
+    ).length;
+
+    const organizationRespondingCount = request.responses.filter(
+      (r) => r.responderType === 'organization'
+    ).length;
+
+    // Remove the responses array and replace with counts
+    const { responses, ...requestWithoutResponses } = request;
+
+    return {
+      ...requestWithoutResponses,
+      volunteerInterestCount,
+      organizationRespondingCount,
+    };
   });
 };
 
@@ -68,6 +111,16 @@ export const updateRequestStatus = async (id, status) => {
   return await prisma.request.update({
     where: { id },
     data: { status }
+  });
+};
+
+// Update a request's category and/or description.
+// Used by organizations to categorize requests and add detail to them.
+// Only the fields provided in `fields` are changed; anything omitted is left as-is.
+export const updateRequestDetails = async (id, fields) => {
+  return await prisma.request.update({
+    where: { id },
+    data: fields
   });
 };
 
@@ -115,11 +168,13 @@ export const getRequestsByLocation = async (location) => {
 
 export default {
   createRequest,
+  getRequestsByUser,
   getAllRequests,
   getRequestById,
   getPrioritizedRequests,
   updateRequestPriority,
   updateRequestStatus,
+  updateRequestDetails,
   deleteRequest,
   getRequestsByCategory,
   getRequestsByUrgency,

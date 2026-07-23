@@ -4,7 +4,14 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 import prioritizeRoutes from './routes/prioritize.js';
+import authRoutes from './routes/auth.js';
 import requestRoutes from './routes/requests.js';
+import dashboardRoutes from './routes/dashboard.js';
+import chatRoutes from './routes/chat.js';
+import emergencyRoutes from './routes/emergency.js';
+import resourceRoutes from './routes/resources.js';
+import crisisEventRoutes from './routes/crisisEvents.js';
+import volunteerTaskRoutes from './routes/volunteerTasks.js';
 
 dotenv.config();
 
@@ -19,9 +26,9 @@ app.use(morgan('dev'));
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
-    message: 'Crisis360 API is running',
+  res.json({
+    status: 'ok',
+    message: 'MapResponse API is running',
     timestamp: new Date().toISOString()
   });
 });
@@ -29,6 +36,13 @@ app.get('/health', (req, res) => {
 // Routes
 app.use('/api/requests', requestRoutes);
 app.use('/api/prioritize', prioritizeRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/chat', chatRoutes);
+app.use('/api/emergency', emergencyRoutes);
+app.use('/api/resources', resourceRoutes);
+app.use('/api/crisis-events', crisisEventRoutes);
+app.use('/api/volunteer-tasks', volunteerTaskRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -45,6 +59,6 @@ app.use((req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://calhost:${PORT}`);
-  console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(` Server running on http://calhost:${PORT}`);
+  console.log(` Environment: ${process.env.NODE_ENV || 'development'}`);
 });

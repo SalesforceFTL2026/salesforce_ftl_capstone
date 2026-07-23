@@ -1,7 +1,7 @@
 {
-  "name": "crisis360-backend",
+  "name": "mapresponse-backend",
   "version": "1.0.0",
-  "description": "Crisis360 Backend API",
+  "description": "MapResponse Backend API",
   "type": "module",
   "main": "server.js",
   "scripts": {
@@ -9,7 +9,9 @@
     "start": "node server.js",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
-    "prisma:generate": "prisma generate"
+    "prisma:generate": "prisma generate",
+    "seed:real-events": "node prisma/seedRealEvents.js",
+    "ingest:events": "node services/ingestion/ingestEvents.js"
   },
   "keywords": [
     "crisis",
@@ -20,14 +22,19 @@
   "license": "MIT",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.1",
+    "@google/generative-ai": "^0.24.1",
     "@prisma/client": "6.7.0",
+    "bcrypt": "^6.0.0",
     "cohere-ai": "^8.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "google-auth-library": "^10.9.0",
     "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.3",
     "ml-distance": "^4.0.1",
     "morgan": "^1.10.0",
+    "multer": "^2.2.0",
     "openai": "^4.73.0"
   },
   "devDependencies": {

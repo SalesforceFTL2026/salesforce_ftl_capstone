@@ -1,54 +1,169 @@
 import * as requestModel from '../models/requestModel.js';
+import * as taskModel from '../models/volunteerTaskModel.js';
+import prisma from '../services/database/prisma.js';
+import { prioritizeRequest } from '../services/ai/prioritizer.js';
+import { geocodeLocation, haversineMiles } from '../services/geocoding/geocoder.js';
+import { parseRadiusFilter, filterWithinRadius } from '../services/geocoding/distance.js';
+import { filterRequestsFromQuery } from '../services/filters/requestFilters.js';
+import { transcribeAudio, extractRequestFields } from '../services/ai/index.js';
 
 /**
  * Request Controller
  * Handles business logic for help request endpoints
  */
 
+// Sentinel returned by parseHouseholdSize when the value can't be used, so we
+// can tell "not provided" (null) apart from "provided but invalid".
+const INVALID_HOUSEHOLD_SIZE = Symbol('invalid-household-size');
+
+// Normalize an incoming householdSize into: null (not provided / blank),
+// a positive integer, or INVALID_HOUSEHOLD_SIZE. Accepts numbers or numeric
+// strings from form submissions.
+const parseHouseholdSize = (value) => {
+  if (value === undefined || value === null || value === '') {
+    return null;
+  }
+  const n = Number(value);
+  if (!Number.isInteger(n) || n < 1) {
+    return INVALID_HOUSEHOLD_SIZE;
+  }
+  return n;
+};
+
+// Decides whether a logged-in user is allowed to manage (update/delete) a request.
+// The rule: organizations can manage any request, and a help-seeker can manage
+// only the request they submitted themselves. Everyone else is not allowed.
+const canManageRequest = (user, request) => {
+  if (user.role === 'organization') {
+    return true;
+  }
+  return user.role === 'help-seeker' && request.userId === user.id;
+};
+
 // Create a new help request
+// Requires authentication: the submitter's identity comes from the logged-in
+// user (req.user), NOT from the request body, so clients can't spoof who they are.
 export const createRequest = async (req, res) => {
   try {
-    const { submitterName, category, urgency, location, description } = req.body;
-
-    // Validation
-    if (!category || !urgency || !location || !description) {
-      return res.status(400).json({
+    // Only help-seekers can submit help requests.
+    if (req.user.role !== 'help-seeker') {
+      return res.status(403).json({
         success: false,
-        message: 'Missing required fields: category, urgency, location, and description are required'
+        message: 'Only help-seekers can submit a help request.'
       });
     }
 
-    // Validate category
+    const { category, urgency, categories, location, description, householdSize } = req.body;
+
+    // A help-seeker can now ask for several kinds of help at once (e.g. Food +
+    // Medical), and each becomes its OWN request so it can be prioritized,
+    // tracked, and fulfilled independently. The client sends `categories`, an
+    // array of { category, urgency } pairs. For backward compatibility (the
+    // voice form and edit flow still send a single category/urgency), we fall
+    // back to wrapping those into a one-item array.
+    const items =
+      Array.isArray(categories) && categories.length > 0
+        ? categories
+        : [{ category, urgency }];
+
+    // Shared-field validation (location + description apply to every request).
+    if (!location || !description) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required fields: location and description are required'
+      });
+    }
+    if (items.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Select at least one category.'
+      });
+    }
+
+    // Household size is required and must be a positive whole number.
+    const parsedHouseholdSize = parseHouseholdSize(householdSize);
+    if (parsedHouseholdSize === null) {
+      return res.status(400).json({
+        success: false,
+        message: 'Household size is required.'
+      });
+    }
+    if (parsedHouseholdSize === INVALID_HOUSEHOLD_SIZE) {
+      return res.status(400).json({
+        success: false,
+        message: 'Household size must be a whole number of 1 or more.'
+      });
+    }
+
+    // Validate every category/urgency pair before creating anything, so a bad
+    // pair fails the whole submission instead of leaving partial requests.
     const validCategories = ['Food', 'Shelter', 'Medical', 'Transport', 'Other'];
-    if (!validCategories.includes(category)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid category. Must be one of: Food, Shelter, Medical, Transport, Other'
-      });
-    }
-
-    // Validate urgency
     const validUrgencies = ['Low', 'Medium', 'High', 'Critical'];
-    if (!validUrgencies.includes(urgency)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid urgency. Must be one of: Low, Medium, High, Critical'
-      });
+    for (const item of items) {
+      if (!item?.category || !item?.urgency) {
+        return res.status(400).json({
+          success: false,
+          message: 'Each selected category needs both a category and an urgency.'
+        });
+      }
+      if (!validCategories.includes(item.category)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid category. Must be one of: Food, Shelter, Medical, Transport, Other'
+        });
+      }
+      if (!validUrgencies.includes(item.urgency)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid urgency. Must be one of: Low, Medium, High, Critical'
+        });
+      }
     }
 
-    // Create request
-    const newRequest = await requestModel.createRequest({
-      submitterName,
-      category,
-      urgency,
-      location,
-      description
-    });
+    // Best-effort geocode so the request can be plotted on the map. A location
+    // we can't resolve just saves without coordinates (never blocks creation).
+    // Location is shared across all the requests, so we only geocode once.
+    const coords = await geocodeLocation(location);
 
+    // Create + prioritize one request per selected category. Prioritization is
+    // best-effort per request: if scoring one fails, that request is still
+    // created (score stays 0 until something re-prioritizes it) and the rest
+    // continue.
+    const created = [];
+    for (const item of items) {
+      const newRequest = await requestModel.createRequest({
+        userId: req.user.id,
+        submitterName: req.user.name,
+        submitterRole: req.user.role,
+        category: item.category,
+        urgency: item.urgency,
+        location,
+        latitude: coords?.latitude ?? null,
+        longitude: coords?.longitude ?? null,
+        description,
+        householdSize: parsedHouseholdSize
+      });
+
+      let scored = newRequest;
+      try {
+        const { priorityScore, reasoning } = await prioritizeRequest(newRequest.id);
+        scored = { ...newRequest, priorityScore, reasoning };
+      } catch (scoreError) {
+        console.error('Prioritization failed for new request:', scoreError.message);
+      }
+      created.push(scored);
+    }
+
+    // Legacy single-category callers still get a single object back in `data`;
+    // multi-category callers get the full array. `count` is always present.
     res.status(201).json({
       success: true,
-      message: 'Help request submitted successfully',
-      data: newRequest
+      message:
+        created.length > 1
+          ? `${created.length} help requests submitted successfully`
+          : 'Help request submitted successfully',
+      count: created.length,
+      data: created.length === 1 ? created[0] : created
     });
   } catch (error) {
     console.error('Error creating request:', error);
@@ -61,9 +176,25 @@ export const createRequest = async (req, res) => {
 };
 
 // Get all requests
+// Optional geo-radius filter (issue #115): pass ?lat=&lng=&radius= (radius in
+// miles) to keep only requests within that distance of the point. Each returned
+// request is annotated with `distanceMiles`. An absent or malformed filter is
+// ignored and all requests are returned.
+//
+// Optional attribute filters (issues #81, #82): pass ?category=, ?urgency=,
+// and/or ?search= to narrow the list by category, urgency, or a free-text
+// keyword (matched against description, location, category, and submitter
+// name). Unknown/blank filter values are ignored. See docs/FILTER_CONTRACT.md.
 export const getAllRequests = async (req, res) => {
   try {
-    const requests = await requestModel.getAllRequests();
+    let requests = await requestModel.getAllRequests();
+
+    const radiusFilter = parseRadiusFilter(req.query);
+    if (radiusFilter) {
+      requests = filterWithinRadius(requests, radiusFilter);
+    }
+
+    requests = filterRequestsFromQuery(requests, req.query);
 
     res.status(200).json({
       success: true,
@@ -74,6 +205,25 @@ export const getAllRequests = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch requests',
+      error: error.message
+    });
+  }
+};
+
+// Get the logged-in user's own requests
+export const getMyRequests = async (req, res) => {
+  try {
+    const requests = await requestModel.getRequestsByUser(req.user.id);
+
+    res.status(200).json({
+      success: true,
+      data: requests
+    });
+  } catch (error) {
+    console.error('Error fetching user requests:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch your requests',
       error: error.message
     });
   }
@@ -108,9 +258,28 @@ export const getRequestById = async (req, res) => {
 };
 
 // Get prioritized requests
+// Optional geo-radius filter (issue #115): pass ?lat=&lng=&radius= (radius in
+// miles) to keep only requests within that distance — this is what the "Near
+// me" toggle (issue #116) on the volunteer/org feeds calls. Each returned
+// request is annotated with `distanceMiles`. An absent or malformed filter is
+// ignored and the full prioritized feed is returned.
+//
+// Optional attribute filters (issues #81, #82): pass ?category=, ?urgency=,
+// and/or ?search= to narrow the feed by category, urgency, or a free-text
+// keyword (matched against description, location, category, and submitter
+// name). These compose with the geo-radius filter and with each other, and the
+// feed stays sorted by AI priority. Unknown/blank filter values are ignored.
+// See docs/FILTER_CONTRACT.md for the full param contract (issue #83).
 export const getPrioritizedRequests = async (req, res) => {
   try {
-    const requests = await requestModel.getPrioritizedRequests();
+    let requests = await requestModel.getPrioritizedRequests();
+
+    const radiusFilter = parseRadiusFilter(req.query);
+    if (radiusFilter) {
+      requests = filterWithinRadius(requests, radiusFilter);
+    }
+
+    requests = filterRequestsFromQuery(requests, req.query);
 
     res.status(200).json({
       success: true,
@@ -126,7 +295,61 @@ export const getPrioritizedRequests = async (req, res) => {
   }
 };
 
+// Get the distance (in miles) from a given origin to each active request.
+// GET /api/requests/distances?origin=<free-text location>
+// Used by organizations to sort the request feed by "nearest". We geocode only
+// the origin here; each request's coordinates are already stored on the row
+// (geocoded at creation), so no per-request network calls are needed. Requests
+// without stored coordinates come back with distanceMiles: null (unknown).
+export const getRequestDistances = async (req, res) => {
+  try {
+    const { origin } = req.query;
+
+    if (!origin || origin.trim() === '') {
+      return res.status(400).json({
+        success: false,
+        message: 'An origin location is required to measure distance.'
+      });
+    }
+
+    const originCoords = await geocodeLocation(origin);
+    if (!originCoords) {
+      return res.status(422).json({
+        success: false,
+        message: `Could not find the location "${origin}".`
+      });
+    }
+
+    // Only measure distance for the active feed (what the org actually sorts).
+    const requests = await requestModel.getPrioritizedRequests();
+
+    const distances = requests.map((request) => {
+      const hasCoords =
+        typeof request.latitude === 'number' && typeof request.longitude === 'number';
+      return {
+        id: request.id,
+        distanceMiles: hasCoords
+          ? Math.round(haversineMiles(originCoords, request) * 10) / 10
+          : null
+      };
+    });
+
+    res.status(200).json({
+      success: true,
+      data: distances
+    });
+  } catch (error) {
+    console.error('Error computing request distances:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to compute distances',
+      error: error.message
+    });
+  }
+};
+
 // Update request status
+// Allowed for organizations, or the help-seeker who owns the request.
 export const updateRequestStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -139,11 +362,27 @@ export const updateRequestStatus = async (req, res) => {
       });
     }
 
-    const validStatuses = ['pending', 'in-progress', 'matched', 'fulfilled', 'closed'];
+    const validStatuses = ['pending', 'assigned', 'in-progress', 'matched', 'completed', 'fulfilled', 'closed'];
     if (!validStatuses.includes(status)) {
       return res.status(400).json({
         success: false,
         message: 'Invalid status'
+      });
+    }
+
+    // Load the request so we can check the caller is allowed to manage it.
+    const request = await requestModel.getRequestById(id);
+    if (!request) {
+      return res.status(404).json({
+        success: false,
+        message: 'Request not found'
+      });
+    }
+
+    if (!canManageRequest(req.user, request)) {
+      return res.status(403).json({
+        success: false,
+        message: 'You are not allowed to update this request.'
       });
     }
 
@@ -165,9 +404,26 @@ export const updateRequestStatus = async (req, res) => {
 };
 
 // Delete request
+// Allowed for organizations, or the help-seeker who owns the request.
 export const deleteRequest = async (req, res) => {
   try {
     const { id } = req.params;
+
+    // Load the request so we can check the caller is allowed to manage it.
+    const request = await requestModel.getRequestById(id);
+    if (!request) {
+      return res.status(404).json({
+        success: false,
+        message: 'Request not found'
+      });
+    }
+
+    if (!canManageRequest(req.user, request)) {
+      return res.status(403).json({
+        success: false,
+        message: 'You are not allowed to delete this request.'
+      });
+    }
 
     await requestModel.deleteRequest(id);
 
@@ -185,11 +441,509 @@ export const deleteRequest = async (req, res) => {
   }
 };
 
+// Edit a request's details.
+// PATCH /api/requests/:id
+// Organizations triage incoming requests (correcting category, adding detail),
+// and a help-seeker can edit the requests they submitted themselves. Any of
+// category, urgency, location, and description may be changed; omitted fields
+// are left as-is.
+export const updateRequestDetails = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { category, urgency, location, description, householdSize } = req.body;
+
+    // Make sure the request exists before we check ownership or update it.
+    const request = await requestModel.getRequestById(id);
+    if (!request) {
+      return res.status(404).json({
+        success: false,
+        message: 'Request not found'
+      });
+    }
+
+    // Orgs can edit any request; a help-seeker can edit only their own.
+    if (!canManageRequest(req.user, request)) {
+      return res.status(403).json({
+        success: false,
+        message: 'You do not have permission to edit this request.'
+      });
+    }
+
+    // Build the set of fields to change; only include what was provided.
+    const fields = {};
+
+    if (category !== undefined) {
+      const validCategories = ['Food', 'Shelter', 'Medical', 'Transport', 'Other'];
+      if (!validCategories.includes(category)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid category. Must be one of: Food, Shelter, Medical, Transport, Other'
+        });
+      }
+      fields.category = category;
+    }
+
+    if (urgency !== undefined) {
+      const validUrgencies = ['Low', 'Medium', 'High', 'Critical'];
+      if (!validUrgencies.includes(urgency)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid urgency. Must be one of: Low, Medium, High, Critical'
+        });
+      }
+      fields.urgency = urgency;
+    }
+
+    if (location !== undefined) {
+      if (typeof location !== 'string' || location.trim() === '') {
+        return res.status(400).json({
+          success: false,
+          message: 'Location must be a non-empty string.'
+        });
+      }
+      fields.location = location;
+      // Location changed, so its map coordinates are stale — re-geocode. A
+      // location we can't resolve clears the coordinates (falls off the map).
+      const coords = await geocodeLocation(location);
+      fields.latitude = coords?.latitude ?? null;
+      fields.longitude = coords?.longitude ?? null;
+    }
+
+    if (description !== undefined) {
+      if (typeof description !== 'string' || description.trim() === '') {
+        return res.status(400).json({
+          success: false,
+          message: 'Description must be a non-empty string.'
+        });
+      }
+      fields.description = description;
+    }
+
+    if (householdSize !== undefined) {
+      const parsedHouseholdSize = parseHouseholdSize(householdSize);
+      if (parsedHouseholdSize === INVALID_HOUSEHOLD_SIZE) {
+        return res.status(400).json({
+          success: false,
+          message: 'Household size must be a whole number of 1 or more.'
+        });
+      }
+      fields.householdSize = parsedHouseholdSize;
+    }
+
+    // The caller must actually be changing something.
+    if (Object.keys(fields).length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Provide at least one field to update.'
+      });
+    }
+
+    const updatedRequest = await requestModel.updateRequestDetails(id, fields);
+
+    res.status(200).json({
+      success: true,
+      message: 'Request updated successfully',
+      data: updatedRequest
+    });
+  } catch (error) {
+    console.error('Error updating request details:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update request',
+      error: error.message
+    });
+  }
+};
+
+// Express interest in a request (volunteer clicks "I can help with this")
+// POST /api/requests/:id/interact
+// Creates a Response linking the logged-in volunteer to the request.
+// This is what later shows up in GET /api/dashboard/volunteer ("My Interests").
+export const interactWithRequest = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { notes } = req.body;
+
+    // Only volunteers can express interest this way.
+    if (req.user.role !== 'volunteer') {
+      return res.status(403).json({
+        success: false,
+        message: 'Only volunteers can express interest in a request.'
+      });
+    }
+
+    // Make sure the request actually exists before responding to it.
+    const request = await requestModel.getRequestById(id);
+    if (!request) {
+      return res.status(404).json({
+        success: false,
+        message: 'Request not found'
+      });
+    }
+
+    // Don't let the same volunteer express interest twice on one request.
+    const existing = await prisma.response.findFirst({
+      where: {
+        requestId: id,
+        responderId: req.user.id,
+        responderType: 'volunteer'
+      }
+    });
+
+    if (existing) {
+      return res.status(200).json({
+        success: true,
+        message: 'You have already expressed interest in this request.',
+        data: existing
+      });
+    }
+
+    const response = await prisma.response.create({
+      data: {
+        requestId: id,
+        responderId: req.user.id,
+        responderType: 'volunteer',
+        status: 'offered',
+        notes: notes || null
+      }
+    });
+
+    // A volunteer stepping up moves the request from pending to assigned so the
+    // help-seeker sees someone is on it. Only upgrade from pending — don't
+    // override a status an organization has already advanced.
+    if (request.status === 'pending') {
+      await requestModel.updateRequestStatus(id, 'assigned');
+    }
+
+    res.status(201).json({
+      success: true,
+      message: 'Interest recorded. Thanks for stepping up to help!',
+      data: response
+    });
+  } catch (error) {
+    console.error('Error recording interest in request:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to record interest',
+      error: error.message
+    });
+  }
+};
+
+// Volunteer marks a request they claimed as helped ("I've helped with this").
+// POST /api/requests/:id/complete
+// Requires the volunteer to already have a Response on the request. Sets both
+// their Response and the request itself to completed.
+export const completeRequest = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Only volunteers can mark a request as helped.
+    if (req.user.role !== 'volunteer') {
+      return res.status(403).json({
+        success: false,
+        message: 'Only volunteers can mark a request as helped.'
+      });
+    }
+
+    // The request must exist before we can complete it.
+    const request = await requestModel.getRequestById(id);
+    if (!request) {
+      return res.status(404).json({
+        success: false,
+        message: 'Request not found'
+      });
+    }
+
+    // The volunteer can only complete a request they actually offered to help
+    // with, so we look up their existing interest first.
+    const existing = await prisma.response.findFirst({
+      where: {
+        requestId: id,
+        responderId: req.user.id,
+        responderType: 'volunteer'
+      }
+    });
+
+    if (!existing) {
+      return res.status(403).json({
+        success: false,
+        message: 'You can only complete a request you offered to help with.'
+      });
+    }
+
+    // Mark both the volunteer's response and the request itself as completed.
+    await prisma.response.update({
+      where: { id: existing.id },
+      data: { status: 'completed' }
+    });
+    const updated = await requestModel.updateRequestStatus(id, 'completed');
+
+    res.status(200).json({
+      success: true,
+      message: 'Marked as helped. Thank you!',
+      data: updated
+    });
+  } catch (error) {
+    console.error('Error completing request:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to mark as helped',
+      error: error.message
+    });
+  }
+};
+
+// Withdraw a volunteer's interest in a request ("un-sign up").
+// DELETE /api/requests/:id/interact
+// Removes this volunteer's Response for the request, so it drops off their
+// Tasks list. Only affects the signed-in volunteer's own interest. Idempotent —
+// withdrawing when there's nothing to withdraw still succeeds.
+export const withdrawInterest = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (req.user.role !== 'volunteer') {
+      return res.status(403).json({
+        success: false,
+        message: 'Only volunteers can withdraw interest in a request.'
+      });
+    }
+
+    await prisma.response.deleteMany({
+      where: {
+        requestId: id,
+        responderId: req.user.id,
+        responderType: 'volunteer'
+      }
+    });
+
+    // Withdrawing from the request also drops this volunteer from any org tasks
+    // tied to it — a volunteer who's no longer helping with the need shouldn't
+    // stay signed up for its tasks.
+    await taskModel.withdrawFromRequestTasks(id, req.user.id);
+
+    // If no volunteers remain interested, roll the request back to pending so it
+    // returns to the active feed for someone else to pick up. Only step down
+    // from 'assigned' (the status a volunteer's interest set) — never override a
+    // status an organization has advanced past that.
+    const remainingVolunteers = await prisma.response.count({
+      where: { requestId: id, responderType: 'volunteer' }
+    });
+    if (remainingVolunteers === 0) {
+      const request = await requestModel.getRequestById(id);
+      if (request && request.status === 'assigned') {
+        await requestModel.updateRequestStatus(id, 'pending');
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'You are no longer signed up for this request.'
+    });
+  } catch (error) {
+    console.error('Error withdrawing interest in request:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to withdraw interest',
+      error: error.message
+    });
+  }
+};
+
+// Voice intake: accept a recorded audio clip, transcribe it, and extract the
+// help-request fields with Claude. This does NOT create the request — it returns
+// the draft fields + transcript so the frontend can show a "confirm what we
+// heard" review step (#156) before the user submits through createRequest.
+// Requires authentication; only help-seekers can file requests.
+export const transcribeVoiceRequest = async (req, res) => {
+  try {
+    if (req.user.role !== 'help-seeker') {
+      return res.status(403).json({
+        success: false,
+        message: 'Only help-seekers can submit help requests'
+      });
+    }
+
+    if (!req.file || !req.file.buffer?.length) {
+      return res.status(400).json({
+        success: false,
+        message: 'No audio file was uploaded'
+      });
+    }
+
+    // Step 1: speech-to-text via Whisper.
+    let transcript;
+    try {
+      transcript = await transcribeAudio(req.file.buffer, req.file.originalname);
+    } catch (error) {
+      console.error('Voice intake transcription failed:', error);
+      return res.status(502).json({
+        success: false,
+        message: 'Could not transcribe the audio. Please try recording again.'
+      });
+    }
+
+    if (!transcript) {
+      return res.status(422).json({
+        success: false,
+        message: "We couldn't hear anything in that recording. Please try again."
+      });
+    }
+
+    // Step 2: pull structured fields out of the transcript via Claude.
+    let fields;
+    try {
+      fields = await extractRequestFields(transcript);
+    } catch (error) {
+      console.error('Voice intake field extraction failed:', error);
+      return res.status(502).json({
+        success: false,
+        message: 'Could not understand the request details. Please try again or fill the form manually.',
+        // Still hand back the transcript so the user doesn't lose what they said.
+        data: { transcript }
+      });
+    }
+
+    // Return a draft for review — nothing is saved yet.
+    return res.status(200).json({
+      success: true,
+      message: 'Transcribed and extracted request details for review',
+      data: {
+        transcript,
+        fields
+      }
+    });
+  } catch (error) {
+    console.error('Error handling voice intake:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to process voice intake',
+      error: error.message
+    });
+  }
+};
+
+// Assign a request to the signed-in organization ("we'll help with this").
+// POST /api/requests/:id/assign
+// Creates a Response linking this organization to the request, which is what
+// makes the request show up under the org's "Your Requests" and unlocks
+// allocating resources to it. Idempotent — assigning twice is a no-op. Multiple
+// organizations can assign themselves to the same request so that resources
+// from different places can all be allocated to it.
+export const assignToRequest = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Only organizations can assign requests to themselves.
+    if (req.user.role !== 'organization') {
+      return res.status(403).json({
+        success: false,
+        message: 'Only organizations can assign requests to themselves.'
+      });
+    }
+
+    // The request must exist before we can assign it.
+    const request = await requestModel.getRequestById(id);
+    if (!request) {
+      return res.status(404).json({
+        success: false,
+        message: 'Request not found'
+      });
+    }
+
+    // Don't create a second assignment if this org already claimed it.
+    const existing = await prisma.response.findFirst({
+      where: {
+        requestId: id,
+        responderId: req.user.id,
+        responderType: 'organization'
+      }
+    });
+
+    if (existing) {
+      return res.status(200).json({
+        success: true,
+        message: 'This request is already assigned to your organization.',
+        data: existing
+      });
+    }
+
+    const response = await prisma.response.create({
+      data: {
+        requestId: id,
+        responderId: req.user.id,
+        responderType: 'organization',
+        status: 'accepted'
+      }
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Request assigned to your organization.',
+      data: response
+    });
+  } catch (error) {
+    console.error('Error assigning request to organization:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to assign request',
+      error: error.message
+    });
+  }
+};
+
+// Remove the signed-in organization's assignment from a request.
+// DELETE /api/requests/:id/assign
+// Only affects this org's own assignment; other organizations that assigned
+// themselves to the same request are untouched.
+export const unassignFromRequest = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (req.user.role !== 'organization') {
+      return res.status(403).json({
+        success: false,
+        message: 'Only organizations can unassign requests.'
+      });
+    }
+
+    await prisma.response.deleteMany({
+      where: {
+        requestId: id,
+        responderId: req.user.id,
+        responderType: 'organization'
+      }
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Request unassigned from your organization.'
+    });
+  } catch (error) {
+    console.error('Error unassigning request:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to unassign request',
+      error: error.message
+    });
+  }
+};
+
 export default {
   createRequest,
+  transcribeVoiceRequest,
+  getMyRequests,
   getAllRequests,
   getRequestById,
   getPrioritizedRequests,
+  getRequestDistances,
   updateRequestStatus,
-  deleteRequest
+  updateRequestDetails,
+  deleteRequest,
+  interactWithRequest,
+  completeRequest,
+  withdrawInterest,
+  assignToRequest,
+  unassignFromRequest
 };

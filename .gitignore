@@ -47,3 +47,9 @@ prisma/migrations/migration_lock.toml
 tmp/
 temp/
 generated/
+
+# Wireframes (local design assets)
+wireframe/
+
+# Local project instructions (not tracked)
+CLAUDE.md

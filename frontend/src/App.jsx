@@ -1,24 +1,28 @@
-import HelpRequestForm from '../components/HelpRequestForm.jsx/HelpRequestForm';
+import { Routes, Route } from 'react-router-dom';
+import LandingPage from './pages/LandingPage';
+import HelpSeekerDashboard from './pages/HelpSeekerDashboard';
+import VolunteerDashboard from './pages/VolunteerDashboard';
+import OrganizationDashboard from './pages/OrganizationDashboard';
+import ComingSoon from './pages/ComingSoon';
 
-function App() {
+const App = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
-      <div className="container mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-5xl font-bold text-indigo-600 mb-2">
-            Crisis360
-          </h1>
-          <p className="text-gray-600">
-            AI-Powered Crisis Coordination Platform
-          </p>
-          <p className="text-sm text-gray-500 mt-2">
-            Team MAJic - Week 1 MVP
-          </p>
-        </div>
+    <Routes>
+      {/* Public landing page with the role cards + sign-in */}
+      <Route path="/" element={<LandingPage />} />
 
-        <HelpRequestForm />
-      </div>
-    </div>
+      {/* Help-seeker dashboard: their requests + a compact request form */}
+      <Route path="/requests/new" element={<HelpSeekerDashboard />} />
+
+      {/* Volunteer dashboard: Priority Feed + My Interests */}
+      <Route path="/dashboard" element={<VolunteerDashboard />} />
+
+      {/* Organization dashboard: Priority Feed + Active Responses */}
+      <Route path="/organization" element={<OrganizationDashboard />} />
+
+      {/* Organization destination (placeholder for teammates) */}
+      <Route path="/feed" element={<ComingSoon title="Volunteer Feed" />} />
+    </Routes>
   );
 }
 
