@@ -1,12 +1,28 @@
-import { anthropic } from './clients.js';
+import { askLLM } from './chatbot.js';
 
-// Claude model used for priority explanations. Configurable via env so it can
-// be pointed at whatever model id our API gateway currently accepts without a
-// code change. Must be a valid id for the key's endpoint (query /v1/models).
-const EXPLANATION_MODEL = process.env.CLAUDE_MODEL || 'claude-haiku-4-5-20251001';
+// Persona + rules for the explanation. Kept as a system prompt so the request
+// details in the user message stay cleanly separated from the instructions.
+const EXPLANATION_SYSTEM_PROMPT = `You are an AI assistant explaining why a crisis help request has been prioritized.
+
+Write a concise 1-2 sentence explanation of why the request received its priority score.
+
+Rules:
+- Be factual and specific
+- Reference the concrete signals that drove the score: urgency level, number of similar requests nearby, and recency
+- Attribute the score to its components (urgency, cluster density, time recency) so the reader understands which factors mattered most
+- Do NOT speculate or add emotional language
+- Do NOT invent facts not provided
+- Keep it under 50 words
+- Write in a confidence-inspiring tone`;
 
 /**
- * Generate Claude explanation for why a request has its priority score
+ * Generate a natural-language explanation for why a request has its priority
+ * score.
+ *
+ * Routes through askLLM, which tries OpenRouter's free models first and
+ * falls back to the Gemini API — the same provider chain used by the chat and
+ * voice features. If every provider fails, returns a templated fallback so
+ * prioritization never breaks on the explanation step.
  *
  * @param {Object} request - The help request
  * @param {number} priorityScore - Calculated priority score (0-100)
@@ -23,22 +39,13 @@ export async function generatePriorityExplanation(
   const prompt = buildExplanationPrompt(request, priorityScore, similarRequests, scoreBreakdown);
 
   try {
-    const response = await anthropic.messages.create({
-      model: EXPLANATION_MODEL,
-      max_tokens: 150,
-      messages: [
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
+    const explanation = await askLLM(prompt, {
+      systemPrompt: EXPLANATION_SYSTEM_PROMPT,
     });
-
-    const explanation = response.content[0].text.trim();
-    return explanation;
+    return explanation.trim();
   } catch (error) {
-    console.error('Error generating Claude explanation:', error);
-    // Fallback to a basic explanation
+    console.error('Error generating priority explanation:', error);
+    // Fallback to a basic explanation when every provider is unavailable.
     return generateFallbackExplanation(request, priorityScore, similarRequests);
   }
 }
@@ -57,9 +64,7 @@ function buildExplanationPrompt(request, priorityScore, similarRequests, scoreBr
     (Date.now() - new Date(request.createdAt)) / (1000 * 60 * 60)
   );
 
-  return `You are an AI assistant explaining why a crisis help request has been prioritized.
-
-Request Details:
+  return `Request Details:
 - Category: ${request.category}
 - Urgency: ${request.urgency}
 - Location: ${request.location}
@@ -88,18 +93,7 @@ ${similarRequests
 `
     : ''
 }
-
-Write a concise 1-2 sentence explanation of why this request received a priority score of ${priorityScore}/100.
-
-Rules:
-- Be factual and specific
-- Reference concrete signals (similar requests, urgency level, recency)
-- Do NOT speculate or add emotional language
-- Do NOT invent facts not provided above
-- Keep it under 50 words
-- Write in a confidence-inspiring tone
-
-Explanation:`;
+Explain why this request received a priority score of ${priorityScore}/100, citing which score components drove it.`;
 }
 
 /**
