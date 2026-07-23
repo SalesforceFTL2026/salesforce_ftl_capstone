@@ -210,6 +210,7 @@
   },
   "org": {
     "nav": {
+      "tasks": "कार्य",
       "metrics": "मेट्रिक्स",
       "resources": "संसाधन",
       "volunteers": "स्वयंसेवक",
@@ -682,12 +683,31 @@
     "guidesHeading": "आपदा तैयारी मार्गदर्शिकाएँ",
     "disclaimer": "मार्गदर्शन FEMA, Ready.gov और American Red Cross से अनुकूलित। हमेशा अपने स्थानीय आपातकालीन अधिकारियों के निर्देशों का पालन करें।",
     "contacts": {
-      "lifeThreatening": { "label": "जानलेवा आपातकाल", "note": "पुलिस, अग्निशमन या चिकित्सा" },
-      "distressHelpline": { "label": "आपदा संकट हेल्पलाइन", "note": "24/7 संकट परामर्श" },
-      "poisonControl": { "label": "विष नियंत्रण", "note": "विषाक्तता या संपर्क" },
-      "fema": { "label": "FEMA हेल्पलाइन", "note": "आपदा सहायता और दावे" },
-      "redCross": { "label": "American Red Cross", "note": "आश्रय और राहत सेवाएँ" },
-      "localNonEmergency": { "label": "स्थानीय गैर-आपातकालीन", "value": "अपनी स्थानीय लाइन जोड़ें", "note": "पुलिस/उपयोगिताएँ गैर-आपातकालीन" }
+      "lifeThreatening": {
+        "label": "जानलेवा आपातकाल",
+        "note": "पुलिस, अग्निशमन या चिकित्सा"
+      },
+      "distressHelpline": {
+        "label": "आपदा संकट हेल्पलाइन",
+        "note": "24/7 संकट परामर्श"
+      },
+      "poisonControl": {
+        "label": "विष नियंत्रण",
+        "note": "विषाक्तता या संपर्क"
+      },
+      "fema": {
+        "label": "FEMA हेल्पलाइन",
+        "note": "आपदा सहायता और दावे"
+      },
+      "redCross": {
+        "label": "American Red Cross",
+        "note": "आश्रय और राहत सेवाएँ"
+      },
+      "localNonEmergency": {
+        "label": "स्थानीय गैर-आपातकालीन",
+        "value": "अपनी स्थानीय लाइन जोड़ें",
+        "note": "पुलिस/उपयोगिताएँ गैर-आपातकालीन"
+      }
     },
     "zip": {
       "label": "ज़िपकोड से स्थानीय मदद खोजें",

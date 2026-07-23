@@ -210,6 +210,7 @@
   },
   "org": {
     "nav": {
+      "tasks": "Nhiệm vụ",
       "metrics": "Chỉ số",
       "resources": "Tài nguyên",
       "volunteers": "Tình nguyện viên",

@@ -210,6 +210,7 @@
   },
   "org": {
     "nav": {
+      "tasks": "Tasks",
       "metrics": "Metrics",
       "resources": "Resources",
       "volunteers": "Volunteers",
@@ -682,12 +683,31 @@
     "guidesHeading": "Disaster Preparedness Guides",
     "disclaimer": "Guidance adapted from FEMA, Ready.gov, and the American Red Cross. Always follow instructions from your local emergency officials.",
     "contacts": {
-      "lifeThreatening": { "label": "Life-threatening emergency", "note": "Police, fire, or medical" },
-      "distressHelpline": { "label": "Disaster Distress Helpline", "note": "24/7 crisis counseling" },
-      "poisonControl": { "label": "Poison Control", "note": "Poisoning or exposure" },
-      "fema": { "label": "FEMA Helpline", "note": "Disaster assistance & claims" },
-      "redCross": { "label": "American Red Cross", "note": "Shelter & relief services" },
-      "localNonEmergency": { "label": "Local non-emergency", "value": "Add your local line", "note": "Police/utilities non-emergency" }
+      "lifeThreatening": {
+        "label": "Life-threatening emergency",
+        "note": "Police, fire, or medical"
+      },
+      "distressHelpline": {
+        "label": "Disaster Distress Helpline",
+        "note": "24/7 crisis counseling"
+      },
+      "poisonControl": {
+        "label": "Poison Control",
+        "note": "Poisoning or exposure"
+      },
+      "fema": {
+        "label": "FEMA Helpline",
+        "note": "Disaster assistance & claims"
+      },
+      "redCross": {
+        "label": "American Red Cross",
+        "note": "Shelter & relief services"
+      },
+      "localNonEmergency": {
+        "label": "Local non-emergency",
+        "value": "Add your local line",
+        "note": "Police/utilities non-emergency"
+      }
     },
     "zip": {
       "label": "Find local help by zipcode",

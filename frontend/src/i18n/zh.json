@@ -210,6 +210,7 @@
   },
   "org": {
     "nav": {
+      "tasks": "任务",
       "metrics": "指标",
       "resources": "资源",
       "volunteers": "志愿者",

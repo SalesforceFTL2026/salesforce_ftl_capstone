@@ -210,6 +210,7 @@
   },
   "org": {
     "nav": {
+      "tasks": "작업",
       "metrics": "지표",
       "resources": "자원",
       "volunteers": "자원봉사자",

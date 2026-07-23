@@ -210,6 +210,7 @@
   },
   "org": {
     "nav": {
+      "tasks": "Tach",
       "metrics": "Metrik",
       "resources": "Resous",
       "volunteers": "Volontè",

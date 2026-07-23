@@ -35,6 +35,7 @@ model Request {
   votes         Vote[]
   crisisEvents  RequestEvent[]
   allocations   ResourceAllocation[]
+  volunteerTasks VolunteerTask[]
 
   @@index([priorityScore])
   @@index([category])
@@ -112,9 +113,48 @@ model Organization {
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   matches         Match[]
   resources       Resource[]
+  volunteerTasks  VolunteerTask[]
 
   @@index([userId])
   @@index([verified])
+}
+
+// Help tasks an organization posts for volunteers to sign up for. Every task is
+// attributed to an existing help Request (VolunteerTask.requestId -> Request.id)
+// — the request is the need the task addresses. The org sets a min/max number of
+// volunteers; the task can't be marked in-progress until the minimum is met AND
+// the necessary resources are ready. Once both have held for two days, the task
+// auto-advances to in-progress (computed on load).
+//
+// NOTE: the volunteer sign-up side isn't built yet. For now `volunteersConfirmed`
+// is a manual count the org maintains; the future volunteer flow will increment
+// the same field.
+model VolunteerTask {
+  id                  String   @id @default(cuid())
+  organizationId      String
+  requestId           String   // the help request this task addresses
+  title               String
+  description         String
+  category            String?  // Food, Shelter, Medical, Transport, Other
+  urgency             String   @default("Medium")  // Low, Medium, High, Critical — feeds AI date priority
+  skillsNeeded        String?  // JSON array: ["medical", "logistics", "translation"]
+  minVolunteers       Int      @default(1)
+  maxVolunteers       Int?     // null = no cap
+  volunteersConfirmed Int      @default(0)  // manual count until volunteer sign-up ships
+  resourcesReady      Boolean  @default(false)  // org confirms necessary resources are on hand
+  volunteerDate       DateTime?  // the scheduled volunteer day (shown to volunteers later)
+  readySince          DateTime?  // when min volunteers + resources were first both met
+  status              String   @default("open")  // open, in-progress, completed, cancelled
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  organization        Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  request             Request      @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([requestId])
+  @@index([status])
+  @@index([volunteerDate])
 }
 
 // WEEK 3: Organization resources inventory
