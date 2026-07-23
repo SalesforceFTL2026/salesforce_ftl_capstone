@@ -1,4 +1,4 @@
-import { askChatbot } from './chatbot.js';
+import { askLLM } from './chatbot.js';
 
 // These MUST stay in sync with the validation in requestController.createRequest.
 const VALID_CATEGORIES = ['Food', 'Shelter', 'Medical', 'Transport', 'Other'];
@@ -7,7 +7,7 @@ const VALID_URGENCIES = ['Low', 'Medium', 'High', 'Critical'];
 /**
  * Extract structured help-request fields from a voice transcript.
  *
- * We go through OpenRouter (via askChatbot) rather than the Anthropic SDK
+ * We go through OpenRouter (via askLLM) rather than the Anthropic SDK
  * directly: the deployment only has an OpenRouter key, and OpenRouter's free
  * models speak the OpenAI chat format, not Anthropic tool-use. So instead of
  * forcing a tool call we ask for a strict JSON object and parse it defensively.
@@ -27,12 +27,12 @@ export async function extractRequestFields(transcript) {
     throw new Error('Cannot extract fields from an empty transcript');
   }
 
-  const reply = await askChatbot(buildExtractionPrompt(text), {
+  const reply = await askLLM(buildExtractionPrompt(text), {
     systemPrompt:
       'You extract structured data from crisis help-request transcripts. ' +
       'You reply with ONLY a single JSON object and no other text, code fences, or commentary.',
     // Reject any model whose reply we can't parse as a JSON object, so
-    // askChatbot falls through to the next free model instead of us failing.
+    // askLLM falls through to the next free model instead of us failing.
     validate: (r) => parseJsonObject(r) !== null,
   });
 

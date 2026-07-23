@@ -1,4 +1,4 @@
-import { askChatbot } from '../services/ai/chatbot.js';
+import { askLLM } from '../services/ai/chatbot.js';
 import * as requestModel from '../models/requestModel.js';
 
 /**
@@ -84,7 +84,7 @@ export const chat = async (req, res) => {
     const requests = await requestModel.getRequestsByUser(req.user.id);
     const systemPrompt = buildSystemPrompt(req.user, requests);
 
-    const reply = await askChatbot(message, { systemPrompt, history: safeHistory });
+    const reply = await askLLM(message, { systemPrompt, history: safeHistory });
 
     res.status(200).json({
       success: true,

@@ -7,11 +7,11 @@
 // output is geographically coherent with the event, so the feed, clustering,
 // and heatmap all light up around a real place instead of synthetic noise.
 //
-// We reuse askChatbot (OpenRouter free models, OpenAI chat format) exactly like
+// We reuse askLLM (OpenRouter free models, OpenAI chat format) exactly like
 // extractor.js, including the ONLY-JSON discipline and defensive parsing, so
 // this survives whatever a free model hands back.
 
-import { askChatbot } from '../ai/chatbot.js';
+import { askLLM } from '../ai/chatbot.js';
 
 // Kept in sync with requestController.createRequest validation (same lists the
 // extractor guards against).
@@ -33,7 +33,7 @@ export async function generateRequestsForEvent(event, { count = 3 } = {}) {
 
   let reply;
   try {
-    reply = await askChatbot(buildPrompt(event, count), {
+    reply = await askLLM(buildPrompt(event, count), {
       systemPrompt:
         'You generate realistic crisis help-request data for a disaster-response demo. ' +
         'You reply with ONLY a single JSON array and no other text, code fences, or commentary.',

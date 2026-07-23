@@ -97,7 +97,7 @@ async function getFreeModels() {
 //   reject a reply and try the next model (e.g. "must be parseable JSON"). Lets
 //   callers that need structured output skip models that reply with prose.
 // @returns {Promise<string>} the AI's reply
-export async function askChatbot(message, { systemPrompt, history = [], validate } = {}) {
+export async function askLLM(message, { systemPrompt, history = [], validate } = {}) {
   // Assemble the full message list: optional system context, prior turns, then
   // the new question.
   const messages = [];
