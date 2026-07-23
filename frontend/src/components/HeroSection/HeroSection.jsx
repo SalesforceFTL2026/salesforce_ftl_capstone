@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import MRLogo from '../../assets/logos/MRLogo.png';
 import fireImg from '../../assets/hero_disaster_pictures/fire.jpeg';
 import floodImg from '../../assets/hero_disaster_pictures/flood.jpeg';
@@ -9,6 +10,7 @@ import foodImg from '../../assets/hero_disaster_pictures/food.jpeg';
 const disasterImages = [fireImg, floodImg, rubbleImg, foodImg];
 
 const HeroSection = ({ onRoleSelect }) => {
+  const { t } = useTranslation();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   // Rotate images every 5 seconds
@@ -48,7 +50,7 @@ const HeroSection = ({ onRoleSelect }) => {
       <div className="relative z-10 text-center px-4 sm:px-6 max-w-6xl mx-auto">
         {/* Heading */}
         <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-3 sm:mb-4 leading-tight flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4">
-          <span>WELCOME TO</span>
+          <span>{t('landing.hero.welcomeTo')}</span>
           <img
             src={MRLogo}
             alt="MapResponse"
@@ -59,7 +61,7 @@ const HeroSection = ({ onRoleSelect }) => {
 
         {/* Subtitle */}
         <p className="text-sm sm:text-base md:text-lg lg:text-xl text-white font-semibold mb-6 sm:mb-10 md:mb-12 tracking-wide px-2">
-          A MAPPED NETWORK TO STREAMLINE ASSISTANCE FOR HELP SEEKERS FROM HELPERS.
+          {t('landing.hero.subtitle')}
         </p>
 
         {/* Role Selection Buttons */}
@@ -68,19 +70,19 @@ const HeroSection = ({ onRoleSelect }) => {
             onClick={() => onRoleSelect('help-seeker')}
             className="px-6 sm:px-8 md:px-10 py-3 bg-[#1C2A16] dark:bg-[#7F9764] text-white text-sm sm:text-base font-semibold rounded-full hover:opacity-90 transition-opacity w-full sm:w-auto shadow-lg"
           >
-            I NEED HELP
+            {t('landing.hero.needHelp')}
           </button>
           <button
             onClick={() => onRoleSelect('volunteer')}
             className="px-6 sm:px-8 md:px-10 py-3 bg-[#1C2A16] dark:bg-[#7F9764] text-white text-sm sm:text-base font-semibold rounded-full hover:opacity-90 transition-opacity w-full sm:w-auto shadow-lg"
           >
-            I WANT TO VOLUNTEER
+            {t('landing.hero.volunteer')}
           </button>
           <button
             onClick={() => onRoleSelect('organization')}
             className="px-6 sm:px-8 md:px-10 py-3 bg-[#1C2A16] dark:bg-[#7F9764] text-white text-sm sm:text-base font-semibold rounded-full hover:opacity-90 transition-opacity w-full sm:w-auto shadow-lg"
           >
-            I'M AN ORGANIZATION
+            {t('landing.hero.organization')}
           </button>
         </div>
       </div>

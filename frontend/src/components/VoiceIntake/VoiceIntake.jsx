@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { submitVoiceIntake, requestErrorMessage } from '../../utils/requests';
 
 // Voice "call" intake screen (issue #155).
@@ -38,6 +39,7 @@ const extensionFor = (mimeType) => {
 };
 
 const VoiceIntake = ({ onTranscribed, onCancel }) => {
+  const { t } = useTranslation();
   const [status, setStatus] = useState(STATUS.IDLE);
   const [error, setError] = useState('');
   const [seconds, setSeconds] = useState(0);
@@ -79,7 +81,7 @@ const VoiceIntake = ({ onTranscribed, onCancel }) => {
 
     if (typeof MediaRecorder === 'undefined' || !navigator.mediaDevices?.getUserMedia) {
       setStatus(STATUS.ERROR);
-      setError('Your browser does not support voice recording. Please use the form instead.');
+      setError(t('voice.errors.unsupportedBrowser'));
       return;
     }
 
@@ -109,8 +111,8 @@ const VoiceIntake = ({ onTranscribed, onCancel }) => {
       // getUserMedia rejects with NotAllowedError when the user blocks the mic.
       setError(
         err?.name === 'NotAllowedError'
-          ? 'Microphone access was blocked. Enable it in your browser settings to record.'
-          : 'Could not start recording. Please check your microphone and try again.'
+          ? t('voice.errors.micBlocked')
+          : t('voice.errors.startFailed')
       );
     }
   };
@@ -133,7 +135,7 @@ const VoiceIntake = ({ onTranscribed, onCancel }) => {
 
     if (blob.size === 0) {
       setStatus(STATUS.ERROR);
-      setError("We didn't catch any audio. Please try recording again.");
+      setError(t('voice.errors.noAudio'));
       return;
     }
 
@@ -149,7 +151,7 @@ const VoiceIntake = ({ onTranscribed, onCancel }) => {
       onTranscribed?.(result);
     } catch (err) {
       setStatus(STATUS.ERROR);
-      setError(requestErrorMessage(err, 'Could not process the recording. Please try again.'));
+      setError(requestErrorMessage(err, t('voice.errors.processFailed')));
     }
   };
 
@@ -165,7 +167,7 @@ const VoiceIntake = ({ onTranscribed, onCancel }) => {
       await processBlob(blob, 'demo-request.m4a');
     } catch {
       setStatus(STATUS.ERROR);
-      setError('Could not load the sample recording.');
+      setError(t('voice.errors.sampleLoadFailed'));
     }
   };
 
@@ -174,9 +176,9 @@ const VoiceIntake = ({ onTranscribed, onCancel }) => {
 
   return (
     <div className="bg-white dark:bg-[#273A20] rounded-2xl shadow-md p-8 transition-colors duration-300 text-center">
-      <h2 className="text-2xl font-bold text-black dark:text-white mb-1">Request Help by Voice</h2>
+      <h2 className="text-2xl font-bold text-black dark:text-white mb-1">{t('voice.intake.title')}</h2>
       <p className="text-gray-600 dark:text-gray-400 text-sm mb-6">
-        Tell us what you need out loud. We'll turn it into a request for you to review.
+        {t('voice.intake.subtitle')}
       </p>
 
       {error && (
@@ -191,7 +193,7 @@ const VoiceIntake = ({ onTranscribed, onCancel }) => {
           type="button"
           onClick={isRecording ? stopRecording : startRecording}
           disabled={isProcessing}
-          aria-label={isRecording ? 'Stop recording' : 'Start recording'}
+          aria-label={isRecording ? t('voice.intake.stopRecording') : t('voice.intake.startRecording')}
           className={`relative w-24 h-24 rounded-full flex items-center justify-center text-white transition-all disabled:opacity-60 ${
             isRecording
               ? 'bg-red-600 hover:bg-red-700'
@@ -212,10 +214,10 @@ const VoiceIntake = ({ onTranscribed, onCancel }) => {
 
         <p className="text-sm font-medium text-gray-700 dark:text-gray-300" role="status">
           {isProcessing
-            ? 'Transcribing your request…'
+            ? t('voice.intake.transcribing')
             : isRecording
-            ? `Recording… ${formatTime(seconds)} — tap to stop`
-            : 'Tap the microphone to start'}
+            ? t('voice.intake.recording', { time: formatTime(seconds) })
+            : t('voice.intake.tapToStart')}
         </p>
       </div>
 
@@ -228,7 +230,7 @@ const VoiceIntake = ({ onTranscribed, onCancel }) => {
             onClick={useSampleRecording}
             className="text-xs font-medium text-[#7F9764] hover:text-[#6b8354] underline underline-offset-2 transition-colors"
           >
-            Use a sample recording instead
+            {t('voice.intake.useSample')}
           </button>
         </div>
       )}
@@ -240,7 +242,7 @@ const VoiceIntake = ({ onTranscribed, onCancel }) => {
           disabled={isProcessing}
           className="text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 disabled:opacity-50 transition-colors"
         >
-          Cancel
+          {t('voice.intake.cancel')}
         </button>
       )}
     </div>

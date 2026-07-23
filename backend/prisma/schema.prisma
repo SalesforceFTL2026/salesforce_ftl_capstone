@@ -54,6 +54,7 @@ model User {
   role              String   // help-seeker, volunteer, organization
   location          String?
   phoneNumber       String?
+  languagePreference String? @default("en")  // UI language: "en" | "es" | "zh"
   verified          Boolean  @default(false)
   active            Boolean  @default(true)
   createdAt         DateTime @default(now())

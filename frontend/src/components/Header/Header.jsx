@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import MRLogo from '../../assets/logos/MRLogo.png';
 import lightModeToggle from '../../assets/light_mode_toggle.png';
 import darkModeToggle from '../../assets/dark_mode_toggle.png';
 
 const Header = ({ currentUser, onSignInClick, onSignOutClick }) => {
+  const { t } = useTranslation();
   const { isDark, toggleTheme } = useTheme();
 
   // Hide the header when scrolling down, reveal it when scrolling up. We track
@@ -35,7 +37,7 @@ const Header = ({ currentUser, onSignInClick, onSignOutClick }) => {
             <div className="relative">
               <img
                 src={MRLogo}
-                alt="MapResponse logo"
+                alt={t('landing.header.logoAlt')}
                 className="h-10 sm:h-[80px] w-auto object-contain"
               />
             </div>
@@ -44,22 +46,22 @@ const Header = ({ currentUser, onSignInClick, onSignOutClick }) => {
           {/* Navigation */}
           <nav className="hidden lg:flex items-center gap-8">
             <a href="#give" className="text-[#1C2A16] dark:text-white text-[22px] font-medium hover:opacity-70 transition-opacity">
-              GIVE
+              {t('landing.header.nav.give')}
             </a>
             <a href="#what-we-do" className="text-[#1C2A16] dark:text-white text-[22px] font-medium hover:opacity-70 transition-opacity">
-              WHAT WE DO
+              {t('landing.header.nav.whatWeDo')}
             </a>
             <a href="#who-we-are" className="text-[#1C2A16] dark:text-white text-[22px] font-medium hover:opacity-70 transition-opacity">
-              WHO WE ARE
+              {t('landing.header.nav.whoWeAre')}
             </a>
             <a href="#how-to-help" className="text-[#1C2A16] dark:text-white text-[22px] font-medium hover:opacity-70 transition-opacity">
-              HOW TO HELP
+              {t('landing.header.nav.howToHelp')}
             </a>
             <a href="#partner-resources" className="text-[#1C2A16] dark:text-white text-[22px] font-medium hover:opacity-70 transition-opacity">
-              PARTNER RESOURCES
+              {t('landing.header.nav.partnerResources')}
             </a>
             <a href="#get-help" className="text-[#1C2A16] dark:text-white text-[22px] font-medium hover:opacity-70 transition-opacity">
-              GET HELP
+              {t('landing.header.nav.getHelp')}
             </a>
           </nav>
 
@@ -68,13 +70,13 @@ const Header = ({ currentUser, onSignInClick, onSignOutClick }) => {
             {currentUser ? (
               <>
                 <span className="hidden sm:inline text-[#1C2A16] dark:text-white text-[22px] font-medium">
-                  Hi, {currentUser.name}
+                  {t('landing.header.greeting', { name: currentUser.name })}
                 </span>
                 <button
                   onClick={onSignOutClick}
                   className="text-[#1C2A16] dark:text-white text-[22px] font-medium hover:opacity-70 transition-opacity"
                 >
-                  SIGN OUT
+                  {t('landing.header.signOut')}
                 </button>
               </>
             ) : (
@@ -82,12 +84,12 @@ const Header = ({ currentUser, onSignInClick, onSignOutClick }) => {
                 onClick={onSignInClick}
                 className="text-[#1C2A16] dark:text-white text-[22px] font-medium hover:opacity-70 transition-opacity"
               >
-                SIGN IN
+                {t('landing.header.signIn')}
               </button>
             )}
             <button
               className="p-2 text-[#1C2A16] dark:text-white hover:opacity-70 transition-opacity"
-              aria-label="Search"
+              aria-label={t('landing.header.searchAria')}
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -97,12 +99,12 @@ const Header = ({ currentUser, onSignInClick, onSignOutClick }) => {
               onClick={toggleTheme}
               role="switch"
               aria-checked={isDark}
-              aria-label="Toggle dark mode"
+              aria-label={t('landing.header.toggleDarkModeAria')}
               className="rounded-full hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/50"
             >
               <img
                 src={isDark ? darkModeToggle : lightModeToggle}
-                alt={isDark ? 'Dark mode enabled' : 'Light mode enabled'}
+                alt={isDark ? t('landing.header.darkModeEnabledAlt') : t('landing.header.lightModeEnabledAlt')}
                 className="h-8 w-auto"
               />
             </button>

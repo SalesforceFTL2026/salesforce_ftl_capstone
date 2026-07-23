@@ -1,0 +1,878 @@
+{
+  "nav": {
+    "general": "General",
+    "tools": "Tools",
+    "dashboard": "Dashboard",
+    "requests": "Requests",
+    "household": "Household",
+    "documents": "Emergency Guide",
+    "settings": "Settings"
+  },
+  "common": {
+    "notSetYet": "Not set yet",
+    "comingSoon": "This section is coming soon.",
+    "close": "Close",
+    "loading": "Loading…"
+  },
+  "dashboardView": {
+    "greeting": "Hello, {{name}}!",
+    "profile": "Profile",
+    "name": "Name",
+    "phoneNumber": "Phone Number",
+    "householdCount": "# in Household",
+    "activeRequests": "Active Requests",
+    "expectedFulfillment": "Expected Fulfillment",
+    "typeOfRequest": "Type of Request",
+    "loadingRequests": "Loading your requests…",
+    "noActiveRequests": "You have no active requests right now.",
+    "makeNewRequest": "Make New Request",
+    "requestByVoice": "Request by Voice",
+    "chatWithAssistant": "Chat with Assistant",
+    "requestSuffix": "Request",
+    "deleteRequest": "Delete request",
+    "nonprofitsTitle": "Participating Non-Profits Near You",
+    "organizationLogo": "Organization Logo",
+    "sampleOrgsNote": "Sample organizations — live listings coming soon."
+  },
+  "household": {
+    "title": "Household",
+    "subtitle": "Your account details and household information.",
+    "yourAccount": "Your account",
+    "fieldName": "Name",
+    "fieldEmail": "Email",
+    "fieldPhone": "Phone Number",
+    "fieldLocation": "Location",
+    "fieldHouseholdSize": "# In Household",
+    "editNote": "Phone number, location, and household size can't be edited here yet — those fields are coming soon."
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Manage your account details.",
+    "displayName": "Display Name",
+    "namePlaceholder": "Your name",
+    "nameEmptyError": "Name must not be empty.",
+    "nameUpdated": "✓ Your name has been updated.",
+    "nameUpdateError": "Could not update your name.",
+    "saveChanges": "Save Changes",
+    "saving": "Saving…",
+    "language": "Language",
+    "languageHelp": "Choose the language for your dashboard.",
+    "languageUpdated": "✓ Your language has been updated.",
+    "languageUpdateError": "Could not update your language."
+  },
+  "languages": {
+    "en": "English",
+    "es": "Español",
+    "zh": "中文",
+    "tl": "Tagalog",
+    "vi": "Tiếng Việt",
+    "fr": "Français",
+    "ko": "한국어",
+    "ru": "Русский",
+    "ht": "Kreyòl Ayisyen",
+    "hi": "हिन्दी",
+    "ne": "नेपाली"
+  },
+  "landing": {
+    "header": {
+      "logoAlt": "MapResponse logo",
+      "nav": {
+        "give": "GIVE",
+        "whatWeDo": "WHAT WE DO",
+        "whoWeAre": "WHO WE ARE",
+        "howToHelp": "HOW TO HELP",
+        "partnerResources": "PARTNER RESOURCES",
+        "getHelp": "GET HELP"
+      },
+      "greeting": "Hi, {{name}}",
+      "signOut": "SIGN OUT",
+      "signIn": "SIGN IN",
+      "searchAria": "Search",
+      "toggleDarkModeAria": "Toggle dark mode",
+      "darkModeEnabledAlt": "Dark mode enabled",
+      "lightModeEnabledAlt": "Light mode enabled"
+    },
+    "hero": {
+      "welcomeTo": "WELCOME TO",
+      "subtitle": "A MAPPED NETWORK TO STREAMLINE ASSISTANCE FOR HELP SEEKERS FROM HELPERS.",
+      "needHelp": "I NEED HELP",
+      "volunteer": "I WANT TO VOLUNTEER",
+      "organization": "I'M AN ORGANIZATION"
+    },
+    "whatWeDo": {
+      "title": "Title",
+      "graphic": "GRAPHIC",
+      "description": "Description",
+      "learnMore": "LEARN MORE"
+    },
+    "impact": {
+      "title": "OUR 2026 IMPACT",
+      "fact": "Fact"
+    },
+    "statCard": {
+      "graphicLine1": "GRAPHIC",
+      "graphicLine2": "PERTAINING TO",
+      "graphicLine3": "FACT",
+      "statistic": "STATISTIC #{{number}}"
+    },
+    "getInvolved": {
+      "title": "GET INVOLVED",
+      "graphic": "GRAPHIC",
+      "corporatePartnerLine1": "BECOME A CORPORATE",
+      "corporatePartnerLine2": "PARTNER",
+      "nonprofitNetworkLine1": "JOIN OUR NON-PROFIT",
+      "nonprofitNetworkLine2": "NETWORK",
+      "helpCommunitiesLine1": "HELP COMMUNITIES IN",
+      "helpCommunitiesLine2": "NEED"
+    },
+    "partners": {
+      "title": "THANK YOU TO OUR PARTNERS FOR YOUR SUPPORT!",
+      "logo": "Logo"
+    },
+    "oneLiner": {
+      "text": "MAP RESPONSE ONE-LINER",
+      "scrollToTopAria": "Scroll to top"
+    },
+    "footer": {
+      "logoAlt": "MapResponse logo",
+      "description": "Description"
+    }
+  },
+  "auth": {
+    "close": "Close",
+    "cancel": "Cancel",
+    "show": "Show",
+    "hide": "Hide",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "modalTitle": "{{role}} {{action}}",
+    "titleAction": {
+      "signUp": "Sign Up",
+      "login": "Login"
+    },
+    "tabs": {
+      "signUp": "Sign Up",
+      "logIn": "Log In"
+    },
+    "roles": {
+      "helpSeeker": "Help Seeker",
+      "volunteer": "Volunteer",
+      "organization": "Organization"
+    },
+    "fields": {
+      "name": "Name",
+      "email": "Email",
+      "password": "Password",
+      "location": "Location",
+      "skills": "Skills"
+    },
+    "placeholders": {
+      "name": "Enter your name",
+      "email": "you@example.com",
+      "password": "Enter your password",
+      "newPassword": "12+ chars, with a capital & number",
+      "location": "City, State or Zip Code"
+    },
+    "signIn": {
+      "welcomeBack": "Welcome back",
+      "submit": "Sign in",
+      "submitting": "Signing in…",
+      "errors": {
+        "missingCredentials": "Please enter your email and password.",
+        "generic": "Unable to sign in right now. Please try again."
+      }
+    },
+    "signUp": {
+      "welcomeRole": "Welcome, {{role}}!",
+      "submit": "Continue",
+      "submitting": "Creating account…",
+      "selectAllThatApply": "Select all that apply",
+      "skillsSelected": "{{count}} selected",
+      "errors": {
+        "missingRequired": "Name, email, and password are required.",
+        "locationRequired": "Location is required.",
+        "passwordTooShort": "Password must be at least 12 characters long.",
+        "passwordTooLong": "Password must be 72 characters or fewer.",
+        "passwordComplexity": "Password must include an uppercase letter, a lowercase letter, and a number.",
+        "skillRequired": "Please select at least one skill you can help with.",
+        "generic": "Unable to sign up right now. Please try again."
+      }
+    }
+  },
+  "portal": {
+    "logoAlt": "{{brand}} logo",
+    "searchPlaceholder": "Search...",
+    "toggleDarkMode": "Toggle dark mode",
+    "darkModeEnabled": "Dark mode enabled",
+    "lightModeEnabled": "Light mode enabled",
+    "notifications": "Notifications",
+    "signOut": "Sign out"
+  },
+  "org": {
+    "nav": {
+      "tasks": "Tasks",
+      "metrics": "Metrics",
+      "resources": "Resources",
+      "volunteers": "Volunteers",
+      "chat": "Chat",
+      "documents": "Documents"
+    },
+    "errors": {
+      "loadRequests": "Something went wrong loading requests.",
+      "updateStatus": "Could not update the request status.",
+      "updateResource": "Could not update the resource.",
+      "removeResource": "Could not remove the resource.",
+      "updateAssignment": "Could not update the assignment."
+    },
+    "dashboard": {
+      "greeting": "Hello, {{name}}!",
+      "metrics": "METRICS",
+      "analyze": "Analyze",
+      "requestsCompleted": "Requests Completed",
+      "peopleHelped": "People Helped",
+      "resourcesAvailable": "Resources Available",
+      "heatMapTitle": "Request Heat Map",
+      "respondingToday": "Where are we responding today?",
+      "tasks": "Tasks",
+      "viewAll": "View all",
+      "chartLabel": "Metrics trend chart",
+      "taskFallback": "Request"
+    },
+    "requests": {
+      "sortBy": "Sort by",
+      "sort": {
+        "priority": "Priority (high → low)",
+        "newest": "Newest first",
+        "nearest": "Nearest to you"
+      },
+      "measuringDistances": "Measuring distances…",
+      "locationRequired": "Location is required and cannot be cleared.",
+      "locationSaveError": "Could not save your location.",
+      "addLocationToSort": "Add a location to your organization profile to sort by distance.",
+      "distanceSortError": "Could not sort by distance.",
+      "locationPlaceholder": "City, ST or ZIP",
+      "saving": "Saving…",
+      "save": "Save",
+      "cancel": "Cancel",
+      "locationTitle": "Set the location distances are measured from",
+      "yourLocation": "Your location: {{location}}",
+      "setYourLocation": "Set your location",
+      "yourRequests": "Your Requests",
+      "yourRequestsEmpty": "You aren't responding to any requests yet.",
+      "unfilteredRequests": "Unfiltered Requests",
+      "unfilteredRequestsEmpty": "No open requests right now.",
+      "heatMapTitle": "Request Heat Map",
+      "mapTitle": "Request Map",
+      "heatToggle": "Heat",
+      "mapToggle": "Map",
+      "heatMapCaption": "Shaded by where needs cluster",
+      "columnName": "Name",
+      "columnDate": "Date",
+      "columnDistance": "Distance",
+      "columnPriority": "Priority",
+      "loading": "Loading…",
+      "tryAgain": "Try again",
+      "helpSeeker": "Help Seeker",
+      "milesAway": "{{miles}} mi",
+      "priority": {
+        "critical": "Critical",
+        "high": "High",
+        "medium": "Medium",
+        "low": "Low",
+        "notSet": "Not set"
+      },
+      "selectPrompt": "Select a request to see its details.",
+      "phoneNumber": "Phone Number",
+      "inHousehold": "# in Household",
+      "detailsTitle": "Help Request Details",
+      "description": "Description",
+      "noDescription": "No description provided.",
+      "categoryOfHelp": "Category of Help",
+      "userUrgency": "User-Declared Urgency",
+      "location": "Location",
+      "aiPriorityRating": "AI Priority Rating",
+      "notScored": "Not scored",
+      "status": "Status",
+      "statusOptions": {
+        "pending": "pending",
+        "in-progress": "in-progress",
+        "matched": "matched",
+        "fulfilled": "fulfilled",
+        "closed": "closed"
+      },
+      "unassign": "Unassign from us",
+      "assign": "Assign to us",
+      "assignedToYou": "Assigned to your organization",
+      "assignToAllocate": "Assign this request to your organization to allocate resources to it."
+    },
+    "resources": {
+      "types": {
+        "food": "Food",
+        "wood": "Wood",
+        "healthCareKits": "Health Care Kits"
+      },
+      "formIncomplete": "Please fill in the name, quantity, and unit.",
+      "addError": "Could not add the resource.",
+      "addTitle": "Add a Resource",
+      "addSubtitle": "List what your organization has available to give out.",
+      "type": "Type",
+      "name": "Name",
+      "namePlaceholder": "e.g. Canned goods, Firewood bundle",
+      "quantity": "Quantity",
+      "unit": "Unit",
+      "unitPlaceholder": "meals, units, kits",
+      "adding": "Adding…",
+      "addButton": "Add Resource",
+      "yourResources": "Your Resources",
+      "loading": "Loading…",
+      "tryAgain": "Try again",
+      "emptyState": "No resources yet. Add your first one using the form.",
+      "available": "Available",
+      "unavailable": "Unavailable",
+      "remove": "Remove"
+    },
+    "allocation": {
+      "loadError": "Could not load allocations.",
+      "resourceFallback": "resource",
+      "noSuggestions": "No suggestions — add available resources first.",
+      "suggestError": "Could not get a suggestion.",
+      "pickResource": "Pick a resource to allocate.",
+      "invalidQuantity": "Quantity must be a whole number of 1 or more.",
+      "allocateError": "Could not allocate the resource.",
+      "removeError": "Could not remove the allocation.",
+      "title": "Allocated Resources",
+      "thinking": "Thinking…",
+      "suggestWithAi": "✨ Suggest with AI",
+      "loading": "Loading…",
+      "nothingAllocated": "Nothing allocated yet.",
+      "remove": "Remove",
+      "resource": "Resource",
+      "select": "Select…",
+      "qty": "Qty",
+      "adding": "Adding…",
+      "allocate": "Allocate"
+    },
+    "heatMap": {
+      "fewerNeeds": "Fewer needs",
+      "moreNeeds": "More needs"
+    }
+  },
+  "volunteer": {
+    "nav": {
+      "general": "General",
+      "dashboard": "Dashboard",
+      "requests": "Requests",
+      "tasks": "Tasks",
+      "skills": "Skills",
+      "groups": "Groups",
+      "tools": "Tools",
+      "chat": "Chat",
+      "documents": "Documents",
+      "settings": "Settings"
+    },
+    "viewTitles": {
+      "requests": "Active Help Requests",
+      "skills": "My Skills"
+    },
+    "comingSoon": "This section is coming soon.",
+    "common": {
+      "loading": "Loading…",
+      "tryAgain": "Try again",
+      "saving": "Saving…"
+    },
+    "errors": {
+      "loadRequests": "Something went wrong loading requests.",
+      "recordInterest": "Could not record your interest. Please try again.",
+      "markHelped": "Could not mark the request as helped. Please try again.",
+      "withdraw": "Could not withdraw your interest. Please try again."
+    },
+    "confirmations": {
+      "interestRecorded": "Interest recorded. Thanks for helping!"
+    },
+    "dashboard": {
+      "defaultName": "Name",
+      "greeting": "Hello, {{name}}!",
+      "metrics": "METRICS",
+      "analyze": "Analyze",
+      "requestsCompleted": "Requests Completed",
+      "peopleHelped": "People Helped",
+      "skillWays": "Ways to Expand your Skillset",
+      "requestHeatMap": "Request Heat Map",
+      "respondingToday": "Where are we responding today?",
+      "tasks": "Tasks",
+      "viewAll": "View all",
+      "noUpcomingTasks": "No upcoming tasks right now.",
+      "metricsChartLabel": "Metrics trend chart",
+      "requestFallback": "Request"
+    },
+    "requests": {
+      "views": {
+        "calendar": "Calendar",
+        "list": "List",
+        "cards": "Cards",
+        "map": "Map"
+      },
+      "noOpenRequests": "No open requests right now. Check back soon.",
+      "whereHelpNeeded": "Where help is needed",
+      "selectedCount": "{{count}} request selected",
+      "helpWithSelected": "I can help with selected",
+      "selectAll": "Select all requests",
+      "columns": {
+        "name": "Name",
+        "category": "Category",
+        "urgencyLevel": "Urgency Level",
+        "aiPriority": "AI Priority",
+        "timeSubmitted": "Time Submitted"
+      },
+      "priorityTooltip": "AI-calculated priority score (0–100)",
+      "sortingByUrgency": "Sorting by urgency",
+      "sortByUrgency": "Sort by urgency",
+      "selectRequestFrom": "Select request from {{name}}",
+      "helpSeekerLower": "help seeker",
+      "helpSeeker": "Help Seeker",
+      "whyPrioritized": "🤖 Why the AI prioritized this",
+      "notScoredYet": "This request has not been scored by the AI prioritizer yet.",
+      "requestLabel": "Request:",
+      "whyTooltip": "Show why the AI prioritized this request",
+      "why": "Why?",
+      "helping": "✓ Helping",
+      "iCanHelp": "I can help",
+      "notSet": "Not set"
+    },
+    "calendar": {
+      "previousMonth": "Previous month",
+      "nextMonth": "Next month",
+      "weekdays": {
+        "sun": "Sun",
+        "mon": "Mon",
+        "tue": "Tue",
+        "wed": "Wed",
+        "thu": "Thu",
+        "fri": "Fri",
+        "sat": "Sat"
+      },
+      "selectDay": "Select a day",
+      "noRequestsThisDay": "No requests submitted on this day."
+    },
+    "skills": {
+      "saveError": "Could not save your skills.",
+      "yourSkills": "Your Skills",
+      "rateHelp": "Rate how confident you feel at each skill, from 1 (novice) to 5 (expert).",
+      "noSkillsYet": "You haven't added any skills yet. Add some below.",
+      "levels": {
+        "novice": "Novice",
+        "beginner": "Beginner",
+        "competent": "Competent",
+        "proficient": "Proficient",
+        "expert": "Expert"
+      },
+      "removeSkill": "Remove {{name}}",
+      "proficiencyFor": "Proficiency for {{name}}",
+      "addASkill": "Add a skill",
+      "addAnotherPlaceholder": "Add another skill…",
+      "add": "Add",
+      "skillsSaved": "Skills saved.",
+      "saveSkills": "Save skills"
+    },
+    "tasks": {
+      "noTasksYet": "No tasks yet",
+      "noTasksHelp": "Head to Requests to sign up for people who need help.",
+      "helped": "✓ Helped",
+      "markAsHelped": "Mark as helped",
+      "removing": "Removing…",
+      "unSignUp": "Un-sign up"
+    }
+  },
+  "requests": {
+    "card": {
+      "priorityScoreTitle": "AI-calculated priority score (0–100)",
+      "priority": "Priority {{score}}",
+      "editRequest": "Edit request",
+      "deleteRequest": "Delete request",
+      "whyPrioritized": "Why this is prioritized:",
+      "volunteersInterested_one": "{{count}} volunteer interested",
+      "volunteersInterested_other": "{{count}} volunteers interested",
+      "orgsResponding_one": "{{count}} org responding",
+      "orgsResponding_other": "{{count}} orgs responding",
+      "status": "Status",
+      "saving": "Saving…",
+      "statusLabel": "Status:",
+      "helped": "✓ Helped",
+      "markAsHelped": "Mark as helped",
+      "iCanHelpWithThis": "I can help with this"
+    },
+    "statusOptions": {
+      "pending": "pending",
+      "assigned": "assigned",
+      "in-progress": "in-progress",
+      "matched": "matched",
+      "completed": "completed",
+      "fulfilled": "fulfilled",
+      "closed": "closed"
+    },
+    "filterBar": {
+      "searchPlaceholder": "Search requests…",
+      "searchAriaLabel": "Search requests by keyword",
+      "categoryAriaLabel": "Filter by category",
+      "allCategories": "All categories",
+      "urgencyAriaLabel": "Filter by urgency",
+      "allUrgencies": "All urgencies",
+      "matching": "{{count}} matching",
+      "clear": "Clear"
+    },
+    "categories": {
+      "Food": "Food",
+      "Shelter": "Shelter",
+      "Medical": "Medical",
+      "Transport": "Transport",
+      "Other": "Other"
+    },
+    "urgencies": {
+      "Critical": "Critical",
+      "High": "High",
+      "Medium": "Medium",
+      "Low": "Low"
+    },
+    "hsRequests": {
+      "tabs": {
+        "calendar": "Calendar",
+        "list": "List",
+        "cards": "Cards"
+      },
+      "loading": "Loading your requests…",
+      "empty": "You haven't submitted any requests yet."
+    },
+    "calendar": {
+      "previousMonth": "Previous month",
+      "nextMonth": "Next month",
+      "months": {
+        "january": "January",
+        "february": "February",
+        "march": "March",
+        "april": "April",
+        "may": "May",
+        "june": "June",
+        "july": "July",
+        "august": "August",
+        "september": "September",
+        "october": "October",
+        "november": "November",
+        "december": "December"
+      },
+      "weekdays": {
+        "sun": "Sun",
+        "mon": "Mon",
+        "tue": "Tue",
+        "wed": "Wed",
+        "thu": "Thu",
+        "fri": "Fri",
+        "sat": "Sat"
+      },
+      "itemTitle": "{{category}} ({{urgency}}) — expected ~this day",
+      "estimateNote": "Expected fulfillment is estimated from each request's urgency until organizations provide exact dates."
+    },
+    "table": {
+      "name": "Name",
+      "category": "Category",
+      "urgencyLevel": "Urgency Level",
+      "status": "Status",
+      "dateSubmitted": "Date Submitted",
+      "location": "Location",
+      "requestFallback": "Request",
+      "deleteRequest": "Delete request",
+      "soonToBeFulfilled": "Soon to Be Fulfilled"
+    },
+    "tabNav": {
+      "ariaLabel": "Dashboard views"
+    },
+    "nearMe": {
+      "locating": "Locating…",
+      "on": "Near me: on",
+      "label": "Near me",
+      "searchRadius": "Search radius",
+      "within": "within",
+      "searchRadiusMiles": "Search radius in miles",
+      "miles": "{{count}} mi",
+      "nearby": "{{count}} nearby"
+    },
+    "map": {
+      "pins": "Pins",
+      "heatmap": "Heatmap",
+      "loadingHeatmap": "Loading heatmap…",
+      "notShown_one": "{{count}} request without a mappable location is not shown.",
+      "notShown_other": "{{count}} requests without a mappable location are not shown.",
+      "fewerNeeds": "Fewer needs",
+      "moreNeeds": "More needs",
+      "popup": {
+        "helpSeeker": "Help Seeker",
+        "uncategorized": "Uncategorized",
+        "urgencySuffix": "{{urgency}} urgency",
+        "aiScore": "AI {{score}}",
+        "helping": "✓ Helping",
+        "saving": "Saving…",
+        "iCanHelp": "I can help"
+      }
+    }
+  },
+  "voice": {
+    "errors": {
+      "unsupportedBrowser": "Your browser does not support voice recording. Please use the form instead.",
+      "micBlocked": "Microphone access was blocked. Enable it in your browser settings to record.",
+      "startFailed": "Could not start recording. Please check your microphone and try again.",
+      "noAudio": "We didn't catch any audio. Please try recording again.",
+      "processFailed": "Could not process the recording. Please try again.",
+      "sampleLoadFailed": "Could not load the sample recording."
+    },
+    "intake": {
+      "title": "Request Help by Voice",
+      "subtitle": "Tell us what you need out loud. We'll turn it into a request for you to review.",
+      "stopRecording": "Stop recording",
+      "startRecording": "Start recording",
+      "transcribing": "Transcribing your request…",
+      "recording": "Recording… {{time}} — tap to stop",
+      "tapToStart": "Tap the microphone to start",
+      "useSample": "Use a sample recording instead",
+      "cancel": "Cancel"
+    },
+    "review": {
+      "title": "Confirm What We Heard",
+      "subtitle": "We turned your recording into a request. Review the details and fix anything that's off before submitting.",
+      "youSaid": "You said",
+      "doubleCheck": "⚠ Please double-check",
+      "reRecord": "Re-record",
+      "submitting": "Submitting…",
+      "submit": "Submit Request",
+      "errors": {
+        "requiredFields": "Please fill in all required fields before submitting.",
+        "submitFailed": "Could not submit your request.",
+        "submitRetry": "Failed to submit request. Please try again."
+      },
+      "fields": {
+        "category": "Category",
+        "urgency": "Urgency",
+        "location": "Location",
+        "householdSize": "People in Household",
+        "description": "Description"
+      },
+      "category": {
+        "placeholder": "Select a category",
+        "food": "Food",
+        "shelter": "Shelter",
+        "medical": "Medical",
+        "transport": "Transportation",
+        "other": "Other"
+      },
+      "urgency": {
+        "placeholder": "Select urgency level",
+        "low": "Low — Can wait a few days",
+        "medium": "Medium — Within 24 hours",
+        "high": "High — Within a few hours",
+        "critical": "Critical — Immediate"
+      },
+      "placeholders": {
+        "location": "City, zip code, or address",
+        "householdSize": "How many people need help?",
+        "description": "Describe what help you need..."
+      }
+    }
+  },
+  "safety": {
+    "pageTitle": "Safety Manual",
+    "pageSubtitle": "Emergency contacts and step-by-step guidance for before, during, and after a disaster.",
+    "contactsHeading": "Emergency Contacts",
+    "guidesHeading": "Disaster Preparedness Guides",
+    "disclaimer": "Guidance adapted from FEMA, Ready.gov, and the American Red Cross. Always follow instructions from your local emergency officials.",
+    "contacts": {
+      "lifeThreatening": {
+        "label": "Life-threatening emergency",
+        "note": "Police, fire, or medical"
+      },
+      "distressHelpline": {
+        "label": "Disaster Distress Helpline",
+        "note": "24/7 crisis counseling"
+      },
+      "poisonControl": {
+        "label": "Poison Control",
+        "note": "Poisoning or exposure"
+      },
+      "fema": {
+        "label": "FEMA Helpline",
+        "note": "Disaster assistance & claims"
+      },
+      "redCross": {
+        "label": "American Red Cross",
+        "note": "Shelter & relief services"
+      },
+      "localNonEmergency": {
+        "label": "Local non-emergency",
+        "value": "Add your local line",
+        "note": "Police/utilities non-emergency"
+      }
+    },
+    "zip": {
+      "label": "Find local help by zipcode",
+      "placeholder": "e.g. 78701",
+      "search": "Search",
+      "searching": "Searching…",
+      "clear": "Clear",
+      "invalid": "Please enter a valid 5-digit US zipcode.",
+      "lookupError": "Could not look up that zipcode. Please try again.",
+      "showingContacts": "Showing contacts for"
+    },
+    "phases": {
+      "before": "Before",
+      "during": "During",
+      "after": "After"
+    },
+    "guides": {
+      "hurricane": {
+        "title": "Hurricane & Flood",
+        "before": {
+          "0": "Know your evacuation zone and route.",
+          "1": "Build a kit: 3 days of water (1 gal/person/day), non-perishable food, meds, flashlight, batteries.",
+          "2": "Keep documents (ID, insurance, medical) in a waterproof bag.",
+          "3": "Charge phones and backup batteries; fill your car with gas."
+        },
+        "during": {
+          "0": "Evacuate immediately if told to. Never drive through flood water — “Turn Around, Don’t Drown.”",
+          "1": "Move to the highest level of the building; avoid basements.",
+          "2": "Stay away from windows; shelter in an interior room.",
+          "3": "Listen to local officials on a battery or hand-crank radio."
+        },
+        "after": {
+          "0": "Return home only when authorities say it’s safe.",
+          "1": "Avoid standing water — it may be electrically charged or contaminated.",
+          "2": "Photograph damage for insurance before cleaning up.",
+          "3": "Check on neighbors, especially older adults and people with disabilities."
+        }
+      },
+      "wildfire": {
+        "title": "Wildfire",
+        "before": {
+          "0": "Clear leaves, brush, and debris within 30 ft of your home.",
+          "1": "Pack a go-bag and keep it by the door.",
+          "2": "Sign up for local emergency alerts.",
+          "3": "Plan two escape routes out of your neighborhood."
+        },
+        "during": {
+          "0": "Leave early — don’t wait for an evacuation order if you feel unsafe.",
+          "1": "Wear an N95 mask; close all windows and doors before leaving.",
+          "2": "If trapped, call 911 and shelter in a cleared area away from vegetation.",
+          "3": "Keep headlights on; drive slowly through smoke."
+        },
+        "after": {
+          "0": "Wait for the “all clear” before returning.",
+          "1": "Watch for hot spots, ash pits, and downed power lines.",
+          "2": "Wear gloves and a mask during cleanup; ash can be toxic.",
+          "3": "Document losses for insurance and FEMA claims."
+        }
+      },
+      "earthquake": {
+        "title": "Earthquake",
+        "before": {
+          "0": "Secure heavy furniture, water heaters, and shelves to walls.",
+          "1": "Identify safe spots: under sturdy tables, against interior walls.",
+          "2": "Keep sturdy shoes and a flashlight by your bed.",
+          "3": "Store an emergency kit and know how to shut off gas and water."
+        },
+        "during": {
+          "0": "Drop, Cover, and Hold On — get under sturdy furniture.",
+          "1": "Stay indoors until shaking stops; don’t run outside.",
+          "2": "If outdoors, move to an open area away from buildings and wires.",
+          "3": "If driving, pull over away from overpasses and stop."
+        },
+        "after": {
+          "0": "Expect aftershocks; Drop, Cover, and Hold On again if they come.",
+          "1": "Check for injuries and gas leaks — leave if you smell gas.",
+          "2": "Use texts, not calls, to keep phone lines open.",
+          "3": "Inspect your home for damage before re-entering."
+        }
+      },
+      "tornado": {
+        "title": "Tornado",
+        "before": {
+          "0": "Know the difference: a Watch means possible; a Warning means take shelter now.",
+          "1": "Identify a safe room — basement or an interior room on the lowest floor.",
+          "2": "Keep a helmet or heavy blankets to protect your head.",
+          "3": "Enable Wireless Emergency Alerts on your phone."
+        },
+        "during": {
+          "0": "Go to your safe room immediately; put as many walls between you and outside as possible.",
+          "1": "Cover your head and neck; crouch low.",
+          "2": "Avoid windows, doors, and outside walls.",
+          "3": "If in a mobile home or car, get to a sturdy building."
+        },
+        "after": {
+          "0": "Watch for broken glass, nails, and downed power lines.",
+          "1": "Don’t enter damaged buildings until they’re inspected.",
+          "2": "Help injured people but don’t move the seriously hurt unless in danger.",
+          "3": "Take photos of damage for your insurance."
+        }
+      },
+      "winter": {
+        "title": "Winter Storm",
+        "before": {
+          "0": "Insulate pipes and know how to shut off water if they freeze.",
+          "1": "Stock extra blankets, warm clothing, food, and water.",
+          "2": "Keep flashlights and batteries ready for outages.",
+          "3": "Service heating equipment and check smoke/CO detectors."
+        },
+        "during": {
+          "0": "Stay indoors and dress in layers.",
+          "1": "Never use a generator, grill, or camp stove indoors — carbon monoxide risk.",
+          "2": "Keep faucets dripping slightly to prevent frozen pipes.",
+          "3": "If you lose heat, close off unused rooms to conserve warmth."
+        },
+        "after": {
+          "0": "Check on neighbors at risk from the cold.",
+          "1": "Watch for signs of frostbite and hypothermia.",
+          "2": "Clear snow from vents and exhausts to avoid CO buildup.",
+          "3": "Avoid overexertion when shoveling."
+        }
+      },
+      "heat": {
+        "title": "Extreme Heat",
+        "before": {
+          "0": "Identify air-conditioned public places (libraries, malls, cooling centers).",
+          "1": "Check that fans and AC work; cover windows that get morning/afternoon sun.",
+          "2": "Stock extra water and electrolyte drinks.",
+          "3": "Plan to check on older or isolated neighbors."
+        },
+        "during": {
+          "0": "Drink water often — don’t wait until you’re thirsty.",
+          "1": "Stay in the coolest part of your home or a cooling center.",
+          "2": "Never leave people or pets in a parked car.",
+          "3": "Limit outdoor activity to early morning or evening."
+        },
+        "after": {
+          "0": "Watch for heat exhaustion (heavy sweating, weakness) and heat stroke (confusion, hot dry skin — call 911).",
+          "1": "Keep hydrating and resting in a cool place.",
+          "2": "Check on family, neighbors, and pets.",
+          "3": "Restock your water and supplies for the next wave."
+        }
+      }
+    }
+  },
+  "chat": {
+    "greeting": "Hi {{name}}! I'm Mappie, your MapResponse assistant. Ask me about your requests, safety tips, or how to get help.",
+    "unavailable": "The assistant is unavailable right now. Please try again.",
+    "openAssistant": "Open chat assistant",
+    "closeAssistant": "Close chat assistant",
+    "assistantSubtitle": "Your MapResponse assistant",
+    "thinking": "Thinking…",
+    "inputPlaceholder": "Type your message…",
+    "send": "Send"
+  },
+  "misc": {
+    "comingSoon": "You're signed in! This page is coming soon."
+  },
+  "requestForm": {
+    "titleCreate": "Request Help",
+    "titleEdit": "Edit Request",
+    "subtitleCreate": "Tell us what you need and we'll prioritize it.",
+    "subtitleEdit": "Update the details of your request below.",
+    "successCreate": "✓ Request submitted!",
+    "successEdit": "✓ Changes saved!",
+    "errorRequired": "Please fill in all required fields"
+  }
+}

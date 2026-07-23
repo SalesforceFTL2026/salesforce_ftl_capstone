@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import MRLogo from '../../assets/logos/MRLogo.png';
 import { PortalIcon } from './portalIcons';
 
@@ -10,6 +11,7 @@ import { PortalIcon } from './portalIcons';
 // @param {string} activeView - id of the current view
 // @param {(id: string) => void} onNavigate
 const PortalSidebar = ({ label, groups, activeView, onNavigate }) => {
+  const { t } = useTranslation();
   return (
     <aside className="w-20 lg:w-60 shrink-0 bg-[#9db29a] dark:bg-[#1a2417] flex flex-col transition-colors duration-300">
       {/* Logo header block */}
@@ -17,7 +19,7 @@ const PortalSidebar = ({ label, groups, activeView, onNavigate }) => {
         <div className="p-1 rounded-xl dark:bg-white/75">
           <img
             src={MRLogo}
-            alt="MapResponse logo"
+            alt={t('portal.logoAlt', { brand: 'MapResponse' })}
             className="h-12 lg:h-16 w-auto object-contain"
           />
         </div>

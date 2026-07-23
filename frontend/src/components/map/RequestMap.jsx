@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -181,6 +182,7 @@ const ChoroplethLayer = ({ points, onLoadingChange }) => {
 };
 
 const RequestMap = ({ requests = [], onInteract, interactingId, confirmations = {} }) => {
+  const { t } = useTranslation();
   // 'pins' shows urgency markers; 'heat' shows the county choropleth.
   const [mode, setMode] = useState('pins');
   // True while the (lazy-loaded) county geometry is downloading/building.
@@ -210,8 +212,8 @@ const RequestMap = ({ requests = [], onInteract, interactingId, confirmations = 
       <div className="flex justify-center">
         <div className="inline-flex gap-1 p-1 rounded-xl bg-black/5 dark:bg-white/10">
           {[
-            { id: 'pins', label: 'Pins' },
-            { id: 'heat', label: 'Heatmap' },
+            { id: 'pins', label: t('requests.map.pins') },
+            { id: 'heat', label: t('requests.map.heatmap') },
           ].map((opt) => (
             <button
               key={opt.id}
@@ -236,7 +238,7 @@ const RequestMap = ({ requests = [], onInteract, interactingId, confirmations = 
           <div className="absolute inset-0 z-[1000] flex flex-col items-center justify-center gap-3 bg-white/70 dark:bg-[#16233a]/70 backdrop-blur-sm">
             <div className="h-8 w-8 rounded-full border-2 border-[#6ba3d3] border-t-transparent animate-spin" />
             <p className="text-sm font-semibold text-[#1C2A16] dark:text-gray-200">
-              Loading heatmap…
+              {t('requests.map.loadingHeatmap')}
             </p>
           </div>
         )}
@@ -280,9 +282,7 @@ const RequestMap = ({ requests = [], onInteract, interactingId, confirmations = 
           for the full picture. */}
       {mappable.length < requests.length && (
         <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-          {requests.length - mappable.length} request
-          {requests.length - mappable.length === 1 ? '' : 's'} without a mappable location{' '}
-          {requests.length - mappable.length === 1 ? 'is' : 'are'} not shown.
+          {t('requests.map.notShown', { count: requests.length - mappable.length })}
         </p>
       )}
 
@@ -292,20 +292,20 @@ const RequestMap = ({ requests = [], onInteract, interactingId, confirmations = 
           {Object.entries(URGENCY_COLOR).map(([label, color]) => (
             <span key={label} className="flex items-center gap-1.5">
               <span className="inline-block w-3 h-3 rounded-full" style={{ background: color }} />
-              {label}
+              {t(`requests.urgencies.${label}`)}
             </span>
           ))}
         </div>
       ) : (
         <div className="flex items-center justify-center gap-2 text-xs text-gray-600 dark:text-gray-300">
-          <span>Fewer needs</span>
+          <span>{t('requests.map.fewerNeeds')}</span>
           <span
             className="inline-block h-2 w-32 rounded-full"
             style={{
               background: `linear-gradient(to right, ${HEAT_GRADIENT.join(', ')})`,
             }}
           />
-          <span>More needs</span>
+          <span>{t('requests.map.moreNeeds')}</span>
         </div>
       )}
     </div>
@@ -314,23 +314,24 @@ const RequestMap = ({ requests = [], onInteract, interactingId, confirmations = 
 
 // The content shown inside a pin's popup: request summary + optional action.
 const RequestPopup = ({ request, onInteract, interacting, confirmation }) => {
+  const { t } = useTranslation();
   const { submitterName, requesterName, name, category, urgency, location, description, priorityScore } = request;
-  const who = submitterName || requesterName || name || 'Help Seeker';
+  const who = submitterName || requesterName || name || t('requests.map.popup.helpSeeker');
   const hasScore = typeof priorityScore === 'number' && priorityScore > 0;
 
   return (
     <div className="min-w-[12rem]">
       <p className="font-bold text-sm text-[#1C2A16]">{who}</p>
       <p className="text-xs text-gray-600 mt-0.5">
-        {category || 'Uncategorized'}
-        {urgency ? ` · ${urgency} urgency` : ''}
-        {hasScore ? ` · AI ${Math.round(priorityScore)}` : ''}
+        {category || t('requests.map.popup.uncategorized')}
+        {urgency ? ` · ${t('requests.map.popup.urgencySuffix', { urgency })}` : ''}
+        {hasScore ? ` · ${t('requests.map.popup.aiScore', { score: Math.round(priorityScore) })}` : ''}
       </p>
       {location && <p className="text-xs text-gray-500 mt-0.5">{location}</p>}
       {description && <p className="text-xs text-gray-700 mt-1">{description}</p>}
 
       {confirmation ? (
-        <p className="text-xs font-semibold text-green-700 mt-2">✓ Helping</p>
+        <p className="text-xs font-semibold text-green-700 mt-2">{t('requests.map.popup.helping')}</p>
       ) : (
         onInteract && (
           <button
@@ -339,7 +340,7 @@ const RequestPopup = ({ request, onInteract, interacting, confirmation }) => {
             disabled={interacting}
             className="mt-2 px-3 py-1.5 rounded-lg bg-[#6ba3d3] text-white text-xs font-semibold hover:bg-[#5a92c2] disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
           >
-            {interacting ? 'Saving…' : 'I can help'}
+            {interacting ? t('requests.map.popup.saving') : t('requests.map.popup.iCanHelp')}
           </button>
         )
       )}

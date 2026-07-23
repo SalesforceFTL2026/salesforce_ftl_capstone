@@ -1,4 +1,7 @@
+import { useTranslation } from 'react-i18next';
+
 const MapResponseOneLiner = () => {
+  const { t } = useTranslation();
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -8,12 +11,12 @@ const MapResponseOneLiner = () => {
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center justify-between">
           <h2 className="text-4xl font-bold text-white max-w-3xl">
-            MAP RESPONSE ONE-LINER
+            {t('landing.oneLiner.text')}
           </h2>
           <button
             onClick={scrollToTop}
             className="w-16 h-16 bg-[#6ba3d3] rounded-full flex items-center justify-center hover:bg-[#5a92c2] transition-colors flex-shrink-0 ml-4"
-            aria-label="Scroll to top"
+            aria-label={t('landing.oneLiner.scrollToTopAria')}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"

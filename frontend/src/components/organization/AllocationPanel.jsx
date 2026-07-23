@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   getRequestAllocations,
   getAllocationSuggestions,
@@ -19,6 +20,7 @@ import {
 // @param {object[]} resources - the org's inventory (for the picker dropdown)
 // @param {() => void} onChanged - called after allocate/deallocate succeeds
 const AllocationPanel = ({ request, resources, onChanged }) => {
+  const { t } = useTranslation();
   const [allocations, setAllocations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -42,11 +44,11 @@ const AllocationPanel = ({ request, resources, onChanged }) => {
     try {
       setAllocations(await getRequestAllocations(requestId));
     } catch (err) {
-      setError(requestErrorMessage(err, 'Could not load allocations.'));
+      setError(requestErrorMessage(err, t('org.allocation.loadError')));
     } finally {
       setLoading(false);
     }
-  }, [requestId]);
+  }, [requestId, t]);
 
   // Reset local form state and reload allocations whenever the request changes.
   useEffect(() => {
@@ -57,7 +59,7 @@ const AllocationPanel = ({ request, resources, onChanged }) => {
     loadAllocations();
   }, [loadAllocations]);
 
-  const nameFor = (id) => resources.find((r) => r.id === id)?.name || 'resource';
+  const nameFor = (id) => resources.find((r) => r.id === id)?.name || t('org.allocation.resourceFallback');
 
   const handleSuggest = async () => {
     setSuggesting(true);
@@ -66,10 +68,10 @@ const AllocationPanel = ({ request, resources, onChanged }) => {
       const result = await getAllocationSuggestions(requestId);
       setSuggestions(result);
       if (result.length === 0) {
-        setSuggestError('No suggestions — add available resources first.');
+        setSuggestError(t('org.allocation.noSuggestions'));
       }
     } catch (err) {
-      setSuggestError(requestErrorMessage(err, 'Could not get a suggestion.'));
+      setSuggestError(requestErrorMessage(err, t('org.allocation.suggestError')));
     } finally {
       setSuggesting(false);
     }
@@ -86,12 +88,12 @@ const AllocationPanel = ({ request, resources, onChanged }) => {
     setError('');
 
     if (!resourceId) {
-      setError('Pick a resource to allocate.');
+      setError(t('org.allocation.pickResource'));
       return;
     }
     const qty = Number(quantity);
     if (!Number.isInteger(qty) || qty < 1) {
-      setError('Quantity must be a whole number of 1 or more.');
+      setError(t('org.allocation.invalidQuantity'));
       return;
     }
 
@@ -103,7 +105,7 @@ const AllocationPanel = ({ request, resources, onChanged }) => {
       await loadAllocations();
       onChanged?.();
     } catch (err) {
-      setError(requestErrorMessage(err, 'Could not allocate the resource.'));
+      setError(requestErrorMessage(err, t('org.allocation.allocateError')));
     } finally {
       setBusy(false);
     }
@@ -116,21 +118,21 @@ const AllocationPanel = ({ request, resources, onChanged }) => {
       await loadAllocations();
       onChanged?.();
     } catch (err) {
-      setError(requestErrorMessage(err, 'Could not remove the allocation.'));
+      setError(requestErrorMessage(err, t('org.allocation.removeError')));
     }
   };
 
   return (
     <div className="mt-4 pt-4 border-t border-white/40 dark:border-white/10">
       <div className="flex items-center justify-between mb-2">
-        <h4 className="font-bold uppercase tracking-wide text-xs">Allocated Resources</h4>
+        <h4 className="font-bold uppercase tracking-wide text-xs">{t('org.allocation.title')}</h4>
         <button
           type="button"
           onClick={handleSuggest}
           disabled={suggesting}
           className="text-xs font-semibold bg-[#7F9764] text-white px-3 py-1 rounded-full hover:opacity-90 disabled:opacity-60"
         >
-          {suggesting ? 'Thinking…' : '✨ Suggest with AI'}
+          {suggesting ? t('org.allocation.thinking') : t('org.allocation.suggestWithAi')}
         </button>
       </div>
 
@@ -159,9 +161,9 @@ const AllocationPanel = ({ request, resources, onChanged }) => {
       )}
 
       {/* Current allocations */}
-      {loading && <p className="text-xs" role="status">Loading…</p>}
+      {loading && <p className="text-xs" role="status">{t('org.allocation.loading')}</p>}
       {!loading && allocations.length === 0 && (
-        <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">Nothing allocated yet.</p>
+        <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">{t('org.allocation.nothingAllocated')}</p>
       )}
       {!loading && allocations.length > 0 && (
         <ul className="space-y-1 mb-3">
@@ -178,7 +180,7 @@ const AllocationPanel = ({ request, resources, onChanged }) => {
                 onClick={() => handleRemove(a.id)}
                 className="text-xs font-semibold text-red-600 hover:underline"
               >
-                Remove
+                {t('org.allocation.remove')}
               </button>
             </li>
           ))}
@@ -189,7 +191,7 @@ const AllocationPanel = ({ request, resources, onChanged }) => {
       <form onSubmit={handleAllocate} className="flex items-end gap-2">
         <div className="flex-1">
           <label htmlFor="alloc-resource" className="text-xs font-semibold uppercase block mb-1">
-            Resource
+            {t('org.allocation.resource')}
           </label>
           <select
             id="alloc-resource"
@@ -197,7 +199,7 @@ const AllocationPanel = ({ request, resources, onChanged }) => {
             onChange={(e) => setResourceId(e.target.value)}
             className="w-full text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#1f2d18] text-gray-800 dark:text-gray-100 px-2 py-1.5"
           >
-            <option value="">Select…</option>
+            <option value="">{t('org.allocation.select')}</option>
             {availableResources.map((r) => (
               <option key={r.id} value={r.id}>
                 {r.name} ({r.quantity} {r.unit})
@@ -207,7 +209,7 @@ const AllocationPanel = ({ request, resources, onChanged }) => {
         </div>
         <div className="w-20">
           <label htmlFor="alloc-qty" className="text-xs font-semibold uppercase block mb-1">
-            Qty
+            {t('org.allocation.qty')}
           </label>
           <input
             id="alloc-qty"
@@ -224,7 +226,7 @@ const AllocationPanel = ({ request, resources, onChanged }) => {
           disabled={busy}
           className="text-sm font-semibold bg-[#1C2A16] dark:bg-[#7F9764] text-white px-4 py-1.5 rounded-lg hover:opacity-90 disabled:opacity-60"
         >
-          {busy ? 'Adding…' : 'Allocate'}
+          {busy ? t('org.allocation.adding') : t('org.allocation.allocate')}
         </button>
       </form>
     </div>

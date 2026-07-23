@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { getCurrentPosition, DEFAULT_RADIUS_MILES } from '../../utils/geolocation';
 
 // "Near me" geolocation toggle (issue #116). Lets a volunteer or organization
@@ -16,6 +17,7 @@ import { getCurrentPosition, DEFAULT_RADIUS_MILES } from '../../utils/geolocatio
 const RADIUS_OPTIONS = [10, 25, 50, 100];
 
 const NearMeToggle = ({ onChange, active = false, count = null }) => {
+  const { t } = useTranslation();
   // The located point, kept so changing the radius doesn't re-prompt for GPS.
   const [coords, setCoords] = useState(null);
   const [radiusMiles, setRadiusMiles] = useState(DEFAULT_RADIUS_MILES);
@@ -71,28 +73,28 @@ const NearMeToggle = ({ onChange, active = false, count = null }) => {
             <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z" />
             <circle cx="12" cy="11" r="3" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-          {locating ? 'Locating…' : active ? 'Near me: on' : 'Near me'}
+          {locating ? t('requests.nearMe.locating') : active ? t('requests.nearMe.on') : t('requests.nearMe.label')}
         </button>
 
         {/* Radius picker — always visible so users know the circle is adjustable. */}
         <label className="flex items-center gap-1.5 text-sm text-[#1C2A16] dark:text-gray-300">
-          <span className="sr-only">Search radius</span>
-          <span aria-hidden="true">within</span>
+          <span className="sr-only">{t('requests.nearMe.searchRadius')}</span>
+          <span aria-hidden="true">{t('requests.nearMe.within')}</span>
           <select
             value={radiusMiles}
             onChange={(e) => changeRadius(Number(e.target.value))}
-            aria-label="Search radius in miles"
+            aria-label={t('requests.nearMe.searchRadiusMiles')}
             className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#1f2d18] text-gray-800 dark:text-gray-100 px-2 py-1.5 text-sm"
           >
             {RADIUS_OPTIONS.map((m) => (
-              <option key={m} value={m}>{m} mi</option>
+              <option key={m} value={m}>{t('requests.nearMe.miles', { count: m })}</option>
             ))}
           </select>
         </label>
 
         {active && count != null && (
           <span className="text-sm text-gray-600 dark:text-gray-400" role="status">
-            {count} nearby
+            {t('requests.nearMe.nearby', { count })}
           </span>
         )}
       </div>

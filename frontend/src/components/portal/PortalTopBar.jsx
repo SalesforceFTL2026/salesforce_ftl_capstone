@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import lightModeToggle from '../../assets/light_mode_toggle.png';
 import darkModeToggle from '../../assets/dark_mode_toggle.png';
@@ -9,6 +10,7 @@ import darkModeToggle from '../../assets/dark_mode_toggle.png';
 // @param {object} [currentUser] - signed-in user, for the name + sign out
 // @param {() => void} [onSignOut]
 const PortalTopBar = ({ title, currentUser, onSignOut }) => {
+  const { t } = useTranslation();
   const { isDark, toggleTheme } = useTheme();
   const name = currentUser?.name || 'Name';
 
@@ -24,7 +26,7 @@ const PortalTopBar = ({ title, currentUser, onSignOut }) => {
         </svg>
         <input
           type="search"
-          placeholder="Search..."
+          placeholder={t('portal.searchPlaceholder')}
           className="w-full rounded-full bg-white/90 dark:bg-[#1f2d18] text-gray-800 dark:text-gray-100 text-lg pl-12 pr-4 py-2.5 shadow-inner focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/50"
         />
       </div>
@@ -40,19 +42,19 @@ const PortalTopBar = ({ title, currentUser, onSignOut }) => {
           onClick={toggleTheme}
           role="switch"
           aria-checked={isDark}
-          aria-label="Toggle dark mode"
+          aria-label={t('portal.toggleDarkMode')}
           className="rounded-full hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/50"
         >
           <img
             src={isDark ? darkModeToggle : lightModeToggle}
-            alt={isDark ? 'Dark mode enabled' : 'Light mode enabled'}
+            alt={isDark ? t('portal.darkModeEnabled') : t('portal.lightModeEnabled')}
             className="h-8 w-auto"
           />
         </button>
 
         <button
           type="button"
-          aria-label="Notifications"
+          aria-label={t('portal.notifications')}
           className="relative w-10 h-10 rounded-full bg-white dark:bg-[#1f2d18] flex items-center justify-center shadow-sm hover:opacity-80 transition-opacity"
         >
           <svg className="w-5 h-5 text-[#1a2332] dark:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -74,7 +76,7 @@ const PortalTopBar = ({ title, currentUser, onSignOut }) => {
                 onClick={onSignOut}
                 className="text-left text-xs text-[#3a4a30] dark:text-gray-400 hover:underline"
               >
-                Sign out
+                {t('portal.signOut')}
               </button>
             )}
           </div>

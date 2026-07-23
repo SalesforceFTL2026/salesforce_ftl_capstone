@@ -1,4 +1,5 @@
 import api from './api';
+import { setLanguage } from '../i18n';
 
 // All sign-up / sign-in calls and token storage live here so components stay
 // thin and there is a single source of truth for how we talk to the auth API.
@@ -27,6 +28,11 @@ export const login = async ({ email, password }) => {
 
   const { token, user } = data.data;
   persistSession({ token, user });
+  // Apply the language saved on the user's profile so their preference follows
+  // them to this device. Falls back to English if they never set one.
+  if (user?.languagePreference) {
+    setLanguage(user.languagePreference);
+  }
   return user;
 };
 
@@ -76,6 +82,14 @@ export const updateProfile = async (fields) => {
 
 // Convenience wrapper for the common case of changing just the display name.
 export const updateName = (name) => updateProfile({ name });
+
+// Save the user's UI language to their profile AND switch the live UI to it.
+// Returns the updated user object.
+export const updateLanguage = async (lang) => {
+  const updated = await updateProfile({ languagePreference: lang });
+  setLanguage(lang);
+  return updated;
+};
 
 // Read the signed-in user saved at login, or null if nobody is signed in.
 // Used to restore the session when the app first loads.

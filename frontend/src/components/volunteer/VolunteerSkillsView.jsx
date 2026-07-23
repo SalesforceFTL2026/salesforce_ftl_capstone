@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { DISASTER_SKILLS } from '../../utils/skills';
 
 // Skills view for a volunteer. Lists the skills they gave at signup (each with a
@@ -12,9 +13,10 @@ import { DISASTER_SKILLS } from '../../utils/skills';
 // @param {() => void} onRetry
 // @param {(skills) => Promise<void>} onSave - persist the edited skills
 // @param {boolean} saving - true while a save is in flight
-const LEVEL_LABELS = ['Novice', 'Beginner', 'Competent', 'Proficient', 'Expert'];
+const LEVEL_KEYS = ['novice', 'beginner', 'competent', 'proficient', 'expert'];
 
 const VolunteerSkillsView = ({ skills, loading, error, onRetry, onSave, saving }) => {
+  const { t } = useTranslation();
   // Local working copy so edits feel instant; seeded from props and re-seeded
   // whenever the saved skills change (e.g. after a reload).
   const [draft, setDraft] = useState(skills);
@@ -51,19 +53,19 @@ const VolunteerSkillsView = ({ skills, loading, error, onRetry, onSave, saving }
       await onSave(draft);
       setSaved(true);
     } catch (err) {
-      setSaveError(err.message || 'Could not save your skills.');
+      setSaveError(err.message || t('volunteer.skills.saveError'));
     }
   };
 
   if (loading) {
-    return <p className="text-[#1C2A16] dark:text-gray-300" role="status">Loading…</p>;
+    return <p className="text-[#1C2A16] dark:text-gray-300" role="status">{t('volunteer.common.loading')}</p>;
   }
   if (error) {
     return (
       <div className="bg-red-50 border border-red-200 text-red-800 rounded-2xl p-4">
         <p className="font-semibold">{error}</p>
         <button onClick={onRetry} className="mt-2 text-sm font-semibold underline hover:no-underline">
-          Try again
+          {t('volunteer.common.tryAgain')}
         </button>
       </div>
     );
@@ -78,15 +80,15 @@ const VolunteerSkillsView = ({ skills, loading, error, onRetry, onSave, saving }
     <div className="max-w-3xl flex flex-col gap-6">
       <div className="bg-white dark:bg-[#16233a] rounded-3xl p-6 sm:p-8 shadow-md flex flex-col gap-5">
         <div>
-          <h2 className="text-2xl font-bold text-[#1C2A16] dark:text-white">Your Skills</h2>
+          <h2 className="text-2xl font-bold text-[#1C2A16] dark:text-white">{t('volunteer.skills.yourSkills')}</h2>
           <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
-            Rate how confident you feel at each skill, from 1 (novice) to 5 (expert).
+            {t('volunteer.skills.rateHelp')}
           </p>
         </div>
 
         {draft.length === 0 ? (
           <p className="text-gray-500 dark:text-gray-400">
-            You haven't added any skills yet. Add some below.
+            {t('volunteer.skills.noSkillsYet')}
           </p>
         ) : (
           <ul className="flex flex-col gap-5">
@@ -98,12 +100,12 @@ const VolunteerSkillsView = ({ skills, loading, error, onRetry, onSave, saving }
                   </span>
                   <div className="flex items-center gap-3">
                     <span className="text-sm font-medium text-[#6ba3d3] w-24 text-right">
-                      {skill.level} · {LEVEL_LABELS[skill.level - 1]}
+                      {skill.level} · {t(`volunteer.skills.levels.${LEVEL_KEYS[skill.level - 1]}`)}
                     </span>
                     <button
                       type="button"
                       onClick={() => removeSkill(skill.name)}
-                      aria-label={`Remove ${skill.name}`}
+                      aria-label={t('volunteer.skills.removeSkill', { name: skill.name })}
                       className="text-gray-400 hover:text-[#c84444] text-xl leading-none"
                     >
                       ×
@@ -118,7 +120,7 @@ const VolunteerSkillsView = ({ skills, loading, error, onRetry, onSave, saving }
                   value={skill.level}
                   onChange={(e) => setLevel(skill.name, Number(e.target.value))}
                   className="w-full accent-[#6ba3d3]"
-                  aria-label={`Proficiency for ${skill.name}`}
+                  aria-label={t('volunteer.skills.proficiencyFor', { name: skill.name })}
                 />
               </li>
             ))}
@@ -128,7 +130,7 @@ const VolunteerSkillsView = ({ skills, loading, error, onRetry, onSave, saving }
 
       {/* Add a skill: quick-add chips from the canonical list + free-form entry. */}
       <div className="bg-white dark:bg-[#16233a] rounded-3xl p-6 sm:p-8 shadow-md flex flex-col gap-4">
-        <h3 className="text-lg font-bold text-[#1C2A16] dark:text-white">Add a skill</h3>
+        <h3 className="text-lg font-bold text-[#1C2A16] dark:text-white">{t('volunteer.skills.addASkill')}</h3>
 
         {remaining.length > 0 && (
           <div className="flex flex-wrap gap-2">
@@ -153,14 +155,14 @@ const VolunteerSkillsView = ({ skills, loading, error, onRetry, onSave, saving }
             type="text"
             value={addValue}
             onChange={(e) => setAddValue(e.target.value)}
-            placeholder="Add another skill…"
+            placeholder={t('volunteer.skills.addAnotherPlaceholder')}
             className="flex-1 px-4 py-2.5 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-[#6ba3d3] focus:ring-2 focus:ring-[#6ba3d3]/20 transition-all dark:bg-[#1f2d18] dark:text-white"
           />
           <button
             type="submit"
             className="px-5 py-2.5 rounded-xl bg-gray-100 dark:bg-[#1f2d18] text-[#1C2A16] dark:text-white font-semibold hover:bg-gray-200 transition-colors"
           >
-            Add
+            {t('volunteer.skills.add')}
           </button>
         </form>
       </div>
@@ -169,7 +171,7 @@ const VolunteerSkillsView = ({ skills, loading, error, onRetry, onSave, saving }
         <p role="alert" className="text-sm font-medium text-red-600">{saveError}</p>
       )}
       {saved && (
-        <p role="status" className="text-sm font-medium text-green-700">Skills saved.</p>
+        <p role="status" className="text-sm font-medium text-green-700">{t('volunteer.skills.skillsSaved')}</p>
       )}
 
       <div>
@@ -179,7 +181,7 @@ const VolunteerSkillsView = ({ skills, loading, error, onRetry, onSave, saving }
           disabled={saving}
           className="px-8 py-3 rounded-xl bg-[#6ba3d3] text-white font-bold hover:bg-[#5a92c2] focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/40 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
         >
-          {saving ? 'Saving…' : 'Save skills'}
+          {saving ? t('volunteer.common.saving') : t('volunteer.skills.saveSkills')}
         </button>
       </div>
     </div>

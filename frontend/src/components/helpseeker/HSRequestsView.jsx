@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import RequestCard from '../RequestCard/RequestCard';
 import { estimateFulfillment } from '../../utils/fulfillment';
 
@@ -14,19 +15,20 @@ import { estimateFulfillment } from '../../utils/fulfillment';
 // @param {(request) => void} onDelete
 // @param {(request) => void} [onEdit] - open the edit form for a request
 const SUB_TABS = [
-  { id: 'calendar', label: 'Calendar', icon: CalendarIcon },
-  { id: 'list', label: 'List', icon: ListIcon },
-  { id: 'cards', label: 'Cards', icon: CardsIcon },
+  { id: 'calendar', labelKey: 'requests.hsRequests.tabs.calendar', icon: CalendarIcon },
+  { id: 'list', labelKey: 'requests.hsRequests.tabs.list', icon: ListIcon },
+  { id: 'cards', labelKey: 'requests.hsRequests.tabs.cards', icon: CardsIcon },
 ];
 
 const HSRequestsView = ({ requests, loading, error, deletingId, onDelete, onEdit }) => {
+  const { t } = useTranslation();
   const [tab, setTab] = useState('list');
 
   return (
     <div>
       {/* Tab switcher pill */}
       <div className="bg-[#9db29a] dark:bg-[#1f3320] rounded-3xl px-4 py-3 flex gap-6 mb-6 transition-colors duration-300">
-        {SUB_TABS.map(({ id, label, icon: renderIcon }) => {
+        {SUB_TABS.map(({ id, labelKey, icon: renderIcon }) => {
           const isActive = id === tab;
           return (
             <button
@@ -40,16 +42,16 @@ const HSRequestsView = ({ requests, loading, error, deletingId, onDelete, onEdit
               }`}
             >
               {renderIcon()}
-              {label}
+              {t(labelKey)}
             </button>
           );
         })}
       </div>
 
-      {loading && <p className="text-gray-600 dark:text-gray-300" role="status">Loading your requests…</p>}
+      {loading && <p className="text-gray-600 dark:text-gray-300" role="status">{t('requests.hsRequests.loading')}</p>}
       {!loading && error && <p className="text-red-700 dark:text-red-300">{error}</p>}
       {!loading && !error && requests.length === 0 && (
-        <p className="text-gray-600 dark:text-gray-300">You haven't submitted any requests yet.</p>
+        <p className="text-gray-600 dark:text-gray-300">{t('requests.hsRequests.empty')}</p>
       )}
 
       {!loading && !error && requests.length > 0 && (
@@ -85,15 +87,16 @@ const URGENCY_DOT = {
   Low: 'bg-green-500',
 };
 
-const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const MONTHS = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
+const WEEKDAY_KEYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+const MONTH_KEYS = [
+  'january', 'february', 'march', 'april', 'may', 'june',
+  'july', 'august', 'september', 'october', 'november', 'december',
 ];
 
 // A month calendar that plots each request on its estimated expected-fulfillment
 // date (derived from urgency). Users can page between months.
 const RequestsCalendar = ({ requests }) => {
+  const { t } = useTranslation();
   // Group requests by their fulfillment day, keyed "YYYY-M-D" for quick lookup.
   const byDay = {};
   for (const r of requests) {
@@ -132,7 +135,7 @@ const RequestsCalendar = ({ requests }) => {
         <button
           type="button"
           onClick={() => changeMonth(-1)}
-          aria-label="Previous month"
+          aria-label={t('requests.calendar.previousMonth')}
           className="w-9 h-9 rounded-full flex items-center justify-center text-[#1C2A16] dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
         >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -140,12 +143,12 @@ const RequestsCalendar = ({ requests }) => {
           </svg>
         </button>
         <h3 className="text-lg font-bold text-[#1C2A16] dark:text-white">
-          {MONTHS[month]} {year}
+          {t(`requests.calendar.months.${MONTH_KEYS[month]}`)} {year}
         </h3>
         <button
           type="button"
           onClick={() => changeMonth(1)}
-          aria-label="Next month"
+          aria-label={t('requests.calendar.nextMonth')}
           className="w-9 h-9 rounded-full flex items-center justify-center text-[#1C2A16] dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
         >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -156,9 +159,9 @@ const RequestsCalendar = ({ requests }) => {
 
       {/* Weekday labels */}
       <div className="grid grid-cols-7 gap-1 mb-1">
-        {WEEKDAYS.map((w) => (
+        {WEEKDAY_KEYS.map((w) => (
           <div key={w} className="text-center text-[11px] font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400 py-1">
-            {w}
+            {t(`requests.calendar.weekdays.${w}`)}
           </div>
         ))}
       </div>
@@ -183,7 +186,7 @@ const RequestsCalendar = ({ requests }) => {
               {items.map(({ request }) => (
                 <div
                   key={request.id}
-                  title={`${request.category} (${request.urgency}) — expected ~this day`}
+                  title={t('requests.calendar.itemTitle', { category: request.category, urgency: request.urgency })}
                   className="flex items-center gap-1 text-[10px] leading-tight text-[#1C2A16] dark:text-gray-100 bg-gray-100 dark:bg-white/10 rounded px-1 py-0.5 truncate"
                 >
                   <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${URGENCY_DOT[request.urgency] || 'bg-gray-400'}`} />
@@ -200,28 +203,30 @@ const RequestsCalendar = ({ requests }) => {
         {Object.entries(URGENCY_DOT).map(([label, dot]) => (
           <span key={label} className="flex items-center gap-1.5">
             <span className={`w-2 h-2 rounded-full ${dot}`} />
-            {label}
+            {t(`requests.urgencies.${label}`)}
           </span>
         ))}
       </div>
       <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-2 italic">
-        Expected fulfillment is estimated from each request's urgency until organizations provide exact dates.
+        {t('requests.calendar.estimateNote')}
       </p>
     </div>
   );
 };
 
 // The wireframe's List table.
-const RequestTable = ({ requests, deletingId, onDelete }) => (
+const RequestTable = ({ requests, deletingId, onDelete }) => {
+  const { t } = useTranslation();
+  return (
   <div className="bg-[#eef4fb] dark:bg-[#16233a] rounded-3xl shadow-md overflow-hidden transition-colors duration-300">
     {/* Header row */}
     <div className="hidden md:grid grid-cols-[1fr_1fr_1fr_1.3fr_1fr_1fr_auto] gap-4 bg-[#c5d9ef] dark:bg-[#22304a] px-6 py-4 font-bold text-[#1C2A16] dark:text-white text-center">
-      <span>Name</span>
-      <span>Category</span>
-      <span>Urgency Level</span>
-      <span>Status</span>
-      <span>Date Submitted</span>
-      <span>Location</span>
+      <span>{t('requests.table.name')}</span>
+      <span>{t('requests.table.category')}</span>
+      <span>{t('requests.table.urgencyLevel')}</span>
+      <span>{t('requests.table.status')}</span>
+      <span>{t('requests.table.dateSubmitted')}</span>
+      <span>{t('requests.table.location')}</span>
       <span className="w-8" />
     </div>
 
@@ -234,7 +239,7 @@ const RequestTable = ({ requests, deletingId, onDelete }) => (
           key={r.id}
           className="grid grid-cols-2 md:grid-cols-[1fr_1fr_1fr_1.3fr_1fr_1fr_auto] gap-4 px-6 py-5 border-t border-white/70 dark:border-white/10 items-center text-center text-[#1C2A16] dark:text-gray-100"
         >
-          <span className="font-semibold">{r.submitterName || r.category || 'Request'}</span>
+          <span className="font-semibold">{r.submitterName || r.category || t('requests.table.requestFallback')}</span>
           <span>{r.category || '—'}</span>
           <span>{r.urgency || '—'}</span>
           <StatusCell request={r} />
@@ -244,14 +249,14 @@ const RequestTable = ({ requests, deletingId, onDelete }) => (
               <span className="w-2.5 h-2.5 rounded-full bg-red-500" />
             </div>
             <span className="text-[10px] font-semibold uppercase text-[#3a4a30] dark:text-gray-400">
-              {r.location || 'Location'}
+              {r.location || t('requests.table.location')}
             </span>
           </div>
           <button
             type="button"
             onClick={() => onDelete(r)}
             disabled={deletingId === r.id}
-            aria-label="Delete request"
+            aria-label={t('requests.table.deleteRequest')}
             className="justify-self-center text-[#1C2A16] dark:text-gray-300 hover:text-red-600 disabled:opacity-50 transition-colors"
           >
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -262,15 +267,17 @@ const RequestTable = ({ requests, deletingId, onDelete }) => (
       );
     })}
   </div>
-);
+  );
+};
 
 // "Soon to Be Fulfilled <date>" if we can infer it, else the raw status.
 const StatusCell = ({ request }) => {
+  const { t } = useTranslation();
   const { status } = request;
   if (status === 'matched' || status === 'in-progress') {
     return (
       <span>
-        Soon to Be Fulfilled
+        {t('requests.table.soonToBeFulfilled')}
         {request.fulfillmentDate && (
           <>
             <br />

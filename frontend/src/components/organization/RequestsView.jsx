@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import HeatMap from './HeatMap';
 import RequestMap from '../map/RequestMap';
 import NearMeToggle from '../map/NearMeToggle';
@@ -7,9 +8,9 @@ import { getRequestDistances, requestErrorMessage } from '../../utils/requests';
 
 // How the request tables can be ordered.
 const SORT_OPTIONS = [
-  { id: 'priority', label: 'Priority (high → low)' },
-  { id: 'newest', label: 'Newest first' },
-  { id: 'nearest', label: 'Nearest to you' },
+  { id: 'priority', labelKey: 'org.requests.sort.priority' },
+  { id: 'newest', labelKey: 'org.requests.sort.newest' },
+  { id: 'nearest', labelKey: 'org.requests.sort.nearest' },
 ];
 
 // Return a copy of `requests` ordered by the chosen sort. For "nearest" we use
@@ -63,6 +64,7 @@ const RequestsView = ({
   resources = [], onAllocationsChanged,
   assignedIds = new Set(), onToggleAssign, assigningId,
 }) => {
+  const { t } = useTranslation();
   // Which request's details show in the bottom-right panel.
   const [selected, setSelected] = useState(null);
   // Top-right panel view: the density heat map, or the interactive pin map.
@@ -94,7 +96,7 @@ const RequestsView = ({
   const saveLocation = async () => {
     // Location is required — it can be changed but not cleared.
     if (!locationInput.trim()) {
-      setLocationError('Location is required and cannot be cleared.');
+      setLocationError(t('org.requests.locationRequired'));
       return;
     }
     setSavingLocation(true);
@@ -103,7 +105,7 @@ const RequestsView = ({
       await onOrgLocationChange?.(locationInput.trim());
       setEditingLocation(false);
     } catch (err) {
-      setLocationError(requestErrorMessage(err, 'Could not save your location.'));
+      setLocationError(requestErrorMessage(err, t('org.requests.locationSaveError')));
     } finally {
       setSavingLocation(false);
     }
@@ -115,7 +117,7 @@ const RequestsView = ({
     if (sortBy !== 'nearest') return;
 
     if (!orgLocation) {
-      setDistanceError('Add a location to your organization profile to sort by distance.');
+      setDistanceError(t('org.requests.addLocationToSort'));
       return;
     }
 
@@ -125,12 +127,12 @@ const RequestsView = ({
     getRequestDistances(orgLocation)
       .then((map) => { if (!cancelled) setDistances(map); })
       .catch((err) => {
-        if (!cancelled) setDistanceError(requestErrorMessage(err, 'Could not sort by distance.'));
+        if (!cancelled) setDistanceError(requestErrorMessage(err, t('org.requests.distanceSortError')));
       })
       .finally(() => { if (!cancelled) setDistanceLoading(false); });
 
     return () => { cancelled = true; };
-  }, [sortBy, orgLocation]);
+  }, [sortBy, orgLocation, t]);
 
   const sortedYours = useMemo(
     () => sortRequests(yourRequests, sortBy, distances),
@@ -147,7 +149,7 @@ const RequestsView = ({
       <div className="flex flex-col gap-6">
         <div className="bg-white dark:bg-[#16233a] rounded-2xl px-5 py-3 shadow-md flex flex-wrap items-center gap-2 transition-colors duration-300">
           <label htmlFor="sort-requests" className="text-sm font-semibold text-[#1C2A16] dark:text-white">
-            Sort by
+            {t('org.requests.sortBy')}
           </label>
           <select
             id="sort-requests"
@@ -156,11 +158,11 @@ const RequestsView = ({
             className="text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#1f2d18] text-gray-800 dark:text-gray-100 px-3 py-1.5"
           >
             {SORT_OPTIONS.map((o) => (
-              <option key={o.id} value={o.id}>{o.label}</option>
+              <option key={o.id} value={o.id}>{t(o.labelKey)}</option>
             ))}
           </select>
           {sortBy === 'nearest' && distanceLoading && (
-            <span className="text-xs text-gray-500 dark:text-gray-400" role="status">Measuring distances…</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400" role="status">{t('org.requests.measuringDistances')}</span>
           )}
 
           {/* Your location — the origin "nearest" measures from. Editable inline. */}
@@ -172,7 +174,7 @@ const RequestsView = ({
                   value={locationInput}
                   onChange={(e) => setLocationInput(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') saveLocation(); }}
-                  placeholder="City, ST or ZIP"
+                  placeholder={t('org.requests.locationPlaceholder')}
                   autoFocus
                   className="text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#1f2d18] text-gray-800 dark:text-gray-100 px-2 py-1.5 w-40"
                 />
@@ -182,14 +184,14 @@ const RequestsView = ({
                   disabled={savingLocation}
                   className="text-xs font-semibold bg-[#1C2A16] dark:bg-[#7F9764] text-white px-3 py-1.5 rounded-lg hover:opacity-90 disabled:opacity-60"
                 >
-                  {savingLocation ? 'Saving…' : 'Save'}
+                  {savingLocation ? t('org.requests.saving') : t('org.requests.save')}
                 </button>
                 <button
                   type="button"
                   onClick={() => { setEditingLocation(false); setLocationError(''); }}
                   className="text-xs font-semibold text-gray-600 dark:text-gray-300 hover:underline"
                 >
-                  Cancel
+                  {t('org.requests.cancel')}
                 </button>
               </>
             ) : (
@@ -197,9 +199,9 @@ const RequestsView = ({
                 type="button"
                 onClick={() => { setLocationInput(orgLocation || ''); setEditingLocation(true); }}
                 className="text-xs font-semibold text-[#1C2A16] dark:text-gray-200 hover:underline"
-                title="Set the location distances are measured from"
+                title={t('org.requests.locationTitle')}
               >
-                📍 {orgLocation ? `Your location: ${orgLocation}` : 'Set your location'}
+                📍 {orgLocation ? t('org.requests.yourLocation', { location: orgLocation }) : t('org.requests.setYourLocation')}
               </button>
             )}
           </div>
@@ -212,28 +214,30 @@ const RequestsView = ({
         )}
 
         <RequestTable
-          title="Your Requests"
+          title={t('org.requests.yourRequests')}
           requests={sortedYours}
           loading={loading}
           error={error}
           onRetry={onRetry}
           selectedId={selected?.id}
           onSelect={setSelected}
-          emptyText="You aren't responding to any requests yet."
+          emptyText={t('org.requests.yourRequestsEmpty')}
           sortBy={sortBy}
           distances={distances}
+          t={t}
         />
         <RequestTable
-          title="Unfiltered Requests"
+          title={t('org.requests.unfilteredRequests')}
           requests={sortedUnfiltered}
           loading={loading}
           error={error}
           onRetry={onRetry}
           selectedId={selected?.id}
           onSelect={setSelected}
-          emptyText="No open requests right now."
+          emptyText={t('org.requests.unfilteredRequestsEmpty')}
           sortBy={sortBy}
           distances={distances}
+          t={t}
         />
       </div>
 
@@ -253,13 +257,13 @@ const RequestsView = ({
           )}
           <div className="flex items-center justify-between mb-3 gap-3">
             <h2 className="text-xl font-bold text-[#1C2A16] dark:text-white">
-              {geoView === 'heat' ? 'Request Heat Map' : 'Request Map'}
+              {geoView === 'heat' ? t('org.requests.heatMapTitle') : t('org.requests.mapTitle')}
             </h2>
             {/* Toggle between the density heat map and the interactive pin map. */}
             <div className="flex rounded-xl bg-black/5 dark:bg-white/10 p-1">
               {[
-                { id: 'heat', label: 'Heat' },
-                { id: 'map', label: 'Map' },
+                { id: 'heat', label: t('org.requests.heatToggle') },
+                { id: 'map', label: t('org.requests.mapToggle') },
               ].map((opt) => (
                 <button
                   key={opt.id}
@@ -278,7 +282,7 @@ const RequestsView = ({
             </div>
           </div>
           {geoView === 'heat' ? (
-            <HeatMap requests={allRequests} caption="Shaded by where needs cluster" />
+            <HeatMap requests={allRequests} caption={t('org.requests.heatMapCaption')} />
           ) : (
             <RequestMap requests={allRequests} />
           )}
@@ -293,6 +297,7 @@ const RequestsView = ({
           isAssigned={selected ? assignedIds.has(selected.id) : false}
           onToggleAssign={onToggleAssign}
           assigning={selected && assigningId === selected.id}
+          t={t}
         />
       </div>
     </div>
@@ -301,13 +306,13 @@ const RequestsView = ({
 
 // Column label + per-row value for the right-hand column, which follows the
 // active sort: priority label, request date, or distance from the org.
-const secondColumnHeader = (sortBy) =>
-  sortBy === 'newest' ? 'Date' : sortBy === 'nearest' ? 'Distance' : 'Priority';
+const secondColumnHeader = (sortBy, t) =>
+  sortBy === 'newest' ? t('org.requests.columnDate') : sortBy === 'nearest' ? t('org.requests.columnDistance') : t('org.requests.columnPriority');
 
 // --- Request table ---
 const RequestTable = ({
   title, requests, loading, error, onRetry, selectedId, onSelect, emptyText,
-  sortBy = 'priority', distances = {},
+  sortBy = 'priority', distances = {}, t,
 }) => (
   <div>
     <div className="inline-block bg-[#9db29a] dark:bg-[#1f3320] text-[#1C2A16] dark:text-white font-bold rounded-t-2xl px-6 py-2 mb-[-8px] relative z-10">
@@ -316,17 +321,17 @@ const RequestTable = ({
     <div className="bg-[#eef4fb] dark:bg-[#16233a] rounded-2xl rounded-tl-none shadow-md overflow-hidden transition-colors duration-300">
       {/* Header row */}
       <div className="grid grid-cols-[1fr_auto] gap-4 bg-[#c5d9ef] dark:bg-[#22304a] px-5 py-3 font-bold text-[#1C2A16] dark:text-white">
-        <span>Name</span>
-        <span>{secondColumnHeader(sortBy)}</span>
+        <span>{t('org.requests.columnName')}</span>
+        <span>{secondColumnHeader(sortBy, t)}</span>
       </div>
 
       {loading && (
-        <p className="px-5 py-4 text-gray-500 dark:text-gray-400 text-sm" role="status">Loading…</p>
+        <p className="px-5 py-4 text-gray-500 dark:text-gray-400 text-sm" role="status">{t('org.requests.loading')}</p>
       )}
       {!loading && error && (
         <div className="px-5 py-4">
           <p className="text-red-700 dark:text-red-300 text-sm">{error}</p>
-          <button onClick={onRetry} className="text-sm font-semibold underline mt-1">Try again</button>
+          <button onClick={onRetry} className="text-sm font-semibold underline mt-1">{t('org.requests.tryAgain')}</button>
         </div>
       )}
       {!loading && !error && requests.length === 0 && (
@@ -344,9 +349,9 @@ const RequestTable = ({
             }`}
           >
             <span className="text-[#1C2A16] dark:text-gray-100 font-medium truncate">
-              {r.submitterName || r.requesterName || r.name || 'Help Seeker'}
+              {r.submitterName || r.requesterName || r.name || t('org.requests.helpSeeker')}
             </span>
-            <SecondColumn request={r} sortBy={sortBy} distances={distances} />
+            <SecondColumn request={r} sortBy={sortBy} distances={distances} t={t} />
           </button>
         );
       })}
@@ -356,7 +361,7 @@ const RequestTable = ({
 
 // Right-hand column value for a row, matching the active sort: the priority
 // label, the request's date, or its distance from the org.
-const SecondColumn = ({ request, sortBy, distances }) => {
+const SecondColumn = ({ request, sortBy, distances, t }) => {
   if (sortBy === 'newest') {
     const d = request.createdAt ? new Date(request.createdAt) : null;
     return (
@@ -370,22 +375,31 @@ const SecondColumn = ({ request, sortBy, distances }) => {
     const miles = distances[request.id];
     return (
       <span className="text-sm text-gray-700 dark:text-gray-300 whitespace-nowrap">
-        {typeof miles === 'number' ? `${miles} mi` : '—'}
+        {typeof miles === 'number' ? t('org.requests.milesAway', { miles }) : '—'}
       </span>
     );
   }
 
-  return <PriorityLabel request={request} />;
+  return <PriorityLabel request={request} t={t} />;
+};
+
+// Display labels for each priority level. The raw level values (Critical/High/
+// Medium/Low) are kept as logic keys; only what the user sees is translated.
+const PRIORITY_LABEL_KEYS = {
+  Critical: 'org.requests.priority.critical',
+  High: 'org.requests.priority.high',
+  Medium: 'org.requests.priority.medium',
+  Low: 'org.requests.priority.low',
 };
 
 // Turn an urgency / priority score into the wireframe's "Low / High / Not set".
-const PriorityLabel = ({ request }) => {
+const PriorityLabel = ({ request, t }) => {
   const { urgency, priorityScore } = request;
   let label = urgency;
   if (!label && typeof priorityScore === 'number' && priorityScore > 0) {
     label = priorityScore >= 70 ? 'High' : priorityScore >= 40 ? 'Medium' : 'Low';
   }
-  if (!label) return <span className="text-gray-400 dark:text-gray-500 italic">Not set</span>;
+  if (!label) return <span className="text-gray-400 dark:text-gray-500 italic">{t('org.requests.priority.notSet')}</span>;
 
   const tone = {
     Critical: 'text-red-700 dark:text-red-400',
@@ -394,7 +408,9 @@ const PriorityLabel = ({ request }) => {
     Low: 'text-green-700 dark:text-green-400',
   }[label] || 'text-gray-600 dark:text-gray-300';
 
-  return <span className={`font-semibold ${tone}`}>{label}</span>;
+  const display = PRIORITY_LABEL_KEYS[label] ? t(PRIORITY_LABEL_KEYS[label]) : label;
+
+  return <span className={`font-semibold ${tone}`}>{display}</span>;
 };
 
 // --- Detail panel (bottom right) ---
@@ -402,12 +418,12 @@ const STATUS_OPTIONS = ['pending', 'in-progress', 'matched', 'fulfilled', 'close
 
 const RequestDetail = ({
   request, onStatusChange, updating, resources, onAllocationsChanged,
-  isAssigned, onToggleAssign, assigning,
+  isAssigned, onToggleAssign, assigning, t,
 }) => {
   if (!request) {
     return (
       <div className="bg-[#bcd4f1] dark:bg-[#16233a] rounded-3xl p-8 shadow-md text-center text-[#1C2A16] dark:text-gray-300 transition-colors duration-300">
-        Select a request to see its details.
+        {t('org.requests.selectPrompt')}
       </div>
     );
   }
@@ -421,17 +437,17 @@ const RequestDetail = ({
     <div className="bg-[#bcd4f1] dark:bg-[#16233a] rounded-3xl p-5 shadow-md flex flex-col sm:flex-row gap-4 transition-colors duration-300">
       {/* Requester card */}
       <div className="bg-[#9db29a] dark:bg-[#1f3320] rounded-2xl p-4 text-center text-[#1C2A16] dark:text-white sm:w-44 shrink-0">
-        <p className="font-bold text-sm mb-2">{submitterName || requesterName || name || 'Help Seeker'}</p>
+        <p className="font-bold text-sm mb-2">{submitterName || requesterName || name || t('org.requests.helpSeeker')}</p>
         <div className="w-16 h-16 mx-auto rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center mb-2">
           <svg className="w-8 h-8 text-gray-600 dark:text-gray-300" fill="currentColor" viewBox="0 0 24 24">
             <path d="M12 12a5 5 0 100-10 5 5 0 000 10zm0 2c-4 0-8 2-8 6v2h16v-2c0-4-4-6-8-6z" />
           </svg>
         </div>
-        <p className="text-xs font-semibold uppercase">Phone Number</p>
+        <p className="text-xs font-semibold uppercase">{t('org.requests.phoneNumber')}</p>
         <p className="text-sm bg-white/70 dark:bg-black/20 rounded-full px-2 py-1 mt-1">
           {phone || '(555) 123-4567'}
         </p>
-        <p className="text-xs font-semibold uppercase mt-2"># in Household</p>
+        <p className="text-xs font-semibold uppercase mt-2">{t('org.requests.inHousehold')}</p>
         <p className="text-sm bg-white/70 dark:bg-black/20 rounded-full px-2 py-1 mt-1">
           {householdSize ?? '—'}
         </p>
@@ -439,30 +455,30 @@ const RequestDetail = ({
 
       {/* Request details */}
       <div className="flex-1 text-[#1C2A16] dark:text-white">
-        <h3 className="font-bold uppercase tracking-wide mb-2">Help Request Details</h3>
+        <h3 className="font-bold uppercase tracking-wide mb-2">{t('org.requests.detailsTitle')}</h3>
 
-        <p className="text-xs font-semibold uppercase">Description</p>
+        <p className="text-xs font-semibold uppercase">{t('org.requests.description')}</p>
         <p className="bg-white/70 dark:bg-black/20 rounded-lg p-2 text-sm min-h-[48px] mb-3">
-          {description || 'No description provided.'}
+          {description || t('org.requests.noDescription')}
         </p>
 
         <div className="grid grid-cols-2 gap-3 mb-3">
           <div>
-            <p className="text-xs font-semibold uppercase">Category of Help</p>
+            <p className="text-xs font-semibold uppercase">{t('org.requests.categoryOfHelp')}</p>
             <p className="bg-white/70 dark:bg-black/20 rounded-lg px-2 py-1 text-sm mt-1">{category || '—'}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase">User-Declared Urgency</p>
+            <p className="text-xs font-semibold uppercase">{t('org.requests.userUrgency')}</p>
             <p className="bg-white/70 dark:bg-black/20 rounded-lg px-2 py-1 text-sm mt-1">{urgency || '—'}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase">Location</p>
+            <p className="text-xs font-semibold uppercase">{t('org.requests.location')}</p>
             <p className="bg-white/70 dark:bg-black/20 rounded-lg px-2 py-1 text-sm mt-1">{location || '—'}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase">AI Priority Rating</p>
+            <p className="text-xs font-semibold uppercase">{t('org.requests.aiPriorityRating')}</p>
             <p className="bg-white/70 dark:bg-black/20 rounded-lg px-2 py-1 text-sm mt-1">
-              {typeof priorityScore === 'number' && priorityScore > 0 ? Math.round(priorityScore) : 'Not scored'}
+              {typeof priorityScore === 'number' && priorityScore > 0 ? Math.round(priorityScore) : t('org.requests.notScored')}
             </p>
           </div>
         </div>
@@ -470,7 +486,7 @@ const RequestDetail = ({
         {/* Status control — the org's action on this request */}
         {onStatusChange && (
           <div className="flex items-center gap-2">
-            <label htmlFor="detail-status" className="text-xs font-semibold uppercase">Status</label>
+            <label htmlFor="detail-status" className="text-xs font-semibold uppercase">{t('org.requests.status')}</label>
             <select
               id="detail-status"
               value={status || 'pending'}
@@ -479,10 +495,10 @@ const RequestDetail = ({
               className="text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#1f2d18] text-gray-800 dark:text-gray-100 px-3 py-1.5 capitalize disabled:opacity-60"
             >
               {STATUS_OPTIONS.map((s) => (
-                <option key={s} value={s}>{s}</option>
+                <option key={s} value={s}>{t(`org.requests.statusOptions.${s}`)}</option>
               ))}
             </select>
-            {updating && <span className="text-xs" role="status">Saving…</span>}
+            {updating && <span className="text-xs" role="status">{t('org.requests.saving')}</span>}
           </div>
         )}
 
@@ -502,14 +518,14 @@ const RequestDetail = ({
               }`}
             >
               {assigning
-                ? 'Saving…'
+                ? t('org.requests.saving')
                 : isAssigned
-                  ? 'Unassign from us'
-                  : 'Assign to us'}
+                  ? t('org.requests.unassign')
+                  : t('org.requests.assign')}
             </button>
             {isAssigned && (
               <span className="text-xs font-semibold text-green-700 dark:text-green-400">
-                Assigned to your organization
+                {t('org.requests.assignedToYou')}
               </span>
             )}
           </div>
@@ -525,7 +541,7 @@ const RequestDetail = ({
           />
         ) : (
           <p className="mt-4 pt-4 border-t border-white/40 dark:border-white/10 text-xs text-gray-600 dark:text-gray-300">
-            Assign this request to your organization to allocate resources to it.
+            {t('org.requests.assignToAllocate')}
           </p>
         )}
       </div>
