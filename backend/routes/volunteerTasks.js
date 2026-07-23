@@ -8,14 +8,24 @@ const router = express.Router();
  * Volunteer Task Routes
  * Base path: /api/volunteer-tasks
  *
- * All routes require authentication and are organization-only (enforced in the
- * controller). These are the help tasks an org posts for volunteers to sign up
- * for. The volunteer-facing side isn't built yet.
+ * All routes require authentication. The management routes are organization-only
+ * (enforced in the controller); the /available and /:id/signup routes are
+ * volunteer-only. These are the help tasks an org posts for volunteers to sign
+ * up for.
  */
 
 // List the signed-in organization's volunteer tasks
 // GET /api/volunteer-tasks
 router.get('/', requireAuth, volunteerTaskController.getMyTasks);
+
+// List the open tasks a volunteer can sign up for
+// (static path declared before /:id so it isn't captured as an id)
+// GET /api/volunteer-tasks/available
+router.get(
+  '/available',
+  requireAuth,
+  volunteerTaskController.getAvailableTasks
+);
 
 // Create a volunteer task
 // POST /api/volunteer-tasks
@@ -46,5 +56,11 @@ router.patch('/:id', requireAuth, volunteerTaskController.updateTask);
 // Remove a task
 // DELETE /api/volunteer-tasks/:id
 router.delete('/:id', requireAuth, volunteerTaskController.deleteTask);
+
+// Volunteer signs up for / withdraws from a task
+// POST   /api/volunteer-tasks/:id/signup
+// DELETE /api/volunteer-tasks/:id/signup
+router.post('/:id/signup', requireAuth, volunteerTaskController.signUpForTask);
+router.delete('/:id/signup', requireAuth, volunteerTaskController.withdrawFromTask);
 
 export default router;

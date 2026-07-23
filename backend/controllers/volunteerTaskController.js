@@ -240,6 +240,99 @@ export const getTaskSuggestions = async (req, res) => {
   }
 };
 
+// Guard: only volunteers may use the sign-up endpoints.
+const ensureVolunteer = (req, res) => {
+  if (req.user.role !== 'volunteer') {
+    res.status(403).json({
+      success: false,
+      message: 'Only volunteers can sign up for tasks.',
+    });
+    return false;
+  }
+  return true;
+};
+
+// GET /api/volunteer-tasks/available
+// List the open tasks a volunteer can sign up for. Each task includes the help
+// request and organization it belongs to, plus a `signedUp` flag for the caller.
+export const getAvailableTasks = async (req, res) => {
+  try {
+    if (!ensureVolunteer(req, res)) return;
+
+    const tasks = await taskModel.getAvailableTasks(req.user.id);
+
+    res.status(200).json({ success: true, data: tasks });
+  } catch (error) {
+    console.error('Error fetching available tasks:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch available tasks',
+      error: error.message,
+    });
+  }
+};
+
+// POST /api/volunteer-tasks/:id/signup
+// Sign the volunteer up for a task (bumps the task's confirmed count).
+export const signUpForTask = async (req, res) => {
+  try {
+    if (!ensureVolunteer(req, res)) return;
+
+    const task = await taskModel.signUpForTask(req.params.id, req.user.id);
+
+    res.status(200).json({
+      success: true,
+      message: 'You are signed up for this task.',
+      data: task,
+    });
+  } catch (error) {
+    // Turn the model's sentinel errors into friendly 4xx responses.
+    if (error.message === 'TASK_NOT_FOUND') {
+      return res.status(404).json({ success: false, message: 'Task not found.' });
+    }
+    if (error.message === 'TASK_NOT_OPEN') {
+      return res.status(409).json({
+        success: false,
+        message: 'This task is no longer open for sign-ups.',
+      });
+    }
+    if (error.message === 'TASK_FULL') {
+      return res.status(409).json({
+        success: false,
+        message: 'This task already has all the volunteers it needs.',
+      });
+    }
+    console.error('Error signing up for task:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to sign up for task',
+      error: error.message,
+    });
+  }
+};
+
+// DELETE /api/volunteer-tasks/:id/signup
+// Withdraw the volunteer from a task (decrements the confirmed count).
+export const withdrawFromTask = async (req, res) => {
+  try {
+    if (!ensureVolunteer(req, res)) return;
+
+    await taskModel.withdrawFromTask(req.params.id, req.user.id);
+
+    res.status(200).json({
+      success: true,
+      message: 'You have withdrawn from this task.',
+    });
+  } catch (error) {
+    console.error('Error withdrawing from task:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to withdraw from task',
+      error: error.message,
+    });
+  }
+};
+
 // --- helpers ---
 
 // Load the task named by :id and confirm it belongs to the caller's org.
@@ -371,4 +464,7 @@ export default {
   deleteTask,
   getDateSuggestions,
   getTaskSuggestions,
+  getAvailableTasks,
+  signUpForTask,
+  withdrawFromTask,
 };

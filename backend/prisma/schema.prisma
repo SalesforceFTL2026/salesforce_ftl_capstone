@@ -71,6 +71,7 @@ model User {
   sentMessages      Message[] @relation("sender")
   receivedMessages  Message[] @relation("receiver")
   votes             Vote[]
+  taskSignups       TaskSignup[]
 
   @@index([email])
   @@index([role])
@@ -150,11 +151,30 @@ model VolunteerTask {
 
   organization        Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   request             Request      @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  signups             TaskSignup[]
 
   @@index([organizationId])
   @@index([requestId])
   @@index([status])
   @@index([volunteerDate])
+}
+
+// A volunteer signing up for a specific org-created VolunteerTask. One row per
+// (task, volunteer); the unique constraint keeps a volunteer from signing up
+// for the same task twice. Signing up bumps the task's volunteersConfirmed
+// count (which feeds the readiness gate); withdrawing decrements it.
+model TaskSignup {
+  id        String   @id @default(cuid())
+  taskId    String
+  userId    String   // the volunteer's User id
+  createdAt DateTime @default(now())
+
+  task      VolunteerTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, userId])
+  @@index([taskId])
+  @@index([userId])
 }
 
 // WEEK 3: Organization resources inventory
