@@ -311,6 +311,45 @@ export const getTaskSuggestions = async (requestId) => {
   return data.data;
 };
 
+// --- Volunteer-facing task sign-up ---
+
+// Fetch the open volunteer tasks the signed-in volunteer can sign up for. Each
+// task carries its help request + organization summary and a `signedUp` flag.
+// Returns the array on success; throws on failure.
+export const getAvailableTasks = async () => {
+  const { data } = await api.get('/api/volunteer-tasks/available');
+
+  if (!data?.success) {
+    throw new Error(data?.message || 'Could not load available tasks.');
+  }
+
+  return data.data;
+};
+
+// Sign the signed-in volunteer up for a task.
+// Returns the updated task on success; throws on failure.
+export const signUpForTask = async (taskId) => {
+  const { data } = await api.post(`/api/volunteer-tasks/${taskId}/signup`);
+
+  if (!data?.success) {
+    throw new Error(data?.message || 'Could not sign up for the task.');
+  }
+
+  return data.data;
+};
+
+// Withdraw the signed-in volunteer from a task.
+// Resolves on success; throws on failure.
+export const withdrawFromTask = async (taskId) => {
+  const { data } = await api.delete(`/api/volunteer-tasks/${taskId}/signup`);
+
+  if (!data?.success) {
+    throw new Error(data?.message || 'Could not withdraw from the task.');
+  }
+
+  return true;
+};
+
 // Update a request's status (organizations, or the help-seeker who owns it).
 // Returns the updated request on success; throws on failure.
 export const updateRequestStatus = async (requestId, status) => {

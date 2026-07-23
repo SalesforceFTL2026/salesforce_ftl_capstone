@@ -42,12 +42,15 @@ const VolunteerTasksView = ({ interests, loading, error, onRetry, onWithdraw, wi
   }
 
   return (
-    <div className="flex flex-col gap-4 max-w-3xl">
+    <div className="flex gap-4 overflow-x-auto pb-2 snap-x">
       {interests.map((request) => {
         const isCompleted =
           request.status === 'completed' || request.responseStatus === 'completed';
         return (
-          <div key={request.id} className="flex flex-col gap-2">
+          <div
+            key={request.id}
+            className="flex flex-col gap-2 shrink-0 w-[340px] snap-start"
+          >
             <RequestCard request={request} />
             <div className="flex justify-end gap-2">
               {isCompleted ? (

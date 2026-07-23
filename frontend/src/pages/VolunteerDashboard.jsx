@@ -5,6 +5,7 @@ import PortalShell from '../components/portal/PortalShell';
 import VolunteerDashboardView from '../components/volunteer/VolunteerDashboardView';
 import VolunteerRequestsView from '../components/volunteer/VolunteerRequestsView';
 import VolunteerTasksView from '../components/volunteer/VolunteerTasksView';
+import AvailableTasksSection from '../components/volunteer/AvailableTasksSection';
 import VolunteerSkillsView from '../components/volunteer/VolunteerSkillsView';
 import { getCurrentUser, logout } from '../utils/auth';
 import { usePolling } from '../hooks/usePolling';
@@ -18,6 +19,9 @@ import {
   expressInterest,
   markRequestHelped,
   withdrawInterest,
+  getAvailableTasks,
+  signUpForTask,
+  withdrawFromTask,
   requestErrorMessage,
 } from '../utils/requests';
 
@@ -104,6 +108,11 @@ const VolunteerDashboard = () => {
   // already offered to help with. Loaded once; both views read from them.
   const [feed, setFeed] = useState([]);
   const [interests, setInterests] = useState([]);
+  // Open org-created tasks the volunteer can sign up for (separate from the
+  // requests they've offered to help with, tracked in `interests`).
+  const [availableTasks, setAvailableTasks] = useState([]);
+  // Task id whose sign-up / withdraw button is mid-request.
+  const [taskBusyId, setTaskBusyId] = useState(null);
   // "Near me" geo-radius filter (issue #116): null = show everything, otherwise
   // { lat, lng, radiusMiles }. When set, the feed is re-fetched filtered to it.
   const [near, setNear] = useState(null);
@@ -161,6 +170,11 @@ const VolunteerDashboard = () => {
         setSkillsDetailed(await getVolunteerSkillsDetailed());
       } catch {
         setSkillsDetailed([]);
+      }
+      try {
+        setAvailableTasks(await getAvailableTasks());
+      } catch {
+        setAvailableTasks([]);
       }
     } catch (err) {
       setError(requestErrorMessage(err, t('volunteer.errors.loadRequests')));
@@ -230,6 +244,35 @@ const VolunteerDashboard = () => {
     }
   };
 
+  // Volunteer clicked "Sign up" on an available org task. On success, reload so
+  // the card flips to "Signed up" and the volunteer count updates.
+  const handleSignUpTask = async (task) => {
+    setTaskBusyId(task.id);
+    setError('');
+    try {
+      await signUpForTask(task.id);
+      await loadData({ silent: true });
+    } catch (err) {
+      setError(requestErrorMessage(err, 'Could not sign up for the task. Please try again.'));
+    } finally {
+      setTaskBusyId(null);
+    }
+  };
+
+  // Volunteer clicked "Withdraw" on a task they'd signed up for.
+  const handleWithdrawTask = async (task) => {
+    setTaskBusyId(task.id);
+    setError('');
+    try {
+      await withdrawFromTask(task.id);
+      await loadData({ silent: true });
+    } catch (err) {
+      setError(requestErrorMessage(err, 'Could not withdraw from the task. Please try again.'));
+    } finally {
+      setTaskBusyId(null);
+    }
+  };
+
   // Save the volunteer's edited skills (names + 1–5 proficiency). On success we
   // update both the detailed list and the flat name list the stats use.
   const handleSaveSkills = async (nextSkills) => {
@@ -285,17 +328,20 @@ const VolunteerDashboard = () => {
     };
   }, [interests, skills]);
 
-  // Surface the top open requests as upcoming "tasks" with dated chips.
+  // The dashboard "Tasks" bar shows the org-created tasks this volunteer has
+  // signed up for, with a dated chip from each task's scheduled volunteer day.
   const tasks = useMemo(() => {
-    return feed.slice(0, 2).map((r) => {
-      const d = r.createdAt ? new Date(r.createdAt) : null;
-      return {
-        date: d ? d.getDate() : '—',
-        month: d ? d.toLocaleString(undefined, { month: 'short' }) : '',
-        title: r.category || r.description?.slice(0, 40) || t('volunteer.dashboard.requestFallback'),
-      };
-    });
-  }, [feed, t]);
+    return availableTasks
+      .filter((task) => task.signedUp)
+      .map((task) => {
+        const d = task.volunteerDate ? new Date(task.volunteerDate) : null;
+        return {
+          date: d ? d.getDate() : '—',
+          month: d ? d.toLocaleString(undefined, { month: 'short' }) : '',
+          title: task.title || task.category || 'Task',
+        };
+      });
+  }, [availableTasks]);
 
   return (
     <PortalShell
@@ -328,16 +374,36 @@ const VolunteerDashboard = () => {
       )}
 
       {view === 'tasks' && (
-        <VolunteerTasksView
-          interests={interests}
-          loading={loading}
-          error={error}
-          onRetry={loadData}
-          onWithdraw={handleWithdraw}
-          withdrawingId={withdrawingId}
-          onMarkHelped={handleMarkHelped}
-          markingId={markingId}
-        />
+        <>
+          <section className="mb-8">
+            <h2 className="text-xl font-bold text-[#1C2A16] dark:text-white text-center mb-1">
+              Your requests
+            </h2>
+            <p className="text-gray-500 dark:text-gray-400 text-sm text-center mb-4">
+              Help requests you offered to help with.
+            </p>
+            <VolunteerTasksView
+              interests={interests}
+              loading={loading}
+              error={error}
+              onRetry={loadData}
+              onWithdraw={handleWithdraw}
+              withdrawingId={withdrawingId}
+              onMarkHelped={handleMarkHelped}
+              markingId={markingId}
+            />
+          </section>
+
+          <AvailableTasksSection
+            tasks={availableTasks}
+            loading={loading}
+            error={error}
+            onRetry={loadData}
+            onSignUp={handleSignUpTask}
+            onWithdraw={handleWithdrawTask}
+            busyId={taskBusyId}
+          />
+        </>
       )}
 
       {view === 'skills' && (
