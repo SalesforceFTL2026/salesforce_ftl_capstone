@@ -4,7 +4,7 @@
     "tools": "Tools",
     "dashboard": "Dashboard",
     "requests": "Requests",
-    "household": "Household",
+    "household": "User Profile",
     "documents": "Emergency Guide",
     "settings": "Settings"
   },
@@ -35,7 +35,7 @@
     "sampleOrgsNote": "Sample organizations — live listings coming soon."
   },
   "household": {
-    "title": "Household",
+    "title": "User Profile",
     "subtitle": "Your account details and household information.",
     "yourAccount": "Your account",
     "fieldName": "Name",
@@ -206,6 +206,9 @@
     "darkModeEnabled": "Dark mode enabled",
     "lightModeEnabled": "Light mode enabled",
     "notifications": "Notifications",
+    "notificationsEmpty": "No notifications yet",
+    "notificationsMarkAllRead": "Mark all as read",
+    "notificationsError": "Couldn't load notifications",
     "signOut": "Sign out"
   },
   "org": {
@@ -440,7 +443,18 @@
       "signedUp": "✓ Signed up",
       "withdraw": "Withdraw",
       "withdrawing": "Withdrawing…",
-      "notSet": "Not set"
+      "notSet": "Not set",
+      "detail": {
+        "title": "Help request details",
+        "close": "Close details",
+        "viewFrom": "View details for request from {{name}}",
+        "description": "Description",
+        "location": "Location",
+        "submitted": "Time submitted",
+        "householdSize": "Household size",
+        "volunteersInterested": "Volunteers interested",
+        "orgsResponding": "Organizations responding"
+      }
     },
     "calendar": {
       "previousMonth": "Previous month",

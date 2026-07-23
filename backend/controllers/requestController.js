@@ -1,5 +1,6 @@
 import * as requestModel from '../models/requestModel.js';
 import * as taskModel from '../models/volunteerTaskModel.js';
+import * as notificationModel from '../models/notificationModel.js';
 import prisma from '../services/database/prisma.js';
 import { prioritizeRequest } from '../services/ai/prioritizer.js';
 import { geocodeLocation, haversineMiles } from '../services/geocoding/geocoder.js';
@@ -613,6 +614,25 @@ export const interactWithRequest = async (req, res) => {
     // override a status an organization has already advanced.
     if (request.status === 'pending') {
       await requestModel.updateRequestStatus(id, 'assigned');
+    }
+
+    // Let the help-seeker who owns this request know a volunteer stepped up.
+    // Wrapped in try/catch so a notification hiccup can never fail the
+    // volunteer's "I can help" action itself. request.userId is optional in
+    // the schema, so only notify when the request actually has an owner.
+    if (request.userId) {
+      try {
+        await notificationModel.createNotification({
+          userId: request.userId,
+          type: 'status-update',
+          title: 'A volunteer is on the way',
+          message: `${req.user.name} offered to help with your ${request.category} request.`,
+          relatedRequestId: request.id,
+          relatedUserId: req.user.id
+        });
+      } catch (notifyErr) {
+        console.error('Could not create help-seeker notification:', notifyErr);
+      }
     }
 
     res.status(201).json({
