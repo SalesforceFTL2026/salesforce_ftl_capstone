@@ -1,21 +1,24 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import RoleSelectionModal from '../RoleSelectionModal/RoleSelectionModal';
 import SignInModal from '../SignInModal/SignInModal';
 
 // Wraps signup + login in one popup with tabs. The role (from the landing
 // page card) labels the title and is passed to signup. Login ignores role —
 // the account's stored role decides where the user lands.
-const roleLabels = {
-  'help-seeker': 'Help Seeker',
-  'volunteer': 'Volunteer',
-  'organization': 'Organization',
+const roleLabelKeys = {
+  'help-seeker': 'auth.roles.helpSeeker',
+  'volunteer': 'auth.roles.volunteer',
+  'organization': 'auth.roles.organization',
 };
 
 const AuthModal = ({ role, initialMode = 'signup', onClose, onAuthenticated }) => {
+  const { t } = useTranslation();
   const [mode, setMode] = useState(initialMode);
 
-  const roleName = role ? roleLabels[role] : '';
-  const title = `${roleName} ${mode === 'signup' ? 'Sign Up' : 'Login'}`.trim();
+  const roleName = role ? t(roleLabelKeys[role]) : '';
+  const action = mode === 'signup' ? t('auth.titleAction.signUp') : t('auth.titleAction.login');
+  const title = t('auth.modalTitle', { role: roleName, action }).trim();
 
   const tabClass = (active) =>
     `flex-1 py-2 text-sm font-bold uppercase tracking-wide rounded-lg transition-colors ${
@@ -40,7 +43,7 @@ const AuthModal = ({ role, initialMode = 'signup', onClose, onAuthenticated }) =
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 text-3xl leading-none -mt-2"
-            aria-label="Close"
+            aria-label={t('auth.close')}
           >
             ×
           </button>
@@ -49,10 +52,10 @@ const AuthModal = ({ role, initialMode = 'signup', onClose, onAuthenticated }) =
         {/* Tabs */}
         <div className="flex gap-2 mb-6 bg-gray-100 dark:bg-[#1a2f1a] p-1 rounded-xl">
           <button className={tabClass(mode === 'signup')} onClick={() => setMode('signup')}>
-            Sign Up
+            {t('auth.tabs.signUp')}
           </button>
           <button className={tabClass(mode === 'login')} onClick={() => setMode('login')}>
-            Log In
+            {t('auth.tabs.logIn')}
           </button>
         </div>
 

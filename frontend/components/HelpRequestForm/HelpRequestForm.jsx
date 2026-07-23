@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import api from '../../src/utils/api';
 import './HelpRequestForm.css';
 
@@ -10,6 +11,7 @@ import './HelpRequestForm.css';
 //   and submitting PATCHes that request instead of creating a new one.
 // - `onSaved` (optional) fires after a successful edit with the updated request.
 const HelpRequestForm = ({ compact = false, onCreated, onSaved, request }) => {
+  const { t } = useTranslation();
   const isEditing = Boolean(request);
   const [formData, setFormData] = useState({
     submitterName: '',
@@ -37,7 +39,7 @@ const HelpRequestForm = ({ compact = false, onCreated, onSaved, request }) => {
     setSuccess(false);
 
     if (!formData.category || !formData.urgency || !formData.location || !formData.description || !formData.householdSize) {
-      setError('Please fill in all required fields');
+      setError(t('requestForm.errorRequired'));
       setLoading(false);
       return;
     }
@@ -59,7 +61,7 @@ const HelpRequestForm = ({ compact = false, onCreated, onSaved, request }) => {
         }
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to submit request. Please try again.');
+      setError(err.response?.data?.message || t('voice.review.errors.submitRetry'));
     } finally {
       setLoading(false);
     }
@@ -76,18 +78,18 @@ const HelpRequestForm = ({ compact = false, onCreated, onSaved, request }) => {
     <div className="help-request-form-wrapper">
     <div className={`bg-white dark:bg-[#273A20] rounded-2xl shadow-md transition-colors duration-300 ${compact ? 'p-6' : 'p-8'}`}>
       <h2 className={`font-bold text-black dark:text-white mb-1 ${compact ? 'text-xl' : 'text-2xl'}`}>
-        {isEditing ? 'Edit Request' : 'Request Help'}
+        {isEditing ? t('requestForm.titleEdit') : t('requestForm.titleCreate')}
       </h2>
       <p className="text-gray-600 dark:text-gray-400 text-sm mb-5">
         {isEditing
-          ? 'Update the details of your request below.'
-          : "Tell us what you need and we'll prioritize it."}
+          ? t('requestForm.subtitleEdit')
+          : t('requestForm.subtitleCreate')}
       </p>
 
       {success && (
         <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 rounded-xl">
           <p className="text-green-800 dark:text-green-300 text-sm font-medium">
-            {isEditing ? '✓ Changes saved!' : '✓ Request submitted!'}
+            {isEditing ? t('requestForm.successEdit') : t('requestForm.successCreate')}
           </p>
         </div>
       )}
@@ -99,52 +101,52 @@ const HelpRequestForm = ({ compact = false, onCreated, onSaved, request }) => {
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label htmlFor="category" className={label}>Category <span className="text-[#c84444]">*</span></label>
+          <label htmlFor="category" className={label}>{t('voice.review.fields.category')} <span className="text-[#c84444]">*</span></label>
           <select id="category" name="category" value={formData.category} onChange={handleChange} required className={field}>
-            <option value="">Select a category</option>
-            <option value="Food">Food</option>
-            <option value="Shelter">Shelter</option>
-            <option value="Medical">Medical</option>
-            <option value="Transport">Transportation</option>
-            <option value="Other">Other</option>
+            <option value="">{t('voice.review.category.placeholder')}</option>
+            <option value="Food">{t('voice.review.category.food')}</option>
+            <option value="Shelter">{t('voice.review.category.shelter')}</option>
+            <option value="Medical">{t('voice.review.category.medical')}</option>
+            <option value="Transport">{t('voice.review.category.transport')}</option>
+            <option value="Other">{t('voice.review.category.other')}</option>
           </select>
         </div>
 
         <div>
-          <label htmlFor="urgency" className={label}>Urgency <span className="text-[#c84444]">*</span></label>
+          <label htmlFor="urgency" className={label}>{t('voice.review.fields.urgency')} <span className="text-[#c84444]">*</span></label>
           <select id="urgency" name="urgency" value={formData.urgency} onChange={handleChange} required className={field}>
-            <option value="">Select urgency level</option>
-            <option value="Low">Low — Can wait a few days</option>
-            <option value="Medium">Medium — Within 24 hours</option>
-            <option value="High">High — Within a few hours</option>
-            <option value="Critical">Critical — Immediate</option>
+            <option value="">{t('voice.review.urgency.placeholder')}</option>
+            <option value="Low">{t('voice.review.urgency.low')}</option>
+            <option value="Medium">{t('voice.review.urgency.medium')}</option>
+            <option value="High">{t('voice.review.urgency.high')}</option>
+            <option value="Critical">{t('voice.review.urgency.critical')}</option>
           </select>
         </div>
 
         <div>
-          <label htmlFor="location" className={label}>Location <span className="text-[#c84444]">*</span></label>
+          <label htmlFor="location" className={label}>{t('voice.review.fields.location')} <span className="text-[#c84444]">*</span></label>
           <input type="text" id="location" name="location" value={formData.location} onChange={handleChange}
-            placeholder="City, zip code, or address" required className={field} />
+            placeholder={t('voice.review.placeholders.location')} required className={field} />
         </div>
 
         <div>
-          <label htmlFor="householdSize" className={label}>People in Household <span className="text-[#c84444]">*</span></label>
+          <label htmlFor="householdSize" className={label}>{t('voice.review.fields.householdSize')} <span className="text-[#c84444]">*</span></label>
           <input type="number" id="householdSize" name="householdSize" min="1" step="1"
             value={formData.householdSize} onChange={handleChange}
-            placeholder="How many people need help?" required className={field} />
+            placeholder={t('voice.review.placeholders.householdSize')} required className={field} />
         </div>
 
         <div>
-          <label htmlFor="description" className={label}>Description <span className="text-[#c84444]">*</span></label>
+          <label htmlFor="description" className={label}>{t('voice.review.fields.description')} <span className="text-[#c84444]">*</span></label>
           <textarea id="description" name="description" value={formData.description} onChange={handleChange}
-            placeholder="Describe what help you need..." required rows={compact ? 3 : 4} className={field} />
+            placeholder={t('voice.review.placeholders.description')} required rows={compact ? 3 : 4} className={field} />
         </div>
 
         <button type="submit" disabled={loading}
           className="w-full mt-2 bg-[#1C2A16] dark:bg-[#7F9764] text-white py-3.5 px-6 rounded-xl font-semibold uppercase text-sm tracking-wide hover:opacity-90 transition-opacity disabled:bg-gray-400 disabled:cursor-not-allowed">
           {loading
-            ? (isEditing ? 'Saving…' : 'Submitting…')
-            : (isEditing ? 'Save Changes' : 'Submit Request')}
+            ? (isEditing ? t('settings.saving') : t('voice.review.submitting'))
+            : (isEditing ? t('settings.saveChanges') : t('voice.review.submit'))}
         </button>
       </form>
     </div>

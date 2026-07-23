@@ -1,0 +1,877 @@
+{
+  "nav": {
+    "general": "Général",
+    "tools": "Outils",
+    "dashboard": "Tableau de bord",
+    "requests": "Demandes",
+    "household": "Foyer",
+    "documents": "Guide d'urgence",
+    "settings": "Paramètres"
+  },
+  "common": {
+    "notSetYet": "Pas encore défini",
+    "comingSoon": "Cette section arrive bientôt.",
+    "close": "Fermer",
+    "loading": "Chargement…"
+  },
+  "dashboardView": {
+    "greeting": "Bonjour, {{name}} !",
+    "profile": "Profil",
+    "name": "Nom",
+    "phoneNumber": "Numéro de téléphone",
+    "householdCount": "Nb dans le foyer",
+    "activeRequests": "Demandes actives",
+    "expectedFulfillment": "Réalisation prévue",
+    "typeOfRequest": "Type de demande",
+    "loadingRequests": "Chargement de vos demandes…",
+    "noActiveRequests": "Vous n'avez aucune demande active pour le moment.",
+    "makeNewRequest": "Faire une nouvelle demande",
+    "requestByVoice": "Demander par la voix",
+    "chatWithAssistant": "Discuter avec l'assistant",
+    "requestSuffix": "Demande",
+    "deleteRequest": "Supprimer la demande",
+    "nonprofitsTitle": "Organismes à but non lucratif participants près de chez vous",
+    "organizationLogo": "Logo de l'organisation",
+    "sampleOrgsNote": "Organisations d'exemple — les listes réelles arrivent bientôt."
+  },
+  "household": {
+    "title": "Foyer",
+    "subtitle": "Les détails de votre compte et les informations sur votre foyer.",
+    "yourAccount": "Votre compte",
+    "fieldName": "Nom",
+    "fieldEmail": "E-mail",
+    "fieldPhone": "Numéro de téléphone",
+    "fieldLocation": "Emplacement",
+    "fieldHouseholdSize": "Nb dans le foyer",
+    "editNote": "Le numéro de téléphone, l'emplacement et la taille du foyer ne peuvent pas encore être modifiés ici — ces champs arrivent bientôt."
+  },
+  "settings": {
+    "title": "Paramètres",
+    "subtitle": "Gérez les détails de votre compte.",
+    "displayName": "Nom d'affichage",
+    "namePlaceholder": "Votre nom",
+    "nameEmptyError": "Le nom ne doit pas être vide.",
+    "nameUpdated": "✓ Votre nom a été mis à jour.",
+    "nameUpdateError": "Impossible de mettre à jour votre nom.",
+    "saveChanges": "Enregistrer les modifications",
+    "saving": "Enregistrement…",
+    "language": "Langue",
+    "languageHelp": "Choisissez la langue de votre tableau de bord.",
+    "languageUpdated": "✓ Votre langue a été mise à jour.",
+    "languageUpdateError": "Impossible de mettre à jour votre langue."
+  },
+  "languages": {
+    "en": "English",
+    "es": "Español",
+    "zh": "中文",
+    "tl": "Tagalog",
+    "vi": "Tiếng Việt",
+    "fr": "Français",
+    "ko": "한국어",
+    "ru": "Русский",
+    "ht": "Kreyòl Ayisyen",
+    "hi": "हिन्दी",
+    "ne": "नेपाली"
+  },
+  "landing": {
+    "header": {
+      "logoAlt": "Logo MapResponse",
+      "nav": {
+        "give": "DONNER",
+        "whatWeDo": "CE QUE NOUS FAISONS",
+        "whoWeAre": "QUI NOUS SOMMES",
+        "howToHelp": "COMMENT AIDER",
+        "partnerResources": "RESSOURCES POUR LES PARTENAIRES",
+        "getHelp": "OBTENIR DE L'AIDE"
+      },
+      "greeting": "Bonjour, {{name}}",
+      "signOut": "SE DÉCONNECTER",
+      "signIn": "SE CONNECTER",
+      "searchAria": "Rechercher",
+      "toggleDarkModeAria": "Basculer le mode sombre",
+      "darkModeEnabledAlt": "Mode sombre activé",
+      "lightModeEnabledAlt": "Mode clair activé"
+    },
+    "hero": {
+      "welcomeTo": "BIENVENUE SUR",
+      "subtitle": "UN RÉSEAU CARTOGRAPHIÉ POUR SIMPLIFIER L'ASSISTANCE ENTRE LES DEMANDEURS D'AIDE ET LES AIDANTS.",
+      "needHelp": "J'AI BESOIN D'AIDE",
+      "volunteer": "JE VEUX ÊTRE BÉNÉVOLE",
+      "organization": "JE SUIS UNE ORGANISATION"
+    },
+    "whatWeDo": {
+      "title": "Titre",
+      "graphic": "GRAPHIQUE",
+      "description": "Description",
+      "learnMore": "EN SAVOIR PLUS"
+    },
+    "impact": {
+      "title": "NOTRE IMPACT 2026",
+      "fact": "Fait"
+    },
+    "statCard": {
+      "graphicLine1": "GRAPHIQUE",
+      "graphicLine2": "CONCERNANT",
+      "graphicLine3": "FAIT",
+      "statistic": "STATISTIQUE N°{{number}}"
+    },
+    "getInvolved": {
+      "title": "S'IMPLIQUER",
+      "graphic": "GRAPHIQUE",
+      "corporatePartnerLine1": "DEVENIR UN PARTENAIRE",
+      "corporatePartnerLine2": "D'ENTREPRISE",
+      "nonprofitNetworkLine1": "REJOINDRE NOTRE RÉSEAU",
+      "nonprofitNetworkLine2": "À BUT NON LUCRATIF",
+      "helpCommunitiesLine1": "AIDER LES COMMUNAUTÉS DANS",
+      "helpCommunitiesLine2": "LE BESOIN"
+    },
+    "partners": {
+      "title": "MERCI À NOS PARTENAIRES POUR VOTRE SOUTIEN !",
+      "logo": "Logo"
+    },
+    "oneLiner": {
+      "text": "SLOGAN DE MAP RESPONSE",
+      "scrollToTopAria": "Remonter en haut"
+    },
+    "footer": {
+      "logoAlt": "Logo MapResponse",
+      "description": "Description"
+    }
+  },
+  "auth": {
+    "close": "Fermer",
+    "cancel": "Annuler",
+    "show": "Afficher",
+    "hide": "Masquer",
+    "showPassword": "Afficher le mot de passe",
+    "hidePassword": "Masquer le mot de passe",
+    "modalTitle": "{{role}} {{action}}",
+    "titleAction": {
+      "signUp": "Inscription",
+      "login": "Connexion"
+    },
+    "tabs": {
+      "signUp": "S'inscrire",
+      "logIn": "Se connecter"
+    },
+    "roles": {
+      "helpSeeker": "Demandeur d'aide",
+      "volunteer": "Bénévole",
+      "organization": "Organisation"
+    },
+    "fields": {
+      "name": "Nom",
+      "email": "E-mail",
+      "password": "Mot de passe",
+      "location": "Emplacement",
+      "skills": "Compétences"
+    },
+    "placeholders": {
+      "name": "Saisissez votre nom",
+      "email": "vous@exemple.com",
+      "password": "Saisissez votre mot de passe",
+      "newPassword": "12 caractères min., avec une majuscule et un chiffre",
+      "location": "Ville, État ou code postal"
+    },
+    "signIn": {
+      "welcomeBack": "Bon retour",
+      "submit": "Se connecter",
+      "submitting": "Connexion…",
+      "errors": {
+        "missingCredentials": "Veuillez saisir votre e-mail et votre mot de passe.",
+        "generic": "Impossible de se connecter pour le moment. Veuillez réessayer."
+      }
+    },
+    "signUp": {
+      "welcomeRole": "Bienvenue, {{role}} !",
+      "submit": "Continuer",
+      "submitting": "Création du compte…",
+      "selectAllThatApply": "Sélectionnez tout ce qui s'applique",
+      "skillsSelected": "{{count}} sélectionné(s)",
+      "errors": {
+        "missingRequired": "Le nom, l'e-mail et le mot de passe sont requis.",
+        "locationRequired": "L'emplacement est requis.",
+        "passwordTooShort": "Le mot de passe doit comporter au moins 12 caractères.",
+        "passwordTooLong": "Le mot de passe doit comporter 72 caractères ou moins.",
+        "passwordComplexity": "Le mot de passe doit inclure une lettre majuscule, une lettre minuscule et un chiffre.",
+        "skillRequired": "Veuillez sélectionner au moins une compétence avec laquelle vous pouvez aider.",
+        "generic": "Impossible de s'inscrire pour le moment. Veuillez réessayer."
+      }
+    }
+  },
+  "portal": {
+    "logoAlt": "Logo {{brand}}",
+    "searchPlaceholder": "Rechercher...",
+    "toggleDarkMode": "Basculer le mode sombre",
+    "darkModeEnabled": "Mode sombre activé",
+    "lightModeEnabled": "Mode clair activé",
+    "notifications": "Notifications",
+    "signOut": "Se déconnecter"
+  },
+  "org": {
+    "nav": {
+      "metrics": "Indicateurs",
+      "resources": "Ressources",
+      "volunteers": "Bénévoles",
+      "chat": "Discussion",
+      "documents": "Documents"
+    },
+    "errors": {
+      "loadRequests": "Une erreur s'est produite lors du chargement des demandes.",
+      "updateStatus": "Impossible de mettre à jour le statut de la demande.",
+      "updateResource": "Impossible de mettre à jour la ressource.",
+      "removeResource": "Impossible de supprimer la ressource.",
+      "updateAssignment": "Impossible de mettre à jour l'affectation."
+    },
+    "dashboard": {
+      "greeting": "Bonjour, {{name}} !",
+      "metrics": "INDICATEURS",
+      "analyze": "Analyser",
+      "requestsCompleted": "Demandes traitées",
+      "peopleHelped": "Personnes aidées",
+      "resourcesAvailable": "Ressources disponibles",
+      "heatMapTitle": "Carte de chaleur des demandes",
+      "respondingToday": "Où intervenons-nous aujourd'hui ?",
+      "tasks": "Tâches",
+      "viewAll": "Tout afficher",
+      "chartLabel": "Graphique de tendance des indicateurs",
+      "taskFallback": "Demande"
+    },
+    "requests": {
+      "sortBy": "Trier par",
+      "sort": {
+        "priority": "Priorité (élevée → faible)",
+        "newest": "Les plus récentes d'abord",
+        "nearest": "Les plus proches de vous"
+      },
+      "measuringDistances": "Mesure des distances…",
+      "locationRequired": "L'emplacement est requis et ne peut pas être effacé.",
+      "locationSaveError": "Impossible d'enregistrer votre emplacement.",
+      "addLocationToSort": "Ajoutez un emplacement au profil de votre organisation pour trier par distance.",
+      "distanceSortError": "Impossible de trier par distance.",
+      "locationPlaceholder": "Ville, État ou code postal",
+      "saving": "Enregistrement…",
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "locationTitle": "Définissez l'emplacement à partir duquel les distances sont mesurées",
+      "yourLocation": "Votre emplacement : {{location}}",
+      "setYourLocation": "Définir votre emplacement",
+      "yourRequests": "Vos demandes",
+      "yourRequestsEmpty": "Vous ne répondez encore à aucune demande.",
+      "unfilteredRequests": "Demandes non filtrées",
+      "unfilteredRequestsEmpty": "Aucune demande ouverte pour le moment.",
+      "heatMapTitle": "Carte de chaleur des demandes",
+      "mapTitle": "Carte des demandes",
+      "heatToggle": "Chaleur",
+      "mapToggle": "Carte",
+      "heatMapCaption": "Ombré selon la concentration des besoins",
+      "columnName": "Nom",
+      "columnDate": "Date",
+      "columnDistance": "Distance",
+      "columnPriority": "Priorité",
+      "loading": "Chargement…",
+      "tryAgain": "Réessayer",
+      "helpSeeker": "Demandeur d'aide",
+      "milesAway": "{{miles}} mi",
+      "priority": {
+        "critical": "Critique",
+        "high": "Élevée",
+        "medium": "Moyenne",
+        "low": "Faible",
+        "notSet": "Non défini"
+      },
+      "selectPrompt": "Sélectionnez une demande pour voir ses détails.",
+      "phoneNumber": "Numéro de téléphone",
+      "inHousehold": "Nb dans le foyer",
+      "detailsTitle": "Détails de la demande d'aide",
+      "description": "Description",
+      "noDescription": "Aucune description fournie.",
+      "categoryOfHelp": "Catégorie d'aide",
+      "userUrgency": "Urgence déclarée par l'utilisateur",
+      "location": "Emplacement",
+      "aiPriorityRating": "Évaluation de priorité par l'IA",
+      "notScored": "Non évalué",
+      "status": "Statut",
+      "statusOptions": {
+        "pending": "pending",
+        "in-progress": "in-progress",
+        "matched": "matched",
+        "fulfilled": "fulfilled",
+        "closed": "closed"
+      },
+      "unassign": "Nous désassigner",
+      "assign": "Nous assigner",
+      "assignedToYou": "Assignée à votre organisation",
+      "assignToAllocate": "Assignez cette demande à votre organisation pour lui allouer des ressources."
+    },
+    "resources": {
+      "types": {
+        "food": "Nourriture",
+        "wood": "Bois",
+        "healthCareKits": "Kits de soins de santé"
+      },
+      "formIncomplete": "Veuillez renseigner le nom, la quantité et l'unité.",
+      "addError": "Impossible d'ajouter la ressource.",
+      "addTitle": "Ajouter une ressource",
+      "addSubtitle": "Répertoriez ce que votre organisation a de disponible à distribuer.",
+      "type": "Type",
+      "name": "Nom",
+      "namePlaceholder": "ex. Conserves, Fagot de bois de chauffage",
+      "quantity": "Quantité",
+      "unit": "Unité",
+      "unitPlaceholder": "repas, unités, kits",
+      "adding": "Ajout…",
+      "addButton": "Ajouter la ressource",
+      "yourResources": "Vos ressources",
+      "loading": "Chargement…",
+      "tryAgain": "Réessayer",
+      "emptyState": "Aucune ressource pour le moment. Ajoutez la première à l'aide du formulaire.",
+      "available": "Disponible",
+      "unavailable": "Indisponible",
+      "remove": "Supprimer"
+    },
+    "allocation": {
+      "loadError": "Impossible de charger les allocations.",
+      "resourceFallback": "ressource",
+      "noSuggestions": "Aucune suggestion — ajoutez d'abord des ressources disponibles.",
+      "suggestError": "Impossible d'obtenir une suggestion.",
+      "pickResource": "Choisissez une ressource à allouer.",
+      "invalidQuantity": "La quantité doit être un nombre entier égal ou supérieur à 1.",
+      "allocateError": "Impossible d'allouer la ressource.",
+      "removeError": "Impossible de supprimer l'allocation.",
+      "title": "Ressources allouées",
+      "thinking": "Réflexion…",
+      "suggestWithAi": "✨ Suggérer avec l'IA",
+      "loading": "Chargement…",
+      "nothingAllocated": "Rien d'alloué pour le moment.",
+      "remove": "Supprimer",
+      "resource": "Ressource",
+      "select": "Sélectionner…",
+      "qty": "Qté",
+      "adding": "Ajout…",
+      "allocate": "Allouer"
+    },
+    "heatMap": {
+      "fewerNeeds": "Moins de besoins",
+      "moreNeeds": "Plus de besoins"
+    }
+  },
+  "volunteer": {
+    "nav": {
+      "general": "Général",
+      "dashboard": "Tableau de bord",
+      "requests": "Demandes",
+      "tasks": "Tâches",
+      "skills": "Compétences",
+      "groups": "Groupes",
+      "tools": "Outils",
+      "chat": "Discussion",
+      "documents": "Documents",
+      "settings": "Paramètres"
+    },
+    "viewTitles": {
+      "requests": "Demandes d'aide actives",
+      "skills": "Mes compétences"
+    },
+    "comingSoon": "Cette section arrive bientôt.",
+    "common": {
+      "loading": "Chargement…",
+      "tryAgain": "Réessayer",
+      "saving": "Enregistrement…"
+    },
+    "errors": {
+      "loadRequests": "Une erreur s'est produite lors du chargement des demandes.",
+      "recordInterest": "Impossible d'enregistrer votre intérêt. Veuillez réessayer.",
+      "markHelped": "Impossible de marquer la demande comme aidée. Veuillez réessayer.",
+      "withdraw": "Impossible de retirer votre intérêt. Veuillez réessayer."
+    },
+    "confirmations": {
+      "interestRecorded": "Intérêt enregistré. Merci de votre aide !"
+    },
+    "dashboard": {
+      "defaultName": "Nom",
+      "greeting": "Bonjour, {{name}} !",
+      "metrics": "INDICATEURS",
+      "analyze": "Analyser",
+      "requestsCompleted": "Demandes traitées",
+      "peopleHelped": "Personnes aidées",
+      "skillWays": "Façons d'élargir vos compétences",
+      "requestHeatMap": "Carte de chaleur des demandes",
+      "respondingToday": "Où intervenons-nous aujourd'hui ?",
+      "tasks": "Tâches",
+      "viewAll": "Tout afficher",
+      "noUpcomingTasks": "Aucune tâche à venir pour le moment.",
+      "metricsChartLabel": "Graphique de tendance des indicateurs",
+      "requestFallback": "Demande"
+    },
+    "requests": {
+      "views": {
+        "calendar": "Calendrier",
+        "list": "Liste",
+        "cards": "Cartes",
+        "map": "Carte"
+      },
+      "noOpenRequests": "Aucune demande ouverte pour le moment. Revenez bientôt.",
+      "whereHelpNeeded": "Où l'aide est nécessaire",
+      "selectedCount": "{{count}} demande sélectionnée",
+      "helpWithSelected": "Je peux aider pour la sélection",
+      "selectAll": "Sélectionner toutes les demandes",
+      "columns": {
+        "name": "Nom",
+        "category": "Catégorie",
+        "urgencyLevel": "Niveau d'urgence",
+        "aiPriority": "Priorité IA",
+        "timeSubmitted": "Heure de soumission"
+      },
+      "priorityTooltip": "Score de priorité calculé par l'IA (0–100)",
+      "sortingByUrgency": "Tri par urgence",
+      "sortByUrgency": "Trier par urgence",
+      "selectRequestFrom": "Sélectionner la demande de {{name}}",
+      "helpSeekerLower": "demandeur d'aide",
+      "helpSeeker": "Demandeur d'aide",
+      "whyPrioritized": "🤖 Pourquoi l'IA a priorisé ceci",
+      "notScoredYet": "Cette demande n'a pas encore été évaluée par le priorisateur IA.",
+      "requestLabel": "Demande :",
+      "whyTooltip": "Afficher pourquoi l'IA a priorisé cette demande",
+      "why": "Pourquoi ?",
+      "helping": "✓ J'aide",
+      "iCanHelp": "Je peux aider",
+      "notSet": "Non défini"
+    },
+    "calendar": {
+      "previousMonth": "Mois précédent",
+      "nextMonth": "Mois suivant",
+      "weekdays": {
+        "sun": "Dim",
+        "mon": "Lun",
+        "tue": "Mar",
+        "wed": "Mer",
+        "thu": "Jeu",
+        "fri": "Ven",
+        "sat": "Sam"
+      },
+      "selectDay": "Sélectionner un jour",
+      "noRequestsThisDay": "Aucune demande soumise ce jour-là."
+    },
+    "skills": {
+      "saveError": "Impossible d'enregistrer vos compétences.",
+      "yourSkills": "Vos compétences",
+      "rateHelp": "Évaluez votre niveau de confiance pour chaque compétence, de 1 (novice) à 5 (expert).",
+      "noSkillsYet": "Vous n'avez encore ajouté aucune compétence. Ajoutez-en ci-dessous.",
+      "levels": {
+        "novice": "Novice",
+        "beginner": "Débutant",
+        "competent": "Compétent",
+        "proficient": "Chevronné",
+        "expert": "Expert"
+      },
+      "removeSkill": "Supprimer {{name}}",
+      "proficiencyFor": "Niveau de maîtrise pour {{name}}",
+      "addASkill": "Ajouter une compétence",
+      "addAnotherPlaceholder": "Ajouter une autre compétence…",
+      "add": "Ajouter",
+      "skillsSaved": "Compétences enregistrées.",
+      "saveSkills": "Enregistrer les compétences"
+    },
+    "tasks": {
+      "noTasksYet": "Aucune tâche pour le moment",
+      "noTasksHelp": "Rendez-vous dans Demandes pour vous inscrire à aider des personnes dans le besoin.",
+      "helped": "✓ Aidé",
+      "markAsHelped": "Marquer comme aidé",
+      "removing": "Suppression…",
+      "unSignUp": "Se désinscrire"
+    }
+  },
+  "requests": {
+    "card": {
+      "priorityScoreTitle": "Score de priorité calculé par l'IA (0–100)",
+      "priority": "Priorité {{score}}",
+      "editRequest": "Modifier la demande",
+      "deleteRequest": "Supprimer la demande",
+      "whyPrioritized": "Pourquoi ceci est priorisé :",
+      "volunteersInterested_one": "{{count}} bénévole intéressé",
+      "volunteersInterested_other": "{{count}} bénévoles intéressés",
+      "orgsResponding_one": "{{count}} organisation qui répond",
+      "orgsResponding_other": "{{count}} organisations qui répondent",
+      "status": "Statut",
+      "saving": "Enregistrement…",
+      "statusLabel": "Statut :",
+      "helped": "✓ Aidé",
+      "markAsHelped": "Marquer comme aidé",
+      "iCanHelpWithThis": "Je peux aider pour ceci"
+    },
+    "statusOptions": {
+      "pending": "pending",
+      "assigned": "assigned",
+      "in-progress": "in-progress",
+      "matched": "matched",
+      "completed": "completed",
+      "fulfilled": "fulfilled",
+      "closed": "closed"
+    },
+    "filterBar": {
+      "searchPlaceholder": "Rechercher des demandes…",
+      "searchAriaLabel": "Rechercher des demandes par mot-clé",
+      "categoryAriaLabel": "Filtrer par catégorie",
+      "allCategories": "Toutes les catégories",
+      "urgencyAriaLabel": "Filtrer par urgence",
+      "allUrgencies": "Toutes les urgences",
+      "matching": "{{count}} correspondance(s)",
+      "clear": "Effacer"
+    },
+    "categories": {
+      "Food": "Nourriture",
+      "Shelter": "Abri",
+      "Medical": "Médical",
+      "Transport": "Transport",
+      "Other": "Autre"
+    },
+    "urgencies": {
+      "Critical": "Critique",
+      "High": "Élevée",
+      "Medium": "Moyenne",
+      "Low": "Faible"
+    },
+    "hsRequests": {
+      "tabs": {
+        "calendar": "Calendrier",
+        "list": "Liste",
+        "cards": "Cartes"
+      },
+      "loading": "Chargement de vos demandes…",
+      "empty": "Vous n'avez encore soumis aucune demande."
+    },
+    "calendar": {
+      "previousMonth": "Mois précédent",
+      "nextMonth": "Mois suivant",
+      "months": {
+        "january": "Janvier",
+        "february": "Février",
+        "march": "Mars",
+        "april": "Avril",
+        "may": "Mai",
+        "june": "Juin",
+        "july": "Juillet",
+        "august": "Août",
+        "september": "Septembre",
+        "october": "Octobre",
+        "november": "Novembre",
+        "december": "Décembre"
+      },
+      "weekdays": {
+        "sun": "Dim",
+        "mon": "Lun",
+        "tue": "Mar",
+        "wed": "Mer",
+        "thu": "Jeu",
+        "fri": "Ven",
+        "sat": "Sam"
+      },
+      "itemTitle": "{{category}} ({{urgency}}) — prévu ~ce jour",
+      "estimateNote": "La réalisation prévue est estimée à partir de l'urgence de chaque demande jusqu'à ce que les organisations fournissent des dates précises."
+    },
+    "table": {
+      "name": "Nom",
+      "category": "Catégorie",
+      "urgencyLevel": "Niveau d'urgence",
+      "status": "Statut",
+      "dateSubmitted": "Date de soumission",
+      "location": "Emplacement",
+      "requestFallback": "Demande",
+      "deleteRequest": "Supprimer la demande",
+      "soonToBeFulfilled": "Bientôt réalisée"
+    },
+    "tabNav": {
+      "ariaLabel": "Vues du tableau de bord"
+    },
+    "nearMe": {
+      "locating": "Localisation…",
+      "on": "Près de moi : activé",
+      "label": "Près de moi",
+      "searchRadius": "Rayon de recherche",
+      "within": "dans un rayon de",
+      "searchRadiusMiles": "Rayon de recherche en miles",
+      "miles": "{{count}} mi",
+      "nearby": "{{count}} à proximité"
+    },
+    "map": {
+      "pins": "Épingles",
+      "heatmap": "Carte de chaleur",
+      "loadingHeatmap": "Chargement de la carte de chaleur…",
+      "notShown_one": "{{count}} demande sans emplacement cartographiable n'est pas affichée.",
+      "notShown_other": "{{count}} demandes sans emplacement cartographiable ne sont pas affichées.",
+      "fewerNeeds": "Moins de besoins",
+      "moreNeeds": "Plus de besoins",
+      "popup": {
+        "helpSeeker": "Demandeur d'aide",
+        "uncategorized": "Non catégorisé",
+        "urgencySuffix": "Urgence {{urgency}}",
+        "aiScore": "IA {{score}}",
+        "helping": "✓ J'aide",
+        "saving": "Enregistrement…",
+        "iCanHelp": "Je peux aider"
+      }
+    }
+  },
+  "voice": {
+    "errors": {
+      "unsupportedBrowser": "Votre navigateur ne prend pas en charge l'enregistrement vocal. Veuillez utiliser le formulaire à la place.",
+      "micBlocked": "L'accès au microphone a été bloqué. Activez-le dans les paramètres de votre navigateur pour enregistrer.",
+      "startFailed": "Impossible de démarrer l'enregistrement. Veuillez vérifier votre microphone et réessayer.",
+      "noAudio": "Nous n'avons capté aucun son. Veuillez réessayer d'enregistrer.",
+      "processFailed": "Impossible de traiter l'enregistrement. Veuillez réessayer.",
+      "sampleLoadFailed": "Impossible de charger l'enregistrement d'exemple."
+    },
+    "intake": {
+      "title": "Demander de l'aide par la voix",
+      "subtitle": "Dites-nous à voix haute ce dont vous avez besoin. Nous en ferons une demande que vous pourrez vérifier.",
+      "stopRecording": "Arrêter l'enregistrement",
+      "startRecording": "Démarrer l'enregistrement",
+      "transcribing": "Transcription de votre demande…",
+      "recording": "Enregistrement… {{time}} — appuyez pour arrêter",
+      "tapToStart": "Appuyez sur le microphone pour commencer",
+      "useSample": "Utiliser un enregistrement d'exemple à la place",
+      "cancel": "Annuler"
+    },
+    "review": {
+      "title": "Confirmez ce que nous avons entendu",
+      "subtitle": "Nous avons transformé votre enregistrement en une demande. Vérifiez les détails et corrigez ce qui ne va pas avant de soumettre.",
+      "youSaid": "Vous avez dit",
+      "doubleCheck": "⚠ Veuillez vérifier attentivement",
+      "reRecord": "Réenregistrer",
+      "submitting": "Soumission…",
+      "submit": "Soumettre la demande",
+      "errors": {
+        "requiredFields": "Veuillez renseigner tous les champs obligatoires avant de soumettre.",
+        "submitFailed": "Impossible de soumettre votre demande.",
+        "submitRetry": "Échec de la soumission de la demande. Veuillez réessayer."
+      },
+      "fields": {
+        "category": "Catégorie",
+        "urgency": "Urgence",
+        "location": "Emplacement",
+        "householdSize": "Personnes dans le foyer",
+        "description": "Description"
+      },
+      "category": {
+        "placeholder": "Sélectionnez une catégorie",
+        "food": "Nourriture",
+        "shelter": "Abri",
+        "medical": "Médical",
+        "transport": "Transport",
+        "other": "Autre"
+      },
+      "urgency": {
+        "placeholder": "Sélectionnez le niveau d'urgence",
+        "low": "Faible — Peut attendre quelques jours",
+        "medium": "Moyenne — Sous 24 heures",
+        "high": "Élevée — Sous quelques heures",
+        "critical": "Critique — Immédiat"
+      },
+      "placeholders": {
+        "location": "Ville, code postal ou adresse",
+        "householdSize": "Combien de personnes ont besoin d'aide ?",
+        "description": "Décrivez l'aide dont vous avez besoin..."
+      }
+    }
+  },
+  "safety": {
+    "pageTitle": "Manuel de sécurité",
+    "pageSubtitle": "Contacts d'urgence et conseils étape par étape pour avant, pendant et après une catastrophe.",
+    "contactsHeading": "Contacts d'urgence",
+    "guidesHeading": "Guides de préparation aux catastrophes",
+    "disclaimer": "Conseils adaptés de la FEMA, de Ready.gov et de l'American Red Cross. Suivez toujours les instructions de vos responsables locaux des situations d'urgence.",
+    "contacts": {
+      "lifeThreatening": {
+        "label": "Urgence vitale",
+        "note": "Police, pompiers ou secours médicaux"
+      },
+      "distressHelpline": {
+        "label": "Ligne d'assistance en cas de détresse liée aux catastrophes",
+        "note": "Soutien psychologique en cas de crise, 24 h/24 et 7 j/7"
+      },
+      "poisonControl": {
+        "label": "Centre antipoison",
+        "note": "Empoisonnement ou exposition"
+      },
+      "fema": {
+        "label": "Ligne d'assistance FEMA",
+        "note": "Aide en cas de catastrophe et demandes d'indemnisation"
+      },
+      "redCross": {
+        "label": "American Red Cross",
+        "note": "Services d'hébergement et de secours"
+      },
+      "localNonEmergency": {
+        "label": "Ligne locale non urgente",
+        "value": "Ajoutez votre ligne locale",
+        "note": "Police/services publics non urgents"
+      }
+    },
+    "zip": {
+      "label": "Trouver de l'aide locale par code postal",
+      "placeholder": "ex. 78701",
+      "search": "Rechercher",
+      "searching": "Recherche…",
+      "clear": "Effacer",
+      "invalid": "Veuillez saisir un code postal américain valide à 5 chiffres.",
+      "lookupError": "Impossible de rechercher ce code postal. Veuillez réessayer.",
+      "showingContacts": "Affichage des contacts pour"
+    },
+    "phases": {
+      "before": "Avant",
+      "during": "Pendant",
+      "after": "Après"
+    },
+    "guides": {
+      "hurricane": {
+        "title": "Ouragan et inondation",
+        "before": {
+          "0": "Connaissez votre zone et votre itinéraire d'évacuation.",
+          "1": "Constituez un kit : 3 jours d'eau (environ 4 litres/personne/jour), nourriture non périssable, médicaments, lampe de poche, piles.",
+          "2": "Conservez vos documents (pièce d'identité, assurance, dossier médical) dans un sac étanche.",
+          "3": "Chargez vos téléphones et vos batteries de secours ; faites le plein de votre voiture."
+        },
+        "during": {
+          "0": "Évacuez immédiatement si on vous le demande. Ne conduisez jamais dans l'eau d'une inondation — « Faites demi-tour, ne vous noyez pas ».",
+          "1": "Montez au niveau le plus élevé du bâtiment ; évitez les sous-sols.",
+          "2": "Éloignez-vous des fenêtres ; abritez-vous dans une pièce intérieure.",
+          "3": "Écoutez les responsables locaux sur une radio à piles ou à manivelle."
+        },
+        "after": {
+          "0": "Ne rentrez chez vous que lorsque les autorités déclarent que c'est sûr.",
+          "1": "Évitez les eaux stagnantes — elles peuvent être électrifiées ou contaminées.",
+          "2": "Photographiez les dégâts pour l'assurance avant de nettoyer.",
+          "3": "Prenez des nouvelles de vos voisins, en particulier les personnes âgées et les personnes en situation de handicap."
+        }
+      },
+      "wildfire": {
+        "title": "Incendie de forêt",
+        "before": {
+          "0": "Dégagez les feuilles, broussailles et débris dans un rayon de 9 m autour de votre maison.",
+          "1": "Préparez un sac d'évacuation et gardez-le près de la porte.",
+          "2": "Inscrivez-vous aux alertes d'urgence locales.",
+          "3": "Prévoyez deux itinéraires d'évacuation hors de votre quartier."
+        },
+        "during": {
+          "0": "Partez tôt — n'attendez pas un ordre d'évacuation si vous vous sentez en danger.",
+          "1": "Portez un masque N95 ; fermez toutes les fenêtres et portes avant de partir.",
+          "2": "Si vous êtes piégé, appelez le 911 et abritez-vous dans une zone dégagée, à l'écart de la végétation.",
+          "3": "Gardez vos phares allumés ; roulez lentement dans la fumée."
+        },
+        "after": {
+          "0": "Attendez le « feu vert » avant de revenir.",
+          "1": "Surveillez les points chauds, les fosses de cendres et les lignes électriques tombées.",
+          "2": "Portez des gants et un masque pendant le nettoyage ; les cendres peuvent être toxiques.",
+          "3": "Documentez les pertes pour les demandes d'indemnisation d'assurance et de la FEMA."
+        }
+      },
+      "earthquake": {
+        "title": "Tremblement de terre",
+        "before": {
+          "0": "Fixez au mur les meubles lourds, les chauffe-eau et les étagères.",
+          "1": "Identifiez les endroits sûrs : sous des tables solides, contre les murs intérieurs.",
+          "2": "Gardez des chaussures solides et une lampe de poche près de votre lit.",
+          "3": "Stockez un kit d'urgence et sachez comment couper le gaz et l'eau."
+        },
+        "during": {
+          "0": "Baissez-vous, Couvrez-vous et Tenez bon — mettez-vous sous un meuble solide.",
+          "1": "Restez à l'intérieur jusqu'à l'arrêt des secousses ; ne courez pas dehors.",
+          "2": "Si vous êtes à l'extérieur, gagnez un espace dégagé, loin des bâtiments et des câbles.",
+          "3": "Si vous conduisez, garez-vous à l'écart des viaducs et arrêtez-vous."
+        },
+        "after": {
+          "0": "Attendez-vous à des répliques ; Baissez-vous, Couvrez-vous et Tenez bon à nouveau si elles surviennent.",
+          "1": "Vérifiez s'il y a des blessés et des fuites de gaz — partez si vous sentez du gaz.",
+          "2": "Utilisez les SMS, pas les appels, pour garder les lignes téléphoniques libres.",
+          "3": "Inspectez votre maison pour détecter des dégâts avant d'y rentrer."
+        }
+      },
+      "tornado": {
+        "title": "Tornade",
+        "before": {
+          "0": "Connaissez la différence : une veille (Watch) signifie possible ; une alerte (Warning) signifie mettez-vous à l'abri maintenant.",
+          "1": "Identifiez une pièce sûre — un sous-sol ou une pièce intérieure à l'étage le plus bas.",
+          "2": "Gardez un casque ou des couvertures épaisses pour protéger votre tête.",
+          "3": "Activez les alertes d'urgence sans fil sur votre téléphone."
+        },
+        "during": {
+          "0": "Rendez-vous immédiatement dans votre pièce sûre ; mettez autant de murs que possible entre vous et l'extérieur.",
+          "1": "Couvrez votre tête et votre nuque ; accroupissez-vous.",
+          "2": "Évitez les fenêtres, les portes et les murs extérieurs.",
+          "3": "Si vous êtes dans une maison mobile ou une voiture, gagnez un bâtiment solide."
+        },
+        "after": {
+          "0": "Surveillez les éclats de verre, les clous et les lignes électriques tombées.",
+          "1": "N'entrez pas dans des bâtiments endommagés avant leur inspection.",
+          "2": "Aidez les blessés, mais ne déplacez pas les personnes gravement blessées, sauf en cas de danger.",
+          "3": "Prenez des photos des dégâts pour votre assurance."
+        }
+      },
+      "winter": {
+        "title": "Tempête hivernale",
+        "before": {
+          "0": "Isolez les tuyaux et sachez comment couper l'eau s'ils gèlent.",
+          "1": "Faites des réserves de couvertures, de vêtements chauds, de nourriture et d'eau supplémentaires.",
+          "2": "Gardez des lampes de poche et des piles prêtes en cas de coupures.",
+          "3": "Faites l'entretien de votre système de chauffage et vérifiez les détecteurs de fumée et de CO."
+        },
+        "during": {
+          "0": "Restez à l'intérieur et habillez-vous en plusieurs couches.",
+          "1": "N'utilisez jamais de générateur, de barbecue ou de réchaud de camping à l'intérieur — risque de monoxyde de carbone.",
+          "2": "Laissez les robinets goutter légèrement pour éviter le gel des tuyaux.",
+          "3": "Si vous perdez le chauffage, fermez les pièces inutilisées pour conserver la chaleur."
+        },
+        "after": {
+          "0": "Prenez des nouvelles des voisins exposés au froid.",
+          "1": "Surveillez les signes de gelures et d'hypothermie.",
+          "2": "Dégagez la neige des bouches d'aération et des évacuations pour éviter l'accumulation de CO.",
+          "3": "Évitez le surmenage lorsque vous pelletez."
+        }
+      },
+      "heat": {
+        "title": "Chaleur extrême",
+        "before": {
+          "0": "Repérez les lieux publics climatisés (bibliothèques, centres commerciaux, centres de rafraîchissement).",
+          "1": "Vérifiez que les ventilateurs et la climatisation fonctionnent ; couvrez les fenêtres exposées au soleil du matin ou de l'après-midi.",
+          "2": "Faites des réserves d'eau et de boissons électrolytiques supplémentaires.",
+          "3": "Prévoyez de prendre des nouvelles des voisins âgés ou isolés."
+        },
+        "during": {
+          "0": "Buvez de l'eau souvent — n'attendez pas d'avoir soif.",
+          "1": "Restez dans la partie la plus fraîche de votre maison ou dans un centre de rafraîchissement.",
+          "2": "Ne laissez jamais de personnes ou d'animaux dans une voiture garée.",
+          "3": "Limitez les activités extérieures au tôt le matin ou en soirée."
+        },
+        "after": {
+          "0": "Surveillez l'épuisement dû à la chaleur (transpiration abondante, faiblesse) et le coup de chaleur (confusion, peau chaude et sèche — appelez le 911).",
+          "1": "Continuez à vous hydrater et à vous reposer dans un endroit frais.",
+          "2": "Prenez des nouvelles de votre famille, de vos voisins et de vos animaux.",
+          "3": "Reconstituez vos réserves d'eau et de fournitures pour la prochaine vague."
+        }
+      }
+    }
+  },
+  "chat": {
+    "greeting": "Bonjour {{name}} ! Je suis Mappie, votre assistant MapResponse. Posez-moi des questions sur vos demandes, des conseils de sécurité ou comment obtenir de l'aide.",
+    "unavailable": "L'assistant est indisponible pour le moment. Veuillez réessayer.",
+    "openAssistant": "Ouvrir l'assistant de discussion",
+    "closeAssistant": "Fermer l'assistant de discussion",
+    "assistantSubtitle": "Votre assistant MapResponse",
+    "thinking": "Réflexion…",
+    "inputPlaceholder": "Tapez votre message…",
+    "send": "Envoyer"
+  },
+  "misc": {
+    "comingSoon": "Vous êtes connecté ! Cette page arrive bientôt."
+  },
+  "requestForm": {
+    "titleCreate": "Demander de l'aide",
+    "titleEdit": "Modifier la demande",
+    "subtitleCreate": "Dites-nous ce dont vous avez besoin et nous le prioriserons.",
+    "subtitleEdit": "Mettez à jour les détails de votre demande ci-dessous.",
+    "successCreate": "✓ Demande soumise !",
+    "successEdit": "✓ Modifications enregistrées !",
+    "errorRequired": "Veuillez renseigner tous les champs obligatoires"
+  }
+}

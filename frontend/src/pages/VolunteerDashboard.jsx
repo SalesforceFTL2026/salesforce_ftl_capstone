@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import PortalShell from '../components/portal/PortalShell';
 import VolunteerDashboardView from '../components/volunteer/VolunteerDashboardView';
 import VolunteerRequestsView from '../components/volunteer/VolunteerRequestsView';
@@ -25,37 +26,6 @@ import {
 // "Dashboard" and "Requests" are fully built; "My Interests" tracks requests
 // the volunteer has offered to help with; other nav items land on a friendly
 // placeholder. This change is front-end only — the same data calls are used.
-const NAV_GROUPS = [
-  {
-    heading: 'General',
-    items: [
-      { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
-      { id: 'requests', label: 'Requests', icon: 'requests' },
-      { id: 'tasks', label: 'Tasks', icon: 'tasks' },
-      { id: 'skills', label: 'Skills', icon: 'skills' },
-      { id: 'groups', label: 'Groups', icon: 'groups' },
-    ],
-  },
-  {
-    heading: 'Tools',
-    items: [
-      { id: 'chat', label: 'Chat', icon: 'chat' },
-      { id: 'documents', label: 'Documents', icon: 'documents' },
-      { id: 'settings', label: 'Settings', icon: 'settings' },
-    ],
-  },
-];
-
-const VIEW_TITLES = {
-  dashboard: 'Dashboard',
-  requests: 'Active Help Requests',
-  tasks: 'Tasks',
-  skills: 'My Skills',
-  groups: 'Groups',
-  chat: 'Chat',
-  documents: 'Documents',
-  settings: 'Settings',
-};
 
 // Canonical skill areas (DISASTER_SKILLS) are shared with the signup form and
 // live in utils/skills.js. We use the list here to estimate how many *new*
@@ -90,10 +60,45 @@ const canonicalizeSkill = (raw) => {
 const AVG_HOUSEHOLD_SIZE = 3;
 
 const VolunteerDashboard = () => {
+  const { t } = useTranslation();
   const [currentUser] = useState(getCurrentUser);
   const navigate = useNavigate();
 
   const [view, setView] = useState('dashboard');
+
+  // Sidebar nav + view titles, built from translations so the labels switch
+  // with the language. Rebuilt each render — cheap, and always in sync.
+  const NAV_GROUPS = [
+    {
+      heading: t('volunteer.nav.general'),
+      items: [
+        { id: 'dashboard', label: t('volunteer.nav.dashboard'), icon: 'dashboard' },
+        { id: 'requests', label: t('volunteer.nav.requests'), icon: 'requests' },
+        { id: 'tasks', label: t('volunteer.nav.tasks'), icon: 'tasks' },
+        { id: 'skills', label: t('volunteer.nav.skills'), icon: 'skills' },
+        { id: 'groups', label: t('volunteer.nav.groups'), icon: 'groups' },
+      ],
+    },
+    {
+      heading: t('volunteer.nav.tools'),
+      items: [
+        { id: 'chat', label: t('volunteer.nav.chat'), icon: 'chat' },
+        { id: 'documents', label: t('volunteer.nav.documents'), icon: 'documents' },
+        { id: 'settings', label: t('volunteer.nav.settings'), icon: 'settings' },
+      ],
+    },
+  ];
+
+  const VIEW_TITLES = {
+    dashboard: t('volunteer.nav.dashboard'),
+    requests: t('volunteer.viewTitles.requests'),
+    tasks: t('volunteer.nav.tasks'),
+    skills: t('volunteer.viewTitles.skills'),
+    groups: t('volunteer.nav.groups'),
+    chat: t('volunteer.nav.chat'),
+    documents: t('volunteer.nav.documents'),
+    settings: t('volunteer.nav.settings'),
+  };
 
   // The AI priority feed of open requests, and the requests this volunteer has
   // already offered to help with. Loaded once; both views read from them.
@@ -158,11 +163,11 @@ const VolunteerDashboard = () => {
         setSkillsDetailed([]);
       }
     } catch (err) {
-      setError(requestErrorMessage(err, 'Something went wrong loading requests.'));
+      setError(requestErrorMessage(err, t('volunteer.errors.loadRequests')));
     } finally {
       if (!silent) setLoading(false);
     }
-  }, [near, filters]);
+  }, [near, filters, t]);
 
   useEffect(() => {
     loadData();
@@ -180,10 +185,10 @@ const VolunteerDashboard = () => {
       const result = await expressInterest(request.id);
       setConfirmations((prev) => ({
         ...prev,
-        [request.id]: result.message || 'Interest recorded. Thanks for helping!',
+        [request.id]: result.message || t('volunteer.confirmations.interestRecorded'),
       }));
     } catch (err) {
-      setError(requestErrorMessage(err, 'Could not record your interest. Please try again.'));
+      setError(requestErrorMessage(err, t('volunteer.errors.recordInterest')));
     } finally {
       setInteractingId(null);
     }
@@ -198,7 +203,7 @@ const VolunteerDashboard = () => {
       await markRequestHelped(request.id);
       await loadData({ silent: true });
     } catch (err) {
-      setError(requestErrorMessage(err, 'Could not mark the request as helped. Please try again.'));
+      setError(requestErrorMessage(err, t('volunteer.errors.markHelped')));
     } finally {
       setMarkingId(null);
     }
@@ -219,7 +224,7 @@ const VolunteerDashboard = () => {
         return next;
       });
     } catch (err) {
-      setError(requestErrorMessage(err, 'Could not withdraw your interest. Please try again.'));
+      setError(requestErrorMessage(err, t('volunteer.errors.withdraw')));
     } finally {
       setWithdrawingId(null);
     }
@@ -287,10 +292,10 @@ const VolunteerDashboard = () => {
       return {
         date: d ? d.getDate() : '—',
         month: d ? d.toLocaleString(undefined, { month: 'short' }) : '',
-        title: r.category || r.description?.slice(0, 40) || 'Request',
+        title: r.category || r.description?.slice(0, 40) || t('volunteer.dashboard.requestFallback'),
       };
     });
-  }, [feed]);
+  }, [feed, t]);
 
   return (
     <PortalShell
@@ -354,11 +359,14 @@ const VolunteerDashboard = () => {
 };
 
 // Placeholder for nav items not yet built (Groups, etc.).
-const ComingSoonPanel = ({ title, subtitle }) => (
-  <div className="bg-white dark:bg-[#16233a] rounded-3xl p-12 text-center shadow-md">
-    <h2 className="text-2xl font-bold text-[#1C2A16] dark:text-white mb-2">{title}</h2>
-    <p className="text-gray-500 dark:text-gray-400">{subtitle || 'This section is coming soon.'}</p>
-  </div>
-);
+const ComingSoonPanel = ({ title, subtitle }) => {
+  const { t } = useTranslation();
+  return (
+    <div className="bg-white dark:bg-[#16233a] rounded-3xl p-12 text-center shadow-md">
+      <h2 className="text-2xl font-bold text-[#1C2A16] dark:text-white mb-2">{title}</h2>
+      <p className="text-gray-500 dark:text-gray-400">{subtitle || t('volunteer.comingSoon')}</p>
+    </div>
+  );
+};
 
 export default VolunteerDashboard;

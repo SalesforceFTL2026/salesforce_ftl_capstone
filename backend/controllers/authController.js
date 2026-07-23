@@ -206,6 +206,7 @@ export async function login(req, res) {
           name: user.name,
           email: user.email,
           role: user.role,
+          languagePreference: user.languagePreference,
         },
       },
     });
@@ -236,6 +237,7 @@ export async function me(req, res) {
       email: user.email,
       role: user.role,
       location: user.location,
+      languagePreference: user.languagePreference,
     },
   });
 }
@@ -243,18 +245,27 @@ export async function me(req, res) {
 /**
  * Update the logged-in user's profile.
  * PATCH /api/auth/me  (protected)
- * Supports changing the display name and/or location. Only the fields provided
- * are changed; at least one must be present. Returns the updated safe fields.
+ * Supports changing the display name, location, and/or UI language preference.
+ * Only the fields provided are changed; at least one must be present. Returns
+ * the updated safe fields.
  */
+// UI languages the app can render. Kept in sync with the frontend i18n config
+// (frontend/src/i18n/index.js SUPPORTED_LANGUAGES).
+const VALID_LANGUAGES = ['en', 'es', 'zh', 'tl', 'vi', 'fr', 'ko', 'ru', 'ht', 'hi', 'ne'];
+
 export async function updateProfile(req, res) {
   try {
-    const { name, location } = req.body;
+    const { name, location, languagePreference } = req.body;
 
     // At least one editable field must be provided.
-    if (name === undefined && location === undefined) {
+    if (
+      name === undefined &&
+      location === undefined &&
+      languagePreference === undefined
+    ) {
       return res.status(400).json({
         success: false,
-        message: 'Provide a name or location to update.',
+        message: 'Provide a name, location, or language to update.',
       });
     }
 
@@ -282,6 +293,17 @@ export async function updateProfile(req, res) {
       data.location = location.trim();
     }
 
+    // Language (if provided) must be one we actually ship translations for.
+    if (languagePreference !== undefined) {
+      if (!VALID_LANGUAGES.includes(languagePreference)) {
+        return res.status(400).json({
+          success: false,
+          message: `Language must be one of: ${VALID_LANGUAGES.join(', ')}.`,
+        });
+      }
+      data.languagePreference = languagePreference;
+    }
+
     const updated = await prisma.user.update({
       where: { id: req.user.id },
       data,
@@ -296,6 +318,7 @@ export async function updateProfile(req, res) {
         email: updated.email,
         role: updated.role,
         location: updated.location,
+        languagePreference: updated.languagePreference,
       },
     });
   } catch (error) {

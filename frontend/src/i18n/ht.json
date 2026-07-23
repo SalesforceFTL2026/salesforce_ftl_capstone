@@ -1,0 +1,877 @@
+{
+  "nav": {
+    "general": "Jeneral",
+    "tools": "Zouti",
+    "dashboard": "Tablo",
+    "requests": "Demand",
+    "household": "Kay",
+    "documents": "Gid Ijans",
+    "settings": "Paramèt"
+  },
+  "common": {
+    "notSetYet": "Poko defini",
+    "comingSoon": "Seksyon sa a ap vini talè.",
+    "close": "Fèmen",
+    "loading": "Ap chaje…"
+  },
+  "dashboardView": {
+    "greeting": "Bonjou, {{name}}!",
+    "profile": "Pwofil",
+    "name": "Non",
+    "phoneNumber": "Nimewo Telefòn",
+    "householdCount": "# nan Kay la",
+    "activeRequests": "Demand Aktif",
+    "expectedFulfillment": "Dat Livrezon Prevwa",
+    "typeOfRequest": "Tip Demand",
+    "loadingRequests": "Ap chaje demand ou yo…",
+    "noActiveRequests": "Ou pa gen okenn demand aktif kounye a.",
+    "makeNewRequest": "Fè Yon Nouvo Demand",
+    "requestByVoice": "Fè Demand pa Vwa",
+    "chatWithAssistant": "Pale ak Asistan",
+    "requestSuffix": "Demand",
+    "deleteRequest": "Efase demand",
+    "nonprofitsTitle": "Òganizasyon San Bi Likratif Toupre Ou",
+    "organizationLogo": "Logo Òganizasyon",
+    "sampleOrgsNote": "Egzanp òganizasyon — lis reyèl ap vini talè."
+  },
+  "household": {
+    "title": "Kay",
+    "subtitle": "Detay kont ou ak enfòmasyon sou kay ou.",
+    "yourAccount": "Kont ou",
+    "fieldName": "Non",
+    "fieldEmail": "Imèl",
+    "fieldPhone": "Nimewo Telefòn",
+    "fieldLocation": "Kote",
+    "fieldHouseholdSize": "# Nan Kay la",
+    "editNote": "Nimewo telefòn, kote, ak gwosè kay la pa ka modifye isit la ankò — chan sa yo ap vini talè."
+  },
+  "settings": {
+    "title": "Paramèt",
+    "subtitle": "Jere detay kont ou.",
+    "displayName": "Non Afiche",
+    "namePlaceholder": "Non ou",
+    "nameEmptyError": "Non pa dwe vid.",
+    "nameUpdated": "✓ Non ou mete ajou.",
+    "nameUpdateError": "Nou pa t kapab mete non ou ajou.",
+    "saveChanges": "Anrejistre Chanjman",
+    "saving": "Ap anrejistre…",
+    "language": "Lang",
+    "languageHelp": "Chwazi lang pou tablo ou.",
+    "languageUpdated": "✓ Lang ou mete ajou.",
+    "languageUpdateError": "Nou pa t kapab mete lang ou ajou."
+  },
+  "languages": {
+    "en": "English",
+    "es": "Español",
+    "zh": "中文",
+    "tl": "Tagalog",
+    "vi": "Tiếng Việt",
+    "fr": "Français",
+    "ko": "한국어",
+    "ru": "Русский",
+    "ht": "Kreyòl Ayisyen",
+    "hi": "हिन्दी",
+    "ne": "नेपाली"
+  },
+  "landing": {
+    "header": {
+      "logoAlt": "Logo MapResponse",
+      "nav": {
+        "give": "BAY",
+        "whatWeDo": "SA NOU FÈ",
+        "whoWeAre": "KIYÈS NOU YE",
+        "howToHelp": "KIJAN POU EDE",
+        "partnerResources": "RESOUS PATNÈ",
+        "getHelp": "JWENN ÈD"
+      },
+      "greeting": "Bonjou, {{name}}",
+      "signOut": "DEKONEKTE",
+      "signIn": "KONEKTE",
+      "searchAria": "Chèche",
+      "toggleDarkModeAria": "Chanje mòd fonse",
+      "darkModeEnabledAlt": "Mòd fonse aktive",
+      "lightModeEnabledAlt": "Mòd klè aktive"
+    },
+    "hero": {
+      "welcomeTo": "BYENVINI NAN",
+      "subtitle": "YON REZO KATOGRAFYE POU SENPLIFYE ASISTANS POU MOUN K AP CHÈCHE ÈD NAN MEN MOUN K AP EDE.",
+      "needHelp": "MWEN BEZWEN ÈD",
+      "volunteer": "MWEN VLE FÈ VOLONTARYA",
+      "organization": "MWEN SE YON ÒGANIZASYON"
+    },
+    "whatWeDo": {
+      "title": "Tit",
+      "graphic": "GRAFIK",
+      "description": "Deskripsyon",
+      "learnMore": "APRANN PLIS"
+    },
+    "impact": {
+      "title": "ENPAK NOU AN 2026",
+      "fact": "Reyalite"
+    },
+    "statCard": {
+      "graphicLine1": "GRAFIK",
+      "graphicLine2": "KI GEN RAPÒ AK",
+      "graphicLine3": "REYALITE",
+      "statistic": "ESTATISTIK #{{number}}"
+    },
+    "getInvolved": {
+      "title": "PATISIPE",
+      "graphic": "GRAFIK",
+      "corporatePartnerLine1": "VIN YON PATNÈ",
+      "corporatePartnerLine2": "KÒPORATIF",
+      "nonprofitNetworkLine1": "REJWENN REZO SAN BI",
+      "nonprofitNetworkLine2": "LIKRATIF NOU AN",
+      "helpCommunitiesLine1": "EDE KOMINOTE KI",
+      "helpCommunitiesLine2": "NAN BEZWEN"
+    },
+    "partners": {
+      "title": "MÈSI A PATNÈ NOU YO POU SOUTYEN NOU!",
+      "logo": "Logo"
+    },
+    "oneLiner": {
+      "text": "FRAZ REZIME MAP RESPONSE",
+      "scrollToTopAria": "Monte anlè"
+    },
+    "footer": {
+      "logoAlt": "Logo MapResponse",
+      "description": "Deskripsyon"
+    }
+  },
+  "auth": {
+    "close": "Fèmen",
+    "cancel": "Anile",
+    "show": "Montre",
+    "hide": "Kache",
+    "showPassword": "Montre modpas",
+    "hidePassword": "Kache modpas",
+    "modalTitle": "{{role}} {{action}}",
+    "titleAction": {
+      "signUp": "Enskri",
+      "login": "Konekte"
+    },
+    "tabs": {
+      "signUp": "Enskri",
+      "logIn": "Konekte"
+    },
+    "roles": {
+      "helpSeeker": "Moun K ap Chèche Èd",
+      "volunteer": "Volontè",
+      "organization": "Òganizasyon"
+    },
+    "fields": {
+      "name": "Non",
+      "email": "Imèl",
+      "password": "Modpas",
+      "location": "Kote",
+      "skills": "Konpetans"
+    },
+    "placeholders": {
+      "name": "Antre non ou",
+      "email": "ou@egzanp.com",
+      "password": "Antre modpas ou",
+      "newPassword": "12+ karaktè, ak yon majiskil ak yon chif",
+      "location": "Vil, Eta oswa Kòd Postal"
+    },
+    "signIn": {
+      "welcomeBack": "Byenvini ankò",
+      "submit": "Konekte",
+      "submitting": "Ap konekte…",
+      "errors": {
+        "missingCredentials": "Tanpri antre imèl ak modpas ou.",
+        "generic": "Nou pa ka konekte ou kounye a. Tanpri eseye ankò."
+      }
+    },
+    "signUp": {
+      "welcomeRole": "Byenvini, {{role}}!",
+      "submit": "Kontinye",
+      "submitting": "Ap kreye kont…",
+      "selectAllThatApply": "Chwazi tout sa ki aplikab",
+      "skillsSelected": "{{count}} chwazi",
+      "errors": {
+        "missingRequired": "Non, imèl, ak modpas obligatwa.",
+        "locationRequired": "Kote a obligatwa.",
+        "passwordTooShort": "Modpas la dwe gen omwen 12 karaktè.",
+        "passwordTooLong": "Modpas la dwe gen 72 karaktè oswa mwens.",
+        "passwordComplexity": "Modpas la dwe gen yon lèt majiskil, yon lèt miniskil, ak yon chif.",
+        "skillRequired": "Tanpri chwazi omwen yon konpetans ou kapab ede avè l.",
+        "generic": "Nou pa ka enskri ou kounye a. Tanpri eseye ankò."
+      }
+    }
+  },
+  "portal": {
+    "logoAlt": "Logo {{brand}}",
+    "searchPlaceholder": "Chèche...",
+    "toggleDarkMode": "Chanje mòd fonse",
+    "darkModeEnabled": "Mòd fonse aktive",
+    "lightModeEnabled": "Mòd klè aktive",
+    "notifications": "Notifikasyon",
+    "signOut": "Dekonekte"
+  },
+  "org": {
+    "nav": {
+      "metrics": "Metrik",
+      "resources": "Resous",
+      "volunteers": "Volontè",
+      "chat": "Chat",
+      "documents": "Dokiman"
+    },
+    "errors": {
+      "loadRequests": "Yon bagay pa mache pandan chajman demand yo.",
+      "updateStatus": "Nou pa t kapab mete estati demand la ajou.",
+      "updateResource": "Nou pa t kapab mete resous la ajou.",
+      "removeResource": "Nou pa t kapab retire resous la.",
+      "updateAssignment": "Nou pa t kapab mete asiyasyon an ajou."
+    },
+    "dashboard": {
+      "greeting": "Bonjou, {{name}}!",
+      "metrics": "METRIK",
+      "analyze": "Analize",
+      "requestsCompleted": "Demand Konplete",
+      "peopleHelped": "Moun Ki Ede",
+      "resourcesAvailable": "Resous Disponib",
+      "heatMapTitle": "Kat Chalè Demand",
+      "respondingToday": "Ki kote n ap reponn jodi a?",
+      "tasks": "Tach",
+      "viewAll": "Wè tout",
+      "chartLabel": "Grafik tandans metrik",
+      "taskFallback": "Demand"
+    },
+    "requests": {
+      "sortBy": "Klase pa",
+      "sort": {
+        "priority": "Priyorite (wo → ba)",
+        "newest": "Pi nouvo an premye",
+        "nearest": "Pi pre ou"
+      },
+      "measuringDistances": "Ap mezire distans…",
+      "locationRequired": "Kote a obligatwa e li pa ka efase.",
+      "locationSaveError": "Nou pa t kapab anrejistre kote ou.",
+      "addLocationToSort": "Ajoute yon kote nan pwofil òganizasyon ou pou klase pa distans.",
+      "distanceSortError": "Nou pa t kapab klase pa distans.",
+      "locationPlaceholder": "Vil, ST oswa KÒD POSTAL",
+      "saving": "Ap anrejistre…",
+      "save": "Anrejistre",
+      "cancel": "Anile",
+      "locationTitle": "Defini kote pou mezire distans yo depi",
+      "yourLocation": "Kote ou: {{location}}",
+      "setYourLocation": "Defini kote ou",
+      "yourRequests": "Demand Ou Yo",
+      "yourRequestsEmpty": "Ou poko ap reponn okenn demand.",
+      "unfilteredRequests": "Demand Ki Pa Filtre",
+      "unfilteredRequestsEmpty": "Pa gen demand ouvè kounye a.",
+      "heatMapTitle": "Kat Chalè Demand",
+      "mapTitle": "Kat Demand",
+      "heatToggle": "Chalè",
+      "mapToggle": "Kat",
+      "heatMapCaption": "Lonbraje selon kote bezwen yo rasanble",
+      "columnName": "Non",
+      "columnDate": "Dat",
+      "columnDistance": "Distans",
+      "columnPriority": "Priyorite",
+      "loading": "Ap chaje…",
+      "tryAgain": "Eseye ankò",
+      "helpSeeker": "Moun K ap Chèche Èd",
+      "milesAway": "{{miles}} mi",
+      "priority": {
+        "critical": "Kritik",
+        "high": "Wo",
+        "medium": "Mwayen",
+        "low": "Ba",
+        "notSet": "Poko defini"
+      },
+      "selectPrompt": "Chwazi yon demand pou wè detay li.",
+      "phoneNumber": "Nimewo Telefòn",
+      "inHousehold": "# nan Kay la",
+      "detailsTitle": "Detay Demand Èd",
+      "description": "Deskripsyon",
+      "noDescription": "Pa gen deskripsyon.",
+      "categoryOfHelp": "Kategori Èd",
+      "userUrgency": "Ijans Deklare pa Itilizatè",
+      "location": "Kote",
+      "aiPriorityRating": "Evalyasyon Priyorite AI",
+      "notScored": "Poko note",
+      "status": "Estati",
+      "statusOptions": {
+        "pending": "pending",
+        "in-progress": "in-progress",
+        "matched": "matched",
+        "fulfilled": "fulfilled",
+        "closed": "closed"
+      },
+      "unassign": "Retire asiyasyon nou",
+      "assign": "Asiyen bay nou",
+      "assignedToYou": "Asiyen bay òganizasyon ou",
+      "assignToAllocate": "Asiyen demand sa a bay òganizasyon ou pou atribye resous pou li."
+    },
+    "resources": {
+      "types": {
+        "food": "Manje",
+        "wood": "Bwa",
+        "healthCareKits": "Twous Swen Sante"
+      },
+      "formIncomplete": "Tanpri ranpli non, kantite, ak inite.",
+      "addError": "Nou pa t kapab ajoute resous la.",
+      "addTitle": "Ajoute Yon Resous",
+      "addSubtitle": "Fè lis sa òganizasyon ou genyen disponib pou bay.",
+      "type": "Tip",
+      "name": "Non",
+      "namePlaceholder": "egz. Manje nan bwat, Pake bwa dife",
+      "quantity": "Kantite",
+      "unit": "Inite",
+      "unitPlaceholder": "repa, inite, twous",
+      "adding": "Ap ajoute…",
+      "addButton": "Ajoute Resous",
+      "yourResources": "Resous Ou Yo",
+      "loading": "Ap chaje…",
+      "tryAgain": "Eseye ankò",
+      "emptyState": "Pa gen resous ankò. Ajoute premye a ou an ak fòm la.",
+      "available": "Disponib",
+      "unavailable": "Pa disponib",
+      "remove": "Retire"
+    },
+    "allocation": {
+      "loadError": "Nou pa t kapab chaje atribisyon yo.",
+      "resourceFallback": "resous",
+      "noSuggestions": "Pa gen sijesyon — ajoute resous disponib anvan.",
+      "suggestError": "Nou pa t kapab jwenn yon sijesyon.",
+      "pickResource": "Chwazi yon resous pou atribye.",
+      "invalidQuantity": "Kantite a dwe yon chif antye 1 oswa plis.",
+      "allocateError": "Nou pa t kapab atribye resous la.",
+      "removeError": "Nou pa t kapab retire atribisyon an.",
+      "title": "Resous Atribye",
+      "thinking": "Ap reflechi…",
+      "suggestWithAi": "✨ Sijere ak AI",
+      "loading": "Ap chaje…",
+      "nothingAllocated": "Anyen poko atribye.",
+      "remove": "Retire",
+      "resource": "Resous",
+      "select": "Chwazi…",
+      "qty": "Kant",
+      "adding": "Ap ajoute…",
+      "allocate": "Atribye"
+    },
+    "heatMap": {
+      "fewerNeeds": "Mwens bezwen",
+      "moreNeeds": "Plis bezwen"
+    }
+  },
+  "volunteer": {
+    "nav": {
+      "general": "Jeneral",
+      "dashboard": "Tablo",
+      "requests": "Demand",
+      "tasks": "Tach",
+      "skills": "Konpetans",
+      "groups": "Gwoup",
+      "tools": "Zouti",
+      "chat": "Chat",
+      "documents": "Dokiman",
+      "settings": "Paramèt"
+    },
+    "viewTitles": {
+      "requests": "Demand Èd Aktif",
+      "skills": "Konpetans Mwen"
+    },
+    "comingSoon": "Seksyon sa a ap vini talè.",
+    "common": {
+      "loading": "Ap chaje…",
+      "tryAgain": "Eseye ankò",
+      "saving": "Ap anrejistre…"
+    },
+    "errors": {
+      "loadRequests": "Yon bagay pa mache pandan chajman demand yo.",
+      "recordInterest": "Nou pa t kapab anrejistre enterè ou. Tanpri eseye ankò.",
+      "markHelped": "Nou pa t kapab make demand la kòm ede. Tanpri eseye ankò.",
+      "withdraw": "Nou pa t kapab retire enterè ou. Tanpri eseye ankò."
+    },
+    "confirmations": {
+      "interestRecorded": "Enterè anrejistre. Mèsi paske w ap ede!"
+    },
+    "dashboard": {
+      "defaultName": "Non",
+      "greeting": "Bonjou, {{name}}!",
+      "metrics": "METRIK",
+      "analyze": "Analize",
+      "requestsCompleted": "Demand Konplete",
+      "peopleHelped": "Moun Ki Ede",
+      "skillWays": "Fason pou Elaji Konpetans Ou",
+      "requestHeatMap": "Kat Chalè Demand",
+      "respondingToday": "Ki kote n ap reponn jodi a?",
+      "tasks": "Tach",
+      "viewAll": "Wè tout",
+      "noUpcomingTasks": "Pa gen tach k ap vini kounye a.",
+      "metricsChartLabel": "Grafik tandans metrik",
+      "requestFallback": "Demand"
+    },
+    "requests": {
+      "views": {
+        "calendar": "Kalandriye",
+        "list": "Lis",
+        "cards": "Kat",
+        "map": "Kat Jeyografik"
+      },
+      "noOpenRequests": "Pa gen demand ouvè kounye a. Tounen tcheke talè.",
+      "whereHelpNeeded": "Ki kote bezwen èd",
+      "selectedCount": "{{count}} demand chwazi",
+      "helpWithSelected": "Mwen ka ede ak sa ki chwazi yo",
+      "selectAll": "Chwazi tout demand",
+      "columns": {
+        "name": "Non",
+        "category": "Kategori",
+        "urgencyLevel": "Nivo Ijans",
+        "aiPriority": "Priyorite AI",
+        "timeSubmitted": "Lè Soumèt"
+      },
+      "priorityTooltip": "Nòt priyorite kalkile pa AI (0–100)",
+      "sortingByUrgency": "Ap klase pa ijans",
+      "sortByUrgency": "Klase pa ijans",
+      "selectRequestFrom": "Chwazi demand ki soti nan {{name}}",
+      "helpSeekerLower": "moun k ap chèche èd",
+      "helpSeeker": "Moun K ap Chèche Èd",
+      "whyPrioritized": "🤖 Poukisa AI a bay sa a priyorite",
+      "notScoredYet": "Demand sa a poko note pa priyorizatè AI a.",
+      "requestLabel": "Demand:",
+      "whyTooltip": "Montre poukisa AI a bay demand sa a priyorite",
+      "why": "Poukisa?",
+      "helping": "✓ Ap Ede",
+      "iCanHelp": "Mwen ka ede",
+      "notSet": "Poko defini"
+    },
+    "calendar": {
+      "previousMonth": "Mwa anvan",
+      "nextMonth": "Mwa apre",
+      "weekdays": {
+        "sun": "Dim",
+        "mon": "Len",
+        "tue": "Mad",
+        "wed": "Mèk",
+        "thu": "Jed",
+        "fri": "Van",
+        "sat": "Sam"
+      },
+      "selectDay": "Chwazi yon jou",
+      "noRequestsThisDay": "Pa gen demand soumèt jou sa a."
+    },
+    "skills": {
+      "saveError": "Nou pa t kapab anrejistre konpetans ou yo.",
+      "yourSkills": "Konpetans Ou Yo",
+      "rateHelp": "Evalye konbyen ou santi w konfyan nan chak konpetans, soti 1 (novis) rive 5 (ekspè).",
+      "noSkillsYet": "Ou poko ajoute okenn konpetans. Ajoute kèk anba a.",
+      "levels": {
+        "novice": "Novis",
+        "beginner": "Debitan",
+        "competent": "Konpetan",
+        "proficient": "Abil",
+        "expert": "Ekspè"
+      },
+      "removeSkill": "Retire {{name}}",
+      "proficiencyFor": "Nivo abilte pou {{name}}",
+      "addASkill": "Ajoute yon konpetans",
+      "addAnotherPlaceholder": "Ajoute yon lòt konpetans…",
+      "add": "Ajoute",
+      "skillsSaved": "Konpetans anrejistre.",
+      "saveSkills": "Anrejistre konpetans"
+    },
+    "tasks": {
+      "noTasksYet": "Pa gen tach ankò",
+      "noTasksHelp": "Ale nan Demand pou enskri pou moun ki bezwen èd.",
+      "helped": "✓ Ede",
+      "markAsHelped": "Make kòm ede",
+      "removing": "Ap retire…",
+      "unSignUp": "Anile enskripsyon"
+    }
+  },
+  "requests": {
+    "card": {
+      "priorityScoreTitle": "Nòt priyorite kalkile pa AI (0–100)",
+      "priority": "Priyorite {{score}}",
+      "editRequest": "Modifye demand",
+      "deleteRequest": "Efase demand",
+      "whyPrioritized": "Poukisa sa a gen priyorite:",
+      "volunteersInterested_one": "{{count}} volontè enterese",
+      "volunteersInterested_other": "{{count}} volontè enterese",
+      "orgsResponding_one": "{{count}} òganizasyon ap reponn",
+      "orgsResponding_other": "{{count}} òganizasyon ap reponn",
+      "status": "Estati",
+      "saving": "Ap anrejistre…",
+      "statusLabel": "Estati:",
+      "helped": "✓ Ede",
+      "markAsHelped": "Make kòm ede",
+      "iCanHelpWithThis": "Mwen ka ede ak sa a"
+    },
+    "statusOptions": {
+      "pending": "pending",
+      "assigned": "assigned",
+      "in-progress": "in-progress",
+      "matched": "matched",
+      "completed": "completed",
+      "fulfilled": "fulfilled",
+      "closed": "closed"
+    },
+    "filterBar": {
+      "searchPlaceholder": "Chèche demand…",
+      "searchAriaLabel": "Chèche demand pa mo kle",
+      "categoryAriaLabel": "Filtre pa kategori",
+      "allCategories": "Tout kategori",
+      "urgencyAriaLabel": "Filtre pa ijans",
+      "allUrgencies": "Tout ijans",
+      "matching": "{{count}} ki koresponn",
+      "clear": "Efase"
+    },
+    "categories": {
+      "Food": "Manje",
+      "Shelter": "Abri",
+      "Medical": "Medikal",
+      "Transport": "Transpò",
+      "Other": "Lòt"
+    },
+    "urgencies": {
+      "Critical": "Kritik",
+      "High": "Wo",
+      "Medium": "Mwayen",
+      "Low": "Ba"
+    },
+    "hsRequests": {
+      "tabs": {
+        "calendar": "Kalandriye",
+        "list": "Lis",
+        "cards": "Kat"
+      },
+      "loading": "Ap chaje demand ou yo…",
+      "empty": "Ou poko soumèt okenn demand."
+    },
+    "calendar": {
+      "previousMonth": "Mwa anvan",
+      "nextMonth": "Mwa apre",
+      "months": {
+        "january": "Janvye",
+        "february": "Fevriye",
+        "march": "Mas",
+        "april": "Avril",
+        "may": "Me",
+        "june": "Jen",
+        "july": "Jiyè",
+        "august": "Out",
+        "september": "Septanm",
+        "october": "Oktòb",
+        "november": "Novanm",
+        "december": "Desanm"
+      },
+      "weekdays": {
+        "sun": "Dim",
+        "mon": "Len",
+        "tue": "Mad",
+        "wed": "Mèk",
+        "thu": "Jed",
+        "fri": "Van",
+        "sat": "Sam"
+      },
+      "itemTitle": "{{category}} ({{urgency}}) — prevwa ~jou sa a",
+      "estimateNote": "Dat livrezon prevwa a estime selon ijans chak demand jiskaske òganizasyon yo bay dat egzak."
+    },
+    "table": {
+      "name": "Non",
+      "category": "Kategori",
+      "urgencyLevel": "Nivo Ijans",
+      "status": "Estati",
+      "dateSubmitted": "Dat Soumèt",
+      "location": "Kote",
+      "requestFallback": "Demand",
+      "deleteRequest": "Efase demand",
+      "soonToBeFulfilled": "Pral Livre Talè"
+    },
+    "tabNav": {
+      "ariaLabel": "Vi tablo yo"
+    },
+    "nearMe": {
+      "locating": "Ap lokalize…",
+      "on": "Toupre m: aktive",
+      "label": "Toupre m",
+      "searchRadius": "Reyon rechèch",
+      "within": "andedan",
+      "searchRadiusMiles": "Reyon rechèch an mil",
+      "miles": "{{count}} mi",
+      "nearby": "{{count}} toupre"
+    },
+    "map": {
+      "pins": "Zepeng",
+      "heatmap": "Kat chalè",
+      "loadingHeatmap": "Ap chaje kat chalè…",
+      "notShown_one": "{{count}} demand san yon kote kap trase pa afiche.",
+      "notShown_other": "{{count}} demand san yon kote kap trase pa afiche.",
+      "fewerNeeds": "Mwens bezwen",
+      "moreNeeds": "Plis bezwen",
+      "popup": {
+        "helpSeeker": "Moun K ap Chèche Èd",
+        "uncategorized": "San kategori",
+        "urgencySuffix": "ijans {{urgency}}",
+        "aiScore": "AI {{score}}",
+        "helping": "✓ Ap Ede",
+        "saving": "Ap anrejistre…",
+        "iCanHelp": "Mwen ka ede"
+      }
+    }
+  },
+  "voice": {
+    "errors": {
+      "unsupportedBrowser": "Navigatè ou pa sipòte anrejistreman vwa. Tanpri sèvi ak fòm la olye.",
+      "micBlocked": "Aksè mikwofòn te bloke. Aktive li nan paramèt navigatè ou pou anrejistre.",
+      "startFailed": "Nou pa t kapab kòmanse anrejistreman. Tanpri tcheke mikwofòn ou epi eseye ankò.",
+      "noAudio": "Nou pa t kaptire okenn son. Tanpri eseye anrejistre ankò.",
+      "processFailed": "Nou pa t kapab trete anrejistreman an. Tanpri eseye ankò.",
+      "sampleLoadFailed": "Nou pa t kapab chaje egzanp anrejistreman an."
+    },
+    "intake": {
+      "title": "Fè Demand Èd pa Vwa",
+      "subtitle": "Di nou sa ou bezwen awotvwa. N ap transfòme li an yon demand pou ou revize.",
+      "stopRecording": "Sispann anrejistre",
+      "startRecording": "Kòmanse anrejistre",
+      "transcribing": "Ap transkri demand ou…",
+      "recording": "Ap anrejistre… {{time}} — tape pou sispann",
+      "tapToStart": "Tape mikwofòn nan pou kòmanse",
+      "useSample": "Sèvi ak yon egzanp anrejistreman olye",
+      "cancel": "Anile"
+    },
+    "review": {
+      "title": "Konfime Sa Nou Tande",
+      "subtitle": "Nou transfòme anrejistreman ou an yon demand. Revize detay yo epi korije sa ki pa kòrèk anvan ou soumèt.",
+      "youSaid": "Ou te di",
+      "doubleCheck": "⚠ Tanpri verifye ankò",
+      "reRecord": "Re-anrejistre",
+      "submitting": "Ap soumèt…",
+      "submit": "Soumèt Demand",
+      "errors": {
+        "requiredFields": "Tanpri ranpli tout chan obligatwa yo anvan ou soumèt.",
+        "submitFailed": "Nou pa t kapab soumèt demand ou.",
+        "submitRetry": "Soumisyon demand la echwe. Tanpri eseye ankò."
+      },
+      "fields": {
+        "category": "Kategori",
+        "urgency": "Ijans",
+        "location": "Kote",
+        "householdSize": "Moun nan Kay la",
+        "description": "Deskripsyon"
+      },
+      "category": {
+        "placeholder": "Chwazi yon kategori",
+        "food": "Manje",
+        "shelter": "Abri",
+        "medical": "Medikal",
+        "transport": "Transpòtasyon",
+        "other": "Lòt"
+      },
+      "urgency": {
+        "placeholder": "Chwazi nivo ijans",
+        "low": "Ba — Ka tann kèk jou",
+        "medium": "Mwayen — Nan 24 èdtan",
+        "high": "Wo — Nan kèk èdtan",
+        "critical": "Kritik — Imedyatman"
+      },
+      "placeholders": {
+        "location": "Vil, kòd postal, oswa adrès",
+        "householdSize": "Konbyen moun ki bezwen èd?",
+        "description": "Dekri ki èd ou bezwen..."
+      }
+    }
+  },
+  "safety": {
+    "pageTitle": "Manyèl Sekirite",
+    "pageSubtitle": "Kontak ijans ak konsèy etap pa etap pou anvan, pandan, ak apre yon dezas.",
+    "contactsHeading": "Kontak Ijans",
+    "guidesHeading": "Gid Preparasyon pou Dezas",
+    "disclaimer": "Konsèy adapte soti nan FEMA, Ready.gov, ak American Red Cross. Toujou swiv enstriksyon otorite ijans lokal ou yo.",
+    "contacts": {
+      "lifeThreatening": {
+        "label": "Ijans ki menase lavi",
+        "note": "Lapolis, ponpye, oswa medikal"
+      },
+      "distressHelpline": {
+        "label": "Liy Èd pou Detrès Dezas",
+        "note": "Konsèy kriz 24/7"
+      },
+      "poisonControl": {
+        "label": "Kontwòl Anpwazònman",
+        "note": "Anpwazònman oswa ekspozisyon"
+      },
+      "fema": {
+        "label": "Liy Èd FEMA",
+        "note": "Asistans dezas ak reklamasyon"
+      },
+      "redCross": {
+        "label": "American Red Cross",
+        "note": "Sèvis abri ak sekou"
+      },
+      "localNonEmergency": {
+        "label": "Non-ijans lokal",
+        "value": "Ajoute liy lokal ou",
+        "note": "Non-ijans lapolis/sèvis piblik"
+      }
+    },
+    "zip": {
+      "label": "Jwenn èd lokal pa kòd postal",
+      "placeholder": "egz. 78701",
+      "search": "Chèche",
+      "searching": "Ap chèche…",
+      "clear": "Efase",
+      "invalid": "Tanpri antre yon kòd postal ameriken valab ak 5 chif.",
+      "lookupError": "Nou pa t kapab chèche kòd postal sa a. Tanpri eseye ankò.",
+      "showingContacts": "Ap montre kontak pou"
+    },
+    "phases": {
+      "before": "Anvan",
+      "during": "Pandan",
+      "after": "Apre"
+    },
+    "guides": {
+      "hurricane": {
+        "title": "Siklòn ak Inondasyon",
+        "before": {
+          "0": "Konnen zòn ak wout evakyasyon ou.",
+          "1": "Prepare yon twous: 3 jou dlo (1 galon/moun/jou), manje ki pa gate, medikaman, flach, pil.",
+          "2": "Kenbe dokiman (idantite, asirans, medikal) nan yon sak ki pa kite dlo pase.",
+          "3": "Chaje telefòn ak pil rezèv; plen machin ou ak gaz."
+        },
+        "during": {
+          "0": "Evakye imedyatman si yo di w fè sa. Pa janm kondwi nan dlo inondasyon — “Vire, Pa Neye.”",
+          "1": "Ale nan nivo ki pi wo nan bilding lan; evite sousòl.",
+          "2": "Rete lwen fenèt yo; pran abri nan yon chanm anndan.",
+          "3": "Koute otorite lokal yo sou yon radyo ak pil oswa ak manivèl."
+        },
+        "after": {
+          "0": "Retounen lakay ou sèlman lè otorite yo di li san danje.",
+          "1": "Evite dlo kanpe — li ka gen kouran elektrik oswa li ka kontamine.",
+          "2": "Pran foto domaj yo pou asirans anvan ou netwaye.",
+          "3": "Tcheke vwazen yo, sitou granmoun aje ak moun ki gen andikap."
+        }
+      },
+      "wildfire": {
+        "title": "Dife Nan Bwa",
+        "before": {
+          "0": "Retire fèy, raje, ak fatra nan 30 pye alantou kay ou.",
+          "1": "Prepare yon sak pare epi kenbe l bò pòt la.",
+          "2": "Enskri pou alèt ijans lokal yo.",
+          "3": "Planifye de wout sòti nan katye ou."
+        },
+        "during": {
+          "0": "Sòti bonè — pa tann yon lòd evakyasyon si ou santi ou pa an sekirite.",
+          "1": "Mete yon mask N95; fèmen tout fenèt ak pòt anvan ou pati.",
+          "2": "Si ou kwense, rele 911 epi pran abri nan yon zòn deblaye lwen plant.",
+          "3": "Kenbe limyè machin ou limen; kondwi dousman nan lafimen."
+        },
+        "after": {
+          "0": "Tann “tout klè” anvan ou retounen.",
+          "1": "Veye pou pwen cho, twou sann, ak fil kouran ki tonbe.",
+          "2": "Mete gan ak yon mask pandan netwayaj; sann ka toksik.",
+          "3": "Dokimante pèt yo pou reklamasyon asirans ak FEMA."
+        }
+      },
+      "earthquake": {
+        "title": "Tranblemanntè",
+        "before": {
+          "0": "Fikse mèb lou, chofè dlo, ak etajè nan mi yo.",
+          "1": "Idantifye kote ki an sekirite: anba tab solid, kont mi anndan.",
+          "2": "Kenbe soulye solid ak yon flach bò kabann ou.",
+          "3": "Estoke yon twous ijans epi konnen kijan pou fèmen gaz ak dlo."
+        },
+        "during": {
+          "0": "Bese, Kouvri, epi Kenbe Fèm — ale anba mèb solid.",
+          "1": "Rete anndan jiskaske tranbleman an sispann; pa kouri deyò.",
+          "2": "Si ou deyò, ale nan yon zòn ouvè lwen bilding ak fil.",
+          "3": "Si w ap kondwi, ranje sou kote lwen pon epi kanpe."
+        },
+        "after": {
+          "0": "Atann sekous apre; Bese, Kouvri, epi Kenbe Fèm ankò si yo vini.",
+          "1": "Tcheke pou blesi ak fwit gaz — sòti si ou santi gaz.",
+          "2": "Sèvi ak tèks, pa apèl, pou kenbe liy telefòn yo ouvè.",
+          "3": "Enspekte kay ou pou domaj anvan ou re-antre."
+        }
+      },
+      "tornado": {
+        "title": "Toneod",
+        "before": {
+          "0": "Konnen diferans lan: yon Vèy vle di posib; yon Avètisman vle di pran abri kounye a.",
+          "1": "Idantifye yon chanm an sekirite — sousòl oswa yon chanm anndan nan etaj ki pi ba a.",
+          "2": "Kenbe yon kas oswa dra lou pou pwoteje tèt ou.",
+          "3": "Aktive Alèt Ijans San Fil sou telefòn ou."
+        },
+        "during": {
+          "0": "Ale nan chanm an sekirite ou imedyatman; mete otan mi ke posib ant ou ak deyò.",
+          "1": "Kouvri tèt ak kou ou; koupi ba.",
+          "2": "Evite fenèt, pòt, ak mi deyò.",
+          "3": "Si ou nan yon kay mobil oswa machin, ale nan yon bilding solid."
+        },
+        "after": {
+          "0": "Veye pou vè kase, klou, ak fil kouran ki tonbe.",
+          "1": "Pa antre nan bilding ki domaje jiskaske yo enspekte yo.",
+          "2": "Ede moun ki blese men pa deplase moun ki grav blese sof si yo an danje.",
+          "3": "Pran foto domaj yo pou asirans ou."
+        }
+      },
+      "winter": {
+        "title": "Tanpèt Livè",
+        "before": {
+          "0": "Izole tiyo yo epi konnen kijan pou fèmen dlo si yo jele.",
+          "1": "Estoke dra anplis, rad cho, manje, ak dlo.",
+          "2": "Kenbe flach ak pil pare pou pàn kouran.",
+          "3": "Fè antretyen ekipman chofaj epi tcheke detektè lafimen/CO."
+        },
+        "during": {
+          "0": "Rete anndan epi abiye an kouch.",
+          "1": "Pa janm sèvi ak yon dèlko, gril, oswa recho anndan — risk monoksid kabòn.",
+          "2": "Kite tiyo dlo goute yon ti kras pou anpeche tiyo jele.",
+          "3": "Si ou pèdi chalè, fèmen chanm ou pa itilize pou konsève chalè."
+        },
+        "after": {
+          "0": "Tcheke vwazen ki an risk akoz fredi a.",
+          "1": "Veye pou siy jèl ak ipotèmi.",
+          "2": "Retire nèj nan vantilasyon ak echapman pou evite akimilasyon CO.",
+          "3": "Evite fè twòp efò lè w ap pèlte nèj."
+        }
+      },
+      "heat": {
+        "title": "Chalè Ekstrèm",
+        "before": {
+          "0": "Idantifye kote piblik ki gen èkondisyone (bibliyotèk, sant komèsyal, sant rafrechisman).",
+          "1": "Tcheke ke vantilatè ak èkondisyone mache; kouvri fenèt ki resevwa solèy maten/apremidi.",
+          "2": "Estoke dlo anplis ak bwason elektwolit.",
+          "3": "Planifye pou tcheke vwazen aje oswa izole."
+        },
+        "during": {
+          "0": "Bwè dlo souvan — pa tann jiskaske ou swaf.",
+          "1": "Rete nan pati ki pi fre nan kay ou oswa nan yon sant rafrechisman.",
+          "2": "Pa janm kite moun oswa bèt nan yon machin ki pake.",
+          "3": "Limite aktivite deyò nan bonè maten oswa aswè."
+        },
+        "after": {
+          "0": "Veye pou epwizman chalè (transpirasyon anpil, feblès) ak konjesyon serebral chalè (konfizyon, po cho sèk — rele 911).",
+          "1": "Kontinye bwè dlo epi repoze nan yon kote fre.",
+          "2": "Tcheke fanmi, vwazen, ak bèt.",
+          "3": "Ranplase dlo ak pwovizyon ou pou pwochen vag la."
+        }
+      }
+    }
+  },
+  "chat": {
+    "greeting": "Bonjou {{name}}! Mwen se Mappie, asistan MapResponse ou. Mande m sou demand ou yo, konsèy sekirite, oswa kijan pou jwenn èd.",
+    "unavailable": "Asistan an pa disponib kounye a. Tanpri eseye ankò.",
+    "openAssistant": "Ouvri asistan chat",
+    "closeAssistant": "Fèmen asistan chat",
+    "assistantSubtitle": "Asistan MapResponse ou",
+    "thinking": "Ap reflechi…",
+    "inputPlaceholder": "Tape mesaj ou…",
+    "send": "Voye"
+  },
+  "misc": {
+    "comingSoon": "Ou konekte! Paj sa a ap vini talè."
+  },
+  "requestForm": {
+    "titleCreate": "Mande Èd",
+    "titleEdit": "Modifye Demand",
+    "subtitleCreate": "Di nou sa ou bezwen epi n ap bay li priyorite.",
+    "subtitleEdit": "Mete ajou detay demand ou an anba a.",
+    "successCreate": "✓ Demand soumèt!",
+    "successEdit": "✓ Chanjman anrejistre!",
+    "errorRequired": "Tanpri ranpli tout chan obligatwa yo"
+  }
+}

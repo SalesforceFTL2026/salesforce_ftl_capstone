@@ -6,12 +6,14 @@
 // @param {{ id: string, label: string }[]} tabs - the tabs to render
 // @param {string} activeTab - id of the currently selected tab
 // @param {(id: string) => void} onTabChange - called with the tab id on click
+import { useTranslation } from 'react-i18next';
 
 const TabNav = ({ tabs, activeTab, onTabChange }) => {
+  const { t } = useTranslation();
   return (
     <div
       role="tablist"
-      aria-label="Dashboard views"
+      aria-label={t('requests.tabNav.ariaLabel')}
       className="flex gap-2 border-b border-gray-200"
     >
       {tabs.map((tab) => {

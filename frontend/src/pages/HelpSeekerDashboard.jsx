@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import PortalShell from '../components/portal/PortalShell';
 import HSDashboardView from '../components/helpseeker/HSDashboardView';
 import HSRequestsView from '../components/helpseeker/HSRequestsView';
@@ -8,35 +9,9 @@ import ChatAssistant from '../components/ChatAssistant/ChatAssistant';
 import HelpRequestForm from '../../components/HelpRequestForm/HelpRequestForm';
 import VoiceIntakeFlow from '../components/VoiceIntake/VoiceIntakeFlow';
 import api from '../utils/api';
-import { getCurrentUser, logout, updateName } from '../utils/auth';
+import { getCurrentUser, logout, updateName, updateLanguage } from '../utils/auth';
+import { SUPPORTED_LANGUAGES } from '../i18n';
 import { usePolling } from '../hooks/usePolling';
-
-// Sidebar nav for the help-seeker portal, matching the wireframe.
-const NAV_GROUPS = [
-  {
-    heading: 'General',
-    items: [
-      { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
-      { id: 'requests', label: 'Requests', icon: 'requests' },
-      { id: 'household', label: 'Household', icon: 'household' },
-    ],
-  },
-  {
-    heading: 'Tools',
-    items: [
-      { id: 'documents', label: 'Emergency Guide', icon: 'documents' },
-      { id: 'settings', label: 'Settings', icon: 'settings' },
-    ],
-  },
-];
-
-const VIEW_TITLES = {
-  dashboard: 'Dashboard',
-  requests: 'Requests',
-  household: 'Household',
-  documents: 'Emergency Guide',
-  settings: 'Settings',
-};
 
 // Views that are actually built. Anything else shows the "coming soon" panel.
 const BUILT_VIEWS = new Set(['dashboard', 'requests', 'household', 'documents', 'settings']);
@@ -56,6 +31,9 @@ const SAMPLE_NONPROFITS = [
 // Help-Seeker portal. Shares the sidebar + top bar chrome with the organization
 // portal (PortalShell), so both personas have the same background format.
 const HelpSeekerDashboard = () => {
+  // t() looks up UI text in the active language; changing the language
+  // re-renders this component with the translated strings.
+  const { t } = useTranslation();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -77,11 +55,62 @@ const HelpSeekerDashboard = () => {
   const [savingName, setSavingName] = useState(false);
   const [nameError, setNameError] = useState('');
   const [nameSaved, setNameSaved] = useState(false);
+  // Settings: language save state and feedback.
+  const [savingLanguage, setSavingLanguage] = useState(false);
+  const [languageError, setLanguageError] = useState('');
+  const [languageSaved, setLanguageSaved] = useState(false);
   const navigate = useNavigate();
+
+  // Sidebar nav, built from translations so the labels switch with the
+  // language. Rebuilt each render — cheap, and keeps it always in sync.
+  const NAV_GROUPS = [
+    {
+      heading: t('nav.general'),
+      items: [
+        { id: 'dashboard', label: t('nav.dashboard'), icon: 'dashboard' },
+        { id: 'requests', label: t('nav.requests'), icon: 'requests' },
+        { id: 'household', label: t('nav.household'), icon: 'household' },
+      ],
+    },
+    {
+      heading: t('nav.tools'),
+      items: [
+        { id: 'documents', label: t('nav.documents'), icon: 'documents' },
+        { id: 'settings', label: t('nav.settings'), icon: 'settings' },
+      ],
+    },
+  ];
+
+  const VIEW_TITLES = {
+    dashboard: t('nav.dashboard'),
+    requests: t('nav.requests'),
+    household: t('nav.household'),
+    documents: t('nav.documents'),
+    settings: t('nav.settings'),
+  };
 
   const handleLogout = () => {
     logout();
     navigate('/');
+  };
+
+  // Save the chosen UI language to the user's profile and switch the live UI.
+  const handleChangeLanguage = async (e) => {
+    const lang = e.target.value;
+    setLanguageError('');
+    setLanguageSaved(false);
+    setSavingLanguage(true);
+    try {
+      const updated = await updateLanguage(lang);
+      setCurrentUser(updated);
+      setLanguageSaved(true);
+    } catch (err) {
+      setLanguageError(
+        err.response?.data?.message || err.message || t('settings.languageUpdateError'),
+      );
+    } finally {
+      setSavingLanguage(false);
+    }
   };
 
   // Save the edited display name, then update the live session so the greeting
@@ -194,10 +223,10 @@ const HelpSeekerDashboard = () => {
       {view === 'household' && (
         <div className="max-w-2xl">
           <h2 className="text-2xl sm:text-3xl font-bold text-[#1C2A16] dark:text-white mb-1">
-            Household
+            {t('household.title')}
           </h2>
           <p className="text-gray-600 dark:text-gray-300 mb-6">
-            Your account details and household information.
+            {t('household.subtitle')}
           </p>
 
           {/* Account info card */}
@@ -208,7 +237,7 @@ const HelpSeekerDashboard = () => {
               </div>
               <div className="min-w-0">
                 <p className="text-xl font-bold text-[#1C2A16] dark:text-white truncate">
-                  {currentUser?.name || 'Your account'}
+                  {currentUser?.name || t('household.yourAccount')}
                 </p>
                 <p className="text-sm text-gray-500 dark:text-gray-400 capitalize">
                   {currentUser?.role || 'help-seeker'}
@@ -218,11 +247,11 @@ const HelpSeekerDashboard = () => {
 
             <dl className="divide-y divide-gray-100 dark:divide-gray-700">
               {[
-                { label: 'Name', value: currentUser?.name },
-                { label: 'Email', value: currentUser?.email },
-                { label: 'Phone Number', value: currentUser?.phoneNumber },
-                { label: 'Location', value: currentUser?.location },
-                { label: '# In Household', value: currentUser?.householdSize },
+                { label: t('household.fieldName'), value: currentUser?.name },
+                { label: t('household.fieldEmail'), value: currentUser?.email },
+                { label: t('household.fieldPhone'), value: currentUser?.phoneNumber },
+                { label: t('household.fieldLocation'), value: currentUser?.location },
+                { label: t('household.fieldHouseholdSize'), value: currentUser?.householdSize },
               ].map((row) => (
                 <div key={row.label} className="flex justify-between gap-4 py-3">
                   <dt className="text-sm font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">
@@ -230,7 +259,7 @@ const HelpSeekerDashboard = () => {
                   </dt>
                   <dd className="text-sm text-right min-w-0 truncate text-gray-800 dark:text-gray-100">
                     {row.value || (
-                      <span className="text-gray-400 dark:text-gray-500 italic">Not set yet</span>
+                      <span className="text-gray-400 dark:text-gray-500 italic">{t('common.notSetYet')}</span>
                     )}
                   </dd>
                 </div>
@@ -239,8 +268,7 @@ const HelpSeekerDashboard = () => {
           </div>
 
           <p className="text-xs text-gray-500 dark:text-gray-400 italic">
-            Phone number, location, and household size can't be edited here yet —
-            those fields are coming soon.
+            {t('household.editNote')}
           </p>
         </div>
       )}
@@ -248,10 +276,10 @@ const HelpSeekerDashboard = () => {
       {view === 'settings' && (
         <div className="max-w-2xl">
           <h2 className="text-2xl sm:text-3xl font-bold text-[#1C2A16] dark:text-white mb-1">
-            Settings
+            {t('settings.title')}
           </h2>
           <p className="text-gray-600 dark:text-gray-300 mb-6">
-            Manage your account details.
+            {t('settings.subtitle')}
           </p>
 
           <form
@@ -262,7 +290,7 @@ const HelpSeekerDashboard = () => {
               htmlFor="displayName"
               className="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-2"
             >
-              Display Name
+              {t('settings.displayName')}
             </label>
             <input
               id="displayName"
@@ -273,7 +301,7 @@ const HelpSeekerDashboard = () => {
                 setNameError('');
                 setNameSaved(false);
               }}
-              placeholder="Your name"
+              placeholder={t('settings.namePlaceholder')}
               className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-[#3a4f30] bg-white dark:bg-[#1a2f1a] text-gray-900 dark:text-white focus:outline-none focus:border-[#6ba3d3] focus:ring-2 focus:ring-[#6ba3d3]/30 transition-all"
             />
 
@@ -282,7 +310,7 @@ const HelpSeekerDashboard = () => {
             )}
             {nameSaved && (
               <p className="mt-3 text-sm text-green-700 dark:text-green-400">
-                ✓ Your name has been updated.
+                {t('settings.nameUpdated')}
               </p>
             )}
 
@@ -291,9 +319,47 @@ const HelpSeekerDashboard = () => {
               disabled={savingName || !nameInput.trim() || nameInput.trim() === currentUser?.name}
               className="mt-5 px-8 py-3 bg-[#1a2740] text-white font-bold rounded-full hover:bg-[#14203a] focus:outline-none focus:ring-2 focus:ring-[#1a2740]/40 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {savingName ? 'Saving…' : 'Save Changes'}
+              {savingName ? t('settings.saving') : t('settings.saveChanges')}
             </button>
           </form>
+
+          {/* Language preference: switching this instantly re-renders the UI in
+              the chosen language and saves the choice to the user's profile so
+              it follows them across devices. Serves accessibility for
+              non-English-speaking help-seekers. */}
+          <div className="bg-white dark:bg-[#16233a] rounded-3xl shadow-md p-6 mt-6">
+            <label
+              htmlFor="language"
+              className="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-2"
+            >
+              {t('settings.language')}
+            </label>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
+              {t('settings.languageHelp')}
+            </p>
+            <select
+              id="language"
+              value={currentUser?.languagePreference || 'en'}
+              onChange={handleChangeLanguage}
+              disabled={savingLanguage}
+              className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-[#3a4f30] bg-white dark:bg-[#1a2f1a] text-gray-900 dark:text-white focus:outline-none focus:border-[#6ba3d3] focus:ring-2 focus:ring-[#6ba3d3]/30 transition-all disabled:opacity-50"
+            >
+              {SUPPORTED_LANGUAGES.map((lang) => (
+                <option key={lang} value={lang}>
+                  {t(`languages.${lang}`)}
+                </option>
+              ))}
+            </select>
+
+            {languageError && (
+              <p className="mt-3 text-sm text-red-600 dark:text-red-400">{languageError}</p>
+            )}
+            {languageSaved && (
+              <p className="mt-3 text-sm text-green-700 dark:text-green-400">
+                {t('settings.languageUpdated')}
+              </p>
+            )}
+          </div>
         </div>
       )}
 
@@ -304,7 +370,7 @@ const HelpSeekerDashboard = () => {
           <h2 className="text-2xl font-bold text-[#1C2A16] dark:text-white mb-2">
             {VIEW_TITLES[view]}
           </h2>
-          <p className="text-gray-500 dark:text-gray-400">This section is coming soon.</p>
+          <p className="text-gray-500 dark:text-gray-400">{t('common.comingSoon')}</p>
         </div>
       )}
 
@@ -327,7 +393,7 @@ const HelpSeekerDashboard = () => {
                 setShowForm(false);
                 setEditingRequest(null);
               }}
-              aria-label="Close"
+              aria-label={t('common.close')}
               className="absolute -top-3 -right-3 z-10 w-9 h-9 rounded-full bg-white text-gray-600 hover:text-gray-900 shadow-md text-2xl leading-none"
             >
               ×
@@ -355,7 +421,7 @@ const HelpSeekerDashboard = () => {
             <button
               type="button"
               onClick={() => setShowVoice(false)}
-              aria-label="Close"
+              aria-label={t('common.close')}
               className="absolute -top-3 -right-3 z-10 w-9 h-9 rounded-full bg-white text-gray-600 hover:text-gray-900 shadow-md text-2xl leading-none"
             >
               ×

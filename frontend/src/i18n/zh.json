@@ -1,0 +1,877 @@
+{
+  "nav": {
+    "general": "综合",
+    "tools": "工具",
+    "dashboard": "仪表板",
+    "requests": "求助请求",
+    "household": "家庭",
+    "documents": "应急指南",
+    "settings": "设置"
+  },
+  "common": {
+    "notSetYet": "尚未设置",
+    "comingSoon": "此部分即将推出。",
+    "close": "关闭",
+    "loading": "加载中…"
+  },
+  "dashboardView": {
+    "greeting": "你好，{{name}}！",
+    "profile": "个人资料",
+    "name": "姓名",
+    "phoneNumber": "电话号码",
+    "householdCount": "家庭人数",
+    "activeRequests": "进行中的请求",
+    "expectedFulfillment": "预计满足时间",
+    "typeOfRequest": "请求类型",
+    "loadingRequests": "正在加载你的请求…",
+    "noActiveRequests": "你目前没有进行中的请求。",
+    "makeNewRequest": "创建新请求",
+    "requestByVoice": "语音请求",
+    "chatWithAssistant": "与助手对话",
+    "requestSuffix": "请求",
+    "deleteRequest": "删除请求",
+    "nonprofitsTitle": "你附近参与的非营利组织",
+    "organizationLogo": "组织徽标",
+    "sampleOrgsNote": "示例组织——实时列表即将推出。"
+  },
+  "household": {
+    "title": "家庭",
+    "subtitle": "你的账户详情和家庭信息。",
+    "yourAccount": "你的账户",
+    "fieldName": "姓名",
+    "fieldEmail": "电子邮箱",
+    "fieldPhone": "电话号码",
+    "fieldLocation": "位置",
+    "fieldHouseholdSize": "家庭人数",
+    "editNote": "电话号码、位置和家庭人数暂时无法在此处编辑——这些字段即将推出。"
+  },
+  "settings": {
+    "title": "设置",
+    "subtitle": "管理你的账户详情。",
+    "displayName": "显示名称",
+    "namePlaceholder": "你的姓名",
+    "nameEmptyError": "姓名不能为空。",
+    "nameUpdated": "✓ 你的姓名已更新。",
+    "nameUpdateError": "无法更新你的姓名。",
+    "saveChanges": "保存更改",
+    "saving": "保存中…",
+    "language": "语言",
+    "languageHelp": "选择你仪表板的显示语言。",
+    "languageUpdated": "✓ 你的语言已更新。",
+    "languageUpdateError": "无法更新你的语言。"
+  },
+  "languages": {
+    "en": "English",
+    "es": "Español",
+    "zh": "中文",
+    "tl": "Tagalog",
+    "vi": "Tiếng Việt",
+    "fr": "Français",
+    "ko": "한국어",
+    "ru": "Русский",
+    "ht": "Kreyòl Ayisyen",
+    "hi": "हिन्दी",
+    "ne": "नेपाली"
+  },
+  "landing": {
+    "header": {
+      "logoAlt": "MapResponse 徽标",
+      "nav": {
+        "give": "捐赠",
+        "whatWeDo": "我们的工作",
+        "whoWeAre": "关于我们",
+        "howToHelp": "如何提供帮助",
+        "partnerResources": "合作伙伴资源",
+        "getHelp": "获取帮助"
+      },
+      "greeting": "你好，{{name}}",
+      "signOut": "退出登录",
+      "signIn": "登录",
+      "searchAria": "搜索",
+      "toggleDarkModeAria": "切换深色模式",
+      "darkModeEnabledAlt": "已启用深色模式",
+      "lightModeEnabledAlt": "已启用浅色模式"
+    },
+    "hero": {
+      "welcomeTo": "欢迎来到",
+      "subtitle": "一个绘制的网络，简化助人者向求助者提供援助的流程。",
+      "needHelp": "我需要帮助",
+      "volunteer": "我想当志愿者",
+      "organization": "我是一个组织"
+    },
+    "whatWeDo": {
+      "title": "标题",
+      "graphic": "图形",
+      "description": "描述",
+      "learnMore": "了解更多"
+    },
+    "impact": {
+      "title": "我们 2026 年的影响",
+      "fact": "事实"
+    },
+    "statCard": {
+      "graphicLine1": "图形",
+      "graphicLine2": "相关于",
+      "graphicLine3": "事实",
+      "statistic": "统计数据 #{{number}}"
+    },
+    "getInvolved": {
+      "title": "参与其中",
+      "graphic": "图形",
+      "corporatePartnerLine1": "成为企业",
+      "corporatePartnerLine2": "合作伙伴",
+      "nonprofitNetworkLine1": "加入我们的非营利",
+      "nonprofitNetworkLine2": "网络",
+      "helpCommunitiesLine1": "帮助有需要的",
+      "helpCommunitiesLine2": "社区"
+    },
+    "partners": {
+      "title": "感谢我们的合作伙伴给予的支持！",
+      "logo": "徽标"
+    },
+    "oneLiner": {
+      "text": "MAP RESPONSE 一句话简介",
+      "scrollToTopAria": "滚动到顶部"
+    },
+    "footer": {
+      "logoAlt": "MapResponse 徽标",
+      "description": "描述"
+    }
+  },
+  "auth": {
+    "close": "关闭",
+    "cancel": "取消",
+    "show": "显示",
+    "hide": "隐藏",
+    "showPassword": "显示密码",
+    "hidePassword": "隐藏密码",
+    "modalTitle": "{{role}} {{action}}",
+    "titleAction": {
+      "signUp": "注册",
+      "login": "登录"
+    },
+    "tabs": {
+      "signUp": "注册",
+      "logIn": "登录"
+    },
+    "roles": {
+      "helpSeeker": "求助者",
+      "volunteer": "志愿者",
+      "organization": "组织"
+    },
+    "fields": {
+      "name": "姓名",
+      "email": "电子邮箱",
+      "password": "密码",
+      "location": "位置",
+      "skills": "技能"
+    },
+    "placeholders": {
+      "name": "请输入你的姓名",
+      "email": "you@example.com",
+      "password": "请输入你的密码",
+      "newPassword": "12 个以上字符，包含大写字母和数字",
+      "location": "城市、州或邮政编码"
+    },
+    "signIn": {
+      "welcomeBack": "欢迎回来",
+      "submit": "登录",
+      "submitting": "正在登录…",
+      "errors": {
+        "missingCredentials": "请输入你的电子邮箱和密码。",
+        "generic": "目前无法登录。请重试。"
+      }
+    },
+    "signUp": {
+      "welcomeRole": "欢迎你，{{role}}！",
+      "submit": "继续",
+      "submitting": "正在创建账户…",
+      "selectAllThatApply": "选择所有适用项",
+      "skillsSelected": "已选择 {{count}} 项",
+      "errors": {
+        "missingRequired": "姓名、电子邮箱和密码为必填项。",
+        "locationRequired": "位置为必填项。",
+        "passwordTooShort": "密码长度至少为 12 个字符。",
+        "passwordTooLong": "密码不得超过 72 个字符。",
+        "passwordComplexity": "密码必须包含一个大写字母、一个小写字母和一个数字。",
+        "skillRequired": "请至少选择一项你能提供帮助的技能。",
+        "generic": "目前无法注册。请重试。"
+      }
+    }
+  },
+  "portal": {
+    "logoAlt": "{{brand}} 徽标",
+    "searchPlaceholder": "搜索...",
+    "toggleDarkMode": "切换深色模式",
+    "darkModeEnabled": "已启用深色模式",
+    "lightModeEnabled": "已启用浅色模式",
+    "notifications": "通知",
+    "signOut": "退出登录"
+  },
+  "org": {
+    "nav": {
+      "metrics": "指标",
+      "resources": "资源",
+      "volunteers": "志愿者",
+      "chat": "聊天",
+      "documents": "文档"
+    },
+    "errors": {
+      "loadRequests": "加载请求时出错。",
+      "updateStatus": "无法更新请求状态。",
+      "updateResource": "无法更新资源。",
+      "removeResource": "无法移除资源。",
+      "updateAssignment": "无法更新分配。"
+    },
+    "dashboard": {
+      "greeting": "你好，{{name}}！",
+      "metrics": "指标",
+      "analyze": "分析",
+      "requestsCompleted": "已完成的请求",
+      "peopleHelped": "已帮助的人数",
+      "resourcesAvailable": "可用资源",
+      "heatMapTitle": "请求热力图",
+      "respondingToday": "我们今天在哪里响应？",
+      "tasks": "任务",
+      "viewAll": "查看全部",
+      "chartLabel": "指标趋势图",
+      "taskFallback": "请求"
+    },
+    "requests": {
+      "sortBy": "排序方式",
+      "sort": {
+        "priority": "优先级（高 → 低）",
+        "newest": "最新优先",
+        "nearest": "距离你最近"
+      },
+      "measuringDistances": "正在测量距离…",
+      "locationRequired": "位置为必填项，不能清空。",
+      "locationSaveError": "无法保存你的位置。",
+      "addLocationToSort": "在你的组织资料中添加位置以按距离排序。",
+      "distanceSortError": "无法按距离排序。",
+      "locationPlaceholder": "城市、州或邮政编码",
+      "saving": "保存中…",
+      "save": "保存",
+      "cancel": "取消",
+      "locationTitle": "设置测量距离的起始位置",
+      "yourLocation": "你的位置：{{location}}",
+      "setYourLocation": "设置你的位置",
+      "yourRequests": "你的请求",
+      "yourRequestsEmpty": "你尚未响应任何请求。",
+      "unfilteredRequests": "未筛选的请求",
+      "unfilteredRequestsEmpty": "目前没有待处理的请求。",
+      "heatMapTitle": "请求热力图",
+      "mapTitle": "请求地图",
+      "heatToggle": "热力图",
+      "mapToggle": "地图",
+      "heatMapCaption": "按需求聚集情况着色",
+      "columnName": "姓名",
+      "columnDate": "日期",
+      "columnDistance": "距离",
+      "columnPriority": "优先级",
+      "loading": "加载中…",
+      "tryAgain": "重试",
+      "helpSeeker": "求助者",
+      "milesAway": "{{miles}} 英里",
+      "priority": {
+        "critical": "危急",
+        "high": "高",
+        "medium": "中",
+        "low": "低",
+        "notSet": "未设置"
+      },
+      "selectPrompt": "选择一个请求以查看其详情。",
+      "phoneNumber": "电话号码",
+      "inHousehold": "家庭人数",
+      "detailsTitle": "求助请求详情",
+      "description": "描述",
+      "noDescription": "未提供描述。",
+      "categoryOfHelp": "帮助类别",
+      "userUrgency": "用户申报的紧急程度",
+      "location": "位置",
+      "aiPriorityRating": "AI 优先级评分",
+      "notScored": "未评分",
+      "status": "状态",
+      "statusOptions": {
+        "pending": "pending",
+        "in-progress": "in-progress",
+        "matched": "matched",
+        "fulfilled": "fulfilled",
+        "closed": "closed"
+      },
+      "unassign": "取消分配给我们",
+      "assign": "分配给我们",
+      "assignedToYou": "已分配给你的组织",
+      "assignToAllocate": "将此请求分配给你的组织以为其调配资源。"
+    },
+    "resources": {
+      "types": {
+        "food": "食物",
+        "wood": "木材",
+        "healthCareKits": "医疗护理包"
+      },
+      "formIncomplete": "请填写名称、数量和单位。",
+      "addError": "无法添加资源。",
+      "addTitle": "添加资源",
+      "addSubtitle": "列出你的组织可供发放的物资。",
+      "type": "类型",
+      "name": "名称",
+      "namePlaceholder": "例如：罐头食品、柴火捆",
+      "quantity": "数量",
+      "unit": "单位",
+      "unitPlaceholder": "餐、件、包",
+      "adding": "添加中…",
+      "addButton": "添加资源",
+      "yourResources": "你的资源",
+      "loading": "加载中…",
+      "tryAgain": "重试",
+      "emptyState": "尚无资源。使用此表单添加你的第一项资源。",
+      "available": "可用",
+      "unavailable": "不可用",
+      "remove": "移除"
+    },
+    "allocation": {
+      "loadError": "无法加载分配。",
+      "resourceFallback": "资源",
+      "noSuggestions": "无建议——请先添加可用资源。",
+      "suggestError": "无法获取建议。",
+      "pickResource": "选择要调配的资源。",
+      "invalidQuantity": "数量必须为 1 或以上的整数。",
+      "allocateError": "无法调配资源。",
+      "removeError": "无法移除分配。",
+      "title": "已调配的资源",
+      "thinking": "思考中…",
+      "suggestWithAi": "✨ 使用 AI 建议",
+      "loading": "加载中…",
+      "nothingAllocated": "尚未调配任何资源。",
+      "remove": "移除",
+      "resource": "资源",
+      "select": "选择…",
+      "qty": "数量",
+      "adding": "添加中…",
+      "allocate": "调配"
+    },
+    "heatMap": {
+      "fewerNeeds": "需求较少",
+      "moreNeeds": "需求较多"
+    }
+  },
+  "volunteer": {
+    "nav": {
+      "general": "综合",
+      "dashboard": "仪表板",
+      "requests": "求助请求",
+      "tasks": "任务",
+      "skills": "技能",
+      "groups": "小组",
+      "tools": "工具",
+      "chat": "聊天",
+      "documents": "文档",
+      "settings": "设置"
+    },
+    "viewTitles": {
+      "requests": "进行中的求助请求",
+      "skills": "我的技能"
+    },
+    "comingSoon": "此部分即将推出。",
+    "common": {
+      "loading": "加载中…",
+      "tryAgain": "重试",
+      "saving": "保存中…"
+    },
+    "errors": {
+      "loadRequests": "加载请求时出错。",
+      "recordInterest": "无法记录你的意向。请重试。",
+      "markHelped": "无法将请求标记为已帮助。请重试。",
+      "withdraw": "无法撤回你的意向。请重试。"
+    },
+    "confirmations": {
+      "interestRecorded": "已记录意向。感谢你的帮助！"
+    },
+    "dashboard": {
+      "defaultName": "姓名",
+      "greeting": "你好，{{name}}！",
+      "metrics": "指标",
+      "analyze": "分析",
+      "requestsCompleted": "已完成的请求",
+      "peopleHelped": "已帮助的人数",
+      "skillWays": "拓展你技能的方法",
+      "requestHeatMap": "请求热力图",
+      "respondingToday": "我们今天在哪里响应？",
+      "tasks": "任务",
+      "viewAll": "查看全部",
+      "noUpcomingTasks": "目前没有即将开始的任务。",
+      "metricsChartLabel": "指标趋势图",
+      "requestFallback": "请求"
+    },
+    "requests": {
+      "views": {
+        "calendar": "日历",
+        "list": "列表",
+        "cards": "卡片",
+        "map": "地图"
+      },
+      "noOpenRequests": "目前没有待处理的请求。请稍后再来查看。",
+      "whereHelpNeeded": "哪里需要帮助",
+      "selectedCount": "已选择 {{count}} 个请求",
+      "helpWithSelected": "我可以帮助所选的请求",
+      "selectAll": "选择所有请求",
+      "columns": {
+        "name": "姓名",
+        "category": "类别",
+        "urgencyLevel": "紧急程度",
+        "aiPriority": "AI 优先级",
+        "timeSubmitted": "提交时间"
+      },
+      "priorityTooltip": "AI 计算的优先级评分（0–100）",
+      "sortingByUrgency": "正在按紧急程度排序",
+      "sortByUrgency": "按紧急程度排序",
+      "selectRequestFrom": "选择来自 {{name}} 的请求",
+      "helpSeekerLower": "求助者",
+      "helpSeeker": "求助者",
+      "whyPrioritized": "🤖 AI 为何将此优先处理",
+      "notScoredYet": "此请求尚未由 AI 优先级排序器评分。",
+      "requestLabel": "请求：",
+      "whyTooltip": "显示 AI 为何将此请求优先处理",
+      "why": "为什么？",
+      "helping": "✓ 正在帮助",
+      "iCanHelp": "我可以帮忙",
+      "notSet": "未设置"
+    },
+    "calendar": {
+      "previousMonth": "上一个月",
+      "nextMonth": "下一个月",
+      "weekdays": {
+        "sun": "周日",
+        "mon": "周一",
+        "tue": "周二",
+        "wed": "周三",
+        "thu": "周四",
+        "fri": "周五",
+        "sat": "周六"
+      },
+      "selectDay": "选择一天",
+      "noRequestsThisDay": "这一天没有提交任何请求。"
+    },
+    "skills": {
+      "saveError": "无法保存你的技能。",
+      "yourSkills": "你的技能",
+      "rateHelp": "为你对每项技能的信心程度打分，从 1（新手）到 5（专家）。",
+      "noSkillsYet": "你还没有添加任何技能。在下方添加一些。",
+      "levels": {
+        "novice": "新手",
+        "beginner": "初级",
+        "competent": "胜任",
+        "proficient": "熟练",
+        "expert": "专家"
+      },
+      "removeSkill": "移除 {{name}}",
+      "proficiencyFor": "{{name}} 的熟练程度",
+      "addASkill": "添加技能",
+      "addAnotherPlaceholder": "添加另一项技能…",
+      "add": "添加",
+      "skillsSaved": "技能已保存。",
+      "saveSkills": "保存技能"
+    },
+    "tasks": {
+      "noTasksYet": "尚无任务",
+      "noTasksHelp": "前往“求助请求”，报名帮助需要帮助的人。",
+      "helped": "✓ 已帮助",
+      "markAsHelped": "标记为已帮助",
+      "removing": "移除中…",
+      "unSignUp": "取消报名"
+    }
+  },
+  "requests": {
+    "card": {
+      "priorityScoreTitle": "AI 计算的优先级评分（0–100）",
+      "priority": "优先级 {{score}}",
+      "editRequest": "编辑请求",
+      "deleteRequest": "删除请求",
+      "whyPrioritized": "此项优先处理的原因：",
+      "volunteersInterested_one": "{{count}} 名志愿者有意向",
+      "volunteersInterested_other": "{{count}} 名志愿者有意向",
+      "orgsResponding_one": "{{count}} 个组织正在响应",
+      "orgsResponding_other": "{{count}} 个组织正在响应",
+      "status": "状态",
+      "saving": "保存中…",
+      "statusLabel": "状态：",
+      "helped": "✓ 已帮助",
+      "markAsHelped": "标记为已帮助",
+      "iCanHelpWithThis": "我可以帮助这个请求"
+    },
+    "statusOptions": {
+      "pending": "pending",
+      "assigned": "assigned",
+      "in-progress": "in-progress",
+      "matched": "matched",
+      "completed": "completed",
+      "fulfilled": "fulfilled",
+      "closed": "closed"
+    },
+    "filterBar": {
+      "searchPlaceholder": "搜索请求…",
+      "searchAriaLabel": "按关键词搜索请求",
+      "categoryAriaLabel": "按类别筛选",
+      "allCategories": "所有类别",
+      "urgencyAriaLabel": "按紧急程度筛选",
+      "allUrgencies": "所有紧急程度",
+      "matching": "{{count}} 个匹配",
+      "clear": "清除"
+    },
+    "categories": {
+      "Food": "食物",
+      "Shelter": "住所",
+      "Medical": "医疗",
+      "Transport": "交通",
+      "Other": "其他"
+    },
+    "urgencies": {
+      "Critical": "危急",
+      "High": "高",
+      "Medium": "中",
+      "Low": "低"
+    },
+    "hsRequests": {
+      "tabs": {
+        "calendar": "日历",
+        "list": "列表",
+        "cards": "卡片"
+      },
+      "loading": "正在加载你的请求…",
+      "empty": "你还没有提交任何请求。"
+    },
+    "calendar": {
+      "previousMonth": "上一个月",
+      "nextMonth": "下一个月",
+      "months": {
+        "january": "一月",
+        "february": "二月",
+        "march": "三月",
+        "april": "四月",
+        "may": "五月",
+        "june": "六月",
+        "july": "七月",
+        "august": "八月",
+        "september": "九月",
+        "october": "十月",
+        "november": "十一月",
+        "december": "十二月"
+      },
+      "weekdays": {
+        "sun": "周日",
+        "mon": "周一",
+        "tue": "周二",
+        "wed": "周三",
+        "thu": "周四",
+        "fri": "周五",
+        "sat": "周六"
+      },
+      "itemTitle": "{{category}}（{{urgency}}）—— 预计约在这一天",
+      "estimateNote": "预计满足时间是根据每个请求的紧急程度估算的，直到组织提供确切日期。"
+    },
+    "table": {
+      "name": "姓名",
+      "category": "类别",
+      "urgencyLevel": "紧急程度",
+      "status": "状态",
+      "dateSubmitted": "提交日期",
+      "location": "位置",
+      "requestFallback": "请求",
+      "deleteRequest": "删除请求",
+      "soonToBeFulfilled": "即将得到满足"
+    },
+    "tabNav": {
+      "ariaLabel": "仪表板视图"
+    },
+    "nearMe": {
+      "locating": "正在定位…",
+      "on": "附近：开启",
+      "label": "我附近",
+      "searchRadius": "搜索半径",
+      "within": "范围内",
+      "searchRadiusMiles": "搜索半径（英里）",
+      "miles": "{{count}} 英里",
+      "nearby": "附近 {{count}} 个"
+    },
+    "map": {
+      "pins": "标记点",
+      "heatmap": "热力图",
+      "loadingHeatmap": "正在加载热力图…",
+      "notShown_one": "{{count}} 个没有可定位位置的请求未显示。",
+      "notShown_other": "{{count}} 个没有可定位位置的请求未显示。",
+      "fewerNeeds": "需求较少",
+      "moreNeeds": "需求较多",
+      "popup": {
+        "helpSeeker": "求助者",
+        "uncategorized": "未分类",
+        "urgencySuffix": "{{urgency}} 紧急程度",
+        "aiScore": "AI {{score}}",
+        "helping": "✓ 正在帮助",
+        "saving": "保存中…",
+        "iCanHelp": "我可以帮忙"
+      }
+    }
+  },
+  "voice": {
+    "errors": {
+      "unsupportedBrowser": "你的浏览器不支持语音录制。请改用表单。",
+      "micBlocked": "麦克风访问已被阻止。请在浏览器设置中启用它以进行录制。",
+      "startFailed": "无法开始录制。请检查你的麦克风并重试。",
+      "noAudio": "我们没有捕捉到任何音频。请重新录制。",
+      "processFailed": "无法处理录音。请重试。",
+      "sampleLoadFailed": "无法加载示例录音。"
+    },
+    "intake": {
+      "title": "通过语音请求帮助",
+      "subtitle": "大声说出你的需求。我们会将其转换为请求供你审核。",
+      "stopRecording": "停止录制",
+      "startRecording": "开始录制",
+      "transcribing": "正在转写你的请求…",
+      "recording": "录制中… {{time}} —— 点击停止",
+      "tapToStart": "点击麦克风开始",
+      "useSample": "改用示例录音",
+      "cancel": "取消"
+    },
+    "review": {
+      "title": "确认我们听到的内容",
+      "subtitle": "我们已将你的录音转换为请求。请审核详情，并在提交前修正任何有误之处。",
+      "youSaid": "你说的是",
+      "doubleCheck": "⚠ 请仔细核对",
+      "reRecord": "重新录制",
+      "submitting": "提交中…",
+      "submit": "提交请求",
+      "errors": {
+        "requiredFields": "请在提交前填写所有必填字段。",
+        "submitFailed": "无法提交你的请求。",
+        "submitRetry": "提交请求失败。请重试。"
+      },
+      "fields": {
+        "category": "类别",
+        "urgency": "紧急程度",
+        "location": "位置",
+        "householdSize": "家庭人数",
+        "description": "描述"
+      },
+      "category": {
+        "placeholder": "选择一个类别",
+        "food": "食物",
+        "shelter": "住所",
+        "medical": "医疗",
+        "transport": "交通",
+        "other": "其他"
+      },
+      "urgency": {
+        "placeholder": "选择紧急程度",
+        "low": "低 —— 可以等几天",
+        "medium": "中 —— 24 小时内",
+        "high": "高 —— 几小时内",
+        "critical": "危急 —— 立即"
+      },
+      "placeholders": {
+        "location": "城市、邮政编码或地址",
+        "householdSize": "有多少人需要帮助？",
+        "description": "描述你需要什么帮助..."
+      }
+    }
+  },
+  "safety": {
+    "pageTitle": "安全手册",
+    "pageSubtitle": "灾害发生前、中、后的紧急联系方式和分步指导。",
+    "contactsHeading": "紧急联系方式",
+    "guidesHeading": "灾害防备指南",
+    "disclaimer": "指导内容改编自 FEMA、Ready.gov 和 American Red Cross。请始终遵循当地应急官员的指示。",
+    "contacts": {
+      "lifeThreatening": {
+        "label": "危及生命的紧急情况",
+        "note": "警察、消防或医疗"
+      },
+      "distressHelpline": {
+        "label": "灾害危机援助热线",
+        "note": "全天候危机咨询"
+      },
+      "poisonControl": {
+        "label": "中毒控制中心",
+        "note": "中毒或接触有害物质"
+      },
+      "fema": {
+        "label": "FEMA 援助热线",
+        "note": "灾害援助与理赔"
+      },
+      "redCross": {
+        "label": "American Red Cross",
+        "note": "庇护所与救济服务"
+      },
+      "localNonEmergency": {
+        "label": "当地非紧急热线",
+        "value": "添加你当地的热线",
+        "note": "警察/公共设施非紧急事务"
+      }
+    },
+    "zip": {
+      "label": "按邮政编码查找当地帮助",
+      "placeholder": "例如 78701",
+      "search": "搜索",
+      "searching": "搜索中…",
+      "clear": "清除",
+      "invalid": "请输入有效的 5 位美国邮政编码。",
+      "lookupError": "无法查找该邮政编码。请重试。",
+      "showingContacts": "正在显示以下地区的联系方式："
+    },
+    "phases": {
+      "before": "之前",
+      "during": "期间",
+      "after": "之后"
+    },
+    "guides": {
+      "hurricane": {
+        "title": "飓风与洪水",
+        "before": {
+          "0": "了解你的疏散区域和路线。",
+          "1": "准备应急包：3 天的饮用水（每人每天 1 加仑）、非易腐食物、药品、手电筒、电池。",
+          "2": "将证件（身份证、保险、医疗）放在防水袋中。",
+          "3": "为手机和备用电池充电；给你的汽车加满油。"
+        },
+        "during": {
+          "0": "如被要求疏散，请立即撤离。切勿驶过洪水——“掉头，别淹没（Turn Around, Don’t Drown）”。",
+          "1": "移动到建筑物的最高层；避开地下室。",
+          "2": "远离窗户；在室内房间中避难。",
+          "3": "用电池或手摇收音机收听当地官员的信息。"
+        },
+        "after": {
+          "0": "只有当当局宣布安全后才返回家中。",
+          "1": "避开积水——它可能带电或已被污染。",
+          "2": "在清理前拍摄损失照片以供保险理赔。",
+          "3": "查看邻居的情况，尤其是老年人和残障人士。"
+        }
+      },
+      "wildfire": {
+        "title": "野火",
+        "before": {
+          "0": "清除住宅周围 30 英尺内的落叶、灌木和杂物。",
+          "1": "准备一个应急包并放在门边。",
+          "2": "订阅当地紧急警报。",
+          "3": "规划两条离开你所在社区的逃生路线。"
+        },
+        "during": {
+          "0": "尽早撤离——如果你感到不安全，不要等到接到疏散命令。",
+          "1": "佩戴 N95 口罩；离开前关闭所有门窗。",
+          "2": "如果被困，拨打 911 并在远离植被的清空区域避难。",
+          "3": "打开车头灯；在烟雾中缓慢行驶。"
+        },
+        "after": {
+          "0": "在收到“解除警报”之前不要返回。",
+          "1": "警惕余火热点、灰坑和掉落的电线。",
+          "2": "清理时佩戴手套和口罩；灰烬可能有毒。",
+          "3": "记录损失以供保险和 FEMA 理赔。"
+        }
+      },
+      "earthquake": {
+        "title": "地震",
+        "before": {
+          "0": "将笨重的家具、热水器和架子固定在墙上。",
+          "1": "找出安全地点：坚固的桌子下方、靠内墙处。",
+          "2": "在床边放一双结实的鞋和一支手电筒。",
+          "3": "储备应急包，并了解如何关闭燃气和水源。"
+        },
+        "during": {
+          "0": "趴下、遮挡、抓牢（Drop, Cover, and Hold On）——躲到坚固的家具下方。",
+          "1": "在震动停止前留在室内；不要跑到室外。",
+          "2": "如果在室外，移动到远离建筑物和电线的开阔地带。",
+          "3": "如果在驾车，靠边停车，远离立交桥并停下。"
+        },
+        "after": {
+          "0": "预防余震；如果余震来临，再次趴下、遮挡、抓牢。",
+          "1": "检查是否有人受伤以及是否有燃气泄漏——如果闻到燃气味，立即离开。",
+          "2": "使用短信而非通话，以保持电话线路畅通。",
+          "3": "在重新进入前检查你的住宅是否受损。"
+        }
+      },
+      "tornado": {
+        "title": "龙卷风",
+        "before": {
+          "0": "了解区别：警戒（Watch）意味着可能发生；警报（Warning）意味着立即避难。",
+          "1": "确定一个安全房间——地下室或最低楼层的室内房间。",
+          "2": "准备头盔或厚毯子以保护头部。",
+          "3": "在你的手机上启用无线紧急警报。"
+        },
+        "during": {
+          "0": "立即前往你的安全房间；在你和外界之间尽可能多隔几堵墙。",
+          "1": "护住你的头部和颈部；蹲低身子。",
+          "2": "避开窗户、门和外墙。",
+          "3": "如果在移动房屋或车内，请前往坚固的建筑物。"
+        },
+        "after": {
+          "0": "警惕碎玻璃、钉子和掉落的电线。",
+          "1": "在受损建筑物经过检查前不要进入。",
+          "2": "帮助受伤人员，但除非有危险，否则不要移动重伤者。",
+          "3": "拍摄损失照片以供保险理赔。"
+        }
+      },
+      "winter": {
+        "title": "冬季风暴",
+        "before": {
+          "0": "为管道保温，并了解如果管道结冰如何关闭水源。",
+          "1": "储备额外的毯子、保暖衣物、食物和水。",
+          "2": "准备好手电筒和电池以应对停电。",
+          "3": "检修供暖设备，并检查烟雾/一氧化碳探测器。"
+        },
+        "during": {
+          "0": "留在室内并穿多层衣物。",
+          "1": "切勿在室内使用发电机、烤架或野营炉——存在一氧化碳中毒风险。",
+          "2": "让水龙头稍微滴水以防止管道结冰。",
+          "3": "如果失去供暖，关闭不使用的房间以保存暖气。"
+        },
+        "after": {
+          "0": "查看有受冻风险的邻居的情况。",
+          "1": "警惕冻伤和体温过低的迹象。",
+          "2": "清除通风口和排气口的积雪，以避免一氧化碳积聚。",
+          "3": "铲雪时避免过度劳累。"
+        }
+      },
+      "heat": {
+        "title": "极端高温",
+        "before": {
+          "0": "找出有空调的公共场所（图书馆、商场、纳凉中心）。",
+          "1": "检查风扇和空调是否正常；遮挡上午/下午被太阳照射的窗户。",
+          "2": "储备额外的水和电解质饮料。",
+          "3": "计划查看年长或独居邻居的情况。"
+        },
+        "during": {
+          "0": "经常喝水——不要等到口渴才喝。",
+          "1": "待在家中最凉爽的地方或纳凉中心。",
+          "2": "切勿将人或宠物留在停放的车内。",
+          "3": "将户外活动限制在清晨或傍晚。"
+        },
+        "after": {
+          "0": "警惕中暑衰竭（大量出汗、虚弱）和热射病（意识模糊、皮肤又热又干——拨打 911）。",
+          "1": "继续在凉爽的地方补水和休息。",
+          "2": "查看家人、邻居和宠物的情况。",
+          "3": "为下一波高温补充你的水和物资。"
+        }
+      }
+    }
+  },
+  "chat": {
+    "greeting": "你好，{{name}}！我是 Mappie，你的 MapResponse 助手。你可以向我咨询你的请求、安全提示或如何获取帮助。",
+    "unavailable": "助手目前不可用。请重试。",
+    "openAssistant": "打开聊天助手",
+    "closeAssistant": "关闭聊天助手",
+    "assistantSubtitle": "你的 MapResponse 助手",
+    "thinking": "思考中…",
+    "inputPlaceholder": "输入你的消息…",
+    "send": "发送"
+  },
+  "misc": {
+    "comingSoon": "你已登录！此页面即将推出。"
+  },
+  "requestForm": {
+    "titleCreate": "请求帮助",
+    "titleEdit": "编辑请求",
+    "subtitleCreate": "告诉我们你需要什么，我们会优先处理。",
+    "subtitleEdit": "在下方更新你的请求详情。",
+    "successCreate": "✓ 请求已提交！",
+    "successEdit": "✓ 更改已保存！",
+    "errorRequired": "请填写所有必填字段"
+  }
+}

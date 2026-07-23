@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 // A compact "request heat map": a grid whose cells are shaded from cool (few
 // needs) to hot (many needs), reading as a choropleth at a glance without
@@ -83,6 +84,7 @@ const binRequests = (requests) => {
 };
 
 const HeatMap = ({ requests, caption }) => {
+  const { t } = useTranslation();
   const binned = useMemo(
     () => (Array.isArray(requests) ? binRequests(requests) : null),
     [requests]
@@ -111,13 +113,13 @@ const HeatMap = ({ requests, caption }) => {
       </div>
       {/* Legend */}
       <div className="flex items-center justify-center gap-2 mt-3 text-xs text-gray-500 dark:text-gray-400">
-        <span>Fewer needs</span>
+        <span>{t('org.heatMap.fewerNeeds')}</span>
         <div className="flex gap-0.5">
           {HEAT_COLORS.map((c) => (
             <span key={c} className={`w-4 h-3 rounded-sm ${c}`} />
           ))}
         </div>
-        <span>More needs</span>
+        <span>{t('org.heatMap.moreNeeds')}</span>
       </div>
     </div>
   );

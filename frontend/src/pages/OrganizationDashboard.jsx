@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import PortalShell from '../components/portal/PortalShell';
 import DashboardView from '../components/organization/DashboardView';
 import RequestsView from '../components/organization/RequestsView';
@@ -22,46 +23,52 @@ import {
 // Organization portal, built from the product wireframes. Shares the sidebar +
 // top bar chrome with the help-seeker portal (PortalShell). "Dashboard" and
 // "Requests" are fully built; other nav items land on a friendly placeholder.
-const NAV_GROUPS = [
-  {
-    heading: 'General',
-    items: [
-      { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
-      { id: 'requests', label: 'Requests', icon: 'requests' },
-      { id: 'metrics', label: 'Metrics', icon: 'metrics' },
-      { id: 'resources', label: 'Resources', icon: 'resources' },
-      { id: 'volunteers', label: 'Volunteers', icon: 'volunteers' },
-    ],
-  },
-  {
-    heading: 'Tools',
-    items: [
-      { id: 'chat', label: 'Chat', icon: 'chat' },
-      { id: 'documents', label: 'Documents', icon: 'documents' },
-      { id: 'settings', label: 'Settings', icon: 'settings' },
-    ],
-  },
-];
-
-const VIEW_TITLES = {
-  dashboard: 'Dashboard',
-  requests: 'Requests',
-  metrics: 'Metrics',
-  resources: 'Resources',
-  volunteers: 'Volunteers',
-  chat: 'Chat',
-  documents: 'Documents',
-  settings: 'Settings',
-};
 
 // Assumed people per household, used only as a fallback for completed requests
 // that don't have a real householdSize recorded.
 const AVG_HOUSEHOLD_SIZE = 3;
 
 const OrganizationDashboard = () => {
+  // t() looks up UI text in the active language; changing the language
+  // re-renders this component with the translated strings.
+  const { t } = useTranslation();
   // Kept in state (not a constant) so profile edits like location re-render.
   const [currentUser, setCurrentUser] = useState(getCurrentUser);
   const navigate = useNavigate();
+
+  // Sidebar nav, built from translations so the labels switch with the
+  // language. Rebuilt each render — cheap, and keeps it always in sync.
+  const NAV_GROUPS = [
+    {
+      heading: t('nav.general'),
+      items: [
+        { id: 'dashboard', label: t('nav.dashboard'), icon: 'dashboard' },
+        { id: 'requests', label: t('nav.requests'), icon: 'requests' },
+        { id: 'metrics', label: t('org.nav.metrics'), icon: 'metrics' },
+        { id: 'resources', label: t('org.nav.resources'), icon: 'resources' },
+        { id: 'volunteers', label: t('org.nav.volunteers'), icon: 'volunteers' },
+      ],
+    },
+    {
+      heading: t('nav.tools'),
+      items: [
+        { id: 'chat', label: t('org.nav.chat'), icon: 'chat' },
+        { id: 'documents', label: t('org.nav.documents'), icon: 'documents' },
+        { id: 'settings', label: t('nav.settings'), icon: 'settings' },
+      ],
+    },
+  ];
+
+  const VIEW_TITLES = {
+    dashboard: t('nav.dashboard'),
+    requests: t('nav.requests'),
+    metrics: t('org.nav.metrics'),
+    resources: t('org.nav.resources'),
+    volunteers: t('org.nav.volunteers'),
+    chat: t('org.nav.chat'),
+    documents: t('org.nav.documents'),
+    settings: t('nav.settings'),
+  };
 
   const [view, setView] = useState('dashboard');
 
@@ -107,11 +114,11 @@ const OrganizationDashboard = () => {
         setResources([]);
       }
     } catch (err) {
-      setError(requestErrorMessage(err, 'Something went wrong loading requests.'));
+      setError(requestErrorMessage(err, t('org.errors.loadRequests')));
     } finally {
       if (!silent) setLoading(false);
     }
-  }, [near]);
+  }, [near, t]);
 
   useEffect(() => {
     loadData();
@@ -135,7 +142,7 @@ const OrganizationDashboard = () => {
       setFeed(apply);
       setResponses(apply);
     } catch (err) {
-      setError(requestErrorMessage(err, 'Could not update the request status.'));
+      setError(requestErrorMessage(err, t('org.errors.updateStatus')));
     } finally {
       setUpdatingId(null);
     }
@@ -171,7 +178,7 @@ const OrganizationDashboard = () => {
       const updated = await setResourceAvailability(id, available);
       setResources((prev) => prev.map((r) => (r.id === id ? { ...r, ...updated } : r)));
     } catch (err) {
-      setError(requestErrorMessage(err, 'Could not update the resource.'));
+      setError(requestErrorMessage(err, t('org.errors.updateResource')));
     }
   };
 
@@ -180,7 +187,7 @@ const OrganizationDashboard = () => {
       await deleteOrganizationResource(id);
       setResources((prev) => prev.filter((r) => r.id !== id));
     } catch (err) {
-      setError(requestErrorMessage(err, 'Could not remove the resource.'));
+      setError(requestErrorMessage(err, t('org.errors.removeResource')));
     }
   };
 
@@ -203,7 +210,7 @@ const OrganizationDashboard = () => {
         setResponses([]);
       }
     } catch (err) {
-      setError(requestErrorMessage(err, 'Could not update the assignment.'));
+      setError(requestErrorMessage(err, t('org.errors.updateAssignment')));
     } finally {
       setAssigningId(null);
     }
@@ -256,10 +263,10 @@ const OrganizationDashboard = () => {
       return {
         date: d ? d.getDate() : '—',
         month: d ? d.toLocaleString(undefined, { month: 'short' }) : '',
-        title: r.category || r.description?.slice(0, 40) || 'Request',
+        title: r.category || r.description?.slice(0, 40) || t('org.dashboard.taskFallback'),
       };
     });
-  }, [unfiltered]);
+  }, [unfiltered, t]);
 
   return (
     <PortalShell
@@ -316,11 +323,14 @@ const OrganizationDashboard = () => {
 };
 
 // Placeholder for nav items not yet built (Metrics, Resources, etc.).
-const ComingSoonPanel = ({ title }) => (
-  <div className="bg-white dark:bg-[#16233a] rounded-3xl p-12 text-center shadow-md">
-    <h2 className="text-2xl font-bold text-[#1C2A16] dark:text-white mb-2">{title}</h2>
-    <p className="text-gray-500 dark:text-gray-400">This section is coming soon.</p>
-  </div>
-);
+const ComingSoonPanel = ({ title }) => {
+  const { t } = useTranslation();
+  return (
+    <div className="bg-white dark:bg-[#16233a] rounded-3xl p-12 text-center shadow-md">
+      <h2 className="text-2xl font-bold text-[#1C2A16] dark:text-white mb-2">{title}</h2>
+      <p className="text-gray-500 dark:text-gray-400">{t('common.comingSoon')}</p>
+    </div>
+  );
+};
 
 export default OrganizationDashboard;

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDebounce } from '../../hooks/useDebounce';
 
 // Search + filter bar for the request feeds (issues #81, #82, #85). Owns the
@@ -17,6 +18,7 @@ const CATEGORIES = ['Food', 'Shelter', 'Medical', 'Transport', 'Other'];
 const URGENCIES = ['Critical', 'High', 'Medium', 'Low'];
 
 const RequestFilterBar = ({ value = {}, onChange, resultCount }) => {
+  const { t } = useTranslation();
   const { search = '', category = '', urgency = '' } = value;
 
   // Local, un-debounced copy of the text field so typing stays responsive.
@@ -59,8 +61,8 @@ const RequestFilterBar = ({ value = {}, onChange, resultCount }) => {
           type="search"
           value={term}
           onChange={(e) => setTerm(e.target.value)}
-          placeholder="Search requests…"
-          aria-label="Search requests by keyword"
+          placeholder={t('requests.filterBar.searchPlaceholder')}
+          aria-label={t('requests.filterBar.searchAriaLabel')}
           className="w-full pl-10 pr-3 py-2.5 rounded-xl bg-white/80 dark:bg-[#0f1a0f] text-[#1C2A16] dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/40"
         />
       </div>
@@ -69,12 +71,12 @@ const RequestFilterBar = ({ value = {}, onChange, resultCount }) => {
       <select
         value={category}
         onChange={(e) => onChange({ ...value, category: e.target.value })}
-        aria-label="Filter by category"
+        aria-label={t('requests.filterBar.categoryAriaLabel')}
         className="px-3 py-2.5 rounded-xl bg-white/80 dark:bg-[#0f1a0f] text-[#1C2A16] dark:text-white font-semibold focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/40"
       >
-        <option value="">All categories</option>
+        <option value="">{t('requests.filterBar.allCategories')}</option>
         {CATEGORIES.map((c) => (
-          <option key={c} value={c}>{c}</option>
+          <option key={c} value={c}>{t(`requests.categories.${c}`)}</option>
         ))}
       </select>
 
@@ -82,18 +84,18 @@ const RequestFilterBar = ({ value = {}, onChange, resultCount }) => {
       <select
         value={urgency}
         onChange={(e) => onChange({ ...value, urgency: e.target.value })}
-        aria-label="Filter by urgency"
+        aria-label={t('requests.filterBar.urgencyAriaLabel')}
         className="px-3 py-2.5 rounded-xl bg-white/80 dark:bg-[#0f1a0f] text-[#1C2A16] dark:text-white font-semibold focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/40"
       >
-        <option value="">All urgencies</option>
+        <option value="">{t('requests.filterBar.allUrgencies')}</option>
         {URGENCIES.map((u) => (
-          <option key={u} value={u}>{u}</option>
+          <option key={u} value={u}>{t(`requests.urgencies.${u}`)}</option>
         ))}
       </select>
 
       {typeof resultCount === 'number' && (
         <span className="text-sm font-semibold text-[#1C2A16] dark:text-gray-200 whitespace-nowrap" role="status">
-          {resultCount} matching
+          {t('requests.filterBar.matching', { count: resultCount })}
         </span>
       )}
 
@@ -103,7 +105,7 @@ const RequestFilterBar = ({ value = {}, onChange, resultCount }) => {
           onClick={clearAll}
           className="px-3 py-2.5 rounded-xl text-sm font-semibold text-[#1C2A16] dark:text-gray-200 hover:bg-black/5 dark:hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/40 transition-colors"
         >
-          Clear
+          {t('requests.filterBar.clear')}
         </button>
       )}
     </div>

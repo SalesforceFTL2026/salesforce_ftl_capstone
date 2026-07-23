@@ -13,10 +13,12 @@
 // @param {() => void} [onVoiceRequest] - open the voice intake flow
 // @param {() => void} onChat - open the AI chat assistant
 // @param {object[]} nonprofits - sample nearby orgs
+import { useTranslation } from 'react-i18next';
 
 const HSDashboardView = ({
   currentUser, requests, loading, error, deletingId, onDelete, onNewRequest, onVoiceRequest, onChat, nonprofits,
 }) => {
+  const { t } = useTranslation();
   const firstName = currentUser?.name?.split(' ')[0] || 'Name';
 
   return (
@@ -24,36 +26,36 @@ const HSDashboardView = ({
       {/* Left column */}
       <div className="bg-[#dce8f7] dark:bg-[#16233a] rounded-3xl p-6 sm:p-8 transition-colors duration-300">
         <h2 className="text-2xl sm:text-3xl font-bold text-[#1C2A16] dark:text-white mb-1">
-          Hello, {firstName}!
+          {t('dashboardView.greeting', { name: firstName })}
         </h2>
 
         {/* Profile card */}
         <div className="bg-[#5b8bb0] dark:bg-[#1a3a52] rounded-2xl p-5 text-white mt-4">
           <div className="flex items-center gap-5">
             <div className="flex flex-col items-center gap-2">
-              <span className="font-bold uppercase text-sm">Profile</span>
+              <span className="font-bold uppercase text-sm">{t('dashboardView.profile')}</span>
               <div className="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center text-[#1a2740] text-xl font-bold">
                 {(currentUser?.name?.[0] || '?').toUpperCase()}
               </div>
             </div>
             <div className="flex-1 space-y-2 text-sm min-w-0">
-              <ProfileField label="Name" value={currentUser?.name} />
-              <ProfileField label="Phone Number" placeholder="Not set yet" />
-              <ProfileField label="# in Household" placeholder="Not set yet" />
+              <ProfileField label={t('dashboardView.name')} value={currentUser?.name} />
+              <ProfileField label={t('dashboardView.phoneNumber')} placeholder={t('common.notSetYet')} />
+              <ProfileField label={t('dashboardView.householdCount')} placeholder={t('common.notSetYet')} />
             </div>
           </div>
         </div>
 
-        <h3 className="text-lg font-bold text-[#1C2A16] dark:text-white mt-6">Active Requests</h3>
+        <h3 className="text-lg font-bold text-[#1C2A16] dark:text-white mt-6">{t('dashboardView.activeRequests')}</h3>
         <div className="grid grid-cols-[auto_1fr] gap-x-4 text-[10px] font-semibold uppercase tracking-wide text-[#3a4a30] dark:text-gray-400 mb-2 px-1">
-          <span>Expected Fulfillment</span>
-          <span>Type of Request</span>
+          <span>{t('dashboardView.expectedFulfillment')}</span>
+          <span>{t('dashboardView.typeOfRequest')}</span>
         </div>
 
-        {loading && <p className="text-gray-500 dark:text-gray-400" role="status">Loading your requests…</p>}
+        {loading && <p className="text-gray-500 dark:text-gray-400" role="status">{t('dashboardView.loadingRequests')}</p>}
         {!loading && error && <p className="text-red-700 dark:text-red-300">{error}</p>}
         {!loading && !error && requests.length === 0 && (
-          <p className="text-gray-600 dark:text-gray-300">You have no active requests right now.</p>
+          <p className="text-gray-600 dark:text-gray-300">{t('dashboardView.noActiveRequests')}</p>
         )}
 
         {!loading && !error && requests.length > 0 && (
@@ -64,6 +66,7 @@ const HSDashboardView = ({
                 request={r}
                 deleting={deletingId === r.id}
                 onDelete={onDelete}
+                t={t}
               />
             ))}
           </ul>
@@ -76,7 +79,7 @@ const HSDashboardView = ({
             onClick={onNewRequest}
             className="px-10 py-4 bg-[#1a2740] text-white font-bold rounded-full text-lg hover:bg-[#14203a] focus:outline-none focus:ring-2 focus:ring-[#1a2740]/40 transition-colors shadow-md"
           >
-            Make New Request
+            {t('dashboardView.makeNewRequest')}
           </button>
           {onVoiceRequest && (
             <button
@@ -88,7 +91,7 @@ const HSDashboardView = ({
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 1.5a3 3 0 00-3 3v6a3 3 0 006 0v-6a3 3 0 00-3-3z" />
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 10.5a7 7 0 0014 0M12 17.5V21m-3 0h6" />
               </svg>
-              Request by Voice
+              {t('dashboardView.requestByVoice')}
             </button>
           )}
           {onChat && (
@@ -100,7 +103,7 @@ const HSDashboardView = ({
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12a8 8 0 01-8 8 8.5 8.5 0 01-3.5-.75L3 21l1.5-4A8 8 0 1121 12z" />
               </svg>
-              Chat with Assistant
+              {t('dashboardView.chatWithAssistant')}
             </button>
           )}
         </div>
@@ -109,13 +112,13 @@ const HSDashboardView = ({
       {/* Right column: participating non-profits */}
       <div className="bg-[#5b8bb0] dark:bg-[#16233a] rounded-3xl p-6 transition-colors duration-300">
         <h2 className="text-2xl font-bold text-white text-center mb-6 leading-tight">
-          Participating Non-Profits Near You
+          {t('dashboardView.nonprofitsTitle')}
         </h2>
         <div className="space-y-4">
           {nonprofits.map((org) => (
             <div key={org.id} className="flex items-stretch gap-3">
               <div className="w-24 shrink-0 rounded-xl bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-[10px] font-bold text-gray-500 text-center px-1">
-                Organization Logo
+                {t('dashboardView.organizationLogo')}
               </div>
               <div className="flex-1 bg-[#bcd4f1] dark:bg-[#22304a] rounded-xl p-3 text-[#1C2A16] dark:text-gray-100 text-sm min-w-0">
                 <p className="font-bold truncate">{org.name}</p>
@@ -126,7 +129,7 @@ const HSDashboardView = ({
           ))}
         </div>
         <p className="text-white/70 text-xs text-center mt-4 italic">
-          Sample organizations — live listings coming soon.
+          {t('dashboardView.sampleOrgsNote')}
         </p>
       </div>
     </div>
@@ -134,7 +137,7 @@ const HSDashboardView = ({
 };
 
 // One dated request row with expand + delete, styled like the maroon pills.
-const RequestRow = ({ request, deleting, onDelete }) => {
+const RequestRow = ({ request, deleting, onDelete, t }) => {
   const d = request.createdAt ? new Date(request.createdAt) : null;
   const day = d ? d.getDate() : '—';
   const month = d ? d.toLocaleString(undefined, { month: 'short' }) : '';
@@ -146,14 +149,14 @@ const RequestRow = ({ request, deleting, onDelete }) => {
           <span className="text-[10px] font-semibold uppercase">{month}</span>
         </div>
         <span className="flex-1 font-bold uppercase truncate">
-          {request.category || 'Request'} Request
+          {request.category || t('dashboardView.requestSuffix')} {t('dashboardView.requestSuffix')}
         </span>
       </div>
       <button
         type="button"
         onClick={() => onDelete(request)}
         disabled={deleting}
-        aria-label="Delete request"
+        aria-label={t('dashboardView.deleteRequest')}
         className="w-10 h-10 flex items-center justify-center text-[#1C2A16] dark:text-gray-200 hover:text-red-600 disabled:opacity-50 transition-colors"
       >
         {deleting ? (

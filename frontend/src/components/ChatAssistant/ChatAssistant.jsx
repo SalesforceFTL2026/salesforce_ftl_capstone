@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import api from '../../utils/api';
 import MappieMascot from './MappieMascot';
 
@@ -18,6 +19,7 @@ import MappieMascot from './MappieMascot';
 // @param {boolean} [hideLauncher] - hide the built-in floating round button,
 //   e.g. when the parent renders its own trigger button
 const ChatAssistant = ({ firstName = 'there', open: openProp, onOpenChange, hideLauncher = false }) => {
+  const { t } = useTranslation();
   const [openState, setOpenState] = useState(false);
   // Use the controlled value when provided, otherwise fall back to local state.
   const open = openProp !== undefined ? openProp : openState;
@@ -29,7 +31,7 @@ const ChatAssistant = ({ firstName = 'there', open: openProp, onOpenChange, hide
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: `Hi ${firstName}! I'm Mappie, your MapResponse assistant. Ask me about your requests, safety tips, or how to get help.`,
+      content: t('chat.greeting', { name: firstName }),
     },
   ]);
   const [input, setInput] = useState('');
@@ -66,7 +68,7 @@ const ChatAssistant = ({ firstName = 'there', open: openProp, onOpenChange, hide
     } catch (err) {
       setError(
         err.response?.data?.message ||
-          'The assistant is unavailable right now. Please try again.'
+          t('chat.unavailable')
       );
     } finally {
       setLoading(false);
@@ -80,7 +82,7 @@ const ChatAssistant = ({ firstName = 'there', open: openProp, onOpenChange, hide
         <button
           type="button"
           onClick={() => setOpen((o) => !o)}
-          aria-label={open ? 'Close chat assistant' : 'Open chat assistant'}
+          aria-label={open ? t('chat.closeAssistant') : t('chat.openAssistant')}
           className="fixed bottom-16 right-6 z-50 w-16 h-16 rounded-full bg-[#1e3a5f] text-white shadow-xl flex items-center justify-center hover:bg-[#182f4d] focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/50 transition-colors"
         >
           {open ? (
@@ -113,13 +115,13 @@ const ChatAssistant = ({ firstName = 'there', open: openProp, onOpenChange, hide
               </div>
               <div>
                 <p className="font-bold leading-tight">Mappie</p>
-                <p className="text-xs text-white/70">Your MapResponse assistant</p>
+                <p className="text-xs text-white/70">{t('chat.assistantSubtitle')}</p>
               </div>
             </div>
             <button
               type="button"
               onClick={() => setOpen(false)}
-              aria-label="Close chat assistant"
+              aria-label={t('chat.closeAssistant')}
               className="text-white/80 hover:text-white text-2xl leading-none -mt-1 focus:outline-none"
             >
               ×
@@ -151,7 +153,7 @@ const ChatAssistant = ({ firstName = 'there', open: openProp, onOpenChange, hide
               <div className="flex items-end gap-2 justify-start">
                 <MappieMascot className="w-7 h-7 shrink-0 mb-0.5" />
                 <div className="bg-gray-100 dark:bg-[#1a2f1a] text-gray-500 dark:text-gray-400 rounded-2xl rounded-bl-sm px-3 py-2 text-sm">
-                  Thinking…
+                  {t('chat.thinking')}
                 </div>
               </div>
             )}
@@ -166,7 +168,7 @@ const ChatAssistant = ({ firstName = 'there', open: openProp, onOpenChange, hide
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Type your message…"
+              placeholder={t('chat.inputPlaceholder')}
               className="flex-1 px-3 py-2 rounded-xl border-2 border-gray-300 dark:border-[#3a4f30] bg-white dark:bg-[#1a2f1a] text-gray-900 dark:text-white text-sm focus:outline-none focus:border-[#1e3a5f] focus:ring-2 focus:ring-[#1e3a5f]/20 transition-all"
             />
             <button
@@ -174,7 +176,7 @@ const ChatAssistant = ({ firstName = 'there', open: openProp, onOpenChange, hide
               disabled={loading || !input.trim()}
               className="px-4 py-2 rounded-xl bg-[#1e3a5f] text-white font-semibold text-sm hover:bg-[#182f4d] focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/40 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              Send
+              {t('chat.send')}
             </button>
           </form>
         </div>
