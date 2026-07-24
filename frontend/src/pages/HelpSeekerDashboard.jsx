@@ -9,6 +9,7 @@ import ChatAssistant from '../components/ChatAssistant/ChatAssistant';
 import HelpRequestForm from '../../components/HelpRequestForm/HelpRequestForm';
 // Request by Voice — temporarily disabled for demo (do not remove)
 // import VoiceIntakeFlow from '../components/VoiceIntake/VoiceIntakeFlow';
+import Toast from '../components/Toast/Toast';
 import api from '../utils/api';
 import { getCurrentUser, logout, updateName, updateLanguage } from '../utils/auth';
 import { isAdminSession } from '../utils/previewMode';
@@ -39,7 +40,11 @@ const HelpSeekerDashboard = () => {
   const { t } = useTranslation();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+  // `error` is only for load failures — it renders inline in the view. Feedback
+  // from an action (e.g. a failed delete) goes to `actionMessage` instead, shown
+  // as a small temporary toast so it doesn't push the page content around.
   const [error, setError] = useState('');
+  const [actionMessage, setActionMessage] = useState('');
   const [deletingId, setDeletingId] = useState(null);
   const [showForm, setShowForm] = useState(false);
   // Whether the voice intake modal (record → review → submit) is open.
@@ -194,12 +199,12 @@ const HelpSeekerDashboard = () => {
   // Delete a request, then drop it from the list without a full refetch.
   const handleDelete = async (request) => {
     setDeletingId(request.id);
-    setError('');
+    setActionMessage('');
     try {
       await api.delete(`/api/requests/${request.id}`);
       setRequests((prev) => prev.filter((r) => r.id !== request.id));
     } catch (err) {
-      setError(err.response?.data?.message || 'Could not delete that request.');
+      setActionMessage(err.response?.data?.message || 'Could not delete that request.');
     } finally {
       setDeletingId(null);
     }
@@ -483,6 +488,10 @@ const HelpSeekerDashboard = () => {
         </div>
       )}
       */}
+
+      {/* Temporary, corner-anchored feedback for actions (e.g. a failed delete).
+          Auto-dismisses; never shifts page content. */}
+      <Toast message={actionMessage} onDismiss={() => setActionMessage('')} />
     </PortalShell>
   );
 };

@@ -6,6 +6,7 @@ import DashboardView from '../components/organization/DashboardView';
 import RequestsView from '../components/organization/RequestsView';
 import ResourcesView from '../components/organization/ResourcesView';
 import TasksView from '../components/organization/TasksView';
+import Toast from '../components/Toast/Toast';
 import { getCurrentUser, logout, updateProfile } from '../utils/auth';
 import { usePolling } from '../hooks/usePolling';
 import {
@@ -96,7 +97,12 @@ const OrganizationDashboard = () => {
   // The org's volunteer tasks (help tasks volunteers can sign up for).
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(false);
+  // `error` is only for load failures — it renders inline in the view (with a
+  // Retry). Feedback from an action (a rejected status change, a failed
+  // allocation, etc.) goes to `actionMessage` instead, shown as a small
+  // temporary toast so it doesn't push the page content around.
   const [error, setError] = useState('');
+  const [actionMessage, setActionMessage] = useState('');
   const [updatingId, setUpdatingId] = useState(null);
 
   const handleLogout = () => {
@@ -155,7 +161,7 @@ const OrganizationDashboard = () => {
   // Optimistically move a request through its lifecycle, then reconcile.
   const handleStatusChange = async (request, status) => {
     setUpdatingId(request.id);
-    setError('');
+    setActionMessage('');
     try {
       const updated = await updateRequestStatus(request.id, status);
       const apply = (list) =>
@@ -163,7 +169,9 @@ const OrganizationDashboard = () => {
       setFeed(apply);
       setResponses(apply);
     } catch (err) {
-      setError(requestErrorMessage(err, t('org.errors.updateStatus')));
+      // e.g. the backend rejecting an in-progress/fulfilled move because the
+      // volunteers/resources/date conditions aren't met yet.
+      setActionMessage(requestErrorMessage(err, t('org.errors.updateStatus')));
     } finally {
       setUpdatingId(null);
     }
@@ -199,7 +207,7 @@ const OrganizationDashboard = () => {
       const updated = await setResourceAvailability(id, available);
       setResources((prev) => prev.map((r) => (r.id === id ? { ...r, ...updated } : r)));
     } catch (err) {
-      setError(requestErrorMessage(err, t('org.errors.updateResource')));
+      setActionMessage(requestErrorMessage(err, t('org.errors.updateResource')));
     }
   };
 
@@ -208,7 +216,7 @@ const OrganizationDashboard = () => {
       await deleteOrganizationResource(id);
       setResources((prev) => prev.filter((r) => r.id !== id));
     } catch (err) {
-      setError(requestErrorMessage(err, t('org.errors.removeResource')));
+      setActionMessage(requestErrorMessage(err, t('org.errors.removeResource')));
     }
   };
 
@@ -237,7 +245,7 @@ const OrganizationDashboard = () => {
   // "Your Requests" list and the allocation gating stay in sync.
   const handleToggleAssign = async (request, assign) => {
     setAssigningId(request.id);
-    setError('');
+    setActionMessage('');
     try {
       if (assign) {
         await assignRequest(request.id);
@@ -250,7 +258,7 @@ const OrganizationDashboard = () => {
         setResponses([]);
       }
     } catch (err) {
-      setError(requestErrorMessage(err, t('org.errors.updateAssignment')));
+      setActionMessage(requestErrorMessage(err, t('org.errors.updateAssignment')));
     } finally {
       setAssigningId(null);
     }
@@ -375,6 +383,10 @@ const OrganizationDashboard = () => {
       {!['dashboard', 'requests', 'resources', 'tasks'].includes(view) && (
         <ComingSoonPanel title={VIEW_TITLES[view]} />
       )}
+
+      {/* Temporary, corner-anchored feedback for actions (e.g. a status change
+          the backend rejected). Auto-dismisses; never shifts page content. */}
+      <Toast message={actionMessage} onDismiss={() => setActionMessage('')} />
     </PortalShell>
   );
 };
