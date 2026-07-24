@@ -88,6 +88,9 @@ const OrganizationDashboard = () => {
   // "Near me" geo-radius filter (issue #116): null = show everything, otherwise
   // { lat, lng, radiusMiles }. When set, the feed is re-fetched filtered to it.
   const [near, setNear] = useState(null);
+  // Keyword / category / urgency filters (issues #81, #82). Changing these
+  // re-fetches the feed, which the backend narrows via the shared contract.
+  const [filters, setFilters] = useState({ search: '', category: '', urgency: '' });
   // The org's inventory of resources (food, wood, health care kits, ...).
   const [resources, setResources] = useState([]);
   // The org's volunteer tasks (help tasks volunteers can sign up for).
@@ -111,8 +114,9 @@ const OrganizationDashboard = () => {
     if (!silent) setLoading(true);
     setError('');
     try {
-      // When "Near me" is on, ask the backend to geo-radius filter the feed.
-      const feedData = await getAllRequests(near);
+      // When "Near me" is on, ask the backend to geo-radius filter the feed;
+      // the keyword/category/urgency filters compose with it server-side.
+      const feedData = await getAllRequests(near, filters);
       setFeed(feedData);
       try {
         setResponses(await getOrganizationResponses());
@@ -134,7 +138,7 @@ const OrganizationDashboard = () => {
     } finally {
       if (!silent) setLoading(false);
     }
-  }, [near, t]);
+  }, [near, filters, t]);
 
   useEffect(() => {
     loadData();
@@ -144,8 +148,9 @@ const OrganizationDashboard = () => {
   // so background refreshes don't flash the spinner.
   usePolling(useCallback(() => loadData({ silent: true }), [loadData]));
 
-  // Re-fetch the feed whenever the "Near me" filter changes (on/off or radius).
-  // loadData closes over `near`, so it's a fresh callback each time `near` moves.
+  // Re-fetch the feed whenever the "Near me" or keyword/category/urgency filters
+  // change. loadData closes over `near` and `filters`, so it's a fresh callback
+  // each time either moves, and the useEffect above re-runs it.
 
   // Optimistically move a request through its lifecycle, then reconcile.
   const handleStatusChange = async (request, status) => {
@@ -335,6 +340,8 @@ const OrganizationDashboard = () => {
           assigningId={assigningId}
           near={near}
           onNearChange={setNear}
+          filters={filters}
+          onFiltersChange={setFilters}
         />
       )}
 
