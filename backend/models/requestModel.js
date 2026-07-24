@@ -114,6 +114,70 @@ export const updateRequestStatus = async (id, status) => {
   });
 };
 
+// Summarize whether a request has actually met the real-world conditions behind
+// its "in-progress" and "fulfilled" states, so the controller can stop a status
+// from being set falsely. The signals come from the org-managed work already
+// tied to the request:
+//   - volunteersAssigned: at least one linked volunteer task has confirmed the
+//     minimum number of volunteers it needs (VolunteerTask.volunteersConfirmed
+//     >= minVolunteers).
+//   - resourcesAllocated: resources have been earmarked to the request (>= 1
+//     ResourceAllocation) OR a linked task has confirmed its resources are ready.
+//   - volunteerDatePassed: the latest scheduled volunteer day across the linked
+//     tasks is set and now in the past — i.e. the work day has come and gone, so
+//     the request can legitimately be marked done.
+// Returns null when the request doesn't exist.
+export const getRequestReadiness = async (id) => {
+  const request = await prisma.request.findUnique({
+    where: { id },
+    include: {
+      volunteerTasks: {
+        select: {
+          minVolunteers: true,
+          volunteersConfirmed: true,
+          resourcesReady: true,
+          volunteerDate: true
+        }
+      },
+      allocations: { select: { id: true } }
+    }
+  });
+
+  if (!request) return null;
+
+  const tasks = request.volunteerTasks;
+
+  // "Required volunteers assigned" — a task has met its own minimum. minVolunteers
+  // is always >= 1 (schema default + validation), so an empty task never counts.
+  const volunteersAssigned = tasks.some(
+    (task) => task.volunteersConfirmed >= task.minVolunteers
+  );
+
+  // "Necessary resources allocated" — either units earmarked to the request, or
+  // an org that flagged a task's resources as ready.
+  const resourcesAllocated =
+    request.allocations.length > 0 ||
+    tasks.some((task) => task.resourcesReady === true);
+
+  // The latest scheduled volunteer day; a request with several tasks isn't done
+  // until the last one's day has passed. Null when no task has a date set.
+  const scheduledDates = tasks
+    .map((task) => task.volunteerDate)
+    .filter(Boolean)
+    .map((date) => new Date(date).getTime());
+  const latestVolunteerDate =
+    scheduledDates.length > 0 ? new Date(Math.max(...scheduledDates)) : null;
+  const volunteerDatePassed =
+    latestVolunteerDate !== null && latestVolunteerDate.getTime() <= Date.now();
+
+  return {
+    volunteersAssigned,
+    resourcesAllocated,
+    latestVolunteerDate,
+    volunteerDatePassed
+  };
+};
+
 // Update a request's category and/or description.
 // Used by organizations to categorize requests and add detail to them.
 // Only the fields provided in `fields` are changed; anything omitted is left as-is.
@@ -174,6 +238,7 @@ export default {
   getPrioritizedRequests,
   updateRequestPriority,
   updateRequestStatus,
+  getRequestReadiness,
   updateRequestDetails,
   deleteRequest,
   getRequestsByCategory,
