@@ -1,4 +1,4 @@
-import { anthropic } from './clients.js';
+import { askLLM } from './chatbot.js';
 
 /**
  * Resource Advisor
@@ -7,14 +7,11 @@ import { anthropic } from './clients.js';
  *
  * The suggestion always comes back as an array of:
  *   { resourceId, quantity, reason }
- * where resourceId is one the org actually has available. We ask Claude for a
- * recommendation, but fall back to a simple category-based heuristic if the AI
- * call fails or returns something we can't use — so the feature works even
- * without a live API key.
+ * where resourceId is one the org actually has available. We ask an LLM for a
+ * recommendation via askLLM (Anthropic locally, then OpenRouter -> Gemini ->
+ * OpenAI), but fall back to a simple category-based heuristic if the AI call
+ * fails or returns something we can't use — so the feature always works.
  */
-
-// Same Claude model/env convention the explainer uses.
-const ADVISOR_MODEL = process.env.CLAUDE_MODEL || 'claude-haiku-4-5-20251001';
 
 // Roughly how many units of a resource one person needs. Used both to seed the
 // heuristic fallback and to cap the AI's suggestion at something sensible.
@@ -50,7 +47,7 @@ export async function suggestAllocations(request, availableResources) {
   }
 
   try {
-    const suggestion = await askClaudeForAllocations(request, availableResources);
+    const suggestion = await askForAllocations(request, availableResources);
     const cleaned = sanitizeSuggestion(suggestion, request, availableResources);
     // If the model gave us nothing usable, fall back to the heuristic.
     return cleaned.length > 0
@@ -62,19 +59,18 @@ export async function suggestAllocations(request, availableResources) {
   }
 }
 
-// --- Claude call ---
+// --- LLM call ---
 
-async function askClaudeForAllocations(request, availableResources) {
-  const prompt = buildPrompt(request, availableResources);
-
-  const response = await anthropic.messages.create({
-    model: ADVISOR_MODEL,
-    max_tokens: 400,
-    messages: [{ role: 'user', content: prompt }],
+async function askForAllocations(request, availableResources) {
+  const reply = await askLLM(buildPrompt(request, availableResources), {
+    systemPrompt:
+      'You suggest resource allocations for a disaster-relief organization. ' +
+      'You reply with ONLY a JSON array and no other text, code fences, or commentary.',
+    // Reject replies that contain no JSON array at all (e.g. pure prose), so
+    // askLLM falls through to the next provider instead of settling for it.
+    validate: (r) => typeof r === 'string' && /\[[\s\S]*\]/.test(r),
   });
-
-  const text = response.content[0].text.trim();
-  return parseJsonArray(text);
+  return parseJsonArray(reply);
 }
 
 function buildPrompt(request, availableResources) {

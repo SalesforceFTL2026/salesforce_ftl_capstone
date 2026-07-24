@@ -1,4 +1,4 @@
-import { anthropic } from './clients.js';
+import { askLLM } from './chatbot.js';
 
 /**
  * Task Suggestion Advisor
@@ -7,13 +7,12 @@ import { anthropic } from './clients.js';
  * draft: title, description, category, urgency, skills, and a min/max number of
  * volunteers.
  *
- * As with the other AI advisors, we ask Claude but always fall back to a simple
+ * As with the other AI advisors, we ask an LLM via askLLM (Anthropic locally,
+ * then OpenRouter -> Gemini -> OpenAI) but always fall back to a simple
  * deterministic rule so the feature works even without a live API key. Every
  * suggestion is sanitized to the shape and vocabulary the task form expects
  * before it is returned.
  */
-
-const ADVISOR_MODEL = process.env.CLAUDE_MODEL || 'claude-haiku-4-5-20251001';
 
 // How many task drafts we aim to return.
 const NUM_SUGGESTIONS = 3;
@@ -34,7 +33,7 @@ const URGENCIES = ['Low', 'Medium', 'High', 'Critical'];
  */
 export async function suggestTasksForRequest(request) {
   try {
-    const raw = await askClaudeForTasks(request);
+    const raw = await askForTasks(request);
     const cleaned = sanitizeSuggestions(raw, request);
     return cleaned.length > 0 ? cleaned : heuristicTasks(request);
   } catch (error) {
@@ -43,19 +42,17 @@ export async function suggestTasksForRequest(request) {
   }
 }
 
-// --- Claude call ---
+// --- LLM call ---
 
-async function askClaudeForTasks(request) {
-  const prompt = buildPrompt(request);
-
-  const response = await anthropic.messages.create({
-    model: ADVISOR_MODEL,
-    max_tokens: 700,
-    messages: [{ role: 'user', content: prompt }],
+async function askForTasks(request) {
+  const reply = await askLLM(buildPrompt(request), {
+    systemPrompt:
+      'You break a disaster-relief help request into concrete volunteer tasks. ' +
+      'You reply with ONLY a JSON array and no other text, code fences, or commentary.',
+    // Fall through to the next provider if the reply contains no JSON array.
+    validate: (r) => typeof r === 'string' && /\[[\s\S]*\]/.test(r),
   });
-
-  const text = response.content[0].text.trim();
-  return parseJsonArray(text);
+  return parseJsonArray(reply);
 }
 
 function buildPrompt(request) {

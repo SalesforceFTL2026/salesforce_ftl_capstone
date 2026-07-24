@@ -98,6 +98,36 @@ describe('life-safety detection', () => {
   });
 });
 
+describe('life-safety override (LLM classifier verdict)', () => {
+  // A description with no matching KEYWORD, so keyword detection alone says false.
+  const paraphrase = { category: 'Other', urgency: 'Low', description: "he's turning blue and won't respond", createdAt: hoursAgo(0.5) };
+
+  it('floors severity when the override is true even without a keyword match', () => {
+    const withoutOverride = calculatePriorityScore(paraphrase, []);
+    const withOverride = calculatePriorityScore(paraphrase, [], true);
+    expect(withOverride).toBeGreaterThan(withoutOverride);
+  });
+
+  it('lets a false override suppress a keyword the caller has judged non-critical', () => {
+    // "in labor" is a keyword, but say the classifier decided it was a false match.
+    const req = { category: 'Medical', urgency: 'Low', description: 'volunteered as a doula, helping someone in labor', createdAt: hoursAgo(0.5) };
+    const keywordFloored = calculatePriorityScore(req, []); // keyword path -> floored
+    const overridden = calculatePriorityScore(req, [], false); // classifier -> not life-safety
+    expect(overridden).toBeLessThan(keywordFloored);
+  });
+
+  it('ignores a non-boolean override and falls back to keyword detection', () => {
+    const req = { category: 'Medical', urgency: 'Low', description: 'needs an epipen', createdAt: hoursAgo(0.5) };
+    // undefined override => keyword scan still flags the epipen.
+    expect(calculatePriorityScore(req, [], undefined)).toBe(calculatePriorityScore(req, []));
+  });
+
+  it('reports the override verdict in getScoreBreakdown.lifeSafety', () => {
+    expect(getScoreBreakdown(paraphrase, [], true).lifeSafety).toBe(true);
+    expect(getScoreBreakdown(paraphrase, [], false).lifeSafety).toBe(false);
+  });
+});
+
 describe('getScoreBreakdown', () => {
   it('returns rounded components that sum to the total (when uncapped)', () => {
     const b = getScoreBreakdown({ category: 'Food', urgency: 'High', createdAt: hoursAgo(3) }, [{}, {}]);

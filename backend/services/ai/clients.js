@@ -21,11 +21,18 @@ export const openai = new OpenAI({
 });
 
 /**
- * Initialize Anthropic client for Claude API
+ * Initialize Anthropic client for Claude API.
+ *
+ * LOCAL TESTING ONLY: Anthropic is never used in production. It is enabled only
+ * outside production AND when a key is present, so it can serve as the preferred
+ * provider during local development/testing. In production this is null and the
+ * AI text chain (askLLM) falls back to OpenRouter -> Gemini -> OpenAI. Keeping
+ * the gate here makes `anthropic` a single source of truth callers can null-check.
  */
-export const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+export const anthropic =
+  process.env.NODE_ENV !== 'production' && process.env.ANTHROPIC_API_KEY
+    ? new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+    : null;
 
 /**
  * Initialize Cohere client for embeddings (free tier available)

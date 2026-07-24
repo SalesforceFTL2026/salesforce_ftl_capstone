@@ -19,6 +19,12 @@
  * The math is deterministic for a fixed input and clock. The only run-to-run
  * variation comes from the cluster count, which depends on vector search — that
  * is now reproducible because embeddings use a single provider (Cohere).
+ *
+ * Life-safety is the one signal that can come from AI: the prioritizer may run
+ * an LLM classifier (lifeSafetyClassifier.js) that understands paraphrases the
+ * keyword list misses, and pass its boolean verdict in as `lifeSafetyOverride`.
+ * When omitted, scoring falls back to the deterministic keyword scan, so the
+ * score stays pure math and fully reproducible on its own.
  */
 
 // Weight (0-1) of self-reported urgency. Self-reported, so people inflate it;
@@ -94,16 +100,24 @@ export function hasLifeSafetySignal(request) {
  *
  * @param {Object} request - The help request
  * @param {Array} similarRequests - Similar requests from vector search
+ * @param {boolean} [lifeSafetyOverride] - Verdict from the LLM classifier. When
+ *   provided it wins over the keyword scan; when omitted we fall back to keywords
+ *   so scoring stays deterministic on its own.
  * @returns {{severity:number, cluster:number, recency:number, lifeSafety:boolean, hoursOld:number}}
  */
-function computeComponents(request, similarRequests = []) {
+function computeComponents(request, similarRequests = [], lifeSafetyOverride) {
   // Severity: blend self-reported urgency with objective category criticality,
   // then floor for detected life-safety needs.
   const urgencyNorm = URGENCY_WEIGHT[request.urgency] ?? URGENCY_WEIGHT.Low;
   const categoryNorm = CATEGORY_CRITICALITY[request.category] ?? CATEGORY_CRITICALITY.Other;
   let severityNorm = URGENCY_SHARE * urgencyNorm + CATEGORY_SHARE * categoryNorm;
 
-  const lifeSafety = hasLifeSafetySignal(request);
+  // Prefer the classifier's verdict when the caller supplies one; otherwise use
+  // the deterministic keyword scan.
+  const lifeSafety =
+    typeof lifeSafetyOverride === 'boolean'
+      ? lifeSafetyOverride
+      : hasLifeSafetySignal(request);
   if (lifeSafety) {
     severityNorm = Math.max(severityNorm, LIFE_SAFETY_FLOOR);
   }
@@ -129,10 +143,12 @@ function computeComponents(request, similarRequests = []) {
  * @param {string} [request.description] - Free text; scanned for life-safety signals
  * @param {Date} request.createdAt - When request was created
  * @param {Array} similarRequests - Array of similar requests with similarity scores
+ * @param {boolean} [lifeSafetyOverride] - Optional LLM classifier verdict; falls
+ *   back to keyword detection when omitted.
  * @returns {number} - Priority score (0-100)
  */
-export function calculatePriorityScore(request, similarRequests = []) {
-  const { severity, cluster, recency } = computeComponents(request, similarRequests);
+export function calculatePriorityScore(request, similarRequests = [], lifeSafetyOverride) {
+  const { severity, cluster, recency } = computeComponents(request, similarRequests, lifeSafetyOverride);
   const total = severity + cluster + recency;
   return Math.min(Math.round(total), 100);
 }
@@ -143,10 +159,12 @@ export function calculatePriorityScore(request, similarRequests = []) {
  *
  * @param {Object} request - The help request
  * @param {Array} similarRequests - Similar requests
+ * @param {boolean} [lifeSafetyOverride] - Optional LLM classifier verdict; falls
+ *   back to keyword detection when omitted.
  * @returns {Object} - Score breakdown
  */
-export function getScoreBreakdown(request, similarRequests = []) {
-  const { severity, cluster, recency, lifeSafety } = computeComponents(request, similarRequests);
+export function getScoreBreakdown(request, similarRequests = [], lifeSafetyOverride) {
+  const { severity, cluster, recency, lifeSafety } = computeComponents(request, similarRequests, lifeSafetyOverride);
 
   const severityScore = Math.round(severity);
   const clusterScore = Math.round(cluster);
