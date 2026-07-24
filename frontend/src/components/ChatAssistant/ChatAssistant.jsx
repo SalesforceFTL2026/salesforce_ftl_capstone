@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import api from '../../utils/api';
 import MappieMascot from './MappieMascot';
+import { useModalDismiss } from '../../hooks/useModalDismiss';
 
 // AI chat assistant for the help-seeker dashboard. Opening it reveals a chat
 // panel anchored to the bottom-right. Messages are sent to POST /api/chat,
@@ -37,6 +38,9 @@ const ChatAssistant = ({ firstName = 'there', open: openProp, onOpenChange, hide
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Let Escape close the chat panel when it's open.
+  useModalDismiss(open, () => setOpen(false));
 
   // Keep the message list scrolled to the newest message.
   const scrollRef = useRef(null);

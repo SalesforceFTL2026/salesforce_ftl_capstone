@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { signup, authErrorMessage } from '../../utils/auth';
 import { DISASTER_SKILLS } from '../../utils/skills';
+import { useModalDismiss } from '../../hooks/useModalDismiss';
 
 // New-user registration form. Opened when someone picks a role on the landing
 // page (help-seeker / volunteer / organization). The role is passed in, so it
@@ -26,6 +27,10 @@ const RoleSelectionModal = ({ role, embedded = false, onClose, onSubmit }) => {
   const [skillsOpen, setSkillsOpen] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Standalone popup only: allow Escape to close. (Embedded in AuthModal, the
+  // wrapper owns dismissal.)
+  useModalDismiss(!embedded, onClose);
 
   const isVolunteer = role === 'volunteer';
 
@@ -261,7 +266,7 @@ const RoleSelectionModal = ({ role, embedded = false, onClose, onSubmit }) => {
       {/* Stop clicks inside the modal from bubbling up to the backdrop's close. */}
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-white rounded-2xl p-10 max-w-lg w-full shadow-2xl max-h-full overflow-y-auto"
+        className="bg-white rounded-2xl p-10 max-w-lg w-full shadow-2xl max-h-[90vh] overflow-y-auto"
       >
         <div className="flex justify-between items-start mb-8">
           <h2 className="text-3xl font-bold text-black">

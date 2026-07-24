@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useModalDismiss } from '../../hooks/useModalDismiss';
 
 // A full-details modal for a single help request, opened when a volunteer taps a
 // row in the List view. It renders as a centered overlay that fits the screen —
@@ -23,14 +23,7 @@ const RequestDetailsModal = ({ request, onClose }) => {
   const { t } = useTranslation();
 
   // Close on Escape while the modal is open.
-  useEffect(() => {
-    if (!request) return undefined;
-    const onKey = (e) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, [request, onClose]);
+  useModalDismiss(Boolean(request), onClose);
 
   if (!request) return null;
 

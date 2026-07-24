@@ -12,6 +12,7 @@ import api from '../utils/api';
 import { getCurrentUser, logout, updateName, updateLanguage } from '../utils/auth';
 import { SUPPORTED_LANGUAGES } from '../i18n';
 import { usePolling } from '../hooks/usePolling';
+import { useModalDismiss } from '../hooks/useModalDismiss';
 
 // Views that are actually built. Anything else shows the "coming soon" panel.
 const BUILT_VIEWS = new Set(['dashboard', 'requests', 'household', 'documents', 'settings']);
@@ -171,16 +172,10 @@ const HelpSeekerDashboard = () => {
     loadRequests();
   }, [loadRequests]);
 
-  // Let Escape close the New Request / Edit modal while it's open, so backing
-  // out of the form is as easy as opening it.
-  useEffect(() => {
-    if (!showForm && !editingRequest) return undefined;
-    const onKeyDown = (e) => {
-      if (e.key === 'Escape') closeRequestModal();
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [showForm, editingRequest]);
+  // Let Escape close each modal while it's open, so backing out of a form is as
+  // easy as opening it.
+  useModalDismiss(showForm || Boolean(editingRequest), closeRequestModal);
+  useModalDismiss(showVoice, () => setShowVoice(false));
 
   // Auto-refresh so newly submitted requests (including voice ones) appear
   // without a manual reload (#157). Silent so it doesn't flash the spinner.
@@ -411,7 +406,7 @@ const HelpSeekerDashboard = () => {
           onClick={closeRequestModal}
         >
           <div
-            className="w-full max-w-lg relative"
+            className="w-full max-w-lg relative max-h-[90vh]"
             onClick={(e) => e.stopPropagation()}
           >
             <button
@@ -422,27 +417,38 @@ const HelpSeekerDashboard = () => {
             >
               ×
             </button>
-            <HelpRequestForm
-              compact
-              request={editingRequest}
-              onClose={closeRequestModal}
-              onCreated={() => {
-                loadRequests();
-                setShowForm(false);
-              }}
-              onSaved={() => {
-                loadRequests();
-                setEditingRequest(null);
-              }}
-            />
+            {/* Inner scroll container so a tall form scrolls within the viewport
+                while the floating close button stays pinned and visible. */}
+            <div className="max-h-[90vh] overflow-y-auto rounded-2xl">
+              <HelpRequestForm
+                compact
+                request={editingRequest}
+                onClose={closeRequestModal}
+                onCreated={() => {
+                  loadRequests();
+                  setShowForm(false);
+                }}
+                onSaved={() => {
+                  loadRequests();
+                  setEditingRequest(null);
+                }}
+              />
+            </div>
           </div>
         </div>
       )}
 
-      {/* Voice intake modal: record → review → submit */}
+      {/* Voice intake modal: record → review → submit. Clicking the backdrop
+          closes it; clicking inside the flow does not. */}
       {showVoice && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="w-full max-w-lg relative">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+          onClick={() => setShowVoice(false)}
+        >
+          <div
+            className="w-full max-w-lg relative max-h-[90vh]"
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
               type="button"
               onClick={() => setShowVoice(false)}
@@ -451,13 +457,17 @@ const HelpSeekerDashboard = () => {
             >
               ×
             </button>
-            <VoiceIntakeFlow
-              onSubmitted={() => {
-                loadRequests();
-                setShowVoice(false);
-              }}
-              onCancel={() => setShowVoice(false)}
-            />
+            {/* Inner scroll container so tall content scrolls within the
+                viewport while the floating close button stays pinned. */}
+            <div className="max-h-[90vh] overflow-y-auto rounded-2xl">
+              <VoiceIntakeFlow
+                onSubmitted={() => {
+                  loadRequests();
+                  setShowVoice(false);
+                }}
+                onCancel={() => setShowVoice(false)}
+              />
+            </div>
           </div>
         </div>
       )}
