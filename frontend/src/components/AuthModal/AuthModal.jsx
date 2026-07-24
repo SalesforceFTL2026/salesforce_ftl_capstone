@@ -1,21 +1,26 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import RoleSelectionModal from '../RoleSelectionModal/RoleSelectionModal';
 import SignInModal from '../SignInModal/SignInModal';
+import { useModalDismiss } from '../../hooks/useModalDismiss';
 
 // Wraps signup + login in one popup with tabs. The role (from the landing
 // page card) labels the title and is passed to signup. Login ignores role —
 // the account's stored role decides where the user lands.
-const roleLabels = {
-  'help-seeker': 'Help Seeker',
-  'volunteer': 'Volunteer',
-  'organization': 'Organization',
+const roleLabelKeys = {
+  'help-seeker': 'auth.roles.helpSeeker',
+  'volunteer': 'auth.roles.volunteer',
+  'organization': 'auth.roles.organization',
 };
 
 const AuthModal = ({ role, initialMode = 'signup', onClose, onAuthenticated }) => {
+  const { t } = useTranslation();
   const [mode, setMode] = useState(initialMode);
+  useModalDismiss(true, onClose);
 
-  const roleName = role ? roleLabels[role] : '';
-  const title = `${roleName} ${mode === 'signup' ? 'Sign Up' : 'Login'}`.trim();
+  const roleName = role ? t(roleLabelKeys[role]) : '';
+  const action = mode === 'signup' ? t('auth.titleAction.signUp') : t('auth.titleAction.login');
+  const title = t('auth.modalTitle', { role: roleName, action }).trim();
 
   const tabClass = (active) =>
     `flex-1 py-2 text-sm font-bold uppercase tracking-wide rounded-lg transition-colors ${
@@ -25,15 +30,22 @@ const AuthModal = ({ role, initialMode = 'signup', onClose, onAuthenticated }) =
     }`;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="bg-white dark:bg-[#273A20] rounded-2xl p-8 max-w-lg w-full mx-4 shadow-2xl">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 sm:p-6"
+    >
+      {/* Stop clicks inside the modal from bubbling up to the backdrop's close. */}
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="bg-white dark:bg-[#273A20] rounded-2xl p-8 max-w-lg w-full shadow-2xl max-h-[90vh] overflow-y-auto"
+      >
         {/* Title + close */}
         <div className="flex justify-between items-start mb-6">
           <h2 className="text-2xl font-bold text-black dark:text-white">{title}</h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 text-3xl leading-none -mt-2"
-            aria-label="Close"
+            aria-label={t('auth.close')}
           >
             ×
           </button>
@@ -42,10 +54,10 @@ const AuthModal = ({ role, initialMode = 'signup', onClose, onAuthenticated }) =
         {/* Tabs */}
         <div className="flex gap-2 mb-6 bg-gray-100 dark:bg-[#1a2f1a] p-1 rounded-xl">
           <button className={tabClass(mode === 'signup')} onClick={() => setMode('signup')}>
-            Sign Up
+            {t('auth.tabs.signUp')}
           </button>
           <button className={tabClass(mode === 'login')} onClick={() => setMode('login')}>
-            Log In
+            {t('auth.tabs.logIn')}
           </button>
         </div>
 

@@ -1,74 +1,97 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import PortalShell from '../components/portal/PortalShell';
 import DashboardView from '../components/organization/DashboardView';
 import RequestsView from '../components/organization/RequestsView';
 import ResourcesView from '../components/organization/ResourcesView';
-import { getCurrentUser, logout } from '../utils/auth';
+import TasksView from '../components/organization/TasksView';
+import { getCurrentUser, logout, updateProfile } from '../utils/auth';
+import { usePolling } from '../hooks/usePolling';
 import {
-  getPrioritizedRequests,
+  getAllRequests,
   getOrganizationResponses,
   getOrganizationResources,
   addOrganizationResource,
   setResourceAvailability,
   deleteOrganizationResource,
   updateRequestStatus,
+  assignRequest,
+  unassignRequest,
+  getVolunteerTasks,
+  createVolunteerTask,
+  updateVolunteerTask,
+  deleteVolunteerTask,
+  getTaskDateSuggestions,
+  getTaskSuggestions,
   requestErrorMessage,
 } from '../utils/requests';
 
 // Organization portal, built from the product wireframes. Shares the sidebar +
 // top bar chrome with the help-seeker portal (PortalShell). "Dashboard" and
 // "Requests" are fully built; other nav items land on a friendly placeholder.
-const NAV_GROUPS = [
-  {
-    heading: 'General',
-    items: [
-      { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
-      { id: 'requests', label: 'Requests', icon: 'requests' },
-      { id: 'metrics', label: 'Metrics', icon: 'metrics' },
-      { id: 'resources', label: 'Resources', icon: 'resources' },
-      { id: 'volunteers', label: 'Volunteers', icon: 'volunteers' },
-    ],
-  },
-  {
-    heading: 'Tools',
-    items: [
-      { id: 'chat', label: 'Chat', icon: 'chat' },
-      { id: 'documents', label: 'Documents', icon: 'documents' },
-      { id: 'settings', label: 'Settings', icon: 'settings' },
-    ],
-  },
-];
-
-const VIEW_TITLES = {
-  dashboard: 'Dashboard',
-  requests: 'Requests',
-  metrics: 'Metrics',
-  resources: 'Resources',
-  volunteers: 'Volunteers',
-  chat: 'Chat',
-  documents: 'Documents',
-  settings: 'Settings',
-};
-
-// A request is "open" (unclaimed) while pending/in-progress with no org yet.
-const OPEN_STATUSES = ['pending', 'in-progress'];
 
 // Assumed people per household, used only as a fallback for completed requests
 // that don't have a real householdSize recorded.
 const AVG_HOUSEHOLD_SIZE = 3;
 
 const OrganizationDashboard = () => {
-  const [currentUser] = useState(getCurrentUser);
+  // t() looks up UI text in the active language; changing the language
+  // re-renders this component with the translated strings.
+  const { t } = useTranslation();
+  // Kept in state (not a constant) so profile edits like location re-render.
+  const [currentUser, setCurrentUser] = useState(getCurrentUser);
   const navigate = useNavigate();
+
+  // Sidebar nav, built from translations so the labels switch with the
+  // language. Rebuilt each render — cheap, and keeps it always in sync.
+  const NAV_GROUPS = [
+    {
+      heading: t('nav.general'),
+      items: [
+        { id: 'dashboard', label: t('nav.dashboard'), icon: 'dashboard' },
+        { id: 'requests', label: t('nav.requests'), icon: 'requests' },
+        { id: 'tasks', label: t('org.nav.tasks'), icon: 'tasks' },
+        { id: 'metrics', label: t('org.nav.metrics'), icon: 'metrics' },
+        { id: 'resources', label: t('org.nav.resources'), icon: 'resources' },
+        { id: 'volunteers', label: t('org.nav.volunteers'), icon: 'volunteers' },
+      ],
+    },
+    {
+      heading: t('nav.tools'),
+      items: [
+        { id: 'chat', label: t('org.nav.chat'), icon: 'chat' },
+        { id: 'documents', label: t('org.nav.documents'), icon: 'documents' },
+        { id: 'settings', label: t('nav.settings'), icon: 'settings' },
+      ],
+    },
+  ];
+
+  const VIEW_TITLES = {
+    dashboard: t('nav.dashboard'),
+    requests: t('nav.requests'),
+    tasks: t('org.nav.tasks'),
+    metrics: t('org.nav.metrics'),
+    resources: t('org.nav.resources'),
+    volunteers: t('org.nav.volunteers'),
+    chat: t('org.nav.chat'),
+    documents: t('org.nav.documents'),
+    settings: t('nav.settings'),
+  };
 
   const [view, setView] = useState('dashboard');
 
-  // Priority feed (all active requests) and this org's tracked responses.
+  // Every request in the system (any status) and this org's assigned responses.
   const [feed, setFeed] = useState([]);
   const [responses, setResponses] = useState([]);
+  const [assigningId, setAssigningId] = useState(null);
+  // "Near me" geo-radius filter (issue #116): null = show everything, otherwise
+  // { lat, lng, radiusMiles }. When set, the feed is re-fetched filtered to it.
+  const [near, setNear] = useState(null);
   // The org's inventory of resources (food, wood, health care kits, ...).
   const [resources, setResources] = useState([]);
+  // The org's volunteer tasks (help tasks volunteers can sign up for).
+  const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [updatingId, setUpdatingId] = useState(null);
@@ -81,11 +104,15 @@ const OrganizationDashboard = () => {
   // Load both lists. The responses call needs auth and may 404 if the org has
   // none yet — we treat a failure there as "no responses" rather than a hard
   // error, so the dashboard still renders from the priority feed.
-  const loadData = useCallback(async () => {
-    setLoading(true);
+  //
+  // Pass { silent: true } for background polling refreshes so the feed updates
+  // in place without flashing the loading spinner.
+  const loadData = useCallback(async ({ silent = false } = {}) => {
+    if (!silent) setLoading(true);
     setError('');
     try {
-      const feedData = await getPrioritizedRequests();
+      // When "Near me" is on, ask the backend to geo-radius filter the feed.
+      const feedData = await getAllRequests(near);
       setFeed(feedData);
       try {
         setResponses(await getOrganizationResponses());
@@ -97,16 +124,28 @@ const OrganizationDashboard = () => {
       } catch {
         setResources([]);
       }
+      try {
+        setTasks(await getVolunteerTasks());
+      } catch {
+        setTasks([]);
+      }
     } catch (err) {
-      setError(requestErrorMessage(err, 'Something went wrong loading requests.'));
+      setError(requestErrorMessage(err, t('org.errors.loadRequests')));
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
-  }, []);
+  }, [near, t]);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  // Auto-refresh the priority feed so new requests appear live (#157). Silent
+  // so background refreshes don't flash the spinner.
+  usePolling(useCallback(() => loadData({ silent: true }), [loadData]));
+
+  // Re-fetch the feed whenever the "Near me" filter changes (on/off or radius).
+  // loadData closes over `near`, so it's a fresh callback each time `near` moves.
 
   // Optimistically move a request through its lifecycle, then reconcile.
   const handleStatusChange = async (request, status) => {
@@ -119,11 +158,28 @@ const OrganizationDashboard = () => {
       setFeed(apply);
       setResponses(apply);
     } catch (err) {
-      setError(requestErrorMessage(err, 'Could not update the request status.'));
+      setError(requestErrorMessage(err, t('org.errors.updateStatus')));
     } finally {
       setUpdatingId(null);
     }
   };
+
+  // Save the org's location (the origin "nearest" measures from) and reflect it
+  // in the session so the change sticks across the app and a page refresh.
+  const handleOrgLocationChange = useCallback(async (location) => {
+    const updated = await updateProfile({ location });
+    setCurrentUser(updated);
+  }, []);
+
+  // Reload just the resource inventory (used after allocations change on-hand
+  // quantities, so the list and the "Resources Available" pill stay accurate).
+  const refreshResources = useCallback(async () => {
+    try {
+      setResources(await getOrganizationResources());
+    } catch {
+      // A failed refresh shouldn't blow away what's already on screen.
+    }
+  }, []);
 
   // --- Resource inventory handlers ---
   // Each optimistically updates the local list after the API call succeeds.
@@ -138,7 +194,7 @@ const OrganizationDashboard = () => {
       const updated = await setResourceAvailability(id, available);
       setResources((prev) => prev.map((r) => (r.id === id ? { ...r, ...updated } : r)));
     } catch (err) {
-      setError(requestErrorMessage(err, 'Could not update the resource.'));
+      setError(requestErrorMessage(err, t('org.errors.updateResource')));
     }
   };
 
@@ -147,20 +203,63 @@ const OrganizationDashboard = () => {
       await deleteOrganizationResource(id);
       setResources((prev) => prev.filter((r) => r.id !== id));
     } catch (err) {
-      setError(requestErrorMessage(err, 'Could not remove the resource.'));
+      setError(requestErrorMessage(err, t('org.errors.removeResource')));
     }
   };
 
-  // Requests the org is responding to vs. still-open ("unfiltered") ones.
+  // --- Volunteer task handlers ---
+  // Each optimistically updates the local list after the API call succeeds.
+  const handleCreateTask = async (task) => {
+    const created = await createVolunteerTask(task);
+    setTasks((prev) => [created, ...prev]);
+    return created;
+  };
+
+  const handleUpdateTask = async (id, updates) => {
+    const updated = await updateVolunteerTask(id, updates);
+    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, ...updated } : t)));
+    return updated;
+  };
+
+  const handleDeleteTask = async (id) => {
+    await deleteVolunteerTask(id);
+    setTasks((prev) => prev.filter((t) => t.id !== id));
+  };
+
+  // Assign a request to this org (or remove that assignment). Assigning is what
+  // lets the org allocate resources to the request; multiple orgs can assign
+  // themselves to the same request. We reload responses afterward so the
+  // "Your Requests" list and the allocation gating stay in sync.
+  const handleToggleAssign = async (request, assign) => {
+    setAssigningId(request.id);
+    setError('');
+    try {
+      if (assign) {
+        await assignRequest(request.id);
+      } else {
+        await unassignRequest(request.id);
+      }
+      try {
+        setResponses(await getOrganizationResponses());
+      } catch {
+        setResponses([]);
+      }
+    } catch (err) {
+      setError(requestErrorMessage(err, t('org.errors.updateAssignment')));
+    } finally {
+      setAssigningId(null);
+    }
+  };
+
+  // Requests this org has assigned to itself vs. everything else it can browse
+  // (any status — pending or fulfilled). Orgs can view all requests, but only
+  // allocate resources to the ones they've assigned to themselves.
   const respondingIds = useMemo(
     () => new Set(responses.map((r) => r.id)),
     [responses]
   );
   const unfiltered = useMemo(
-    () =>
-      feed.filter(
-        (r) => !respondingIds.has(r.id) && OPEN_STATUSES.includes(r.status)
-      ),
+    () => feed.filter((r) => !respondingIds.has(r.id)),
     [feed, respondingIds]
   );
 
@@ -192,17 +291,17 @@ const OrganizationDashboard = () => {
     };
   }, [responses, resources]);
 
-  const tasks = useMemo(() => {
+  const dashboardTasks = useMemo(() => {
     // Surface the top open requests as upcoming "tasks" with dated chips.
     return unfiltered.slice(0, 2).map((r) => {
       const d = r.createdAt ? new Date(r.createdAt) : null;
       return {
         date: d ? d.getDate() : '—',
         month: d ? d.toLocaleString(undefined, { month: 'short' }) : '',
-        title: r.category || r.description?.slice(0, 40) || 'Request',
+        title: r.category || r.description?.slice(0, 40) || t('org.dashboard.taskFallback'),
       };
     });
-  }, [unfiltered]);
+  }, [unfiltered, t]);
 
   return (
     <PortalShell
@@ -215,7 +314,7 @@ const OrganizationDashboard = () => {
       onSignOut={handleLogout}
     >
       {view === 'dashboard' && (
-        <DashboardView currentUser={currentUser} stats={dashboardStats} tasks={tasks} />
+        <DashboardView currentUser={currentUser} stats={dashboardStats} tasks={dashboardTasks} />
       )}
 
       {view === 'requests' && (
@@ -227,6 +326,15 @@ const OrganizationDashboard = () => {
           onRetry={loadData}
           onStatusChange={handleStatusChange}
           updatingId={updatingId}
+          orgLocation={currentUser?.location}
+          onOrgLocationChange={handleOrgLocationChange}
+          resources={resources}
+          onAllocationsChanged={refreshResources}
+          assignedIds={respondingIds}
+          onToggleAssign={handleToggleAssign}
+          assigningId={assigningId}
+          near={near}
+          onNearChange={setNear}
         />
       )}
 
@@ -242,7 +350,22 @@ const OrganizationDashboard = () => {
         />
       )}
 
-      {!['dashboard', 'requests', 'resources'].includes(view) && (
+      {view === 'tasks' && (
+        <TasksView
+          tasks={tasks}
+          requests={responses}
+          loading={loading}
+          error={error}
+          onRetry={loadData}
+          onCreate={handleCreateTask}
+          onUpdate={handleUpdateTask}
+          onDelete={handleDeleteTask}
+          onSuggestDates={getTaskDateSuggestions}
+          onSuggestTasks={getTaskSuggestions}
+        />
+      )}
+
+      {!['dashboard', 'requests', 'resources', 'tasks'].includes(view) && (
         <ComingSoonPanel title={VIEW_TITLES[view]} />
       )}
     </PortalShell>
@@ -250,11 +373,14 @@ const OrganizationDashboard = () => {
 };
 
 // Placeholder for nav items not yet built (Metrics, Resources, etc.).
-const ComingSoonPanel = ({ title }) => (
-  <div className="bg-white dark:bg-[#16233a] rounded-3xl p-12 text-center shadow-md">
-    <h2 className="text-2xl font-bold text-[#1C2A16] dark:text-white mb-2">{title}</h2>
-    <p className="text-gray-500 dark:text-gray-400">This section is coming soon.</p>
-  </div>
-);
+const ComingSoonPanel = ({ title }) => {
+  const { t } = useTranslation();
+  return (
+    <div className="bg-white dark:bg-[#16233a] rounded-3xl p-12 text-center shadow-md">
+      <h2 className="text-2xl font-bold text-[#1C2A16] dark:text-white mb-2">{title}</h2>
+      <p className="text-gray-500 dark:text-gray-400">{t('common.comingSoon')}</p>
+    </div>
+  );
+};
 
 export default OrganizationDashboard;

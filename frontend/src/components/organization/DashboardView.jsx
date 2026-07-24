@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import HeatMap from './HeatMap';
 
 // Dashboard landing view for an organization. Left: greeting, a metrics chart
@@ -9,6 +10,7 @@ import HeatMap from './HeatMap';
 // @param {object} stats - { completedPct, peopleHelped, resourcesAvailable }
 // @param {{date: string, month: string, title: string}[]} tasks - upcoming tasks
 const DashboardView = ({ currentUser, stats, tasks }) => {
+  const { t } = useTranslation();
   const orgName = currentUser?.name || 'org';
 
   return (
@@ -16,48 +18,48 @@ const DashboardView = ({ currentUser, stats, tasks }) => {
       {/* Left column */}
       <div className="bg-[#dce8f7] dark:bg-[#16233a] rounded-3xl p-6 sm:p-8 transition-colors duration-300">
         <h2 className="text-2xl sm:text-3xl font-bold text-[#1C2A16] dark:text-white mb-6">
-          Hello, {orgName}!
+          {t('org.dashboard.greeting', { name: orgName })}
         </h2>
 
         <div className="flex flex-col md:flex-row gap-6">
           {/* Metrics card */}
           <div className="bg-[#9db29a] dark:bg-[#1f3320] rounded-2xl p-5 flex-1 transition-colors duration-300">
             <h3 className="text-lg font-bold text-[#1C2A16] dark:text-white mb-3 text-center">
-              METRICS
+              {t('org.dashboard.metrics')}
             </h3>
             <div className="bg-white rounded-xl p-3">
-              <MetricsChart />
+              <MetricsChart t={t} />
             </div>
             <button
               type="button"
               className="mt-4 w-full flex items-center justify-center gap-3 rounded-full bg-[#7c8ba0] dark:bg-[#2b3b55] text-white font-semibold py-2.5 border-2 border-dashed border-[#1a2332] dark:border-[#6ba3d3] hover:opacity-90 transition-opacity"
             >
-              Analyze
+              {t('org.dashboard.analyze')}
               <span className="w-7 h-7 rounded-full bg-[#7f9976] flex items-center justify-center">→</span>
             </button>
           </div>
 
           {/* Stat pills */}
           <div className="flex flex-row md:flex-col gap-4 justify-center">
-            <StatPill value={stats.completedPct} label="Requests Completed" tone="sage" />
-            <StatPill value={stats.peopleHelped} label="People Helped" tone="navy" />
-            <StatPill value={stats.resourcesAvailable} label="Resources Available" tone="forest" />
+            <StatPill value={stats.completedPct} label={t('org.dashboard.requestsCompleted')} tone="sage" />
+            <StatPill value={stats.peopleHelped} label={t('org.dashboard.peopleHelped')} tone="navy" />
+            <StatPill value={stats.resourcesAvailable} label={t('org.dashboard.resourcesAvailable')} tone="forest" />
           </div>
         </div>
       </div>
 
       {/* Right column: heat map + tasks */}
       <div className="bg-[#5b8bb0] dark:bg-[#16233a] rounded-3xl p-6 transition-colors duration-300">
-        <h2 className="text-2xl font-bold text-white text-center mb-4">Request Heat Map</h2>
+        <h2 className="text-2xl font-bold text-white text-center mb-4">{t('org.dashboard.heatMapTitle')}</h2>
         <HeatMap />
         <p className="text-white font-semibold text-center mt-4 mb-4">
-          Where are we responding today?
+          {t('org.dashboard.respondingToday')}
         </p>
 
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-white font-bold uppercase tracking-wide text-sm">Tasks</h3>
+          <h3 className="text-white font-bold uppercase tracking-wide text-sm">{t('org.dashboard.tasks')}</h3>
           <button className="text-white/90 text-xs font-semibold uppercase hover:underline">
-            View all
+            {t('org.dashboard.viewAll')}
           </button>
         </div>
         <ul className="flex flex-col gap-3">
@@ -105,9 +107,9 @@ const SERIES = [
   { color: '#2f7d6b', points: '0,56 18,54 36,50 54,52 72,46 90,48 108,42 126,44 144,40 160,38' },
 ];
 
-function MetricsChart() {
+function MetricsChart({ t }) {
   return (
-    <svg viewBox="0 0 160 64" className="w-full h-24" preserveAspectRatio="none" role="img" aria-label="Metrics trend chart">
+    <svg viewBox="0 0 160 64" className="w-full h-24" preserveAspectRatio="none" role="img" aria-label={t('org.dashboard.chartLabel')}>
       {SERIES.map((s) => (
         <polyline
           key={s.color}

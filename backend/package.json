@@ -9,7 +9,13 @@
     "start": "node server.js",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
-    "prisma:generate": "prisma generate"
+    "prisma:generate": "prisma generate",
+    "seed:real-events": "node prisma/seedRealEvents.js",
+    "ingest:events": "node services/ingestion/ingestEvents.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "seed:admin": "node prisma/seedAdmin.js"
   },
   "keywords": [
     "crisis",
@@ -32,10 +38,12 @@
     "jsonwebtoken": "^9.0.3",
     "ml-distance": "^4.0.1",
     "morgan": "^1.10.0",
+    "multer": "^2.2.0",
     "openai": "^4.73.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.9",
-    "prisma": "6.7.0"
+    "prisma": "6.7.0",
+    "vitest": "^4.1.10"
   }
 }

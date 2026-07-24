@@ -10,6 +10,9 @@ import dashboardRoutes from './routes/dashboard.js';
 import chatRoutes from './routes/chat.js';
 import emergencyRoutes from './routes/emergency.js';
 import resourceRoutes from './routes/resources.js';
+import crisisEventRoutes from './routes/crisisEvents.js';
+import volunteerTaskRoutes from './routes/volunteerTasks.js';
+import notificationRoutes from './routes/notifications.js';
 
 dotenv.config();
 
@@ -39,6 +42,9 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/emergency', emergencyRoutes);
 app.use('/api/resources', resourceRoutes);
+app.use('/api/crisis-events', crisisEventRoutes);
+app.use('/api/volunteer-tasks', volunteerTaskRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

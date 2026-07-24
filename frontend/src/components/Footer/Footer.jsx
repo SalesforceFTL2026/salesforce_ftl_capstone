@@ -1,6 +1,8 @@
+import { useTranslation } from 'react-i18next';
 import MRLogo from '../../assets/logos/MRLogo.png';
 
 const Footer = () => {
+  const { t } = useTranslation();
   return (
     <footer className="bg-[#79A7ED] dark:bg-[#1a2332] py-12 transition-colors duration-300">
       <div className="max-w-7xl mx-auto">
@@ -10,13 +12,13 @@ const Footer = () => {
             <div className="flex items-center gap-3 mb-4">
               <img
                 src={MRLogo}
-                alt="MapResponse logo"
+                alt={t('landing.footer.logoAlt')}
                 className="w-[200px] object-contain"
               />
             </div>
             <p className="text-[#1C2A16] dark:text-gray-300 text-[20px] font-semibold mb-2 transition-colors duration-300">(555) 234-1092</p>
             <p className="text-[#1C2A16] dark:text-gray-300 text-[20px] max-w-xs transition-colors duration-300">
-              Description
+              {t('landing.footer.description')}
             </p>
           </div>
 

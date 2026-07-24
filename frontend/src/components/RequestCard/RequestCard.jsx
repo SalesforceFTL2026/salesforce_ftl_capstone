@@ -23,15 +23,19 @@
 //   the change is in flight. Interaction counts (volunteerInterestCount /
 //   organizationRespondingCount) are shown automatically when present.
 
+import { useTranslation } from 'react-i18next';
+
 // The lifecycle states an organization can move a request through. Mirrors the
 // backend's validStatuses in updateRequestStatus.
-const STATUS_OPTIONS = ['pending', 'in-progress', 'matched', 'fulfilled', 'closed'];
+const STATUS_OPTIONS = ['pending', 'assigned', 'in-progress', 'matched', 'completed', 'fulfilled', 'closed'];
 
 // Status badge colors for the help-seeker list.
 const STATUS_STYLES = {
   pending:       'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300',
+  assigned:      'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300',
   'in-progress': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300',
   matched:       'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300',
+  completed:     'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300',
   fulfilled:     'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300',
   closed:        'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
 };
@@ -61,10 +65,12 @@ const priorityScoreClass = (score) => {
   return 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300';
 };
 
-const RequestCard = ({ request, onInteract, interacting, confirmation, onDelete, deleting, onEdit, onStatusChange, updating }) => {
+const RequestCard = ({ request, onInteract, interacting, confirmation, onWithdraw, withdrawing, onDelete, deleting, onEdit, onStatusChange, updating, onMarkHelped, marking }) => {
+  const { t } = useTranslation();
   const {
     category, urgency, location, description, status, createdAt, reasoning,
     responseStatus, priorityScore, volunteerInterestCount, organizationRespondingCount,
+    signedUp,
   } = request;
 
   // Only show the AI priority score once the request has actually been scored
@@ -94,9 +100,9 @@ const RequestCard = ({ request, onInteract, interacting, confirmation, onDelete,
           {hasPriorityScore && (
             <span
               className={`text-sm font-bold px-3 py-1.5 rounded-full ${priorityScoreClass(priorityScore)}`}
-              title="AI-calculated priority score (0–100)"
+              title={t('requests.card.priorityScoreTitle')}
             >
-              Priority {Math.round(priorityScore)}
+              {t('requests.card.priority', { score: Math.round(priorityScore) })}
             </span>
           )}
           <span className={`text-sm font-semibold px-3 py-1.5 rounded-full capitalize ${badgeClass}`}>
@@ -107,7 +113,7 @@ const RequestCard = ({ request, onInteract, interacting, confirmation, onDelete,
               type="button"
               onClick={() => onEdit(request)}
               disabled={deleting}
-              aria-label="Edit request"
+              aria-label={t('requests.card.editRequest')}
               className="p-1.5 rounded-lg text-gray-400 hover:text-[#6ba3d3] hover:bg-blue-50 dark:hover:bg-blue-900/30 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -120,7 +126,7 @@ const RequestCard = ({ request, onInteract, interacting, confirmation, onDelete,
               type="button"
               onClick={() => onDelete(request)}
               disabled={deleting}
-              aria-label="Delete request"
+              aria-label={t('requests.card.deleteRequest')}
               className="p-1.5 rounded-lg text-gray-400 hover:text-[#c84444] hover:bg-red-50 dark:hover:bg-red-900/30 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -136,7 +142,7 @@ const RequestCard = ({ request, onInteract, interacting, confirmation, onDelete,
       {/* AI reasoning, only shown when the prioritizer has explained the score */}
       {reasoning && (
         <p className="text-base text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 rounded-lg p-3 border border-gray-100 dark:border-gray-700">
-          <span className="font-semibold">Why this is prioritized: </span>
+          <span className="font-semibold">{t('requests.card.whyPrioritized')} </span>
           {reasoning}
         </p>
       )}
@@ -153,12 +159,12 @@ const RequestCard = ({ request, onInteract, interacting, confirmation, onDelete,
         <div className="flex flex-wrap gap-2 text-sm">
           {typeof volunteerInterestCount === 'number' && (
             <span className="px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 font-medium">
-              🙋 {volunteerInterestCount} volunteer{volunteerInterestCount === 1 ? '' : 's'} interested
+              🙋 {t('requests.card.volunteersInterested', { count: volunteerInterestCount })}
             </span>
           )}
           {typeof organizationRespondingCount === 'number' && (
             <span className="px-3 py-1.5 rounded-full bg-green-50 text-green-700 dark:bg-green-900/40 dark:text-green-300 font-medium">
-              🏢 {organizationRespondingCount} org{organizationRespondingCount === 1 ? '' : 's'} responding
+              🏢 {t('requests.card.orgsResponding', { count: organizationRespondingCount })}
             </span>
           )}
         </div>
@@ -171,7 +177,7 @@ const RequestCard = ({ request, onInteract, interacting, confirmation, onDelete,
             htmlFor={`status-${request.id}`}
             className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400"
           >
-            Status
+            {t('requests.card.status')}
           </label>
           <select
             id={`status-${request.id}`}
@@ -182,13 +188,13 @@ const RequestCard = ({ request, onInteract, interacting, confirmation, onDelete,
           >
             {STATUS_OPTIONS.map((s) => (
               <option key={s} value={s}>
-                {s}
+                {t(`requests.statusOptions.${s}`)}
               </option>
             ))}
           </select>
           {updating && (
             <span className="text-xs text-gray-500 dark:text-gray-400" role="status">
-              Saving…
+              {t('requests.card.saving')}
             </span>
           )}
         </div>
@@ -197,14 +203,53 @@ const RequestCard = ({ request, onInteract, interacting, confirmation, onDelete,
       {/* On the My Interests tab, show the volunteer's response status. */}
       {responseStatus && (
         <p className="text-base font-medium text-[#6ba3d3]">
-          Status: {responseStatus}
+          {t('requests.card.statusLabel')} {responseStatus}
         </p>
       )}
 
-      {/* On the Priority Feed tab, show the "I can help" button. */}
+      {/* On the My Interests tab, let the volunteer mark a claimed request as
+          helped — unless it's already been completed. */}
+      {onMarkHelped && (
+        <div className="mt-auto">
+          {status === 'completed' || responseStatus === 'completed' ? (
+            <p className="text-base font-semibold text-green-700 dark:text-green-400" role="status">
+              {t('requests.card.helped')}
+            </p>
+          ) : (
+            <button
+              type="button"
+              onClick={() => onMarkHelped(request)}
+              disabled={marking}
+              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-green-600 text-white font-semibold text-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-600/40 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+            >
+              {marking ? t('requests.card.saving') : t('requests.card.markAsHelped')}
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* On the Priority Feed tab, show the "I can help" button — or, once the
+          volunteer has signed up, a "Signed up" badge with a Withdraw action so
+          the request stays visible instead of disappearing from the feed. */}
       {onInteract && (
         <div className="mt-auto">
-          {confirmation ? (
+          {signedUp ? (
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="text-base font-semibold text-green-700 dark:text-green-400" role="status">
+                {t('requests.card.signedUp')}
+              </span>
+              {onWithdraw && (
+                <button
+                  type="button"
+                  onClick={() => onWithdraw(request)}
+                  disabled={withdrawing}
+                  className="px-5 py-2.5 rounded-xl border-2 border-[#c84444] text-[#c84444] font-semibold text-base hover:bg-red-50 dark:hover:bg-red-900/20 focus:outline-none focus:ring-2 focus:ring-[#c84444]/40 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+                >
+                  {withdrawing ? t('requests.card.withdrawing') : t('requests.card.withdraw')}
+                </button>
+              )}
+            </div>
+          ) : confirmation ? (
             <p className="text-base font-semibold text-green-700" role="status">
               {confirmation}
             </p>
@@ -215,7 +260,7 @@ const RequestCard = ({ request, onInteract, interacting, confirmation, onDelete,
               disabled={interacting}
               className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#6ba3d3] text-white font-semibold text-lg hover:bg-[#5a92c2] focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/40 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
             >
-              {interacting ? 'Saving…' : 'I can help with this'}
+              {interacting ? t('requests.card.saving') : t('requests.card.iCanHelpWithThis')}
             </button>
           )}
         </div>

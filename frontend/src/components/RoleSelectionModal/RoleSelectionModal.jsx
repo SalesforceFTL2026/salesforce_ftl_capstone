@@ -1,5 +1,8 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { signup, authErrorMessage } from '../../utils/auth';
+import { DISASTER_SKILLS } from '../../utils/skills';
+import { useModalDismiss } from '../../hooks/useModalDismiss';
 
 // New-user registration form. Opened when someone picks a role on the landing
 // page (help-seeker / volunteer / organization). The role is passed in, so it
@@ -12,18 +15,36 @@ import { signup, authErrorMessage } from '../../utils/auth';
 // @param {() => void} onClose - close the modal without registering
 // @param {(user: object) => void} onSubmit - called with the signed-in user on success
 const RoleSelectionModal = ({ role, embedded = false, onClose, onSubmit }) => {
+  const { t } = useTranslation();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [location, setLocation] = useState('');
+  // Skills only apply to volunteers; ignored for other roles.
+  const [skills, setSkills] = useState([]);
+  // The skills list is long, so keep it collapsed until the user opens it.
+  const [skillsOpen, setSkillsOpen] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const roleLabels = {
-    'help-seeker': 'Help Seeker',
-    'volunteer': 'Volunteer',
-    'organization': 'Organization'
+  // Standalone popup only: allow Escape to close. (Embedded in AuthModal, the
+  // wrapper owns dismissal.)
+  useModalDismiss(!embedded, onClose);
+
+  const isVolunteer = role === 'volunteer';
+
+  const roleLabelKeys = {
+    'help-seeker': 'auth.roles.helpSeeker',
+    'volunteer': 'auth.roles.volunteer',
+    'organization': 'auth.roles.organization'
+  };
+
+  // Toggle a skill in/out of the selected list.
+  const toggleSkill = (skill) => {
+    setSkills((prev) =>
+      prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill]
+    );
   };
 
   const handleSubmit = async (e) => {
@@ -32,20 +53,30 @@ const RoleSelectionModal = ({ role, embedded = false, onClose, onSubmit }) => {
 
     // Match the backend's rules so users get feedback before we call the API.
     if (!name.trim() || !email.trim() || !password) {
-      setError('Name, email, and password are required.');
+      setError(t('auth.signUp.errors.missingRequired'));
+      return;
+    }
+    if (!location.trim()) {
+      setError(t('auth.signUp.errors.locationRequired'));
       return;
     }
     // Mirror the backend policy so users get feedback before we call the API.
     if (password.length < 12) {
-      setError('Password must be at least 12 characters long.');
+      setError(t('auth.signUp.errors.passwordTooShort'));
       return;
     }
     if (password.length > 72) {
-      setError('Password must be 72 characters or fewer.');
+      setError(t('auth.signUp.errors.passwordTooLong'));
       return;
     }
     if (!/[a-z]/.test(password) || !/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
-      setError('Password must include an uppercase letter, a lowercase letter, and a number.');
+      setError(t('auth.signUp.errors.passwordComplexity'));
+      return;
+    }
+    // Volunteers must pick at least one skill (mirrors the backend policy).
+    if (isVolunteer && skills.length === 0) {
+      setSkillsOpen(true); // reveal the picker so they can act on the error
+      setError(t('auth.signUp.errors.skillRequired'));
       return;
     }
 
@@ -58,11 +89,12 @@ const RoleSelectionModal = ({ role, embedded = false, onClose, onSubmit }) => {
         password,
         role,
         location: location.trim(),
+        skills: isVolunteer ? skills : [],
       });
       onSubmit?.(user);
     } catch (err) {
       // Prefer the server's message; never surface a raw stack trace.
-      setError(authErrorMessage(err, 'Unable to sign up right now. Please try again.'));
+      setError(authErrorMessage(err, t('auth.signUp.errors.generic')));
     } finally {
       setLoading(false);
     }
@@ -72,7 +104,7 @@ const RoleSelectionModal = ({ role, embedded = false, onClose, onSubmit }) => {
     <form onSubmit={handleSubmit} className="space-y-6" noValidate>
           <div>
             <label htmlFor="name" className="block text-sm font-bold text-gray-800 mb-2 uppercase tracking-wide">
-              Name <span className="text-red-500">*</span>
+              {t('auth.fields.name')} <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -81,14 +113,14 @@ const RoleSelectionModal = ({ role, embedded = false, onClose, onSubmit }) => {
               onChange={(e) => setName(e.target.value)}
               autoComplete="name"
               className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-[#6ba3d3] focus:ring-2 focus:ring-[#6ba3d3]/20 transition-all"
-              placeholder="Enter your name"
+              placeholder={t('auth.placeholders.name')}
               required
             />
           </div>
 
           <div>
             <label htmlFor="email" className="block text-sm font-bold text-gray-800 mb-2 uppercase tracking-wide">
-              Email <span className="text-red-500">*</span>
+              {t('auth.fields.email')} <span className="text-red-500">*</span>
             </label>
             <input
               type="email"
@@ -97,14 +129,14 @@ const RoleSelectionModal = ({ role, embedded = false, onClose, onSubmit }) => {
               onChange={(e) => setEmail(e.target.value)}
               autoComplete="email"
               className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-[#6ba3d3] focus:ring-2 focus:ring-[#6ba3d3]/20 transition-all"
-              placeholder="you@example.com"
+              placeholder={t('auth.placeholders.email')}
               required
             />
           </div>
 
           <div>
             <label htmlFor="password" className="block text-sm font-bold text-gray-800 mb-2 uppercase tracking-wide">
-              Password <span className="text-red-500">*</span>
+              {t('auth.fields.password')} <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <input
@@ -114,23 +146,23 @@ const RoleSelectionModal = ({ role, embedded = false, onClose, onSubmit }) => {
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="new-password"
                 className="w-full px-4 py-3 pr-16 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-[#6ba3d3] focus:ring-2 focus:ring-[#6ba3d3]/20 transition-all"
-                placeholder="12+ chars, with a capital & number"
+                placeholder={t('auth.placeholders.newPassword')}
                 required
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
                 className="absolute inset-y-0 right-0 px-4 flex items-center text-sm font-medium text-[#6ba3d3]"
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                aria-label={showPassword ? t('auth.hidePassword') : t('auth.showPassword')}
               >
-                {showPassword ? 'Hide' : 'Show'}
+                {showPassword ? t('auth.hide') : t('auth.show')}
               </button>
             </div>
           </div>
 
           <div>
             <label htmlFor="location" className="block text-sm font-bold text-gray-800 mb-2 uppercase tracking-wide">
-              Location <span className="text-gray-400 text-xs font-normal">(optional)</span>
+              {t('auth.fields.location')} <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -138,9 +170,64 @@ const RoleSelectionModal = ({ role, embedded = false, onClose, onSubmit }) => {
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-[#6ba3d3] focus:ring-2 focus:ring-[#6ba3d3]/20 transition-all"
-              placeholder="City, State or Zip Code"
+              placeholder={t('auth.placeholders.location')}
+              required
             />
           </div>
+
+          {/* Volunteers pick the disaster-response skills they can offer. These
+              seed their profile and feed the dashboard's "My Interests" view. */}
+          {isVolunteer && (
+            <div>
+              <button
+                type="button"
+                onClick={() => setSkillsOpen((v) => !v)}
+                aria-expanded={skillsOpen}
+                className="flex w-full items-center justify-between text-left"
+              >
+                <span className="block text-sm font-bold text-gray-800 uppercase tracking-wide">
+                  {t('auth.fields.skills')} <span className="text-red-500">*</span>
+                  <span className="ml-2 text-gray-400 text-xs font-normal normal-case tracking-normal">
+                    {skills.length > 0
+                      ? t('auth.signUp.skillsSelected', { count: skills.length })
+                      : t('auth.signUp.selectAllThatApply')}
+                  </span>
+                </span>
+                {/* Chevron rotates to point down when the section is open. */}
+                <svg
+                  className={`h-4 w-4 text-gray-500 transition-transform ${skillsOpen ? 'rotate-180' : ''}`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {skillsOpen && (
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {DISASTER_SKILLS.map((skill) => {
+                    const selected = skills.includes(skill);
+                    return (
+                      <button
+                        key={skill}
+                        type="button"
+                        onClick={() => toggleSkill(skill)}
+                        aria-pressed={selected}
+                        className={`px-3 py-2 rounded-full border-2 text-sm font-medium transition-colors ${
+                          selected
+                            ? 'bg-[#6ba3d3] border-[#6ba3d3] text-white'
+                            : 'bg-transparent border-gray-300 text-gray-700 hover:border-[#6ba3d3]'
+                        }`}
+                      >
+                        {skill}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
 
           {error && (
             <p role="alert" className="text-sm font-medium text-red-600">
@@ -154,14 +241,14 @@ const RoleSelectionModal = ({ role, embedded = false, onClose, onSubmit }) => {
               onClick={onClose}
               className="flex-1 px-6 py-3 border-2 border-gray-400 text-gray-700 font-bold rounded-xl hover:bg-gray-50 transition-colors uppercase text-sm tracking-wide"
             >
-              Cancel
+              {t('auth.cancel')}
             </button>
             <button
               type="submit"
               className="flex-1 px-6 py-3 bg-[#6ba3d3] text-white font-bold rounded-xl hover:bg-[#5a92c2] transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed uppercase text-sm tracking-wide"
               disabled={loading}
             >
-              {loading ? 'Creating account…' : 'Continue'}
+              {loading ? t('auth.signUp.submitting') : t('auth.signUp.submit')}
             </button>
           </div>
     </form>
@@ -172,16 +259,23 @@ const RoleSelectionModal = ({ role, embedded = false, onClose, onSubmit }) => {
 
   // Standalone: render our own popup shell + title.
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl p-10 max-w-lg w-full mx-4 shadow-2xl">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 sm:p-6"
+    >
+      {/* Stop clicks inside the modal from bubbling up to the backdrop's close. */}
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="bg-white rounded-2xl p-10 max-w-lg w-full shadow-2xl max-h-[90vh] overflow-y-auto"
+      >
         <div className="flex justify-between items-start mb-8">
           <h2 className="text-3xl font-bold text-black">
-            Welcome, {roleLabels[role]}!
+            {t('auth.signUp.welcomeRole', { role: t(roleLabelKeys[role]) })}
           </h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 text-3xl leading-none -mt-2"
-            aria-label="Close"
+            aria-label={t('auth.close')}
           >
             ×
           </button>

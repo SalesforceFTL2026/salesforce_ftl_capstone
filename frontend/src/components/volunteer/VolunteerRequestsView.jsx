@@ -1,6 +1,10 @@
 import { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import RequestCard from '../RequestCard/RequestCard';
-import HeatMap from '../organization/HeatMap';
+import RequestDetailsModal from '../RequestCard/RequestDetailsModal';
+import RequestMap from '../map/RequestMap';
+import NearMeToggle from '../map/NearMeToggle';
+import RequestFilterBar from '../RequestFilterBar/RequestFilterBar';
 
 // Active Help Requests view for a volunteer, built from the product wireframe.
 // A view switcher (Calendar / List / Cards / Map) sits above the requests. The
@@ -9,9 +13,10 @@ import HeatMap from '../organization/HeatMap';
 // "Why?" toggle that expands the AI prioritizer's full reasoning inline. The
 // AI Priority column surfaces the prioritization pipeline's score. Cards reuses
 // the shared RequestCard so a volunteer can still express interest there too.
-// Calendar and Map are placeholders until those data sources exist. This is a
-// front-end presentation layer over the same priority-feed data the dashboard
-// already loads.
+// Map plots geocoded requests on a Leaflet map (RequestMap) where a volunteer
+// can also express interest from a pin's popup. Calendar buckets requests by
+// submission date. This is a front-end presentation layer over the same
+// priority-feed data the dashboard already loads.
 //
 // @param {object[]} requests - the active/prioritized requests
 // @param {boolean} loading
@@ -21,22 +26,27 @@ import HeatMap from '../organization/HeatMap';
 // @param {string|null} interactingId
 // @param {Object<string,string>} confirmations - requestId -> confirmation text
 const VIEWS = [
-  { id: 'calendar', label: 'Calendar', icon: 'calendar' },
-  { id: 'list', label: 'List', icon: 'list' },
-  { id: 'cards', label: 'Cards', icon: 'cards' },
-  { id: 'map', label: 'Map', icon: 'map' },
+  { id: 'calendar', icon: 'calendar' },
+  { id: 'list', icon: 'list' },
+  { id: 'cards', icon: 'cards' },
+  { id: 'map', icon: 'map' },
 ];
 
 const URGENCY_ORDER = { Critical: 0, High: 1, Medium: 2, Low: 3 };
 
 const VolunteerRequestsView = ({
   requests, loading, error, onRetry, onInteract, interactingId, confirmations,
+  onWithdraw, withdrawingId,
+  near, onNearChange, filters, onFiltersChange,
 }) => {
+  const { t } = useTranslation();
   const [activeView, setActiveView] = useState('list');
   // Which rows the volunteer has checked in the List view.
   const [selectedIds, setSelectedIds] = useState(() => new Set());
   // Sort toggle behind the filter icon: default (priority) vs. by urgency.
   const [sortByUrgency, setSortByUrgency] = useState(false);
+  // The request whose full-details modal is open (List view), or null.
+  const [detailRequest, setDetailRequest] = useState(null);
 
   const rows = useMemo(() => {
     if (!sortByUrgency) return requests;
@@ -63,7 +73,7 @@ const VolunteerRequestsView = ({
   // a time flows through the existing POST /api/requests/:id/interact handler.
   const helpWithSelected = async () => {
     const targets = rows.filter(
-      (r) => selectedIds.has(r.id) && !confirmations[r.id] && interactingId !== r.id
+      (r) => selectedIds.has(r.id) && !r.signedUp && !confirmations[r.id] && interactingId !== r.id
     );
     for (const request of targets) {
       await onInteract(request);
@@ -73,38 +83,58 @@ const VolunteerRequestsView = ({
 
   return (
     <div className="flex flex-col gap-5">
-      {/* View switcher */}
-      <div className="bg-[#c3d3ae] dark:bg-[#1f3320] rounded-3xl px-4 sm:px-6 py-3 flex flex-wrap gap-2 transition-colors duration-300">
-        {VIEWS.map((v) => {
-          const isActive = v.id === activeView;
-          return (
-            <button
-              key={v.id}
-              type="button"
-              onClick={() => setActiveView(v.id)}
-              aria-pressed={isActive}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-lg transition-colors focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/40 ${
-                isActive
-                  ? 'bg-white/80 dark:bg-[#0f1a0f] text-[#1C2A16] dark:text-white border-b-2 border-[#6ba3d3]'
-                  : 'text-[#1C2A16] dark:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5'
-              }`}
-            >
-              <ViewIcon name={v.icon} />
-              <span>{v.label}</span>
-            </button>
-          );
-        })}
+      {/* Keyword search + category/urgency filters (issues #81, #82, #85).
+          Filtering happens on the backend, so changing these re-fetches the
+          feed via the dashboard's onFiltersChange handler. */}
+      {onFiltersChange && (
+        <RequestFilterBar
+          value={filters}
+          onChange={onFiltersChange}
+          resultCount={loading ? undefined : requests.length}
+        />
+      )}
+
+      {/* View switcher + "Near me" geo-radius filter (issue #116). */}
+      <div className="bg-[#c3d3ae] dark:bg-[#1f3320] rounded-3xl px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3 transition-colors duration-300">
+        <div className="flex flex-wrap gap-2">
+          {VIEWS.map((v) => {
+            const isActive = v.id === activeView;
+            return (
+              <button
+                key={v.id}
+                type="button"
+                onClick={() => setActiveView(v.id)}
+                aria-pressed={isActive}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-lg transition-colors focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/40 ${
+                  isActive
+                    ? 'bg-white/80 dark:bg-[#0f1a0f] text-[#1C2A16] dark:text-white border-b-2 border-[#6ba3d3]'
+                    : 'text-[#1C2A16] dark:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5'
+                }`}
+              >
+                <ViewIcon name={v.icon} />
+                <span>{t(`volunteer.requests.views.${v.id}`)}</span>
+              </button>
+            );
+          })}
+        </div>
+        {onNearChange && (
+          <NearMeToggle
+            onChange={onNearChange}
+            active={Boolean(near)}
+            count={near ? requests.length : null}
+          />
+        )}
       </div>
 
       {loading && (
-        <p className="text-[#1C2A16] dark:text-gray-300" role="status">Loading…</p>
+        <p className="text-[#1C2A16] dark:text-gray-300" role="status">{t('volunteer.common.loading')}</p>
       )}
 
       {!loading && error && (
         <div className="bg-red-50 border border-red-200 text-red-800 rounded-2xl p-4">
           <p className="font-semibold">{error}</p>
           <button onClick={onRetry} className="mt-2 text-sm font-semibold underline hover:no-underline">
-            Try again
+            {t('volunteer.common.tryAgain')}
           </button>
         </div>
       )}
@@ -121,14 +151,17 @@ const VolunteerRequestsView = ({
           onInteract={onInteract}
           interactingId={interactingId}
           confirmations={confirmations}
+          onWithdraw={onWithdraw}
+          withdrawingId={withdrawingId}
           onHelpWithSelected={helpWithSelected}
+          onRowClick={setDetailRequest}
         />
       )}
 
       {!loading && !error && activeView === 'cards' && (
         <>
           {rows.length === 0 ? (
-            <EmptyPanel text="No open requests right now. Check back soon." />
+            <EmptyPanel text={t('volunteer.requests.noOpenRequests')} />
           ) : (
             <div className="grid sm:grid-cols-2 gap-4">
               {rows.map((request) => (
@@ -138,6 +171,8 @@ const VolunteerRequestsView = ({
                   onInteract={onInteract}
                   interacting={interactingId === request.id}
                   confirmation={confirmations[request.id]}
+                  onWithdraw={onWithdraw}
+                  withdrawing={withdrawingId === request.id}
                 />
               ))}
             </div>
@@ -148,9 +183,16 @@ const VolunteerRequestsView = ({
       {!loading && !error && activeView === 'map' && (
         <div className="bg-white dark:bg-[#16233a] rounded-3xl p-6 shadow-md transition-colors duration-300">
           <h2 className="text-xl font-bold text-[#1C2A16] dark:text-white text-center mb-3">
-            Where help is needed
+            {t('volunteer.requests.whereHelpNeeded')}
           </h2>
-          <HeatMap caption="Interactive map coming soon" />
+          <RequestMap
+            requests={rows}
+            onInteract={onInteract}
+            interactingId={interactingId}
+            confirmations={confirmations}
+            onWithdraw={onWithdraw}
+            withdrawingId={withdrawingId}
+          />
         </div>
       )}
 
@@ -160,8 +202,13 @@ const VolunteerRequestsView = ({
           onInteract={onInteract}
           interactingId={interactingId}
           confirmations={confirmations}
+          onWithdraw={onWithdraw}
+          withdrawingId={withdrawingId}
         />
       )}
+
+      {/* Full-details modal, opened by tapping a row in the List view. */}
+      <RequestDetailsModal request={detailRequest} onClose={() => setDetailRequest(null)} />
     </div>
   );
 };
@@ -171,7 +218,7 @@ const VolunteerRequestsView = ({
 // colored by urgency. Selecting a day lists its requests below (reusing the
 // shared RequestCard so "I can help" works here too). Navigating starts on the
 // month of the most recent request so the demo data is visible immediately.
-const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const WEEKDAYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 const URGENCY_DOT = {
   Critical: 'bg-[#c84444]',
   High: 'bg-orange-500',
@@ -182,7 +229,8 @@ const URGENCY_DOT = {
 // Local YYYY-M-D key so requests bucket by calendar day in the user's timezone.
 const dayKey = (date) => `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
 
-const CalendarView = ({ rows, onInteract, interactingId, confirmations }) => {
+const CalendarView = ({ rows, onInteract, interactingId, confirmations, onWithdraw, withdrawingId }) => {
+  const { t } = useTranslation();
   // Group requests by the day they were submitted.
   const byDay = useMemo(() => {
     const map = new Map();
@@ -231,7 +279,7 @@ const CalendarView = ({ rows, onInteract, interactingId, confirmations }) => {
           <button
             type="button"
             onClick={() => goMonth(-1)}
-            aria-label="Previous month"
+            aria-label={t('volunteer.calendar.previousMonth')}
             className="p-2 rounded-lg text-[#1C2A16] dark:text-white hover:bg-black/5 dark:hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/40"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -242,7 +290,7 @@ const CalendarView = ({ rows, onInteract, interactingId, confirmations }) => {
           <button
             type="button"
             onClick={() => goMonth(1)}
-            aria-label="Next month"
+            aria-label={t('volunteer.calendar.nextMonth')}
             className="p-2 rounded-lg text-[#1C2A16] dark:text-white hover:bg-black/5 dark:hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/40"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -255,7 +303,7 @@ const CalendarView = ({ rows, onInteract, interactingId, confirmations }) => {
         <div className="grid grid-cols-7 gap-2 mb-2">
           {WEEKDAYS.map((w) => (
             <div key={w} className="text-center text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-              {w}
+              {t(`volunteer.calendar.weekdays.${w}`)}
             </div>
           ))}
         </div>
@@ -312,10 +360,10 @@ const CalendarView = ({ rows, onInteract, interactingId, confirmations }) => {
             ? new Date(year, month, Number(selectedKey.split('-')[2])).toLocaleDateString(undefined, {
                 weekday: 'long', month: 'long', day: 'numeric',
               })
-            : 'Select a day'}
+            : t('volunteer.calendar.selectDay')}
         </h3>
         {selected.length === 0 ? (
-          <EmptyPanel text="No requests submitted on this day." />
+          <EmptyPanel text={t('volunteer.calendar.noRequestsThisDay')} />
         ) : (
           <div className="grid sm:grid-cols-2 gap-4">
             {selected.map((request) => (
@@ -325,6 +373,8 @@ const CalendarView = ({ rows, onInteract, interactingId, confirmations }) => {
                 onInteract={onInteract}
                 interacting={interactingId === request.id}
                 confirmation={confirmations[request.id]}
+                onWithdraw={onWithdraw}
+                withdrawing={withdrawingId === request.id}
               />
             ))}
           </div>
@@ -346,8 +396,10 @@ const COLS = 'grid-cols-[2.5rem_minmax(8rem,1.5fr)_1fr_1fr_7rem_1.3fr_12rem]';
 
 const ListView = ({
   rows, allChecked, selectedIds, onToggleAll, onToggleOne, sortByUrgency, onToggleSort,
-  onInteract, interactingId, confirmations, onHelpWithSelected,
+  onInteract, interactingId, confirmations, onWithdraw, withdrawingId, onHelpWithSelected,
+  onRowClick,
 }) => {
+  const { t } = useTranslation();
   // Which rows have their AI reasoning expanded.
   const [expandedIds, setExpandedIds] = useState(() => new Set());
   const toggleExpanded = (id) =>
@@ -365,14 +417,14 @@ const ListView = ({
       {selectedCount > 0 && (
         <div className="flex flex-wrap items-center justify-between gap-3 bg-[#dce8f7] dark:bg-[#22304a] rounded-2xl px-5 py-3">
           <span className="font-semibold text-[#1C2A16] dark:text-white text-lg">
-            {selectedCount} request{selectedCount === 1 ? '' : 's'} selected
+            {t('volunteer.requests.selectedCount', { count: selectedCount })}
           </span>
           <button
             type="button"
             onClick={onHelpWithSelected}
             className="px-5 py-2.5 rounded-xl bg-[#6ba3d3] text-white font-semibold text-base hover:bg-[#5a92c2] focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/40 transition-colors"
           >
-            I can help with selected
+            {t('volunteer.requests.helpWithSelected')}
           </button>
         </div>
       )}
@@ -384,19 +436,19 @@ const ListView = ({
             type="checkbox"
             checked={allChecked}
             onChange={onToggleAll}
-            aria-label="Select all requests"
+            aria-label={t('volunteer.requests.selectAll')}
             className="w-5 h-5 rounded accent-[#6ba3d3]"
           />
-          <span>Name</span>
-          <span>Category</span>
-          <span>Urgency Level</span>
-          <span title="AI-calculated priority score (0–100)">AI Priority</span>
-          <span>Time Submitted</span>
+          <span>{t('volunteer.requests.columns.name')}</span>
+          <span>{t('volunteer.requests.columns.category')}</span>
+          <span>{t('volunteer.requests.columns.urgencyLevel')}</span>
+          <span title={t('volunteer.requests.priorityTooltip')}>{t('volunteer.requests.columns.aiPriority')}</span>
+          <span>{t('volunteer.requests.columns.timeSubmitted')}</span>
           <button
             type="button"
             onClick={onToggleSort}
             aria-pressed={sortByUrgency}
-            title={sortByUrgency ? 'Sorting by urgency' : 'Sort by urgency'}
+            title={sortByUrgency ? t('volunteer.requests.sortingByUrgency') : t('volunteer.requests.sortByUrgency')}
             className={`p-1.5 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/40 ${
               sortByUrgency ? 'bg-[#6ba3d3] text-white' : 'text-[#1C2A16] dark:text-white hover:bg-black/5 dark:hover:bg-white/10'
             }`}
@@ -409,7 +461,7 @@ const ListView = ({
 
         {rows.length === 0 && (
           <p className="px-5 py-6 text-gray-500 dark:text-gray-400 text-lg">
-            No open requests right now. Check back soon.
+            {t('volunteer.requests.noOpenRequests')}
           </p>
         )}
 
@@ -424,20 +476,33 @@ const ListView = ({
           const interacting = interactingId === r.id;
           return (
             <div key={r.id} className="border-t border-white/70 dark:border-white/10">
-              <div className={`grid ${COLS} items-center gap-4 px-5 py-5 text-lg text-[#1C2A16] dark:text-gray-100`}>
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={() => onRowClick?.(r)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onRowClick?.(r);
+                  }
+                }}
+                aria-label={t('volunteer.requests.detail.viewFrom', { name: r.submitterName || r.requesterName || r.name || t('volunteer.requests.helpSeekerLower') })}
+                className={`grid ${COLS} items-center gap-4 px-5 py-5 text-lg text-[#1C2A16] dark:text-gray-100 cursor-pointer hover:bg-white/60 dark:hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#6ba3d3]/40 transition-colors`}
+              >
                 <input
                   type="checkbox"
                   checked={selectedIds.has(r.id)}
                   onChange={() => onToggleOne(r.id)}
-                  aria-label={`Select request from ${r.submitterName || r.requesterName || r.name || 'help seeker'}`}
+                  onClick={(e) => e.stopPropagation()}
+                  aria-label={t('volunteer.requests.selectRequestFrom', { name: r.submitterName || r.requesterName || r.name || t('volunteer.requests.helpSeekerLower') })}
                   className="w-5 h-5 rounded accent-[#6ba3d3]"
                 />
                 <span className="font-semibold truncate">
-                  {r.submitterName || r.requesterName || r.name || 'Help Seeker'}
+                  {r.submitterName || r.requesterName || r.name || t('volunteer.requests.helpSeeker')}
                 </span>
                 <span className="truncate">{r.category || '—'}</span>
-                <UrgencyBadge urgency={r.urgency} />
-                <PriorityBadge score={r.priorityScore} />
+                <UrgencyBadge urgency={r.urgency} t={t} />
+                <PriorityBadge score={r.priorityScore} t={t} />
                 <span className="text-base text-gray-600 dark:text-gray-400">{when}</span>
                 <RowActions
                   request={r}
@@ -446,6 +511,9 @@ const ListView = ({
                   onInteract={onInteract}
                   interacting={interacting}
                   confirmation={confirmation}
+                  onWithdraw={onWithdraw}
+                  withdrawing={withdrawingId === r.id}
+                  t={t}
                 />
               </div>
 
@@ -454,12 +522,12 @@ const ListView = ({
                 <div className="px-5 pb-4 -mt-1">
                   <div className="rounded-xl bg-white dark:bg-[#0f1a2e] border border-[#bcd4f1] dark:border-white/10 p-4 text-base text-gray-700 dark:text-gray-200">
                     <p className="font-semibold text-lg text-[#1C2A16] dark:text-white mb-1">
-                      🤖 Why the AI prioritized this
+                      {t('volunteer.requests.whyPrioritized')}
                     </p>
-                    <p>{r.reasoning || 'This request has not been scored by the AI prioritizer yet.'}</p>
+                    <p>{r.reasoning || t('volunteer.requests.notScoredYet')}</p>
                     {r.description && (
                       <p className="mt-2 text-gray-500 dark:text-gray-400">
-                        <span className="font-medium">Request: </span>{r.description}
+                        <span className="font-medium">{t('volunteer.requests.requestLabel')} </span>{r.description}
                       </p>
                     )}
                   </div>
@@ -475,26 +543,44 @@ const ListView = ({
 
 // Per-row actions: a "Why?" toggle for the AI reasoning and an "I can help"
 // button (which becomes a confirmation once interest is recorded).
-const RowActions = ({ request, expanded, onToggleExpanded, onInteract, interacting, confirmation }) => (
-  <div className="flex items-center gap-2 justify-end">
+const RowActions = ({ request, expanded, onToggleExpanded, onInteract, interacting, confirmation, onWithdraw, withdrawing, t }) => (
+  <div className="flex items-center gap-2 justify-end" onClick={(e) => e.stopPropagation()}>
     {request.reasoning && (
       <button
         type="button"
         onClick={onToggleExpanded}
         aria-expanded={expanded}
-        title="Show why the AI prioritized this request"
+        title={t('volunteer.requests.whyTooltip')}
         className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/40 ${
           expanded
             ? 'bg-[#6ba3d3] text-white'
             : 'text-[#6ba3d3] hover:bg-[#6ba3d3]/10 dark:hover:bg-[#6ba3d3]/20'
         }`}
       >
-        Why?
+        {t('volunteer.requests.why')}
       </button>
     )}
-    {confirmation ? (
+    {/* Signed-up rows stay in the feed with a Withdraw action instead of a
+        one-way "I can help". */}
+    {request.signedUp ? (
+      <>
+        <span className="text-sm font-semibold text-green-700 dark:text-green-400 whitespace-nowrap" role="status">
+          {t('volunteer.requests.signedUp')}
+        </span>
+        {onWithdraw && (
+          <button
+            type="button"
+            onClick={() => onWithdraw(request)}
+            disabled={withdrawing}
+            className="px-4 py-2 rounded-lg border-2 border-[#c84444] text-[#c84444] text-sm font-semibold hover:bg-red-50 dark:hover:bg-red-900/20 focus:outline-none focus:ring-2 focus:ring-[#c84444]/40 disabled:opacity-60 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+          >
+            {withdrawing ? t('volunteer.requests.withdrawing') : t('volunteer.requests.withdraw')}
+          </button>
+        )}
+      </>
+    ) : confirmation ? (
       <span className="text-sm font-semibold text-green-700 dark:text-green-400 whitespace-nowrap" role="status">
-        ✓ Helping
+        {t('volunteer.requests.helping')}
       </span>
     ) : (
       onInteract && (
@@ -504,7 +590,7 @@ const RowActions = ({ request, expanded, onToggleExpanded, onInteract, interacti
           disabled={interacting}
           className="px-4 py-2 rounded-lg bg-[#6ba3d3] text-white text-sm font-semibold hover:bg-[#5a92c2] focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/40 disabled:opacity-60 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
         >
-          {interacting ? 'Saving…' : 'I can help'}
+          {interacting ? t('volunteer.common.saving') : t('volunteer.requests.iCanHelp')}
         </button>
       )
     )}
@@ -518,8 +604,8 @@ const URGENCY_STYLES = {
   Low: 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300',
 };
 
-const UrgencyBadge = ({ urgency }) => {
-  if (!urgency) return <span className="text-gray-400 italic text-base">Not set</span>;
+const UrgencyBadge = ({ urgency, t }) => {
+  if (!urgency) return <span className="text-gray-400 italic text-base">{t('volunteer.requests.notSet')}</span>;
   const tone = URGENCY_STYLES[urgency] || 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300';
   return (
     <span className={`inline-block w-fit text-sm font-semibold px-3 py-1.5 rounded-full ${tone}`}>
@@ -540,13 +626,13 @@ const PRIORITY_STYLES = (score) => {
 // The AI-calculated priority score, surfaced from the prioritization pipeline.
 // Only shown once a request has actually been scored (score > 0); unscored
 // requests show a muted dash. The Claude reasoning rides along as a tooltip.
-const PriorityBadge = ({ score, reasoning }) => {
+const PriorityBadge = ({ score, reasoning, t }) => {
   const hasScore = typeof score === 'number' && score > 0;
   if (!hasScore) return <span className="text-gray-400 italic text-base">—</span>;
   return (
     <span
       className={`inline-block w-fit text-base font-bold px-3 py-1.5 rounded-full ${PRIORITY_STYLES(score)}`}
-      title={reasoning || 'AI-calculated priority score (0–100)'}
+      title={reasoning || t('volunteer.requests.priorityTooltip')}
     >
       {Math.round(score)}
     </span>

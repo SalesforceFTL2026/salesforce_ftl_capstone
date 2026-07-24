@@ -1,4 +1,5 @@
 import api from './api';
+import { setLanguage } from '../i18n';
 
 // All sign-up / sign-in calls and token storage live here so components stay
 // thin and there is a single source of truth for how we talk to the auth API.
@@ -27,18 +28,26 @@ export const login = async ({ email, password }) => {
 
   const { token, user } = data.data;
   persistSession({ token, user });
+  // Apply the language saved on the user's profile so their preference follows
+  // them to this device. Falls back to English if they never set one.
+  if (user?.languagePreference) {
+    setLanguage(user.languagePreference);
+  }
   return user;
 };
 
 // Register a new user, then log them in so we get a token (signup itself
 // returns no token). Returns the logged-in user object.
-export const signup = async ({ name, email, password, role, location }) => {
+export const signup = async ({ name, email, password, role, location, skills }) => {
   const { data } = await api.post('/api/auth/signup', {
     name,
     email,
     password,
     role,
     location,
+    // Only volunteers pick skills; other roles send an empty list, which the
+    // backend ignores.
+    skills: skills ?? [],
   });
 
   if (!data?.success) {
@@ -55,19 +64,31 @@ export const setCurrentUser = (user) => {
   localStorage.setItem(USER_KEY, JSON.stringify(user));
 };
 
-// Update the logged-in user's profile (currently just the display name).
-// Persists the returned user and returns it. Throws with a friendly message.
-export const updateName = async (name) => {
-  const { data } = await api.patch('/api/auth/me', { name });
+// Update the logged-in user's profile. Pass any of { name, location }; only the
+// fields provided are changed. Persists the returned user and returns it.
+// Throws with a friendly message on failure.
+export const updateProfile = async (fields) => {
+  const { data } = await api.patch('/api/auth/me', fields);
 
   if (!data?.success) {
-    throw new Error(data?.message || 'Could not update your name.');
+    throw new Error(data?.message || 'Could not update your profile.');
   }
 
   // Merge the updated fields into the stored user so the session stays current.
   const merged = { ...getCurrentUser(), ...data.data };
   setCurrentUser(merged);
   return merged;
+};
+
+// Convenience wrapper for the common case of changing just the display name.
+export const updateName = (name) => updateProfile({ name });
+
+// Save the user's UI language to their profile AND switch the live UI to it.
+// Returns the updated user object.
+export const updateLanguage = async (lang) => {
+  const updated = await updateProfile({ languagePreference: lang });
+  setLanguage(lang);
+  return updated;
 };
 
 // Read the signed-in user saved at login, or null if nobody is signed in.

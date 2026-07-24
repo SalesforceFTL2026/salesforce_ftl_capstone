@@ -1,0 +1,878 @@
+{
+  "nav": {
+    "general": "Tổng quan",
+    "tools": "Công cụ",
+    "dashboard": "Bảng điều khiển",
+    "requests": "Yêu cầu",
+    "household": "Hộ gia đình",
+    "documents": "Hướng dẫn khẩn cấp",
+    "settings": "Cài đặt"
+  },
+  "common": {
+    "notSetYet": "Chưa thiết lập",
+    "comingSoon": "Phần này sẽ sớm ra mắt.",
+    "close": "Đóng",
+    "loading": "Đang tải…"
+  },
+  "dashboardView": {
+    "greeting": "Xin chào, {{name}}!",
+    "profile": "Hồ sơ",
+    "name": "Tên",
+    "phoneNumber": "Số điện thoại",
+    "householdCount": "Số người trong hộ",
+    "activeRequests": "Yêu cầu đang hoạt động",
+    "expectedFulfillment": "Thời gian dự kiến hoàn thành",
+    "typeOfRequest": "Loại yêu cầu",
+    "loadingRequests": "Đang tải các yêu cầu của bạn…",
+    "noActiveRequests": "Hiện tại bạn không có yêu cầu nào đang hoạt động.",
+    "makeNewRequest": "Tạo yêu cầu mới",
+    "requestByVoice": "Yêu cầu bằng giọng nói",
+    "chatWithAssistant": "Trò chuyện với trợ lý",
+    "requestSuffix": "Yêu cầu",
+    "deleteRequest": "Xóa yêu cầu",
+    "nonprofitsTitle": "Các tổ chức phi lợi nhuận tham gia gần bạn",
+    "organizationLogo": "Logo tổ chức",
+    "sampleOrgsNote": "Tổ chức mẫu — danh sách trực tiếp sẽ sớm ra mắt."
+  },
+  "household": {
+    "title": "Hộ gia đình",
+    "subtitle": "Thông tin tài khoản và hộ gia đình của bạn.",
+    "yourAccount": "Tài khoản của bạn",
+    "fieldName": "Tên",
+    "fieldEmail": "Email",
+    "fieldPhone": "Số điện thoại",
+    "fieldLocation": "Vị trí",
+    "fieldHouseholdSize": "Số người trong hộ",
+    "editNote": "Số điện thoại, vị trí và số người trong hộ chưa thể chỉnh sửa tại đây — các trường này sẽ sớm được bổ sung."
+  },
+  "settings": {
+    "title": "Cài đặt",
+    "subtitle": "Quản lý thông tin tài khoản của bạn.",
+    "displayName": "Tên hiển thị",
+    "namePlaceholder": "Tên của bạn",
+    "nameEmptyError": "Tên không được để trống.",
+    "nameUpdated": "✓ Tên của bạn đã được cập nhật.",
+    "nameUpdateError": "Không thể cập nhật tên của bạn.",
+    "saveChanges": "Lưu thay đổi",
+    "saving": "Đang lưu…",
+    "language": "Ngôn ngữ",
+    "languageHelp": "Chọn ngôn ngữ cho bảng điều khiển của bạn.",
+    "languageUpdated": "✓ Ngôn ngữ của bạn đã được cập nhật.",
+    "languageUpdateError": "Không thể cập nhật ngôn ngữ của bạn."
+  },
+  "languages": {
+    "en": "English",
+    "es": "Español",
+    "zh": "中文",
+    "tl": "Tagalog",
+    "vi": "Tiếng Việt",
+    "fr": "Français",
+    "ko": "한국어",
+    "ru": "Русский",
+    "ht": "Kreyòl Ayisyen",
+    "hi": "हिन्दी",
+    "ne": "नेपाली"
+  },
+  "landing": {
+    "header": {
+      "logoAlt": "Logo MapResponse",
+      "nav": {
+        "give": "QUYÊN GÓP",
+        "whatWeDo": "CHÚNG TÔI LÀM GÌ",
+        "whoWeAre": "CHÚNG TÔI LÀ AI",
+        "howToHelp": "CÁCH GIÚP ĐỠ",
+        "partnerResources": "TÀI NGUYÊN ĐỐI TÁC",
+        "getHelp": "NHẬN TRỢ GIÚP"
+      },
+      "greeting": "Chào, {{name}}",
+      "signOut": "ĐĂNG XUẤT",
+      "signIn": "ĐĂNG NHẬP",
+      "searchAria": "Tìm kiếm",
+      "toggleDarkModeAria": "Bật/tắt chế độ tối",
+      "darkModeEnabledAlt": "Đã bật chế độ tối",
+      "lightModeEnabledAlt": "Đã bật chế độ sáng"
+    },
+    "hero": {
+      "welcomeTo": "CHÀO MỪNG ĐẾN VỚI",
+      "subtitle": "MỘT MẠNG LƯỚI ĐƯỢC LẬP BẢN ĐỒ ĐỂ TỐI ƯU HÓA VIỆC HỖ TRỢ NGƯỜI CẦN GIÚP TỪ NGƯỜI GIÚP ĐỠ.",
+      "needHelp": "TÔI CẦN GIÚP ĐỠ",
+      "volunteer": "TÔI MUỐN TÌNH NGUYỆN",
+      "organization": "TÔI LÀ MỘT TỔ CHỨC"
+    },
+    "whatWeDo": {
+      "title": "Tiêu đề",
+      "graphic": "HÌNH ẢNH",
+      "description": "Mô tả",
+      "learnMore": "TÌM HIỂU THÊM"
+    },
+    "impact": {
+      "title": "TÁC ĐỘNG CỦA CHÚNG TÔI NĂM 2026",
+      "fact": "Sự thật"
+    },
+    "statCard": {
+      "graphicLine1": "HÌNH ẢNH",
+      "graphicLine2": "LIÊN QUAN ĐẾN",
+      "graphicLine3": "SỰ THẬT",
+      "statistic": "THỐNG KÊ #{{number}}"
+    },
+    "getInvolved": {
+      "title": "THAM GIA",
+      "graphic": "HÌNH ẢNH",
+      "corporatePartnerLine1": "TRỞ THÀNH ĐỐI TÁC",
+      "corporatePartnerLine2": "DOANH NGHIỆP",
+      "nonprofitNetworkLine1": "THAM GIA MẠNG LƯỚI PHI",
+      "nonprofitNetworkLine2": "LỢI NHUẬN",
+      "helpCommunitiesLine1": "GIÚP ĐỠ CỘNG ĐỒNG ĐANG",
+      "helpCommunitiesLine2": "CẦN GIÚP"
+    },
+    "partners": {
+      "title": "CẢM ƠN CÁC ĐỐI TÁC ĐÃ HỖ TRỢ CHÚNG TÔI!",
+      "logo": "Logo"
+    },
+    "oneLiner": {
+      "text": "CÂU SLOGAN CỦA MAP RESPONSE",
+      "scrollToTopAria": "Cuộn lên đầu trang"
+    },
+    "footer": {
+      "logoAlt": "Logo MapResponse",
+      "description": "Mô tả"
+    }
+  },
+  "auth": {
+    "close": "Đóng",
+    "cancel": "Hủy",
+    "show": "Hiện",
+    "hide": "Ẩn",
+    "showPassword": "Hiện mật khẩu",
+    "hidePassword": "Ẩn mật khẩu",
+    "modalTitle": "{{role}} {{action}}",
+    "titleAction": {
+      "signUp": "Đăng ký",
+      "login": "Đăng nhập"
+    },
+    "tabs": {
+      "signUp": "Đăng ký",
+      "logIn": "Đăng nhập"
+    },
+    "roles": {
+      "helpSeeker": "Người cần giúp đỡ",
+      "volunteer": "Tình nguyện viên",
+      "organization": "Tổ chức"
+    },
+    "fields": {
+      "name": "Tên",
+      "email": "Email",
+      "password": "Mật khẩu",
+      "location": "Vị trí",
+      "skills": "Kỹ năng"
+    },
+    "placeholders": {
+      "name": "Nhập tên của bạn",
+      "email": "you@example.com",
+      "password": "Nhập mật khẩu của bạn",
+      "newPassword": "12+ ký tự, có chữ hoa & số",
+      "location": "Thành phố, Tiểu bang hoặc Mã bưu điện"
+    },
+    "signIn": {
+      "welcomeBack": "Chào mừng trở lại",
+      "submit": "Đăng nhập",
+      "submitting": "Đang đăng nhập…",
+      "errors": {
+        "missingCredentials": "Vui lòng nhập email và mật khẩu của bạn.",
+        "generic": "Hiện không thể đăng nhập. Vui lòng thử lại."
+      }
+    },
+    "signUp": {
+      "welcomeRole": "Chào mừng, {{role}}!",
+      "submit": "Tiếp tục",
+      "submitting": "Đang tạo tài khoản…",
+      "selectAllThatApply": "Chọn tất cả những mục phù hợp",
+      "skillsSelected": "Đã chọn {{count}}",
+      "errors": {
+        "missingRequired": "Tên, email và mật khẩu là bắt buộc.",
+        "locationRequired": "Vị trí là bắt buộc.",
+        "passwordTooShort": "Mật khẩu phải có ít nhất 12 ký tự.",
+        "passwordTooLong": "Mật khẩu phải có tối đa 72 ký tự.",
+        "passwordComplexity": "Mật khẩu phải bao gồm một chữ hoa, một chữ thường và một số.",
+        "skillRequired": "Vui lòng chọn ít nhất một kỹ năng mà bạn có thể giúp đỡ.",
+        "generic": "Hiện không thể đăng ký. Vui lòng thử lại."
+      }
+    }
+  },
+  "portal": {
+    "logoAlt": "Logo {{brand}}",
+    "searchPlaceholder": "Tìm kiếm...",
+    "toggleDarkMode": "Bật/tắt chế độ tối",
+    "darkModeEnabled": "Đã bật chế độ tối",
+    "lightModeEnabled": "Đã bật chế độ sáng",
+    "notifications": "Thông báo",
+    "signOut": "Đăng xuất"
+  },
+  "org": {
+    "nav": {
+      "tasks": "Nhiệm vụ",
+      "metrics": "Chỉ số",
+      "resources": "Tài nguyên",
+      "volunteers": "Tình nguyện viên",
+      "chat": "Trò chuyện",
+      "documents": "Tài liệu"
+    },
+    "errors": {
+      "loadRequests": "Đã xảy ra lỗi khi tải các yêu cầu.",
+      "updateStatus": "Không thể cập nhật trạng thái yêu cầu.",
+      "updateResource": "Không thể cập nhật tài nguyên.",
+      "removeResource": "Không thể xóa tài nguyên.",
+      "updateAssignment": "Không thể cập nhật phân công."
+    },
+    "dashboard": {
+      "greeting": "Xin chào, {{name}}!",
+      "metrics": "CHỈ SỐ",
+      "analyze": "Phân tích",
+      "requestsCompleted": "Yêu cầu đã hoàn thành",
+      "peopleHelped": "Số người được giúp đỡ",
+      "resourcesAvailable": "Tài nguyên sẵn có",
+      "heatMapTitle": "Bản đồ nhiệt yêu cầu",
+      "respondingToday": "Hôm nay chúng ta đang ứng phó ở đâu?",
+      "tasks": "Nhiệm vụ",
+      "viewAll": "Xem tất cả",
+      "chartLabel": "Biểu đồ xu hướng chỉ số",
+      "taskFallback": "Yêu cầu"
+    },
+    "requests": {
+      "sortBy": "Sắp xếp theo",
+      "sort": {
+        "priority": "Mức ưu tiên (cao → thấp)",
+        "newest": "Mới nhất trước",
+        "nearest": "Gần bạn nhất"
+      },
+      "measuringDistances": "Đang đo khoảng cách…",
+      "locationRequired": "Vị trí là bắt buộc và không thể để trống.",
+      "locationSaveError": "Không thể lưu vị trí của bạn.",
+      "addLocationToSort": "Thêm vị trí vào hồ sơ tổ chức của bạn để sắp xếp theo khoảng cách.",
+      "distanceSortError": "Không thể sắp xếp theo khoảng cách.",
+      "locationPlaceholder": "Thành phố, TB hoặc Mã bưu điện",
+      "saving": "Đang lưu…",
+      "save": "Lưu",
+      "cancel": "Hủy",
+      "locationTitle": "Đặt vị trí để đo khoảng cách từ đó",
+      "yourLocation": "Vị trí của bạn: {{location}}",
+      "setYourLocation": "Đặt vị trí của bạn",
+      "yourRequests": "Yêu cầu của bạn",
+      "yourRequestsEmpty": "Bạn chưa ứng phó với yêu cầu nào.",
+      "unfilteredRequests": "Yêu cầu chưa lọc",
+      "unfilteredRequestsEmpty": "Hiện không có yêu cầu nào đang mở.",
+      "heatMapTitle": "Bản đồ nhiệt yêu cầu",
+      "mapTitle": "Bản đồ yêu cầu",
+      "heatToggle": "Nhiệt",
+      "mapToggle": "Bản đồ",
+      "heatMapCaption": "Tô đậm theo nơi tập trung nhu cầu",
+      "columnName": "Tên",
+      "columnDate": "Ngày",
+      "columnDistance": "Khoảng cách",
+      "columnPriority": "Mức ưu tiên",
+      "loading": "Đang tải…",
+      "tryAgain": "Thử lại",
+      "helpSeeker": "Người cần giúp đỡ",
+      "milesAway": "{{miles}} dặm",
+      "priority": {
+        "critical": "Nguy cấp",
+        "high": "Cao",
+        "medium": "Trung bình",
+        "low": "Thấp",
+        "notSet": "Chưa thiết lập"
+      },
+      "selectPrompt": "Chọn một yêu cầu để xem chi tiết.",
+      "phoneNumber": "Số điện thoại",
+      "inHousehold": "Số người trong hộ",
+      "detailsTitle": "Chi tiết yêu cầu trợ giúp",
+      "description": "Mô tả",
+      "noDescription": "Không có mô tả.",
+      "categoryOfHelp": "Loại trợ giúp",
+      "userUrgency": "Mức khẩn cấp do người dùng khai báo",
+      "location": "Vị trí",
+      "aiPriorityRating": "Xếp hạng ưu tiên của AI",
+      "notScored": "Chưa được chấm điểm",
+      "status": "Trạng thái",
+      "statusOptions": {
+        "pending": "pending",
+        "in-progress": "in-progress",
+        "matched": "matched",
+        "fulfilled": "fulfilled",
+        "closed": "closed"
+      },
+      "unassign": "Bỏ phân công khỏi chúng tôi",
+      "assign": "Phân công cho chúng tôi",
+      "assignedToYou": "Đã phân công cho tổ chức của bạn",
+      "assignToAllocate": "Phân công yêu cầu này cho tổ chức của bạn để cấp phát tài nguyên."
+    },
+    "resources": {
+      "types": {
+        "food": "Thực phẩm",
+        "wood": "Gỗ",
+        "healthCareKits": "Bộ chăm sóc sức khỏe"
+      },
+      "formIncomplete": "Vui lòng điền tên, số lượng và đơn vị.",
+      "addError": "Không thể thêm tài nguyên.",
+      "addTitle": "Thêm tài nguyên",
+      "addSubtitle": "Liệt kê những gì tổ chức của bạn có sẵn để phân phát.",
+      "type": "Loại",
+      "name": "Tên",
+      "namePlaceholder": "ví dụ: Đồ hộp, Bó củi",
+      "quantity": "Số lượng",
+      "unit": "Đơn vị",
+      "unitPlaceholder": "bữa ăn, đơn vị, bộ",
+      "adding": "Đang thêm…",
+      "addButton": "Thêm tài nguyên",
+      "yourResources": "Tài nguyên của bạn",
+      "loading": "Đang tải…",
+      "tryAgain": "Thử lại",
+      "emptyState": "Chưa có tài nguyên nào. Thêm tài nguyên đầu tiên bằng biểu mẫu.",
+      "available": "Có sẵn",
+      "unavailable": "Không có sẵn",
+      "remove": "Xóa"
+    },
+    "allocation": {
+      "loadError": "Không thể tải các khoản cấp phát.",
+      "resourceFallback": "tài nguyên",
+      "noSuggestions": "Không có gợi ý — hãy thêm tài nguyên sẵn có trước.",
+      "suggestError": "Không thể lấy gợi ý.",
+      "pickResource": "Chọn một tài nguyên để cấp phát.",
+      "invalidQuantity": "Số lượng phải là số nguyên từ 1 trở lên.",
+      "allocateError": "Không thể cấp phát tài nguyên.",
+      "removeError": "Không thể xóa khoản cấp phát.",
+      "title": "Tài nguyên đã cấp phát",
+      "thinking": "Đang suy nghĩ…",
+      "suggestWithAi": "✨ Gợi ý bằng AI",
+      "loading": "Đang tải…",
+      "nothingAllocated": "Chưa cấp phát gì.",
+      "remove": "Xóa",
+      "resource": "Tài nguyên",
+      "select": "Chọn…",
+      "qty": "SL",
+      "adding": "Đang thêm…",
+      "allocate": "Cấp phát"
+    },
+    "heatMap": {
+      "fewerNeeds": "Ít nhu cầu hơn",
+      "moreNeeds": "Nhiều nhu cầu hơn"
+    }
+  },
+  "volunteer": {
+    "nav": {
+      "general": "Tổng quan",
+      "dashboard": "Bảng điều khiển",
+      "requests": "Yêu cầu",
+      "tasks": "Nhiệm vụ",
+      "skills": "Kỹ năng",
+      "groups": "Nhóm",
+      "tools": "Công cụ",
+      "chat": "Trò chuyện",
+      "documents": "Tài liệu",
+      "settings": "Cài đặt"
+    },
+    "viewTitles": {
+      "requests": "Yêu cầu trợ giúp đang hoạt động",
+      "skills": "Kỹ năng của tôi"
+    },
+    "comingSoon": "Phần này sẽ sớm ra mắt.",
+    "common": {
+      "loading": "Đang tải…",
+      "tryAgain": "Thử lại",
+      "saving": "Đang lưu…"
+    },
+    "errors": {
+      "loadRequests": "Đã xảy ra lỗi khi tải các yêu cầu.",
+      "recordInterest": "Không thể ghi nhận sự quan tâm của bạn. Vui lòng thử lại.",
+      "markHelped": "Không thể đánh dấu yêu cầu là đã giúp. Vui lòng thử lại.",
+      "withdraw": "Không thể rút lại sự quan tâm của bạn. Vui lòng thử lại."
+    },
+    "confirmations": {
+      "interestRecorded": "Đã ghi nhận sự quan tâm. Cảm ơn bạn đã giúp đỡ!"
+    },
+    "dashboard": {
+      "defaultName": "Tên",
+      "greeting": "Xin chào, {{name}}!",
+      "metrics": "CHỈ SỐ",
+      "analyze": "Phân tích",
+      "requestsCompleted": "Yêu cầu đã hoàn thành",
+      "peopleHelped": "Số người được giúp đỡ",
+      "skillWays": "Cách mở rộng kỹ năng của bạn",
+      "requestHeatMap": "Bản đồ nhiệt yêu cầu",
+      "respondingToday": "Hôm nay chúng ta đang ứng phó ở đâu?",
+      "tasks": "Nhiệm vụ",
+      "viewAll": "Xem tất cả",
+      "noUpcomingTasks": "Hiện không có nhiệm vụ sắp tới nào.",
+      "metricsChartLabel": "Biểu đồ xu hướng chỉ số",
+      "requestFallback": "Yêu cầu"
+    },
+    "requests": {
+      "views": {
+        "calendar": "Lịch",
+        "list": "Danh sách",
+        "cards": "Thẻ",
+        "map": "Bản đồ"
+      },
+      "noOpenRequests": "Hiện không có yêu cầu nào đang mở. Vui lòng quay lại sau.",
+      "whereHelpNeeded": "Nơi cần trợ giúp",
+      "selectedCount": "Đã chọn {{count}} yêu cầu",
+      "helpWithSelected": "Tôi có thể giúp với những mục đã chọn",
+      "selectAll": "Chọn tất cả yêu cầu",
+      "columns": {
+        "name": "Tên",
+        "category": "Loại",
+        "urgencyLevel": "Mức khẩn cấp",
+        "aiPriority": "Ưu tiên AI",
+        "timeSubmitted": "Thời gian gửi"
+      },
+      "priorityTooltip": "Điểm ưu tiên do AI tính toán (0–100)",
+      "sortingByUrgency": "Đang sắp xếp theo mức khẩn cấp",
+      "sortByUrgency": "Sắp xếp theo mức khẩn cấp",
+      "selectRequestFrom": "Chọn yêu cầu từ {{name}}",
+      "helpSeekerLower": "người cần giúp đỡ",
+      "helpSeeker": "Người cần giúp đỡ",
+      "whyPrioritized": "🤖 Vì sao AI ưu tiên yêu cầu này",
+      "notScoredYet": "Yêu cầu này chưa được bộ sắp xếp ưu tiên của AI chấm điểm.",
+      "requestLabel": "Yêu cầu:",
+      "whyTooltip": "Hiển thị lý do AI ưu tiên yêu cầu này",
+      "why": "Tại sao?",
+      "helping": "✓ Đang giúp",
+      "iCanHelp": "Tôi có thể giúp",
+      "notSet": "Chưa thiết lập"
+    },
+    "calendar": {
+      "previousMonth": "Tháng trước",
+      "nextMonth": "Tháng sau",
+      "weekdays": {
+        "sun": "CN",
+        "mon": "T2",
+        "tue": "T3",
+        "wed": "T4",
+        "thu": "T5",
+        "fri": "T6",
+        "sat": "T7"
+      },
+      "selectDay": "Chọn một ngày",
+      "noRequestsThisDay": "Không có yêu cầu nào được gửi vào ngày này."
+    },
+    "skills": {
+      "saveError": "Không thể lưu kỹ năng của bạn.",
+      "yourSkills": "Kỹ năng của bạn",
+      "rateHelp": "Đánh giá mức độ tự tin của bạn ở mỗi kỹ năng, từ 1 (mới bắt đầu) đến 5 (chuyên gia).",
+      "noSkillsYet": "Bạn chưa thêm kỹ năng nào. Hãy thêm ở bên dưới.",
+      "levels": {
+        "novice": "Mới bắt đầu",
+        "beginner": "Cơ bản",
+        "competent": "Thành thạo",
+        "proficient": "Giỏi",
+        "expert": "Chuyên gia"
+      },
+      "removeSkill": "Xóa {{name}}",
+      "proficiencyFor": "Mức thành thạo cho {{name}}",
+      "addASkill": "Thêm một kỹ năng",
+      "addAnotherPlaceholder": "Thêm kỹ năng khác…",
+      "add": "Thêm",
+      "skillsSaved": "Đã lưu kỹ năng.",
+      "saveSkills": "Lưu kỹ năng"
+    },
+    "tasks": {
+      "noTasksYet": "Chưa có nhiệm vụ nào",
+      "noTasksHelp": "Vào mục Yêu cầu để đăng ký giúp đỡ những người cần trợ giúp.",
+      "helped": "✓ Đã giúp",
+      "markAsHelped": "Đánh dấu là đã giúp",
+      "removing": "Đang xóa…",
+      "unSignUp": "Hủy đăng ký"
+    }
+  },
+  "requests": {
+    "card": {
+      "priorityScoreTitle": "Điểm ưu tiên do AI tính toán (0–100)",
+      "priority": "Ưu tiên {{score}}",
+      "editRequest": "Chỉnh sửa yêu cầu",
+      "deleteRequest": "Xóa yêu cầu",
+      "whyPrioritized": "Vì sao yêu cầu này được ưu tiên:",
+      "volunteersInterested_one": "{{count}} tình nguyện viên quan tâm",
+      "volunteersInterested_other": "{{count}} tình nguyện viên quan tâm",
+      "orgsResponding_one": "{{count}} tổ chức đang ứng phó",
+      "orgsResponding_other": "{{count}} tổ chức đang ứng phó",
+      "status": "Trạng thái",
+      "saving": "Đang lưu…",
+      "statusLabel": "Trạng thái:",
+      "helped": "✓ Đã giúp",
+      "markAsHelped": "Đánh dấu là đã giúp",
+      "iCanHelpWithThis": "Tôi có thể giúp với việc này"
+    },
+    "statusOptions": {
+      "pending": "pending",
+      "assigned": "assigned",
+      "in-progress": "in-progress",
+      "matched": "matched",
+      "completed": "completed",
+      "fulfilled": "fulfilled",
+      "closed": "closed"
+    },
+    "filterBar": {
+      "searchPlaceholder": "Tìm kiếm yêu cầu…",
+      "searchAriaLabel": "Tìm kiếm yêu cầu theo từ khóa",
+      "categoryAriaLabel": "Lọc theo loại",
+      "allCategories": "Tất cả các loại",
+      "urgencyAriaLabel": "Lọc theo mức khẩn cấp",
+      "allUrgencies": "Tất cả mức khẩn cấp",
+      "matching": "{{count}} kết quả phù hợp",
+      "clear": "Xóa bộ lọc"
+    },
+    "categories": {
+      "Food": "Thực phẩm",
+      "Shelter": "Nơi trú ẩn",
+      "Medical": "Y tế",
+      "Transport": "Vận chuyển",
+      "Other": "Khác"
+    },
+    "urgencies": {
+      "Critical": "Nguy cấp",
+      "High": "Cao",
+      "Medium": "Trung bình",
+      "Low": "Thấp"
+    },
+    "hsRequests": {
+      "tabs": {
+        "calendar": "Lịch",
+        "list": "Danh sách",
+        "cards": "Thẻ"
+      },
+      "loading": "Đang tải các yêu cầu của bạn…",
+      "empty": "Bạn chưa gửi yêu cầu nào."
+    },
+    "calendar": {
+      "previousMonth": "Tháng trước",
+      "nextMonth": "Tháng sau",
+      "months": {
+        "january": "Tháng Một",
+        "february": "Tháng Hai",
+        "march": "Tháng Ba",
+        "april": "Tháng Tư",
+        "may": "Tháng Năm",
+        "june": "Tháng Sáu",
+        "july": "Tháng Bảy",
+        "august": "Tháng Tám",
+        "september": "Tháng Chín",
+        "october": "Tháng Mười",
+        "november": "Tháng Mười Một",
+        "december": "Tháng Mười Hai"
+      },
+      "weekdays": {
+        "sun": "CN",
+        "mon": "T2",
+        "tue": "T3",
+        "wed": "T4",
+        "thu": "T5",
+        "fri": "T6",
+        "sat": "T7"
+      },
+      "itemTitle": "{{category}} ({{urgency}}) — dự kiến ~ngày này",
+      "estimateNote": "Thời gian dự kiến hoàn thành được ước tính từ mức khẩn cấp của mỗi yêu cầu cho đến khi các tổ chức cung cấp ngày chính xác."
+    },
+    "table": {
+      "name": "Tên",
+      "category": "Loại",
+      "urgencyLevel": "Mức khẩn cấp",
+      "status": "Trạng thái",
+      "dateSubmitted": "Ngày gửi",
+      "location": "Vị trí",
+      "requestFallback": "Yêu cầu",
+      "deleteRequest": "Xóa yêu cầu",
+      "soonToBeFulfilled": "Sắp được hoàn thành"
+    },
+    "tabNav": {
+      "ariaLabel": "Các chế độ xem bảng điều khiển"
+    },
+    "nearMe": {
+      "locating": "Đang định vị…",
+      "on": "Gần tôi: bật",
+      "label": "Gần tôi",
+      "searchRadius": "Bán kính tìm kiếm",
+      "within": "trong vòng",
+      "searchRadiusMiles": "Bán kính tìm kiếm tính bằng dặm",
+      "miles": "{{count}} dặm",
+      "nearby": "{{count}} lân cận"
+    },
+    "map": {
+      "pins": "Ghim",
+      "heatmap": "Bản đồ nhiệt",
+      "loadingHeatmap": "Đang tải bản đồ nhiệt…",
+      "notShown_one": "{{count}} yêu cầu không có vị trí lập bản đồ được không được hiển thị.",
+      "notShown_other": "{{count}} yêu cầu không có vị trí lập bản đồ được không được hiển thị.",
+      "fewerNeeds": "Ít nhu cầu hơn",
+      "moreNeeds": "Nhiều nhu cầu hơn",
+      "popup": {
+        "helpSeeker": "Người cần giúp đỡ",
+        "uncategorized": "Chưa phân loại",
+        "urgencySuffix": "Mức khẩn cấp {{urgency}}",
+        "aiScore": "AI {{score}}",
+        "helping": "✓ Đang giúp",
+        "saving": "Đang lưu…",
+        "iCanHelp": "Tôi có thể giúp"
+      }
+    }
+  },
+  "voice": {
+    "errors": {
+      "unsupportedBrowser": "Trình duyệt của bạn không hỗ trợ ghi âm giọng nói. Vui lòng sử dụng biểu mẫu thay thế.",
+      "micBlocked": "Quyền truy cập micro đã bị chặn. Hãy bật trong cài đặt trình duyệt để ghi âm.",
+      "startFailed": "Không thể bắt đầu ghi âm. Vui lòng kiểm tra micro và thử lại.",
+      "noAudio": "Chúng tôi không nhận được âm thanh nào. Vui lòng thử ghi âm lại.",
+      "processFailed": "Không thể xử lý bản ghi âm. Vui lòng thử lại.",
+      "sampleLoadFailed": "Không thể tải bản ghi âm mẫu."
+    },
+    "intake": {
+      "title": "Yêu cầu trợ giúp bằng giọng nói",
+      "subtitle": "Hãy nói cho chúng tôi biết bạn cần gì. Chúng tôi sẽ chuyển thành một yêu cầu để bạn xem lại.",
+      "stopRecording": "Dừng ghi âm",
+      "startRecording": "Bắt đầu ghi âm",
+      "transcribing": "Đang chuyển yêu cầu của bạn thành văn bản…",
+      "recording": "Đang ghi âm… {{time}} — nhấn để dừng",
+      "tapToStart": "Nhấn vào micro để bắt đầu",
+      "useSample": "Dùng bản ghi âm mẫu thay thế",
+      "cancel": "Hủy"
+    },
+    "review": {
+      "title": "Xác nhận những gì chúng tôi đã nghe",
+      "subtitle": "Chúng tôi đã chuyển bản ghi âm của bạn thành một yêu cầu. Hãy xem lại chi tiết và sửa những gì chưa đúng trước khi gửi.",
+      "youSaid": "Bạn đã nói",
+      "doubleCheck": "⚠ Vui lòng kiểm tra lại",
+      "reRecord": "Ghi âm lại",
+      "submitting": "Đang gửi…",
+      "submit": "Gửi yêu cầu",
+      "errors": {
+        "requiredFields": "Vui lòng điền tất cả các trường bắt buộc trước khi gửi.",
+        "submitFailed": "Không thể gửi yêu cầu của bạn.",
+        "submitRetry": "Gửi yêu cầu thất bại. Vui lòng thử lại."
+      },
+      "fields": {
+        "category": "Loại",
+        "urgency": "Mức khẩn cấp",
+        "location": "Vị trí",
+        "householdSize": "Số người trong hộ",
+        "description": "Mô tả"
+      },
+      "category": {
+        "placeholder": "Chọn một loại",
+        "food": "Thực phẩm",
+        "shelter": "Nơi trú ẩn",
+        "medical": "Y tế",
+        "transport": "Vận chuyển",
+        "other": "Khác"
+      },
+      "urgency": {
+        "placeholder": "Chọn mức khẩn cấp",
+        "low": "Thấp — Có thể chờ vài ngày",
+        "medium": "Trung bình — Trong vòng 24 giờ",
+        "high": "Cao — Trong vòng vài giờ",
+        "critical": "Nguy cấp — Ngay lập tức"
+      },
+      "placeholders": {
+        "location": "Thành phố, mã bưu điện hoặc địa chỉ",
+        "householdSize": "Có bao nhiêu người cần giúp đỡ?",
+        "description": "Mô tả sự trợ giúp bạn cần..."
+      }
+    }
+  },
+  "safety": {
+    "pageTitle": "Sổ tay an toàn",
+    "pageSubtitle": "Danh bạ khẩn cấp và hướng dẫn từng bước cho trước, trong và sau thảm họa.",
+    "contactsHeading": "Danh bạ khẩn cấp",
+    "guidesHeading": "Hướng dẫn chuẩn bị ứng phó thảm họa",
+    "disclaimer": "Hướng dẫn được điều chỉnh từ FEMA, Ready.gov và American Red Cross. Luôn tuân theo chỉ dẫn của cơ quan ứng phó khẩn cấp tại địa phương của bạn.",
+    "contacts": {
+      "lifeThreatening": {
+        "label": "Trường hợp khẩn cấp đe dọa tính mạng",
+        "note": "Cảnh sát, cứu hỏa hoặc y tế"
+      },
+      "distressHelpline": {
+        "label": "Đường dây trợ giúp khủng hoảng do thảm họa",
+        "note": "Tư vấn khủng hoảng 24/7"
+      },
+      "poisonControl": {
+        "label": "Trung tâm kiểm soát chất độc",
+        "note": "Ngộ độc hoặc phơi nhiễm"
+      },
+      "fema": {
+        "label": "Đường dây trợ giúp FEMA",
+        "note": "Hỗ trợ thảm họa & yêu cầu bồi thường"
+      },
+      "redCross": {
+        "label": "American Red Cross",
+        "note": "Dịch vụ nơi trú ẩn & cứu trợ"
+      },
+      "localNonEmergency": {
+        "label": "Đường dây không khẩn cấp tại địa phương",
+        "value": "Thêm đường dây địa phương của bạn",
+        "note": "Cảnh sát/dịch vụ công ích không khẩn cấp"
+      }
+    },
+    "zip": {
+      "label": "Tìm trợ giúp tại địa phương theo mã bưu điện",
+      "placeholder": "ví dụ: 78701",
+      "search": "Tìm kiếm",
+      "searching": "Đang tìm kiếm…",
+      "clear": "Xóa",
+      "invalid": "Vui lòng nhập mã bưu điện Hoa Kỳ hợp lệ gồm 5 chữ số.",
+      "lookupError": "Không thể tra cứu mã bưu điện đó. Vui lòng thử lại.",
+      "showingContacts": "Đang hiển thị danh bạ cho"
+    },
+    "phases": {
+      "before": "Trước",
+      "during": "Trong khi",
+      "after": "Sau"
+    },
+    "guides": {
+      "hurricane": {
+        "title": "Bão & Lũ lụt",
+        "before": {
+          "0": "Biết vùng và tuyến đường sơ tán của bạn.",
+          "1": "Chuẩn bị một bộ đồ dùng: 3 ngày nước (1 gallon/người/ngày), thực phẩm không dễ hỏng, thuốc, đèn pin, pin.",
+          "2": "Giữ giấy tờ (giấy tờ tùy thân, bảo hiểm, y tế) trong túi chống nước.",
+          "3": "Sạc điện thoại và pin dự phòng; đổ đầy xăng cho xe của bạn."
+        },
+        "during": {
+          "0": "Sơ tán ngay lập tức nếu được yêu cầu. Không bao giờ lái xe qua nước lũ — “Quay đầu lại, đừng chết đuối.”",
+          "1": "Di chuyển đến tầng cao nhất của tòa nhà; tránh tầng hầm.",
+          "2": "Tránh xa cửa sổ; trú ẩn trong một phòng bên trong.",
+          "3": "Nghe cơ quan chức năng địa phương qua radio dùng pin hoặc quay tay."
+        },
+        "after": {
+          "0": "Chỉ trở về nhà khi cơ quan chức năng thông báo an toàn.",
+          "1": "Tránh vùng nước đọng — nó có thể bị nhiễm điện hoặc ô nhiễm.",
+          "2": "Chụp ảnh thiệt hại cho bảo hiểm trước khi dọn dẹp.",
+          "3": "Thăm hỏi hàng xóm, đặc biệt là người lớn tuổi và người khuyết tật."
+        }
+      },
+      "wildfire": {
+        "title": "Cháy rừng",
+        "before": {
+          "0": "Dọn sạch lá, bụi cây và mảnh vụn trong phạm vi 30 feet quanh nhà bạn.",
+          "1": "Chuẩn bị một túi đồ sẵn sàng và để cạnh cửa.",
+          "2": "Đăng ký nhận cảnh báo khẩn cấp tại địa phương.",
+          "3": "Lên kế hoạch hai tuyến đường thoát ra khỏi khu phố của bạn."
+        },
+        "during": {
+          "0": "Rời đi sớm — đừng chờ lệnh sơ tán nếu bạn cảm thấy không an toàn.",
+          "1": "Đeo khẩu trang N95; đóng tất cả cửa sổ và cửa ra vào trước khi rời đi.",
+          "2": "Nếu bị mắc kẹt, gọi 911 và trú ẩn ở khu vực trống đã được dọn sạch, tránh xa thảm thực vật.",
+          "3": "Bật đèn pha; lái xe chậm qua vùng khói."
+        },
+        "after": {
+          "0": "Chờ thông báo “an toàn” trước khi quay lại.",
+          "1": "Cẩn thận với điểm nóng, hố tro và đường dây điện bị đứt.",
+          "2": "Đeo găng tay và khẩu trang khi dọn dẹp; tro có thể độc hại.",
+          "3": "Ghi lại các thiệt hại để yêu cầu bồi thường bảo hiểm và FEMA."
+        }
+      },
+      "earthquake": {
+        "title": "Động đất",
+        "before": {
+          "0": "Cố định đồ nội thất nặng, bình nước nóng và kệ vào tường.",
+          "1": "Xác định các vị trí an toàn: dưới bàn chắc chắn, sát tường bên trong.",
+          "2": "Để giày chắc chắn và đèn pin cạnh giường của bạn.",
+          "3": "Chuẩn bị bộ đồ dùng khẩn cấp và biết cách ngắt gas và nước."
+        },
+        "during": {
+          "0": "Cúi xuống, Che chắn và Bám chắc — chui xuống dưới đồ nội thất chắc chắn.",
+          "1": "Ở trong nhà cho đến khi hết rung lắc; đừng chạy ra ngoài.",
+          "2": "Nếu ở ngoài trời, di chuyển đến khu vực trống, tránh xa các tòa nhà và dây điện.",
+          "3": "Nếu đang lái xe, tấp vào lề tránh xa cầu vượt và dừng lại."
+        },
+        "after": {
+          "0": "Hãy đề phòng dư chấn; Cúi xuống, Che chắn và Bám chắc lần nữa nếu chúng xảy ra.",
+          "1": "Kiểm tra thương tích và rò rỉ gas — rời đi nếu bạn ngửi thấy mùi gas.",
+          "2": "Dùng tin nhắn, không gọi điện, để giữ đường dây điện thoại thông suốt.",
+          "3": "Kiểm tra thiệt hại của ngôi nhà trước khi quay lại vào."
+        }
+      },
+      "tornado": {
+        "title": "Lốc xoáy",
+        "before": {
+          "0": "Biết sự khác biệt: Cảnh giác (Watch) nghĩa là có thể xảy ra; Cảnh báo (Warning) nghĩa là hãy trú ẩn ngay.",
+          "1": "Xác định một phòng an toàn — tầng hầm hoặc phòng bên trong ở tầng thấp nhất.",
+          "2": "Chuẩn bị mũ bảo hiểm hoặc chăn dày để bảo vệ đầu của bạn.",
+          "3": "Bật Cảnh báo khẩn cấp không dây trên điện thoại của bạn."
+        },
+        "during": {
+          "0": "Vào phòng an toàn ngay lập tức; tạo càng nhiều bức tường giữa bạn và bên ngoài càng tốt.",
+          "1": "Che đầu và cổ của bạn; cúi thấp người.",
+          "2": "Tránh cửa sổ, cửa ra vào và tường ngoài.",
+          "3": "Nếu ở trong nhà di động hoặc xe hơi, hãy đến một tòa nhà chắc chắn."
+        },
+        "after": {
+          "0": "Cẩn thận với kính vỡ, đinh và đường dây điện bị đứt.",
+          "1": "Đừng vào các tòa nhà bị hư hại cho đến khi chúng được kiểm tra.",
+          "2": "Giúp người bị thương nhưng đừng di chuyển người bị thương nặng trừ khi họ đang gặp nguy hiểm.",
+          "3": "Chụp ảnh thiệt hại cho bảo hiểm của bạn."
+        }
+      },
+      "winter": {
+        "title": "Bão tuyết",
+        "before": {
+          "0": "Cách nhiệt cho ống nước và biết cách ngắt nước nếu chúng bị đóng băng.",
+          "1": "Dự trữ thêm chăn, quần áo ấm, thực phẩm và nước.",
+          "2": "Chuẩn bị sẵn đèn pin và pin cho trường hợp mất điện.",
+          "3": "Bảo dưỡng thiết bị sưởi và kiểm tra máy dò khói/CO."
+        },
+        "during": {
+          "0": "Ở trong nhà và mặc nhiều lớp quần áo.",
+          "1": "Không bao giờ dùng máy phát điện, bếp nướng hoặc bếp cắm trại trong nhà — nguy cơ ngộ độc khí carbon monoxide.",
+          "2": "Để vòi nước nhỏ giọt nhẹ để ngăn ống nước bị đóng băng.",
+          "3": "Nếu mất nhiệt sưởi, hãy đóng kín các phòng không dùng để giữ ấm."
+        },
+        "after": {
+          "0": "Thăm hỏi hàng xóm có nguy cơ bị ảnh hưởng bởi giá lạnh.",
+          "1": "Cẩn thận với các dấu hiệu tê cóng và hạ thân nhiệt.",
+          "2": "Dọn tuyết khỏi lỗ thông hơi và ống xả để tránh tích tụ khí CO.",
+          "3": "Tránh gắng sức quá mức khi xúc tuyết."
+        }
+      },
+      "heat": {
+        "title": "Nắng nóng cực độ",
+        "before": {
+          "0": "Xác định các địa điểm công cộng có điều hòa (thư viện, trung tâm thương mại, trung tâm làm mát).",
+          "1": "Kiểm tra quạt và điều hòa hoạt động tốt; che các cửa sổ đón nắng sáng/chiều.",
+          "2": "Dự trữ thêm nước và đồ uống bù điện giải.",
+          "3": "Lên kế hoạch thăm hỏi hàng xóm lớn tuổi hoặc sống một mình."
+        },
+        "during": {
+          "0": "Uống nước thường xuyên — đừng chờ đến khi khát.",
+          "1": "Ở phần mát nhất trong nhà của bạn hoặc tại trung tâm làm mát.",
+          "2": "Không bao giờ để người hoặc thú cưng trong xe đang đỗ.",
+          "3": "Hạn chế hoạt động ngoài trời vào sáng sớm hoặc chiều tối."
+        },
+        "after": {
+          "0": "Cẩn thận với kiệt sức do nóng (đổ mồ hôi nhiều, yếu ớt) và sốc nhiệt (lú lẫn, da nóng khô — gọi 911).",
+          "1": "Tiếp tục bù nước và nghỉ ngơi ở nơi mát mẻ.",
+          "2": "Thăm hỏi gia đình, hàng xóm và thú cưng.",
+          "3": "Dự trữ lại nước và vật dụng cho đợt nắng nóng tiếp theo."
+        }
+      }
+    }
+  },
+  "chat": {
+    "greeting": "Chào {{name}}! Tôi là Mappie, trợ lý MapResponse của bạn. Hãy hỏi tôi về các yêu cầu của bạn, mẹo an toàn hoặc cách nhận trợ giúp.",
+    "unavailable": "Trợ lý hiện không khả dụng. Vui lòng thử lại.",
+    "openAssistant": "Mở trợ lý trò chuyện",
+    "closeAssistant": "Đóng trợ lý trò chuyện",
+    "assistantSubtitle": "Trợ lý MapResponse của bạn",
+    "thinking": "Đang suy nghĩ…",
+    "inputPlaceholder": "Nhập tin nhắn của bạn…",
+    "send": "Gửi"
+  },
+  "misc": {
+    "comingSoon": "Bạn đã đăng nhập! Trang này sẽ sớm ra mắt."
+  },
+  "requestForm": {
+    "titleCreate": "Yêu cầu trợ giúp",
+    "titleEdit": "Chỉnh sửa yêu cầu",
+    "subtitleCreate": "Hãy cho chúng tôi biết bạn cần gì và chúng tôi sẽ ưu tiên xử lý.",
+    "subtitleEdit": "Cập nhật chi tiết yêu cầu của bạn bên dưới.",
+    "successCreate": "✓ Đã gửi yêu cầu!",
+    "successEdit": "✓ Đã lưu thay đổi!",
+    "errorRequired": "Vui lòng điền tất cả các trường bắt buộc"
+  }
+}

@@ -1,15 +1,20 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 // The baseline resource types an org can stock. Must match the backend's
 // allowed list (resourceController RESOURCE_TYPES). More can be added later.
+// `labelKey` is the i18n key for the display label; `value` stays literal since
+// it's the raw type sent to the backend.
 const RESOURCE_TYPES = [
-  { value: 'food', label: 'Food', defaultUnit: 'meals' },
-  { value: 'wood', label: 'Wood', defaultUnit: 'units' },
-  { value: 'health-care-kits', label: 'Health Care Kits', defaultUnit: 'kits' },
+  { value: 'food', labelKey: 'org.resources.types.food', defaultUnit: 'meals' },
+  { value: 'wood', labelKey: 'org.resources.types.wood', defaultUnit: 'units' },
+  { value: 'health-care-kits', labelKey: 'org.resources.types.healthCareKits', defaultUnit: 'kits' },
 ];
 
-const typeLabel = (value) =>
-  RESOURCE_TYPES.find((t) => t.value === value)?.label || value;
+const typeLabel = (value, t) => {
+  const preset = RESOURCE_TYPES.find((rt) => rt.value === value);
+  return preset ? t(preset.labelKey) : value;
+};
 
 // Organization "Resources" tab. Orgs list the things they have available to
 // give out (food, wood, health care kits) and add more. The total count of
@@ -31,6 +36,7 @@ const ResourcesView = ({
   onToggle,
   onDelete,
 }) => {
+  const { t } = useTranslation();
   const [resourceType, setResourceType] = useState(RESOURCE_TYPES[0].value);
   const [name, setName] = useState('');
   const [quantity, setQuantity] = useState('');
@@ -50,7 +56,7 @@ const ResourcesView = ({
     setFormError('');
 
     if (!name.trim() || !quantity || !unit.trim()) {
-      setFormError('Please fill in the name, quantity, and unit.');
+      setFormError(t('org.resources.formIncomplete'));
       return;
     }
 
@@ -66,7 +72,7 @@ const ResourcesView = ({
       setName('');
       setQuantity('');
     } catch (err) {
-      setFormError(err.message || 'Could not add the resource.');
+      setFormError(err.message || t('org.resources.addError'));
     } finally {
       setSubmitting(false);
     }
@@ -82,9 +88,9 @@ const ResourcesView = ({
     <div className="grid lg:grid-cols-[minmax(300px,380px)_1fr] gap-6">
       {/* Add-resource form */}
       <div className="bg-white dark:bg-[#273A20] rounded-2xl shadow-md p-6 h-fit">
-        <h2 className="text-xl font-bold text-black dark:text-white mb-1">Add a Resource</h2>
+        <h2 className="text-xl font-bold text-black dark:text-white mb-1">{t('org.resources.addTitle')}</h2>
         <p className="text-gray-600 dark:text-gray-400 text-sm mb-5">
-          List what your organization has available to give out.
+          {t('org.resources.addSubtitle')}
         </p>
 
         {formError && (
@@ -95,34 +101,34 @@ const ResourcesView = ({
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label htmlFor="resourceType" className={label}>Type</label>
+            <label htmlFor="resourceType" className={label}>{t('org.resources.type')}</label>
             <select
               id="resourceType"
               value={resourceType}
               onChange={(e) => handleTypeChange(e.target.value)}
               className={field}
             >
-              {RESOURCE_TYPES.map((t) => (
-                <option key={t.value} value={t.value}>{t.label}</option>
+              {RESOURCE_TYPES.map((rt) => (
+                <option key={rt.value} value={rt.value}>{t(rt.labelKey)}</option>
               ))}
             </select>
           </div>
 
           <div>
-            <label htmlFor="resourceName" className={label}>Name</label>
+            <label htmlFor="resourceName" className={label}>{t('org.resources.name')}</label>
             <input
               type="text"
               id="resourceName"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Canned goods, Firewood bundle"
+              placeholder={t('org.resources.namePlaceholder')}
               className={field}
             />
           </div>
 
           <div className="flex gap-3">
             <div className="flex-1">
-              <label htmlFor="resourceQuantity" className={label}>Quantity</label>
+              <label htmlFor="resourceQuantity" className={label}>{t('org.resources.quantity')}</label>
               <input
                 type="number"
                 id="resourceQuantity"
@@ -135,13 +141,13 @@ const ResourcesView = ({
               />
             </div>
             <div className="flex-1">
-              <label htmlFor="resourceUnit" className={label}>Unit</label>
+              <label htmlFor="resourceUnit" className={label}>{t('org.resources.unit')}</label>
               <input
                 type="text"
                 id="resourceUnit"
                 value={unit}
                 onChange={(e) => setUnit(e.target.value)}
-                placeholder="meals, units, kits"
+                placeholder={t('org.resources.unitPlaceholder')}
                 className={field}
               />
             </div>
@@ -152,31 +158,31 @@ const ResourcesView = ({
             disabled={submitting}
             className="w-full bg-[#1C2A16] dark:bg-[#7F9764] text-white py-3 px-6 rounded-xl font-semibold uppercase text-sm tracking-wide hover:opacity-90 transition-opacity disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
-            {submitting ? 'Adding…' : 'Add Resource'}
+            {submitting ? t('org.resources.adding') : t('org.resources.addButton')}
           </button>
         </form>
       </div>
 
       {/* Current inventory */}
       <div className="bg-white dark:bg-[#16233a] rounded-2xl shadow-md p-6">
-        <h2 className="text-xl font-bold text-[#1C2A16] dark:text-white mb-4">Your Resources</h2>
+        <h2 className="text-xl font-bold text-[#1C2A16] dark:text-white mb-4">{t('org.resources.yourResources')}</h2>
 
         {loading && (
-          <p className="text-[#1C2A16] dark:text-gray-300" role="status">Loading…</p>
+          <p className="text-[#1C2A16] dark:text-gray-300" role="status">{t('org.resources.loading')}</p>
         )}
 
         {error && !loading && (
           <div className="bg-red-50 border border-red-200 text-red-800 rounded-xl p-4">
             <p className="font-semibold">{error}</p>
             <button onClick={onRetry} className="mt-2 text-sm font-semibold underline hover:no-underline">
-              Try again
+              {t('org.resources.tryAgain')}
             </button>
           </div>
         )}
 
         {!loading && !error && resources.length === 0 && (
           <p className="text-gray-500 dark:text-gray-400">
-            No resources yet. Add your first one using the form.
+            {t('org.resources.emptyState')}
           </p>
         )}
 
@@ -190,7 +196,7 @@ const ResourcesView = ({
                 <div>
                   <p className="font-semibold text-[#1C2A16] dark:text-white">{r.name}</p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {typeLabel(r.resourceType)} · {r.quantity} {r.unit}
+                    {typeLabel(r.resourceType, t)} · {r.quantity} {r.unit}
                   </p>
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
@@ -203,14 +209,14 @@ const ResourcesView = ({
                         : 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
                     }`}
                   >
-                    {r.available ? 'Available' : 'Unavailable'}
+                    {r.available ? t('org.resources.available') : t('org.resources.unavailable')}
                   </button>
                   <button
                     type="button"
                     onClick={() => onDelete(r.id)}
                     className="text-sm font-semibold text-red-600 hover:underline"
                   >
-                    Remove
+                    {t('org.resources.remove')}
                   </button>
                 </div>
               </li>

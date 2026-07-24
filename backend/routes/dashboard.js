@@ -19,6 +19,10 @@ router.get('/volunteer', requireAuth, dashboardController.getVolunteerDashboard)
 // GET /api/dashboard/volunteer/profile
 router.get('/volunteer/profile', requireAuth, dashboardController.getVolunteerProfile);
 
+// Replace the volunteer's skills (name + self-rated proficiency)
+// PUT /api/dashboard/volunteer/profile/skills
+router.put('/volunteer/profile/skills', requireAuth, dashboardController.updateVolunteerSkills);
+
 // Get organization's active responses
 // GET /api/dashboard/organization
 router.get('/organization', requireAuth, dashboardController.getOrganizationDashboard);

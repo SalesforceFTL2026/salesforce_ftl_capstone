@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { isPreviewMode, isWriteMethod } from './previewMode';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
@@ -16,6 +17,22 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // Admin "Preview only" mode: don't let writes reach the server. We swap in a
+    // one-off adapter that resolves with a synthetic success, so callers (and
+    // their optimistic UI updates) behave as if the write succeeded while the
+    // database stays untouched. Reads are never intercepted.
+    if (isPreviewMode() && isWriteMethod(config.method)) {
+      config.adapter = async (cfg) => ({
+        data: { success: true, data: null, preview: true },
+        status: 200,
+        statusText: 'OK (preview)',
+        headers: {},
+        config: cfg,
+        request: null,
+      });
+    }
+
     return config;
   },
   (error) => {

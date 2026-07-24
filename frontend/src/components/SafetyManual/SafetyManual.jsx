@@ -1,171 +1,174 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import api from '../../utils/api';
 
 // A reference "manual" for help-seekers: who to call in an emergency, and
 // what to do before / during / after common disasters. Content is static
 // (no backend) and sourced from standard FEMA / Ready.gov / Red Cross guidance.
 
-// National emergency contacts. Numbers are US-wide; local lines vary, so we
-// leave a clearly-labeled placeholder for those.
-const EMERGENCY_CONTACTS = [
-  { label: 'Life-threatening emergency', value: '911', note: 'Police, fire, or medical' },
-  { label: 'Disaster Distress Helpline', value: '1-800-985-5990', note: '24/7 crisis counseling' },
-  { label: 'Poison Control', value: '1-800-222-1222', note: 'Poisoning or exposure' },
-  { label: 'FEMA Helpline', value: '1-800-621-3362', note: 'Disaster assistance & claims' },
-  { label: 'American Red Cross', value: '1-800-733-2767', note: 'Shelter & relief services' },
-  { label: 'Local non-emergency', value: 'Add your local line', note: 'Police/utilities non-emergency', placeholder: true },
-];
-
-// Before / during / after steps for each disaster type. Kept concise and
-// action-oriented so it reads like a checklist.
-const DISASTER_GUIDES = [
-  {
-    id: 'hurricane',
-    title: 'Hurricane & Flood',
-    icon: '🌀',
-    before: [
-      'Know your evacuation zone and route.',
-      'Build a kit: 3 days of water (1 gal/person/day), non-perishable food, meds, flashlight, batteries.',
-      'Keep documents (ID, insurance, medical) in a waterproof bag.',
-      'Charge phones and backup batteries; fill your car with gas.',
-    ],
-    during: [
-      'Evacuate immediately if told to. Never drive through flood water — “Turn Around, Don’t Drown.”',
-      'Move to the highest level of the building; avoid basements.',
-      'Stay away from windows; shelter in an interior room.',
-      'Listen to local officials on a battery or hand-crank radio.',
-    ],
-    after: [
-      'Return home only when authorities say it’s safe.',
-      'Avoid standing water — it may be electrically charged or contaminated.',
-      'Photograph damage for insurance before cleaning up.',
-      'Check on neighbors, especially older adults and people with disabilities.',
-    ],
-  },
-  {
-    id: 'wildfire',
-    title: 'Wildfire',
-    icon: '🔥',
-    before: [
-      'Clear leaves, brush, and debris within 30 ft of your home.',
-      'Pack a go-bag and keep it by the door.',
-      'Sign up for local emergency alerts.',
-      'Plan two escape routes out of your neighborhood.',
-    ],
-    during: [
-      'Leave early — don’t wait for an evacuation order if you feel unsafe.',
-      'Wear an N95 mask; close all windows and doors before leaving.',
-      'If trapped, call 911 and shelter in a cleared area away from vegetation.',
-      'Keep headlights on; drive slowly through smoke.',
-    ],
-    after: [
-      'Wait for the “all clear” before returning.',
-      'Watch for hot spots, ash pits, and downed power lines.',
-      'Wear gloves and a mask during cleanup; ash can be toxic.',
-      'Document losses for insurance and FEMA claims.',
-    ],
-  },
-  {
-    id: 'earthquake',
-    title: 'Earthquake',
-    icon: '🌎',
-    before: [
-      'Secure heavy furniture, water heaters, and shelves to walls.',
-      'Identify safe spots: under sturdy tables, against interior walls.',
-      'Keep sturdy shoes and a flashlight by your bed.',
-      'Store an emergency kit and know how to shut off gas and water.',
-    ],
-    during: [
-      'Drop, Cover, and Hold On — get under sturdy furniture.',
-      'Stay indoors until shaking stops; don’t run outside.',
-      'If outdoors, move to an open area away from buildings and wires.',
-      'If driving, pull over away from overpasses and stop.',
-    ],
-    after: [
-      'Expect aftershocks; Drop, Cover, and Hold On again if they come.',
-      'Check for injuries and gas leaks — leave if you smell gas.',
-      'Use texts, not calls, to keep phone lines open.',
-      'Inspect your home for damage before re-entering.',
-    ],
-  },
-  {
-    id: 'tornado',
-    title: 'Tornado',
-    icon: '🌪️',
-    before: [
-      'Know the difference: a Watch means possible; a Warning means take shelter now.',
-      'Identify a safe room — basement or an interior room on the lowest floor.',
-      'Keep a helmet or heavy blankets to protect your head.',
-      'Enable Wireless Emergency Alerts on your phone.',
-    ],
-    during: [
-      'Go to your safe room immediately; put as many walls between you and outside as possible.',
-      'Cover your head and neck; crouch low.',
-      'Avoid windows, doors, and outside walls.',
-      'If in a mobile home or car, get to a sturdy building.',
-    ],
-    after: [
-      'Watch for broken glass, nails, and downed power lines.',
-      'Don’t enter damaged buildings until they’re inspected.',
-      'Help injured people but don’t move the seriously hurt unless in danger.',
-      'Take photos of damage for your insurance.',
-    ],
-  },
-  {
-    id: 'winter',
-    title: 'Winter Storm',
-    icon: '❄️',
-    before: [
-      'Insulate pipes and know how to shut off water if they freeze.',
-      'Stock extra blankets, warm clothing, food, and water.',
-      'Keep flashlights and batteries ready for outages.',
-      'Service heating equipment and check smoke/CO detectors.',
-    ],
-    during: [
-      'Stay indoors and dress in layers.',
-      'Never use a generator, grill, or camp stove indoors — carbon monoxide risk.',
-      'Keep faucets dripping slightly to prevent frozen pipes.',
-      'If you lose heat, close off unused rooms to conserve warmth.',
-    ],
-    after: [
-      'Check on neighbors at risk from the cold.',
-      'Watch for signs of frostbite and hypothermia.',
-      'Clear snow from vents and exhausts to avoid CO buildup.',
-      'Avoid overexertion when shoveling.',
-    ],
-  },
-  {
-    id: 'heat',
-    title: 'Extreme Heat',
-    icon: '🌡️',
-    before: [
-      'Identify air-conditioned public places (libraries, malls, cooling centers).',
-      'Check that fans and AC work; cover windows that get morning/afternoon sun.',
-      'Stock extra water and electrolyte drinks.',
-      'Plan to check on older or isolated neighbors.',
-    ],
-    during: [
-      'Drink water often — don’t wait until you’re thirsty.',
-      'Stay in the coolest part of your home or a cooling center.',
-      'Never leave people or pets in a parked car.',
-      'Limit outdoor activity to early morning or evening.',
-    ],
-    after: [
-      'Watch for heat exhaustion (heavy sweating, weakness) and heat stroke (confusion, hot dry skin — call 911).',
-      'Keep hydrating and resting in a cool place.',
-      'Check on family, neighbors, and pets.',
-      'Restock your water and supplies for the next wave.',
-    ],
-  },
-];
-
-const PHASES = [
-  { key: 'before', label: 'Before', color: 'text-blue-700 dark:text-blue-300' },
-  { key: 'during', label: 'During', color: 'text-[#c84444] dark:text-red-300' },
-  { key: 'after', label: 'After', color: 'text-green-700 dark:text-green-300' },
-];
-
 const SafetyManual = () => {
+  const { t } = useTranslation();
+
+  // National emergency contacts. Numbers are US-wide; local lines vary, so we
+  // leave a clearly-labeled placeholder for those.
+  const EMERGENCY_CONTACTS = [
+    { label: t('safety.contacts.lifeThreatening.label'), value: '911', note: t('safety.contacts.lifeThreatening.note') },
+    { label: t('safety.contacts.distressHelpline.label'), value: '1-800-985-5990', note: t('safety.contacts.distressHelpline.note') },
+    { label: t('safety.contacts.poisonControl.label'), value: '1-800-222-1222', note: t('safety.contacts.poisonControl.note') },
+    { label: t('safety.contacts.fema.label'), value: '1-800-621-3362', note: t('safety.contacts.fema.note') },
+    { label: t('safety.contacts.redCross.label'), value: '1-800-733-2767', note: t('safety.contacts.redCross.note') },
+    { label: t('safety.contacts.localNonEmergency.label'), value: t('safety.contacts.localNonEmergency.value'), note: t('safety.contacts.localNonEmergency.note'), placeholder: true },
+  ];
+
+  // Before / during / after steps for each disaster type. Kept concise and
+  // action-oriented so it reads like a checklist.
+  const DISASTER_GUIDES = [
+    {
+      id: 'hurricane',
+      title: t('safety.guides.hurricane.title'),
+      icon: '🌀',
+      before: [
+        t('safety.guides.hurricane.before.0'),
+        t('safety.guides.hurricane.before.1'),
+        t('safety.guides.hurricane.before.2'),
+        t('safety.guides.hurricane.before.3'),
+      ],
+      during: [
+        t('safety.guides.hurricane.during.0'),
+        t('safety.guides.hurricane.during.1'),
+        t('safety.guides.hurricane.during.2'),
+        t('safety.guides.hurricane.during.3'),
+      ],
+      after: [
+        t('safety.guides.hurricane.after.0'),
+        t('safety.guides.hurricane.after.1'),
+        t('safety.guides.hurricane.after.2'),
+        t('safety.guides.hurricane.after.3'),
+      ],
+    },
+    {
+      id: 'wildfire',
+      title: t('safety.guides.wildfire.title'),
+      icon: '🔥',
+      before: [
+        t('safety.guides.wildfire.before.0'),
+        t('safety.guides.wildfire.before.1'),
+        t('safety.guides.wildfire.before.2'),
+        t('safety.guides.wildfire.before.3'),
+      ],
+      during: [
+        t('safety.guides.wildfire.during.0'),
+        t('safety.guides.wildfire.during.1'),
+        t('safety.guides.wildfire.during.2'),
+        t('safety.guides.wildfire.during.3'),
+      ],
+      after: [
+        t('safety.guides.wildfire.after.0'),
+        t('safety.guides.wildfire.after.1'),
+        t('safety.guides.wildfire.after.2'),
+        t('safety.guides.wildfire.after.3'),
+      ],
+    },
+    {
+      id: 'earthquake',
+      title: t('safety.guides.earthquake.title'),
+      icon: '🌎',
+      before: [
+        t('safety.guides.earthquake.before.0'),
+        t('safety.guides.earthquake.before.1'),
+        t('safety.guides.earthquake.before.2'),
+        t('safety.guides.earthquake.before.3'),
+      ],
+      during: [
+        t('safety.guides.earthquake.during.0'),
+        t('safety.guides.earthquake.during.1'),
+        t('safety.guides.earthquake.during.2'),
+        t('safety.guides.earthquake.during.3'),
+      ],
+      after: [
+        t('safety.guides.earthquake.after.0'),
+        t('safety.guides.earthquake.after.1'),
+        t('safety.guides.earthquake.after.2'),
+        t('safety.guides.earthquake.after.3'),
+      ],
+    },
+    {
+      id: 'tornado',
+      title: t('safety.guides.tornado.title'),
+      icon: '🌪️',
+      before: [
+        t('safety.guides.tornado.before.0'),
+        t('safety.guides.tornado.before.1'),
+        t('safety.guides.tornado.before.2'),
+        t('safety.guides.tornado.before.3'),
+      ],
+      during: [
+        t('safety.guides.tornado.during.0'),
+        t('safety.guides.tornado.during.1'),
+        t('safety.guides.tornado.during.2'),
+        t('safety.guides.tornado.during.3'),
+      ],
+      after: [
+        t('safety.guides.tornado.after.0'),
+        t('safety.guides.tornado.after.1'),
+        t('safety.guides.tornado.after.2'),
+        t('safety.guides.tornado.after.3'),
+      ],
+    },
+    {
+      id: 'winter',
+      title: t('safety.guides.winter.title'),
+      icon: '❄️',
+      before: [
+        t('safety.guides.winter.before.0'),
+        t('safety.guides.winter.before.1'),
+        t('safety.guides.winter.before.2'),
+        t('safety.guides.winter.before.3'),
+      ],
+      during: [
+        t('safety.guides.winter.during.0'),
+        t('safety.guides.winter.during.1'),
+        t('safety.guides.winter.during.2'),
+        t('safety.guides.winter.during.3'),
+      ],
+      after: [
+        t('safety.guides.winter.after.0'),
+        t('safety.guides.winter.after.1'),
+        t('safety.guides.winter.after.2'),
+        t('safety.guides.winter.after.3'),
+      ],
+    },
+    {
+      id: 'heat',
+      title: t('safety.guides.heat.title'),
+      icon: '🌡️',
+      before: [
+        t('safety.guides.heat.before.0'),
+        t('safety.guides.heat.before.1'),
+        t('safety.guides.heat.before.2'),
+        t('safety.guides.heat.before.3'),
+      ],
+      during: [
+        t('safety.guides.heat.during.0'),
+        t('safety.guides.heat.during.1'),
+        t('safety.guides.heat.during.2'),
+        t('safety.guides.heat.during.3'),
+      ],
+      after: [
+        t('safety.guides.heat.after.0'),
+        t('safety.guides.heat.after.1'),
+        t('safety.guides.heat.after.2'),
+        t('safety.guides.heat.after.3'),
+      ],
+    },
+  ];
+
+  const PHASES = [
+    { key: 'before', label: t('safety.phases.before'), color: 'text-blue-700 dark:text-blue-300' },
+    { key: 'during', label: t('safety.phases.during'), color: 'text-[#c84444] dark:text-red-300' },
+    { key: 'after', label: t('safety.phases.after'), color: 'text-green-700 dark:text-green-300' },
+  ];
+
   // Which disaster guide is expanded (only one open at a time). Default to the
   // first so the section doesn't look empty on load.
   const [openId, setOpenId] = useState(DISASTER_GUIDES[0].id);
@@ -183,7 +186,7 @@ const SafetyManual = () => {
     setZipError('');
 
     if (!/^\d{5}$/.test(trimmed)) {
-      setZipError('Please enter a valid 5-digit US zipcode.');
+      setZipError(t('safety.zip.invalid'));
       return;
     }
 
@@ -193,7 +196,7 @@ const SafetyManual = () => {
       setLocalResult(data.data);
     } catch (err) {
       setLocalResult(null);
-      setZipError(err.response?.data?.message || 'Could not look up that zipcode. Please try again.');
+      setZipError(err.response?.data?.message || t('safety.zip.lookupError'));
     } finally {
       setZipLoading(false);
     }
@@ -205,24 +208,23 @@ const SafetyManual = () => {
   return (
     <div>
       <h1 className="text-3xl font-bold text-[#1C2A16] dark:text-white mb-1">
-        Safety Manual
+        {t('safety.pageTitle')}
       </h1>
       <p className="text-gray-500 dark:text-gray-400 mb-8">
-        Emergency contacts and step-by-step guidance for before, during, and
-        after a disaster.
+        {t('safety.pageSubtitle')}
       </p>
 
       {/* ── Emergency contacts ───────────────────────────────────────── */}
       <section className="mb-10">
         <h2 className="text-sm font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-4">
-          Emergency Contacts
+          {t('safety.contactsHeading')}
         </h2>
 
         {/* Zipcode search — find local (211) help for a specific area. */}
         <form onSubmit={handleZipSearch} className="flex flex-wrap items-end gap-3 mb-4">
           <div>
             <label htmlFor="zip" className="block text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-1">
-              Find local help by zipcode
+              {t('safety.zip.label')}
             </label>
             <input
               id="zip"
@@ -230,7 +232,7 @@ const SafetyManual = () => {
               inputMode="numeric"
               value={zip}
               onChange={(e) => { setZip(e.target.value); setZipError(''); }}
-              placeholder="e.g. 78701"
+              placeholder={t('safety.zip.placeholder')}
               maxLength={5}
               className="w-40 px-4 py-2.5 rounded-xl border-2 border-gray-300 dark:border-[#3a4f30] bg-white dark:bg-[#1a2f1a] text-gray-900 dark:text-white focus:outline-none focus:border-[#6ba3d3] focus:ring-2 focus:ring-[#6ba3d3]/30 transition-all"
             />
@@ -240,7 +242,7 @@ const SafetyManual = () => {
             disabled={zipLoading}
             className="px-6 py-2.5 rounded-xl bg-[#1e3a5f] text-white font-semibold hover:bg-[#182f4d] focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/40 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {zipLoading ? 'Searching…' : 'Search'}
+            {zipLoading ? t('safety.zip.searching') : t('safety.zip.search')}
           </button>
           {localResult && (
             <button
@@ -248,7 +250,7 @@ const SafetyManual = () => {
               onClick={() => { setLocalResult(null); setZip(''); setZipError(''); }}
               className="px-4 py-2.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
             >
-              Clear
+              {t('safety.zip.clear')}
             </button>
           )}
         </form>
@@ -258,7 +260,7 @@ const SafetyManual = () => {
         )}
         {localResult && (
           <p className="text-sm text-gray-700 dark:text-gray-300 mb-4">
-            Showing contacts for{' '}
+            {t('safety.zip.showingContacts')}{' '}
             <span className="font-bold">
               {localResult.location.city}, {localResult.location.stateAbbreviation} {localResult.location.zipcode}
             </span>
@@ -297,7 +299,7 @@ const SafetyManual = () => {
       {/* ── Disaster guides ──────────────────────────────────────────── */}
       <section>
         <h2 className="text-sm font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-4">
-          Disaster Preparedness Guides
+          {t('safety.guidesHeading')}
         </h2>
         <div className="space-y-4">
           {DISASTER_GUIDES.map((guide) => {
@@ -360,8 +362,7 @@ const SafetyManual = () => {
       </section>
 
       <p className="text-xs text-gray-400 dark:text-gray-500 mt-8 italic">
-        Guidance adapted from FEMA, Ready.gov, and the American Red Cross. Always
-        follow instructions from your local emergency officials.
+        {t('safety.disclaimer')}
       </p>
     </div>
   );

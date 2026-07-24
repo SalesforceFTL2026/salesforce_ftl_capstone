@@ -1,0 +1,878 @@
+{
+  "nav": {
+    "general": "Pangkalahatan",
+    "tools": "Mga Kasangkapan",
+    "dashboard": "Dashboard",
+    "requests": "Mga Kahilingan",
+    "household": "Sambahayan",
+    "documents": "Gabay sa Emergency",
+    "settings": "Mga Setting"
+  },
+  "common": {
+    "notSetYet": "Hindi pa naitatakda",
+    "comingSoon": "Malapit nang dumating ang seksyong ito.",
+    "close": "Isara",
+    "loading": "Naglo-load…"
+  },
+  "dashboardView": {
+    "greeting": "Kumusta, {{name}}!",
+    "profile": "Profile",
+    "name": "Pangalan",
+    "phoneNumber": "Numero ng Telepono",
+    "householdCount": "Bilang sa Sambahayan",
+    "activeRequests": "Mga Aktibong Kahilingan",
+    "expectedFulfillment": "Inaasahang Pagtupad",
+    "typeOfRequest": "Uri ng Kahilingan",
+    "loadingRequests": "Naglo-load ng iyong mga kahilingan…",
+    "noActiveRequests": "Wala kang aktibong kahilingan sa ngayon.",
+    "makeNewRequest": "Gumawa ng Bagong Kahilingan",
+    "requestByVoice": "Humiling sa Pamamagitan ng Boses",
+    "chatWithAssistant": "Makipag-chat sa Assistant",
+    "requestSuffix": "Kahilingan",
+    "deleteRequest": "Burahin ang kahilingan",
+    "nonprofitsTitle": "Mga Kalahok na Non-Profit Malapit sa Iyo",
+    "organizationLogo": "Logo ng Organisasyon",
+    "sampleOrgsNote": "Mga halimbawang organisasyon — malapit nang dumating ang live na listahan."
+  },
+  "household": {
+    "title": "Sambahayan",
+    "subtitle": "Ang mga detalye ng iyong account at impormasyon ng sambahayan.",
+    "yourAccount": "Ang iyong account",
+    "fieldName": "Pangalan",
+    "fieldEmail": "Email",
+    "fieldPhone": "Numero ng Telepono",
+    "fieldLocation": "Lokasyon",
+    "fieldHouseholdSize": "Bilang sa Sambahayan",
+    "editNote": "Ang numero ng telepono, lokasyon, at laki ng sambahayan ay hindi pa mae-edit dito — malapit nang dumating ang mga field na iyon."
+  },
+  "settings": {
+    "title": "Mga Setting",
+    "subtitle": "Pamahalaan ang mga detalye ng iyong account.",
+    "displayName": "Pangalang Ipapakita",
+    "namePlaceholder": "Ang iyong pangalan",
+    "nameEmptyError": "Hindi dapat blangko ang pangalan.",
+    "nameUpdated": "✓ Na-update na ang iyong pangalan.",
+    "nameUpdateError": "Hindi na-update ang iyong pangalan.",
+    "saveChanges": "I-save ang mga Pagbabago",
+    "saving": "Nagse-save…",
+    "language": "Wika",
+    "languageHelp": "Piliin ang wika para sa iyong dashboard.",
+    "languageUpdated": "✓ Na-update na ang iyong wika.",
+    "languageUpdateError": "Hindi na-update ang iyong wika."
+  },
+  "languages": {
+    "en": "English",
+    "es": "Español",
+    "zh": "中文",
+    "tl": "Tagalog",
+    "vi": "Tiếng Việt",
+    "fr": "Français",
+    "ko": "한국어",
+    "ru": "Русский",
+    "ht": "Kreyòl Ayisyen",
+    "hi": "हिन्दी",
+    "ne": "नेपाली"
+  },
+  "landing": {
+    "header": {
+      "logoAlt": "Logo ng MapResponse",
+      "nav": {
+        "give": "MAGBIGAY",
+        "whatWeDo": "ANO ANG GINAGAWA NAMIN",
+        "whoWeAre": "SINO KAMI",
+        "howToHelp": "PAANO TUMULONG",
+        "partnerResources": "MGA MAPAGKUKUNAN NG PARTNER",
+        "getHelp": "HUMINGI NG TULONG"
+      },
+      "greeting": "Kumusta, {{name}}",
+      "signOut": "MAG-SIGN OUT",
+      "signIn": "MAG-SIGN IN",
+      "searchAria": "Maghanap",
+      "toggleDarkModeAria": "I-toggle ang dark mode",
+      "darkModeEnabledAlt": "Naka-enable ang dark mode",
+      "lightModeEnabledAlt": "Naka-enable ang light mode"
+    },
+    "hero": {
+      "welcomeTo": "MALIGAYANG PAGDATING SA",
+      "subtitle": "ISANG NAKAMAPANG NETWORK PARA PADALIIN ANG TULONG SA MGA HUMIHINGI MULA SA MGA TUMUTULONG.",
+      "needHelp": "KAILANGAN KO NG TULONG",
+      "volunteer": "GUSTO KONG MAG-VOLUNTEER",
+      "organization": "ISA AKONG ORGANISASYON"
+    },
+    "whatWeDo": {
+      "title": "Pamagat",
+      "graphic": "GRAPHIC",
+      "description": "Paglalarawan",
+      "learnMore": "MATUTO PA"
+    },
+    "impact": {
+      "title": "ANG AMING IMPAK NOONG 2026",
+      "fact": "Katotohanan"
+    },
+    "statCard": {
+      "graphicLine1": "GRAPHIC",
+      "graphicLine2": "TUNGKOL SA",
+      "graphicLine3": "KATOTOHANAN",
+      "statistic": "ISTATISTIKA #{{number}}"
+    },
+    "getInvolved": {
+      "title": "SUMALI",
+      "graphic": "GRAPHIC",
+      "corporatePartnerLine1": "MAGING ISANG CORPORATE",
+      "corporatePartnerLine2": "PARTNER",
+      "nonprofitNetworkLine1": "SUMALI SA AMING NON-PROFIT",
+      "nonprofitNetworkLine2": "NETWORK",
+      "helpCommunitiesLine1": "TUMULONG SA MGA KOMUNIDAD NA",
+      "helpCommunitiesLine2": "NANGANGAILANGAN"
+    },
+    "partners": {
+      "title": "SALAMAT SA AMING MGA PARTNER SA INYONG SUPORTA!",
+      "logo": "Logo"
+    },
+    "oneLiner": {
+      "text": "ONE-LINER NG MAP RESPONSE",
+      "scrollToTopAria": "Mag-scroll pataas"
+    },
+    "footer": {
+      "logoAlt": "Logo ng MapResponse",
+      "description": "Paglalarawan"
+    }
+  },
+  "auth": {
+    "close": "Isara",
+    "cancel": "Kanselahin",
+    "show": "Ipakita",
+    "hide": "Itago",
+    "showPassword": "Ipakita ang password",
+    "hidePassword": "Itago ang password",
+    "modalTitle": "{{role}} {{action}}",
+    "titleAction": {
+      "signUp": "Mag-sign Up",
+      "login": "Mag-login"
+    },
+    "tabs": {
+      "signUp": "Mag-sign Up",
+      "logIn": "Mag-log In"
+    },
+    "roles": {
+      "helpSeeker": "Humihingi ng Tulong",
+      "volunteer": "Volunteer",
+      "organization": "Organisasyon"
+    },
+    "fields": {
+      "name": "Pangalan",
+      "email": "Email",
+      "password": "Password",
+      "location": "Lokasyon",
+      "skills": "Mga Kasanayan"
+    },
+    "placeholders": {
+      "name": "Ilagay ang iyong pangalan",
+      "email": "ikaw@halimbawa.com",
+      "password": "Ilagay ang iyong password",
+      "newPassword": "12+ na karakter, may malaking titik at numero",
+      "location": "Lungsod, Estado o Zip Code"
+    },
+    "signIn": {
+      "welcomeBack": "Maligayang pagbabalik",
+      "submit": "Mag-sign in",
+      "submitting": "Nagsi-sign in…",
+      "errors": {
+        "missingCredentials": "Mangyaring ilagay ang iyong email at password.",
+        "generic": "Hindi makapag-sign in sa ngayon. Pakisubukang muli."
+      }
+    },
+    "signUp": {
+      "welcomeRole": "Maligayang pagdating, {{role}}!",
+      "submit": "Magpatuloy",
+      "submitting": "Gumagawa ng account…",
+      "selectAllThatApply": "Piliin lahat ng naaangkop",
+      "skillsSelected": "{{count}} ang napili",
+      "errors": {
+        "missingRequired": "Kailangan ang pangalan, email, at password.",
+        "locationRequired": "Kailangan ang lokasyon.",
+        "passwordTooShort": "Ang password ay dapat hindi bababa sa 12 karakter ang haba.",
+        "passwordTooLong": "Ang password ay dapat 72 karakter o mas kaunti.",
+        "passwordComplexity": "Ang password ay dapat may malaking titik, maliit na titik, at numero.",
+        "skillRequired": "Mangyaring pumili ng hindi bababa sa isang kasanayan na maitutulong mo.",
+        "generic": "Hindi makapag-sign up sa ngayon. Pakisubukang muli."
+      }
+    }
+  },
+  "portal": {
+    "logoAlt": "Logo ng {{brand}}",
+    "searchPlaceholder": "Maghanap...",
+    "toggleDarkMode": "I-toggle ang dark mode",
+    "darkModeEnabled": "Naka-enable ang dark mode",
+    "lightModeEnabled": "Naka-enable ang light mode",
+    "notifications": "Mga Abiso",
+    "signOut": "Mag-sign out"
+  },
+  "org": {
+    "nav": {
+      "tasks": "Mga Gawain",
+      "metrics": "Mga Sukatan",
+      "resources": "Mga Mapagkukunan",
+      "volunteers": "Mga Volunteer",
+      "chat": "Chat",
+      "documents": "Mga Dokumento"
+    },
+    "errors": {
+      "loadRequests": "May nangyaring mali sa pag-load ng mga kahilingan.",
+      "updateStatus": "Hindi na-update ang status ng kahilingan.",
+      "updateResource": "Hindi na-update ang mapagkukunan.",
+      "removeResource": "Hindi natanggal ang mapagkukunan.",
+      "updateAssignment": "Hindi na-update ang assignment."
+    },
+    "dashboard": {
+      "greeting": "Kumusta, {{name}}!",
+      "metrics": "MGA SUKATAN",
+      "analyze": "Suriin",
+      "requestsCompleted": "Mga Kahilingang Natapos",
+      "peopleHelped": "Mga Taong Natulungan",
+      "resourcesAvailable": "Mga Mapagkukunang Available",
+      "heatMapTitle": "Heat Map ng mga Kahilingan",
+      "respondingToday": "Saan kami tumutugon ngayong araw?",
+      "tasks": "Mga Gawain",
+      "viewAll": "Tingnan lahat",
+      "chartLabel": "Chart ng trend ng mga sukatan",
+      "taskFallback": "Kahilingan"
+    },
+    "requests": {
+      "sortBy": "Ayusin ayon sa",
+      "sort": {
+        "priority": "Priyoridad (mataas → mababa)",
+        "newest": "Pinakabago muna",
+        "nearest": "Pinakamalapit sa iyo"
+      },
+      "measuringDistances": "Sinusukat ang mga distansya…",
+      "locationRequired": "Kailangan ang lokasyon at hindi ito maaaring alisin.",
+      "locationSaveError": "Hindi na-save ang iyong lokasyon.",
+      "addLocationToSort": "Magdagdag ng lokasyon sa profile ng iyong organisasyon upang ayusin ayon sa distansya.",
+      "distanceSortError": "Hindi naayos ayon sa distansya.",
+      "locationPlaceholder": "Lungsod, ST o ZIP",
+      "saving": "Nagse-save…",
+      "save": "I-save",
+      "cancel": "Kanselahin",
+      "locationTitle": "Itakda ang lokasyon kung saan susukatin ang mga distansya",
+      "yourLocation": "Ang iyong lokasyon: {{location}}",
+      "setYourLocation": "Itakda ang iyong lokasyon",
+      "yourRequests": "Ang Iyong mga Kahilingan",
+      "yourRequestsEmpty": "Wala ka pang tinutugunang anumang kahilingan.",
+      "unfilteredRequests": "Mga Hindi Na-filter na Kahilingan",
+      "unfilteredRequestsEmpty": "Walang bukas na kahilingan sa ngayon.",
+      "heatMapTitle": "Heat Map ng mga Kahilingan",
+      "mapTitle": "Mapa ng mga Kahilingan",
+      "heatToggle": "Heat",
+      "mapToggle": "Mapa",
+      "heatMapCaption": "Nakakulay ayon sa kung saan nagkukumpol ang mga pangangailangan",
+      "columnName": "Pangalan",
+      "columnDate": "Petsa",
+      "columnDistance": "Distansya",
+      "columnPriority": "Priyoridad",
+      "loading": "Naglo-load…",
+      "tryAgain": "Subukang muli",
+      "helpSeeker": "Humihingi ng Tulong",
+      "milesAway": "{{miles}} mi",
+      "priority": {
+        "critical": "Kritikal",
+        "high": "Mataas",
+        "medium": "Katamtaman",
+        "low": "Mababa",
+        "notSet": "Hindi naitakda"
+      },
+      "selectPrompt": "Pumili ng kahilingan upang makita ang mga detalye nito.",
+      "phoneNumber": "Numero ng Telepono",
+      "inHousehold": "Bilang sa Sambahayan",
+      "detailsTitle": "Mga Detalye ng Kahilingan ng Tulong",
+      "description": "Paglalarawan",
+      "noDescription": "Walang ibinigay na paglalarawan.",
+      "categoryOfHelp": "Kategorya ng Tulong",
+      "userUrgency": "Pagkaapurahang Idineklara ng User",
+      "location": "Lokasyon",
+      "aiPriorityRating": "AI Priority Rating",
+      "notScored": "Hindi na-iskor",
+      "status": "Status",
+      "statusOptions": {
+        "pending": "pending",
+        "in-progress": "in-progress",
+        "matched": "matched",
+        "fulfilled": "fulfilled",
+        "closed": "closed"
+      },
+      "unassign": "Alisin sa amin",
+      "assign": "Italaga sa amin",
+      "assignedToYou": "Naitalaga sa iyong organisasyon",
+      "assignToAllocate": "Italaga ang kahilingang ito sa iyong organisasyon upang maglaan ng mga mapagkukunan dito."
+    },
+    "resources": {
+      "types": {
+        "food": "Pagkain",
+        "wood": "Kahoy",
+        "healthCareKits": "Mga Health Care Kit"
+      },
+      "formIncomplete": "Mangyaring punan ang pangalan, dami, at yunit.",
+      "addError": "Hindi naidagdag ang mapagkukunan.",
+      "addTitle": "Magdagdag ng Mapagkukunan",
+      "addSubtitle": "Ilista ang mga available na maibibigay ng iyong organisasyon.",
+      "type": "Uri",
+      "name": "Pangalan",
+      "namePlaceholder": "hal. De-latang pagkain, Bigkis ng panggatong",
+      "quantity": "Dami",
+      "unit": "Yunit",
+      "unitPlaceholder": "pagkain, yunit, kit",
+      "adding": "Idinadagdag…",
+      "addButton": "Magdagdag ng Mapagkukunan",
+      "yourResources": "Ang Iyong mga Mapagkukunan",
+      "loading": "Naglo-load…",
+      "tryAgain": "Subukang muli",
+      "emptyState": "Wala pang mapagkukunan. Idagdag ang iyong una gamit ang form.",
+      "available": "Available",
+      "unavailable": "Hindi Available",
+      "remove": "Alisin"
+    },
+    "allocation": {
+      "loadError": "Hindi na-load ang mga alokasyon.",
+      "resourceFallback": "mapagkukunan",
+      "noSuggestions": "Walang mga mungkahi — magdagdag muna ng mga available na mapagkukunan.",
+      "suggestError": "Hindi nakakuha ng mungkahi.",
+      "pickResource": "Pumili ng mapagkukunang ilalaan.",
+      "invalidQuantity": "Ang dami ay dapat isang buong numero na 1 o higit pa.",
+      "allocateError": "Hindi nailaan ang mapagkukunan.",
+      "removeError": "Hindi natanggal ang alokasyon.",
+      "title": "Mga Nailaang Mapagkukunan",
+      "thinking": "Nag-iisip…",
+      "suggestWithAi": "✨ Magmungkahi gamit ang AI",
+      "loading": "Naglo-load…",
+      "nothingAllocated": "Wala pang nailaan.",
+      "remove": "Alisin",
+      "resource": "Mapagkukunan",
+      "select": "Pumili…",
+      "qty": "Dami",
+      "adding": "Idinadagdag…",
+      "allocate": "Ilaan"
+    },
+    "heatMap": {
+      "fewerNeeds": "Mas kaunting pangangailangan",
+      "moreNeeds": "Mas maraming pangangailangan"
+    }
+  },
+  "volunteer": {
+    "nav": {
+      "general": "Pangkalahatan",
+      "dashboard": "Dashboard",
+      "requests": "Mga Kahilingan",
+      "tasks": "Mga Gawain",
+      "skills": "Mga Kasanayan",
+      "groups": "Mga Grupo",
+      "tools": "Mga Kasangkapan",
+      "chat": "Chat",
+      "documents": "Mga Dokumento",
+      "settings": "Mga Setting"
+    },
+    "viewTitles": {
+      "requests": "Mga Aktibong Kahilingan ng Tulong",
+      "skills": "Ang Aking mga Kasanayan"
+    },
+    "comingSoon": "Malapit nang dumating ang seksyong ito.",
+    "common": {
+      "loading": "Naglo-load…",
+      "tryAgain": "Subukang muli",
+      "saving": "Nagse-save…"
+    },
+    "errors": {
+      "loadRequests": "May nangyaring mali sa pag-load ng mga kahilingan.",
+      "recordInterest": "Hindi naitala ang iyong interes. Pakisubukang muli.",
+      "markHelped": "Hindi namarkahan ang kahilingan bilang natulungan. Pakisubukang muli.",
+      "withdraw": "Hindi naibawi ang iyong interes. Pakisubukang muli."
+    },
+    "confirmations": {
+      "interestRecorded": "Naitala ang interes. Salamat sa pagtulong!"
+    },
+    "dashboard": {
+      "defaultName": "Pangalan",
+      "greeting": "Kumusta, {{name}}!",
+      "metrics": "MGA SUKATAN",
+      "analyze": "Suriin",
+      "requestsCompleted": "Mga Kahilingang Natapos",
+      "peopleHelped": "Mga Taong Natulungan",
+      "skillWays": "Mga Paraan Upang Palawakin ang Iyong mga Kasanayan",
+      "requestHeatMap": "Heat Map ng mga Kahilingan",
+      "respondingToday": "Saan kami tumutugon ngayong araw?",
+      "tasks": "Mga Gawain",
+      "viewAll": "Tingnan lahat",
+      "noUpcomingTasks": "Walang paparating na gawain sa ngayon.",
+      "metricsChartLabel": "Chart ng trend ng mga sukatan",
+      "requestFallback": "Kahilingan"
+    },
+    "requests": {
+      "views": {
+        "calendar": "Kalendaryo",
+        "list": "Listahan",
+        "cards": "Mga Card",
+        "map": "Mapa"
+      },
+      "noOpenRequests": "Walang bukas na kahilingan sa ngayon. Bumalik ka mamaya.",
+      "whereHelpNeeded": "Kung saan kailangan ang tulong",
+      "selectedCount": "{{count}} napiling kahilingan",
+      "helpWithSelected": "Maaari akong tumulong sa napili",
+      "selectAll": "Piliin lahat ng kahilingan",
+      "columns": {
+        "name": "Pangalan",
+        "category": "Kategorya",
+        "urgencyLevel": "Antas ng Pagkaapurahan",
+        "aiPriority": "AI Priority",
+        "timeSubmitted": "Oras na Isinumite"
+      },
+      "priorityTooltip": "Iskor ng priyoridad na kinalkula ng AI (0–100)",
+      "sortingByUrgency": "Inaayos ayon sa pagkaapurahan",
+      "sortByUrgency": "Ayusin ayon sa pagkaapurahan",
+      "selectRequestFrom": "Piliin ang kahilingan mula kay {{name}}",
+      "helpSeekerLower": "humihingi ng tulong",
+      "helpSeeker": "Humihingi ng Tulong",
+      "whyPrioritized": "🤖 Bakit ito inuna ng AI",
+      "notScoredYet": "Ang kahilingang ito ay hindi pa na-iskor ng AI prioritizer.",
+      "requestLabel": "Kahilingan:",
+      "whyTooltip": "Ipakita kung bakit inuna ng AI ang kahilingang ito",
+      "why": "Bakit?",
+      "helping": "✓ Tumutulong",
+      "iCanHelp": "Maaari akong tumulong",
+      "notSet": "Hindi naitakda"
+    },
+    "calendar": {
+      "previousMonth": "Nakaraang buwan",
+      "nextMonth": "Susunod na buwan",
+      "weekdays": {
+        "sun": "Lin",
+        "mon": "Lun",
+        "tue": "Mar",
+        "wed": "Miy",
+        "thu": "Huw",
+        "fri": "Biy",
+        "sat": "Sab"
+      },
+      "selectDay": "Pumili ng araw",
+      "noRequestsThisDay": "Walang isinumiteng kahilingan sa araw na ito."
+    },
+    "skills": {
+      "saveError": "Hindi na-save ang iyong mga kasanayan.",
+      "yourSkills": "Ang Iyong mga Kasanayan",
+      "rateHelp": "I-rate kung gaano ka kakumpiyansa sa bawat kasanayan, mula 1 (baguhan) hanggang 5 (eksperto).",
+      "noSkillsYet": "Wala ka pang naidadagdag na kasanayan. Magdagdag ng ilan sa ibaba.",
+      "levels": {
+        "novice": "Baguhan",
+        "beginner": "Nagsisimula",
+        "competent": "May Kakayahan",
+        "proficient": "Bihasa",
+        "expert": "Eksperto"
+      },
+      "removeSkill": "Alisin ang {{name}}",
+      "proficiencyFor": "Kahusayan para sa {{name}}",
+      "addASkill": "Magdagdag ng kasanayan",
+      "addAnotherPlaceholder": "Magdagdag ng isa pang kasanayan…",
+      "add": "Idagdag",
+      "skillsSaved": "Na-save ang mga kasanayan.",
+      "saveSkills": "I-save ang mga kasanayan"
+    },
+    "tasks": {
+      "noTasksYet": "Wala pang gawain",
+      "noTasksHelp": "Pumunta sa Mga Kahilingan upang mag-sign up para sa mga taong nangangailangan ng tulong.",
+      "helped": "✓ Natulungan",
+      "markAsHelped": "Markahan bilang natulungan",
+      "removing": "Inaalis…",
+      "unSignUp": "Bawiin ang pag-sign up"
+    }
+  },
+  "requests": {
+    "card": {
+      "priorityScoreTitle": "Iskor ng priyoridad na kinalkula ng AI (0–100)",
+      "priority": "Priyoridad {{score}}",
+      "editRequest": "I-edit ang kahilingan",
+      "deleteRequest": "Burahin ang kahilingan",
+      "whyPrioritized": "Bakit ito inuuna:",
+      "volunteersInterested_one": "{{count}} volunteer ang interesado",
+      "volunteersInterested_other": "{{count}} volunteer ang interesado",
+      "orgsResponding_one": "{{count}} org ang tumutugon",
+      "orgsResponding_other": "{{count}} org ang tumutugon",
+      "status": "Status",
+      "saving": "Nagse-save…",
+      "statusLabel": "Status:",
+      "helped": "✓ Natulungan",
+      "markAsHelped": "Markahan bilang natulungan",
+      "iCanHelpWithThis": "Maaari akong tumulong dito"
+    },
+    "statusOptions": {
+      "pending": "pending",
+      "assigned": "assigned",
+      "in-progress": "in-progress",
+      "matched": "matched",
+      "completed": "completed",
+      "fulfilled": "fulfilled",
+      "closed": "closed"
+    },
+    "filterBar": {
+      "searchPlaceholder": "Maghanap ng mga kahilingan…",
+      "searchAriaLabel": "Maghanap ng mga kahilingan ayon sa keyword",
+      "categoryAriaLabel": "I-filter ayon sa kategorya",
+      "allCategories": "Lahat ng kategorya",
+      "urgencyAriaLabel": "I-filter ayon sa pagkaapurahan",
+      "allUrgencies": "Lahat ng pagkaapurahan",
+      "matching": "{{count}} tumutugma",
+      "clear": "I-clear"
+    },
+    "categories": {
+      "Food": "Pagkain",
+      "Shelter": "Silungan",
+      "Medical": "Medikal",
+      "Transport": "Transportasyon",
+      "Other": "Iba pa"
+    },
+    "urgencies": {
+      "Critical": "Kritikal",
+      "High": "Mataas",
+      "Medium": "Katamtaman",
+      "Low": "Mababa"
+    },
+    "hsRequests": {
+      "tabs": {
+        "calendar": "Kalendaryo",
+        "list": "Listahan",
+        "cards": "Mga Card"
+      },
+      "loading": "Naglo-load ng iyong mga kahilingan…",
+      "empty": "Wala ka pang isinumiteng anumang kahilingan."
+    },
+    "calendar": {
+      "previousMonth": "Nakaraang buwan",
+      "nextMonth": "Susunod na buwan",
+      "months": {
+        "january": "Enero",
+        "february": "Pebrero",
+        "march": "Marso",
+        "april": "Abril",
+        "may": "Mayo",
+        "june": "Hunyo",
+        "july": "Hulyo",
+        "august": "Agosto",
+        "september": "Setyembre",
+        "october": "Oktubre",
+        "november": "Nobyembre",
+        "december": "Disyembre"
+      },
+      "weekdays": {
+        "sun": "Lin",
+        "mon": "Lun",
+        "tue": "Mar",
+        "wed": "Miy",
+        "thu": "Huw",
+        "fri": "Biy",
+        "sat": "Sab"
+      },
+      "itemTitle": "{{category}} ({{urgency}}) — inaasahan ~sa araw na ito",
+      "estimateNote": "Ang inaasahang pagtupad ay tinatantya mula sa pagkaapurahan ng bawat kahilingan hanggang magbigay ang mga organisasyon ng eksaktong petsa."
+    },
+    "table": {
+      "name": "Pangalan",
+      "category": "Kategorya",
+      "urgencyLevel": "Antas ng Pagkaapurahan",
+      "status": "Status",
+      "dateSubmitted": "Petsang Isinumite",
+      "location": "Lokasyon",
+      "requestFallback": "Kahilingan",
+      "deleteRequest": "Burahin ang kahilingan",
+      "soonToBeFulfilled": "Malapit nang Matupad"
+    },
+    "tabNav": {
+      "ariaLabel": "Mga view ng dashboard"
+    },
+    "nearMe": {
+      "locating": "Hinahanap ang lokasyon…",
+      "on": "Malapit sa akin: naka-on",
+      "label": "Malapit sa akin",
+      "searchRadius": "Radius ng paghahanap",
+      "within": "sa loob ng",
+      "searchRadiusMiles": "Radius ng paghahanap sa milya",
+      "miles": "{{count}} mi",
+      "nearby": "{{count}} malapit"
+    },
+    "map": {
+      "pins": "Mga Pin",
+      "heatmap": "Heatmap",
+      "loadingHeatmap": "Naglo-load ng heatmap…",
+      "notShown_one": "{{count}} kahilingan na walang lokasyong mapapa-mapa ay hindi ipinapakita.",
+      "notShown_other": "{{count}} kahilingan na walang lokasyong mapapa-mapa ay hindi ipinapakita.",
+      "fewerNeeds": "Mas kaunting pangangailangan",
+      "moreNeeds": "Mas maraming pangangailangan",
+      "popup": {
+        "helpSeeker": "Humihingi ng Tulong",
+        "uncategorized": "Walang kategorya",
+        "urgencySuffix": "{{urgency}} pagkaapurahan",
+        "aiScore": "AI {{score}}",
+        "helping": "✓ Tumutulong",
+        "saving": "Nagse-save…",
+        "iCanHelp": "Maaari akong tumulong"
+      }
+    }
+  },
+  "voice": {
+    "errors": {
+      "unsupportedBrowser": "Hindi sinusuportahan ng iyong browser ang pag-record ng boses. Mangyaring gamitin ang form sa halip.",
+      "micBlocked": "Na-block ang access sa mikropono. I-enable ito sa mga setting ng iyong browser upang mag-record.",
+      "startFailed": "Hindi makapagsimula ng pag-record. Pakisuri ang iyong mikropono at subukang muli.",
+      "noAudio": "Wala kaming nakuhang audio. Pakisubukang mag-record muli.",
+      "processFailed": "Hindi na-proseso ang recording. Pakisubukang muli.",
+      "sampleLoadFailed": "Hindi na-load ang halimbawang recording."
+    },
+    "intake": {
+      "title": "Humiling ng Tulong sa Pamamagitan ng Boses",
+      "subtitle": "Sabihin sa amin kung ano ang kailangan mo nang malakas. Gagawin namin itong kahilingan para suriin mo.",
+      "stopRecording": "Itigil ang pag-record",
+      "startRecording": "Simulan ang pag-record",
+      "transcribing": "Kinukuha ang teksto ng iyong kahilingan…",
+      "recording": "Nagre-record… {{time}} — i-tap upang itigil",
+      "tapToStart": "I-tap ang mikropono upang magsimula",
+      "useSample": "Gumamit ng halimbawang recording sa halip",
+      "cancel": "Kanselahin"
+    },
+    "review": {
+      "title": "Kumpirmahin ang Aming Narinig",
+      "subtitle": "Ginawa naming kahilingan ang iyong recording. Suriin ang mga detalye at ayusin ang anumang mali bago isumite.",
+      "youSaid": "Sinabi mo",
+      "doubleCheck": "⚠ Mangyaring suriing mabuti",
+      "reRecord": "Mag-record muli",
+      "submitting": "Isinusumite…",
+      "submit": "Isumite ang Kahilingan",
+      "errors": {
+        "requiredFields": "Mangyaring punan ang lahat ng kinakailangang field bago isumite.",
+        "submitFailed": "Hindi naisumite ang iyong kahilingan.",
+        "submitRetry": "Nabigong isumite ang kahilingan. Pakisubukang muli."
+      },
+      "fields": {
+        "category": "Kategorya",
+        "urgency": "Pagkaapurahan",
+        "location": "Lokasyon",
+        "householdSize": "Mga Tao sa Sambahayan",
+        "description": "Paglalarawan"
+      },
+      "category": {
+        "placeholder": "Pumili ng kategorya",
+        "food": "Pagkain",
+        "shelter": "Silungan",
+        "medical": "Medikal",
+        "transport": "Transportasyon",
+        "other": "Iba pa"
+      },
+      "urgency": {
+        "placeholder": "Pumili ng antas ng pagkaapurahan",
+        "low": "Mababa — Maaaring maghintay ng ilang araw",
+        "medium": "Katamtaman — Sa loob ng 24 oras",
+        "high": "Mataas — Sa loob ng ilang oras",
+        "critical": "Kritikal — Agaran"
+      },
+      "placeholders": {
+        "location": "Lungsod, zip code, o address",
+        "householdSize": "Ilang tao ang nangangailangan ng tulong?",
+        "description": "Ilarawan kung anong tulong ang kailangan mo..."
+      }
+    }
+  },
+  "safety": {
+    "pageTitle": "Manwal ng Kaligtasan",
+    "pageSubtitle": "Mga contact sa emergency at hakbang-hakbang na gabay para sa bago, habang, at pagkatapos ng sakuna.",
+    "contactsHeading": "Mga Contact sa Emergency",
+    "guidesHeading": "Mga Gabay sa Paghahanda sa Sakuna",
+    "disclaimer": "Gabay na hinango mula sa FEMA, Ready.gov, at American Red Cross. Palaging sundin ang mga tagubilin mula sa iyong mga lokal na opisyal ng emergency.",
+    "contacts": {
+      "lifeThreatening": {
+        "label": "Emergency na nagbabanta sa buhay",
+        "note": "Pulis, bumbero, o medikal"
+      },
+      "distressHelpline": {
+        "label": "Disaster Distress Helpline",
+        "note": "24/7 na payo sa krisis"
+      },
+      "poisonControl": {
+        "label": "Poison Control",
+        "note": "Pagkalason o pagkalantad"
+      },
+      "fema": {
+        "label": "FEMA Helpline",
+        "note": "Tulong at claims sa sakuna"
+      },
+      "redCross": {
+        "label": "American Red Cross",
+        "note": "Serbisyo ng silungan at relief"
+      },
+      "localNonEmergency": {
+        "label": "Lokal na hindi emergency",
+        "value": "Idagdag ang iyong lokal na linya",
+        "note": "Pulis/utilities na hindi emergency"
+      }
+    },
+    "zip": {
+      "label": "Maghanap ng lokal na tulong ayon sa zipcode",
+      "placeholder": "hal. 78701",
+      "search": "Maghanap",
+      "searching": "Naghahanap…",
+      "clear": "I-clear",
+      "invalid": "Mangyaring maglagay ng balidong 5-digit na US zipcode.",
+      "lookupError": "Hindi mahanap ang zipcode na iyon. Pakisubukang muli.",
+      "showingContacts": "Ipinapakita ang mga contact para sa"
+    },
+    "phases": {
+      "before": "Bago",
+      "during": "Habang",
+      "after": "Pagkatapos"
+    },
+    "guides": {
+      "hurricane": {
+        "title": "Bagyo at Baha",
+        "before": {
+          "0": "Alamin ang iyong evacuation zone at ruta.",
+          "1": "Gumawa ng kit: 3 araw na tubig (1 galon/tao/araw), pagkaing hindi nabubulok, gamot, flashlight, baterya.",
+          "2": "Itago ang mga dokumento (ID, insurance, medikal) sa isang waterproof na bag.",
+          "3": "I-charge ang mga telepono at backup na baterya; punuin ang iyong kotse ng gasolina."
+        },
+        "during": {
+          "0": "Lumikas agad kung sinabihan. Huwag magmaneho sa tubig-baha — “Umikot, Huwag Malunod.”",
+          "1": "Lumipat sa pinakamataas na antas ng gusali; iwasan ang mga basement.",
+          "2": "Lumayo sa mga bintana; sumilong sa isang panloob na silid.",
+          "3": "Makinig sa mga lokal na opisyal sa isang de-baterya o hand-crank na radyo."
+        },
+        "after": {
+          "0": "Umuwi lamang kapag sinabi ng mga awtoridad na ligtas na.",
+          "1": "Iwasan ang nakatigil na tubig — maaari itong may kuryente o kontaminado.",
+          "2": "Kunan ng litrato ang pinsala para sa insurance bago maglinis.",
+          "3": "Tingnan ang mga kapitbahay, lalo na ang mga matatanda at may kapansanan."
+        }
+      },
+      "wildfire": {
+        "title": "Wildfire",
+        "before": {
+          "0": "Alisin ang mga dahon, palumpong, at kalat sa loob ng 30 talampakan ng iyong tahanan.",
+          "1": "Maghanda ng go-bag at itabi ito malapit sa pinto.",
+          "2": "Mag-sign up para sa mga lokal na alerto sa emergency.",
+          "3": "Magplano ng dalawang ruta ng pagtakas palabas ng iyong kapitbahayan."
+        },
+        "during": {
+          "0": "Umalis nang maaga — huwag maghintay ng utos na lumikas kung nararamdaman mong hindi ligtas.",
+          "1": "Magsuot ng N95 na maskara; isara ang lahat ng bintana at pinto bago umalis.",
+          "2": "Kung na-trap, tumawag sa 911 at sumilong sa lugar na walang halaman.",
+          "3": "Panatilihing nakabukas ang headlights; magmaneho nang mabagal sa usok."
+        },
+        "after": {
+          "0": "Maghintay ng “all clear” bago bumalik.",
+          "1": "Mag-ingat sa mga hot spot, ash pit, at bumagsak na linya ng kuryente.",
+          "2": "Magsuot ng gwantes at maskara habang naglilinis; ang abo ay maaaring nakakalason.",
+          "3": "Idokumento ang mga pagkalugi para sa insurance at FEMA claims."
+        }
+      },
+      "earthquake": {
+        "title": "Lindol",
+        "before": {
+          "0": "Isiguro ang mabibigat na muwebles, water heater, at istante sa dingding.",
+          "1": "Tukuyin ang mga ligtas na lugar: sa ilalim ng matibay na mesa, sa panloob na dingding.",
+          "2": "Itabi ang matibay na sapatos at flashlight malapit sa iyong kama.",
+          "3": "Mag-imbak ng emergency kit at alamin kung paano isara ang gas at tubig."
+        },
+        "during": {
+          "0": "Drop, Cover, and Hold On — pumunta sa ilalim ng matibay na muwebles.",
+          "1": "Manatili sa loob hanggang tumigil ang pagyanig; huwag tumakbo palabas.",
+          "2": "Kung nasa labas, lumipat sa bukas na lugar na malayo sa mga gusali at kable.",
+          "3": "Kung nagmamaneho, huminto sa gilid na malayo sa mga overpass."
+        },
+        "after": {
+          "0": "Asahan ang mga aftershock; Drop, Cover, and Hold On muli kung dumating ang mga ito.",
+          "1": "Suriin ang mga pinsala at gas leak — umalis kung may amoy na gas.",
+          "2": "Gumamit ng text, hindi tawag, upang manatiling bukas ang mga linya ng telepono.",
+          "3": "Suriin ang iyong tahanan para sa pinsala bago muling pumasok."
+        }
+      },
+      "tornado": {
+        "title": "Ipo-ipo",
+        "before": {
+          "0": "Alamin ang pagkakaiba: ang Watch ay nangangahulugang posible; ang Warning ay nangangahulugang sumilong na ngayon.",
+          "1": "Tukuyin ang isang ligtas na silid — basement o panloob na silid sa pinakamababang palapag.",
+          "2": "Magtabi ng helmet o mabibigat na kumot upang protektahan ang iyong ulo.",
+          "3": "I-enable ang Wireless Emergency Alerts sa iyong telepono."
+        },
+        "during": {
+          "0": "Pumunta agad sa iyong ligtas na silid; maglagay ng maraming dingding sa pagitan mo at ng labas.",
+          "1": "Takpan ang iyong ulo at leeg; yumuko nang mababa.",
+          "2": "Iwasan ang mga bintana, pinto, at panlabas na dingding.",
+          "3": "Kung nasa mobile home o kotse, pumunta sa isang matibay na gusali."
+        },
+        "after": {
+          "0": "Mag-ingat sa mga basag na salamin, pako, at bumagsak na linya ng kuryente.",
+          "1": "Huwag pumasok sa mga nasirang gusali hanggang masuri ang mga ito.",
+          "2": "Tulungan ang mga nasugatan ngunit huwag galawin ang mga malubhang nasaktan maliban kung nasa panganib.",
+          "3": "Kumuha ng litrato ng pinsala para sa iyong insurance."
+        }
+      },
+      "winter": {
+        "title": "Bagyo sa Taglamig",
+        "before": {
+          "0": "I-insulate ang mga tubo at alamin kung paano isara ang tubig kung mag-freeze ang mga ito.",
+          "1": "Mag-imbak ng dagdag na kumot, mainit na damit, pagkain, at tubig.",
+          "2": "Ihanda ang mga flashlight at baterya para sa mga blackout.",
+          "3": "Iserbisyo ang kagamitan sa pag-init at suriin ang mga smoke/CO detector."
+        },
+        "during": {
+          "0": "Manatili sa loob at magsuot ng maraming damit na patong-patong.",
+          "1": "Huwag gumamit ng generator, grill, o camp stove sa loob — panganib ng carbon monoxide.",
+          "2": "Panatilihing bahagyang tumutulo ang mga gripo upang maiwasan ang pagyeyelo ng tubo.",
+          "3": "Kung mawalan ka ng init, isara ang mga hindi ginagamit na silid upang tipirin ang init."
+        },
+        "after": {
+          "0": "Tingnan ang mga kapitbahay na nasa panganib mula sa lamig.",
+          "1": "Mag-ingat sa mga senyales ng frostbite at hypothermia.",
+          "2": "Alisin ang niyebe sa mga vent at exhaust upang maiwasan ang pag-ipon ng CO.",
+          "3": "Iwasan ang sobrang pagpapagod kapag nagpapala ng niyebe."
+        }
+      },
+      "heat": {
+        "title": "Matinding Init",
+        "before": {
+          "0": "Tukuyin ang mga pampublikong lugar na may air-conditioning (aklatan, mall, cooling center).",
+          "1": "Suriin na gumagana ang mga bentilador at AC; takpan ang mga bintanang sinisikatan ng araw sa umaga/hapon.",
+          "2": "Mag-imbak ng dagdag na tubig at electrolyte drink.",
+          "3": "Magplano na tingnan ang mga matatanda o nag-iisang kapitbahay."
+        },
+        "during": {
+          "0": "Uminom ng tubig nang madalas — huwag maghintay hanggang mauhaw ka.",
+          "1": "Manatili sa pinakamalamig na bahagi ng iyong tahanan o sa isang cooling center.",
+          "2": "Huwag mag-iwan ng mga tao o alagang hayop sa isang nakaparadang kotse.",
+          "3": "Limitahan ang gawain sa labas sa madaling-araw o gabi."
+        },
+        "after": {
+          "0": "Mag-ingat sa heat exhaustion (matinding pagpapawis, panghihina) at heat stroke (pagkalito, mainit na tuyong balat — tumawag sa 911).",
+          "1": "Patuloy na mag-hydrate at magpahinga sa isang malamig na lugar.",
+          "2": "Tingnan ang pamilya, mga kapitbahay, at alagang hayop.",
+          "3": "Mag-imbak muli ng iyong tubig at mga suplay para sa susunod na alon."
+        }
+      }
+    }
+  },
+  "chat": {
+    "greeting": "Kumusta {{name}}! Ako si Mappie, ang iyong MapResponse assistant. Magtanong sa akin tungkol sa iyong mga kahilingan, mga tip sa kaligtasan, o kung paano humingi ng tulong.",
+    "unavailable": "Hindi available ang assistant sa ngayon. Pakisubukang muli.",
+    "openAssistant": "Buksan ang chat assistant",
+    "closeAssistant": "Isara ang chat assistant",
+    "assistantSubtitle": "Ang iyong MapResponse assistant",
+    "thinking": "Nag-iisip…",
+    "inputPlaceholder": "I-type ang iyong mensahe…",
+    "send": "Ipadala"
+  },
+  "misc": {
+    "comingSoon": "Naka-sign in ka na! Malapit nang dumating ang pahinang ito."
+  },
+  "requestForm": {
+    "titleCreate": "Humingi ng Tulong",
+    "titleEdit": "I-edit ang Kahilingan",
+    "subtitleCreate": "Sabihin sa amin kung ano ang kailangan mo at bibigyang-priyoridad namin ito.",
+    "subtitleEdit": "I-update ang mga detalye ng iyong kahilingan sa ibaba.",
+    "successCreate": "✓ Naisumite na ang kahilingan!",
+    "successEdit": "✓ Na-save na ang mga pagbabago!",
+    "errorRequired": "Mangyaring punan ang lahat ng kinakailangang field"
+  }
+}
