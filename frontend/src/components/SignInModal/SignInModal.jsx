@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { login, authErrorMessage } from '../../utils/auth';
+import { useModalDismiss } from '../../hooks/useModalDismiss';
 
 // A single sign-in form used by every role (help-seeker, volunteer,
 // organization). Authentication is identical for everyone — the only thing
@@ -17,6 +18,10 @@ const SignInModal = ({ embedded = false, onClose, onSuccess }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Standalone popup only: allow Escape to close. (Embedded in AuthModal, the
+  // wrapper owns dismissal.)
+  useModalDismiss(!embedded, onClose);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -120,8 +125,14 @@ const SignInModal = ({ embedded = false, onClose, onSuccess }) => {
 
   // Standalone: render our own popup shell + title.
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl p-10 max-w-lg w-full mx-4 shadow-2xl">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="bg-white rounded-2xl p-10 max-w-lg w-full shadow-2xl max-h-[90vh] overflow-y-auto"
+      >
         <div className="flex justify-between items-start mb-8">
           <h2 className="text-3xl font-bold text-black">{t('auth.signIn.welcomeBack')}</h2>
           <button

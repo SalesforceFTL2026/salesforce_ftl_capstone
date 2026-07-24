@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import RoleSelectionModal from '../RoleSelectionModal/RoleSelectionModal';
 import SignInModal from '../SignInModal/SignInModal';
+import { useModalDismiss } from '../../hooks/useModalDismiss';
 
 // Wraps signup + login in one popup with tabs. The role (from the landing
 // page card) labels the title and is passed to signup. Login ignores role —
@@ -15,6 +16,7 @@ const roleLabelKeys = {
 const AuthModal = ({ role, initialMode = 'signup', onClose, onAuthenticated }) => {
   const { t } = useTranslation();
   const [mode, setMode] = useState(initialMode);
+  useModalDismiss(true, onClose);
 
   const roleName = role ? t(roleLabelKeys[role]) : '';
   const action = mode === 'signup' ? t('auth.titleAction.signUp') : t('auth.titleAction.login');
@@ -35,7 +37,7 @@ const AuthModal = ({ role, initialMode = 'signup', onClose, onAuthenticated }) =
       {/* Stop clicks inside the modal from bubbling up to the backdrop's close. */}
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-white dark:bg-[#273A20] rounded-2xl p-8 max-w-lg w-full shadow-2xl max-h-full overflow-y-auto"
+        className="bg-white dark:bg-[#273A20] rounded-2xl p-8 max-w-lg w-full shadow-2xl max-h-[90vh] overflow-y-auto"
       >
         {/* Title + close */}
         <div className="flex justify-between items-start mb-6">
