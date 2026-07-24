@@ -14,9 +14,8 @@
     "ingest:events": "node services/ingestion/ingestEvents.js",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
-    "seed:admin": "node prisma/seedAdmin.js",
-    "ingest:events": "node services/ingestion/ingestEvents.js"
+    "test:coverage": "vitest run --coverage",
+    "seed:admin": "node prisma/seedAdmin.js"
   },
   "keywords": [
     "crisis",
