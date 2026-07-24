@@ -32,7 +32,8 @@
     "deleteRequest": "अनुरोध मेटाउनुहोस्",
     "nonprofitsTitle": "तपाईं नजिकका सहभागी गैरनाफामुखी संस्थाहरू",
     "organizationLogo": "संस्थाको लोगो",
-    "sampleOrgsNote": "नमुना संस्थाहरू — प्रत्यक्ष सूची चाँडै आउँदैछ।"
+    "sampleOrgsNote": "नमुना संस्थाहरू — प्रत्यक्ष सूची चाँडै आउँदैछ।",
+    "orgNoTypes": "Community support"
   },
   "household": {
     "title": "घरपरिवार",
@@ -43,7 +44,7 @@
     "fieldPhone": "फोन नम्बर",
     "fieldLocation": "स्थान",
     "fieldHouseholdSize": "घरपरिवारमा # जना",
-    "editNote": "फोन नम्बर, स्थान, र घरपरिवारको आकार यहाँ अझै सम्पादन गर्न मिल्दैन — ती फिल्डहरू चाँडै आउँदैछन्।"
+    "editNote": "Edit your phone number and household size in Settings. Location cannot be edited here yet — that field is coming soon."
   },
   "settings": {
     "title": "सेटिङहरू",
@@ -58,7 +59,17 @@
     "language": "भाषा",
     "languageHelp": "तपाईंको ड्यासबोर्डको लागि भाषा छान्नुहोस्।",
     "languageUpdated": "✓ तपाईंको भाषा अद्यावधिक गरिएको छ।",
-    "languageUpdateError": "तपाईंको भाषा अद्यावधिक गर्न सकिएन।"
+    "languageUpdateError": "तपाईंको भाषा अद्यावधिक गर्न सकिएन।",
+    "phoneNumber": "Phone Number",
+    "phoneHelp": "Responders use this to reach you about your requests. Leave blank to remove it.",
+    "phonePlaceholder": "e.g. (555) 123-4567",
+    "phoneUpdated": "✓ Your phone number has been updated.",
+    "phoneUpdateError": "Could not update your phone number.",
+    "householdSize": "Household Size",
+    "householdHelp": "How many people live in your household. Used as the default for new requests. Leave blank to remove it.",
+    "householdPlaceholder": "e.g. 4",
+    "householdUpdated": "✓ Your household size has been updated.",
+    "householdUpdateError": "Could not update your household size."
   },
   "languages": {
     "en": "English",
