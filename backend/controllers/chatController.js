@@ -1,5 +1,6 @@
 import { askLLM } from '../services/ai/chatbot.js';
 import * as requestModel from '../models/requestModel.js';
+import { hasRole } from '../utils/roles.js';
 
 /**
  * Chat Controller
@@ -49,7 +50,7 @@ immediately.`;
 export const chat = async (req, res) => {
   try {
     // This assistant is for help-seekers managing their own requests.
-    if (req.user.role !== 'help-seeker') {
+    if (!hasRole(req.user, 'help-seeker')) {
       return res.status(403).json({
         success: false,
         message: 'The help assistant is only available to help-seekers.',
