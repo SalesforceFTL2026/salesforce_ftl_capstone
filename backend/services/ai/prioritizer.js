@@ -119,15 +119,24 @@ export async function prioritizeRequestsBatch(requestIds) {
   return results;
 }
 
+// Statuses worth re-scoring: requests still in the queue. Fulfilled/closed
+// requests are already handled, so re-ranking them wastes LLM calls.
+const ACTIVE_STATUSES = ['pending', 'in-progress', 'matched'];
+
 /**
- * Re-prioritize all pending requests
- * Useful when the scoring algorithm changes
+ * Re-prioritize requests. Useful when the scoring algorithm changes.
  *
+ * By default this re-scores only the active queue (ACTIVE_STATUSES), since
+ * fulfilled/closed requests no longer need ranking. Pass an explicit `statuses`
+ * array (or `null` for every request regardless of status) to widen the scope.
+ *
+ * @param {Object} [options]
+ * @param {string[]|null} [options.statuses] - statuses to include; null = all
  * @returns {Promise<number>} - Number of requests re-prioritized
  */
-export async function reprioritizeAll() {
+export async function reprioritizeAll({ statuses = ACTIVE_STATUSES } = {}) {
   const pendingRequests = await prisma.request.findMany({
-    where: { status: 'pending' },
+    where: statuses ? { status: { in: statuses } } : {},
     select: { id: true },
   });
 
