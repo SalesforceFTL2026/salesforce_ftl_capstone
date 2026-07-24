@@ -1,5 +1,5 @@
 import OpenAI from 'openai';
-import { gemini } from './clients.js';
+import { gemini, anthropic, openai } from './clients.js';
 
 // OpenRouter speaks the OpenAI API format, so we reuse the OpenAI SDK but point
 // it at OpenRouter's base URL and authenticate with the OpenRouter key in .env.
@@ -10,6 +10,14 @@ const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1';
 // we don't 404 when Google retires a specific version. Flash is fast and has a
 // generous free daily quota.
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-flash-latest';
+
+// Claude model used only for LOCAL testing — the `anthropic` client is null in
+// production (see clients.js), so this branch never runs there.
+const CLAUDE_MODEL = process.env.CLAUDE_MODEL || 'claude-haiku-4-5-20251001';
+
+// OpenAI chat model used as the final paid fallback when OpenRouter and Gemini
+// are both unavailable. Configurable via env; kept cheap by default.
+const OPENAI_CHAT_MODEL = process.env.OPENAI_CHAT_MODEL || 'gpt-4o-mini';
 
 // Use Node's native fetch: the OpenAI v4 SDK bundles an older node-fetch that
 // fails on gzipped responses under Node 24 ("Gunzip ... Premature close").
@@ -83,11 +91,16 @@ async function getFreeModels() {
 }
 
 // Ask the chatbot a question and get back its text answer.
-// Discovers the currently-free models and tries them in order; if one is rate
-// limited (429) — or returns a reply that fails the optional `validate` check —
-// it falls back to the next. If OpenRouter is entirely unavailable (e.g. its
-// free daily quota is exhausted), it falls back to Gemini's free tier, which
-// has a separate quota. Throws only if every option fails.
+//
+// Provider chain (each falls through to the next on error or failed `validate`):
+//   0. Anthropic Claude — LOCAL TESTING ONLY. `anthropic` is null in production
+//      (see clients.js), so this step is skipped there entirely.
+//   1. OpenRouter free models — discovers the currently-free models and tries
+//      them in order; a rate-limited (429) or invalid reply falls through.
+//   2. Gemini free tier — separate daily quota from OpenRouter.
+//   3. OpenAI chat — final paid fallback so the feature still works if the free
+//      tiers are exhausted.
+// Throws only if every available option fails.
 // @param {string} message - the user's latest question
 // @param {object} [options]
 // @param {string} [options.systemPrompt] - context/persona given to the model
@@ -106,6 +119,20 @@ export async function askLLM(message, { systemPrompt, history = [], validate } =
   messages.push({ role: 'user', content: message });
 
   let lastError;
+
+  // --- Local-only preferred provider: Anthropic Claude ---
+  // Null in production (clients.js), so this is skipped on the deployed server.
+  if (anthropic) {
+    try {
+      const reply = await askAnthropic(messages);
+      if (!validate || validate(reply)) {
+        return reply;
+      }
+      lastError = new Error('Anthropic reply failed validation');
+    } catch (err) {
+      lastError = err;
+    }
+  }
 
   // --- Primary: OpenRouter free models ---
   try {
@@ -160,7 +187,51 @@ export async function askLLM(message, { systemPrompt, history = [], validate } =
     }
   }
 
+  // --- Final fallback: OpenAI chat (paid) ---
+  // Used when both free tiers are exhausted so the feature still works.
+  try {
+    const reply = await askOpenAI(messages);
+    if (!validate || validate(reply)) {
+      return reply;
+    }
+    lastError = new Error('OpenAI fallback returned a reply that failed validation');
+  } catch (err) {
+    lastError = err;
+  }
+
   throw lastError;
+}
+
+// Send the assembled OpenAI-style message list to Anthropic and return its text.
+// Anthropic wants the system prompt as a top-level param, not a message role, so
+// we split it out and pass the rest as user/assistant turns.
+// @param {Array<{role: string, content: string}>} messages
+// @returns {Promise<string>}
+async function askAnthropic(messages) {
+  const system = messages
+    .filter((m) => m.role === 'system')
+    .map((m) => m.content)
+    .join('\n\n');
+  const rest = messages.filter((m) => m.role !== 'system');
+
+  const response = await anthropic.messages.create({
+    model: CLAUDE_MODEL,
+    max_tokens: 1024,
+    ...(system ? { system } : {}),
+    messages: rest,
+  });
+  return response.content[0].text;
+}
+
+// Send the assembled message list to OpenAI's chat API and return its text.
+// @param {Array<{role: string, content: string}>} messages
+// @returns {Promise<string>}
+async function askOpenAI(messages) {
+  const completion = await openai.chat.completions.create({
+    model: OPENAI_CHAT_MODEL,
+    messages,
+  });
+  return completion.choices[0].message.content;
 }
 
 // Send the assembled OpenAI-style message list to Gemini and return its text.

@@ -53,6 +53,33 @@ export async function requireAuth(req, res, next) {
 }
 
 /**
+ * requireAdmin: gate a route to admin users only.
+ *
+ * Must run AFTER requireAuth, which loads req.user. Kept separate so routes
+ * compose them as `requireAuth, requireAdmin` — requireAuth answers "are you
+ * logged in?", requireAdmin answers "are you an admin?". Returns 403 (not 401)
+ * for a logged-in non-admin: the request is authenticated but not allowed.
+ */
+export function requireAdmin(req, res, next) {
+  if (!req.user) {
+    // Defensive: requireAdmin was mounted without requireAuth in front of it.
+    return res.status(401).json({
+      success: false,
+      message: 'You must be logged in to do that.',
+    });
+  }
+
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({
+      success: false,
+      message: 'This action is restricted to administrators.',
+    });
+  }
+
+  next();
+}
+
+/**
  * attachUserIfPresent: soft version of requireAuth.
  * If a valid token is present, attach req.user. If not, just continue
  * (used for routes that work for both logged-in and anonymous users).

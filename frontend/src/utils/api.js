@@ -1,5 +1,10 @@
 import axios from 'axios';
-import { isPreviewMode, isWriteMethod } from './previewMode';
+import {
+  isPreviewMode,
+  isWriteMethod,
+  handlePreviewWrite,
+  applyPreviewOverlay,
+} from './previewMode';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
@@ -19,12 +24,14 @@ api.interceptors.request.use(
     }
 
     // Admin "Preview only" mode: don't let writes reach the server. We swap in a
-    // one-off adapter that resolves with a synthetic success, so callers (and
-    // their optimistic UI updates) behave as if the write succeeded while the
-    // database stays untouched. Reads are never intercepted.
+    // one-off adapter that records the change in the session-only overlay and
+    // resolves with a matching success, so the UI behaves as if the write
+    // succeeded (and the change sticks for the session) while the database stays
+    // untouched. Reads are never intercepted here; the overlay is layered onto
+    // GET responses in the response interceptor below.
     if (isPreviewMode() && isWriteMethod(config.method)) {
       config.adapter = async (cfg) => ({
-        data: { success: true, data: null, preview: true },
+        data: handlePreviewWrite(cfg),
         status: 200,
         statusText: 'OK (preview)',
         headers: {},
@@ -40,9 +47,17 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor
+// Response interceptor. In admin Preview mode, layer the session overlay onto
+// GET responses for help requests so simulated creates/edits/deletes show
+// through the real (untouched) database data. A no-op for everyone else.
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    const method = String(response.config?.method || 'get').toLowerCase();
+    if (method === 'get') {
+      response.data = applyPreviewOverlay(response.config?.url || '', response.data);
+    }
+    return response;
+  },
   (error) => {
     console.error('API Error:', error);
     return Promise.reject(error);

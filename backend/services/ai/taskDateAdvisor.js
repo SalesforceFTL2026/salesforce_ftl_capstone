@@ -1,4 +1,4 @@
-import { anthropic } from './clients.js';
+import { askLLM } from './chatbot.js';
 
 /**
  * Task Date Advisor
@@ -11,12 +11,11 @@ import { anthropic } from './clients.js';
  *   - whether the necessary resources are ready
  *   - the skills the task needs vs. what's available
  *
- * As with the resource advisor, we ask Claude but always fall back to a simple
+ * As with the resource advisor, we ask an LLM via askLLM (Anthropic locally,
+ * then OpenRouter -> Gemini -> OpenAI) but always fall back to a simple
  * deterministic rule so the feature works even without a live API key. Every
  * suggested date is validated to be a real, future ISO date before we return it.
  */
-
-const ADVISOR_MODEL = process.env.CLAUDE_MODEL || 'claude-haiku-4-5-20251001';
 
 // How many candidate dates we aim to return.
 const NUM_SUGGESTIONS = 3;
@@ -38,7 +37,7 @@ export async function suggestTaskDates(task, context = {}) {
   const today = context.today instanceof Date ? context.today : new Date();
 
   try {
-    const suggestion = await askClaudeForDates(task, context, today);
+    const suggestion = await askForDates(task, context, today);
     const cleaned = sanitizeSuggestion(suggestion, today);
     return cleaned.length > 0 ? cleaned : heuristicDates(task, today);
   } catch (error) {
@@ -47,19 +46,17 @@ export async function suggestTaskDates(task, context = {}) {
   }
 }
 
-// --- Claude call ---
+// --- LLM call ---
 
-async function askClaudeForDates(task, context, today) {
-  const prompt = buildPrompt(task, context, today);
-
-  const response = await anthropic.messages.create({
-    model: ADVISOR_MODEL,
-    max_tokens: 500,
-    messages: [{ role: 'user', content: prompt }],
+async function askForDates(task, context, today) {
+  const reply = await askLLM(buildPrompt(task, context, today), {
+    systemPrompt:
+      'You suggest volunteer-day dates for a disaster-relief organization. ' +
+      'You reply with ONLY a JSON array and no other text, code fences, or commentary.',
+    // Fall through to the next provider if the reply contains no JSON array.
+    validate: (r) => typeof r === 'string' && /\[[\s\S]*\]/.test(r),
   });
-
-  const text = response.content[0].text.trim();
-  return parseJsonArray(text);
+  return parseJsonArray(reply);
 }
 
 function buildPrompt(task, context, today) {

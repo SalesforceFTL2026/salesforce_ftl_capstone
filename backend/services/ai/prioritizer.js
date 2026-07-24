@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { generateEmbedding } from './embeddings.js';
 import { findSimilarRequests } from './vectorSearch.js';
 import { calculatePriorityScore, getScoreBreakdown } from './scoring.js';
+import { classifyLifeSafety } from './lifeSafetyClassifier.js';
 import { generatePriorityExplanation } from './explainer.js';
 
 const prisma = new PrismaClient();
@@ -12,9 +13,10 @@ const prisma = new PrismaClient();
  * Steps:
  * 1. Generate embedding for the request
  * 2. Find similar requests (vector search)
- * 3. Calculate priority score
- * 4. Generate Claude explanation
- * 5. Update database with results
+ * 3. Classify life-safety (LLM, keyword fallback)
+ * 4. Calculate priority score (deterministic math, using the life-safety verdict)
+ * 5. Generate explanation
+ * 6. Update database with results
  *
  * @param {string} requestId - ID of the request to prioritize
  * @returns {Promise<Object>} - { priorityScore, reasoning, similarRequests }
@@ -46,13 +48,18 @@ export async function prioritizeRequest(requestId) {
       similarRequests = await findSimilarRequestsFallback(request);
     }
 
-    // Step 3: Calculate priority score
-    const priorityScore = calculatePriorityScore(request, similarRequests);
+    // Step 3: Classify life-safety. The LLM understands paraphrases the keyword
+    // list misses; it falls back to keywords internally if every provider fails.
+    const { isLifeSafety } = await classifyLifeSafety(request);
 
-    // Get score breakdown for explanation
-    const scoreBreakdown = getScoreBreakdown(request, similarRequests);
+    // Step 4: Calculate priority score (deterministic), using the life-safety
+    // verdict as the severity-floor override.
+    const priorityScore = calculatePriorityScore(request, similarRequests, isLifeSafety);
 
-    // Step 4: Generate Claude explanation
+    // Get score breakdown for explanation (same override so they can't disagree)
+    const scoreBreakdown = getScoreBreakdown(request, similarRequests, isLifeSafety);
+
+    // Step 5: Generate explanation
     const reasoning = await generatePriorityExplanation(
       request,
       priorityScore,
@@ -60,7 +67,7 @@ export async function prioritizeRequest(requestId) {
       scoreBreakdown
     );
 
-    // Step 5: Update database with results
+    // Step 6: Update database with results
     await prisma.request.update({
       where: { id: requestId },
       data: {
@@ -112,15 +119,24 @@ export async function prioritizeRequestsBatch(requestIds) {
   return results;
 }
 
+// Statuses worth re-scoring: requests still in the queue. Fulfilled/closed
+// requests are already handled, so re-ranking them wastes LLM calls.
+const ACTIVE_STATUSES = ['pending', 'in-progress', 'matched'];
+
 /**
- * Re-prioritize all pending requests
- * Useful when the scoring algorithm changes
+ * Re-prioritize requests. Useful when the scoring algorithm changes.
  *
+ * By default this re-scores only the active queue (ACTIVE_STATUSES), since
+ * fulfilled/closed requests no longer need ranking. Pass an explicit `statuses`
+ * array (or `null` for every request regardless of status) to widen the scope.
+ *
+ * @param {Object} [options]
+ * @param {string[]|null} [options.statuses] - statuses to include; null = all
  * @returns {Promise<number>} - Number of requests re-prioritized
  */
-export async function reprioritizeAll() {
+export async function reprioritizeAll({ statuses = ACTIVE_STATUSES } = {}) {
   const pendingRequests = await prisma.request.findMany({
-    where: { status: 'pending' },
+    where: statuses ? { status: { in: statuses } } : {},
     select: { id: true },
   });
 

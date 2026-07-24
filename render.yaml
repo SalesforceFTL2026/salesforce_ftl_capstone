@@ -33,11 +33,15 @@ services:
       - key: NODE_VERSION
         value: "24"
       # Secrets — set these in the Render dashboard (never commit them):
+      # NOTE: ANTHROPIC_API_KEY is intentionally absent — Anthropic is used only
+      # for local testing and is disabled in production (see services/ai/clients.js).
       - key: OPENROUTER_API_KEY
         sync: false
       - key: OPENAI_API_KEY
         sync: false
-      - key: ANTHROPIC_API_KEY
+      - key: GOOGLE_API_KEY
+        sync: false
+      - key: COHERE_API_KEY
         sync: false
       - key: JWT_SECRET
         sync: false
