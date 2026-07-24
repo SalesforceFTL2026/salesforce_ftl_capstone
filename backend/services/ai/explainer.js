@@ -8,8 +8,9 @@ Write a concise 1-2 sentence explanation of why the request received its priorit
 
 Rules:
 - Be factual and specific
-- Reference the concrete signals that drove the score: urgency level, number of similar requests nearby, and recency
-- Attribute the score to its components (urgency, cluster density, time recency) so the reader understands which factors mattered most
+- Reference the concrete signals that drove the score: severity (urgency + how critical the category is), number of similar requests nearby, and recency
+- Attribute the score to its components (severity, cluster density, time recency) so the reader understands which factors mattered most
+- If a life-safety need was detected, call it out as the leading reason
 - Do NOT speculate or add emotional language
 - Do NOT invent facts not provided
 - Keep it under 50 words
@@ -74,9 +75,9 @@ function buildExplanationPrompt(request, priorityScore, similarRequests, scoreBr
 Priority Score: ${priorityScore}/100
 
 Score Breakdown:
-- Urgency component: ${scoreBreakdown.urgencyScore}/40
-- Cluster density: ${scoreBreakdown.clusterScore}/30 (${similarRequests.length} similar requests nearby)
-- Time recency: ${scoreBreakdown.timeScore}/30
+- Severity component: ${scoreBreakdown.severityScore}/${scoreBreakdown.maxima?.severity ?? 50}${scoreBreakdown.lifeSafety ? ' (life-safety need detected)' : ''}
+- Cluster density: ${scoreBreakdown.clusterScore}/${scoreBreakdown.maxima?.cluster ?? 20} (${similarRequests.length} similar requests nearby)
+- Time recency: ${scoreBreakdown.recencyScore}/${scoreBreakdown.maxima?.recency ?? 30}
 
 Similar Requests Found: ${similarRequests.length}
 ${
