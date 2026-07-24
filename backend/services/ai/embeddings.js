@@ -1,8 +1,16 @@
-import { openai, cohere } from './clients.js';
+import { cohere } from './clients.js';
+
+// Single embedding provider on purpose. Cosine similarity is only meaningful
+// between vectors from the SAME model, so mixing providers would corrupt the
+// cluster-density signal and make priority scores non-reproducible. Cohere's
+// free tier is what this project provisions, so it is the one source of truth.
+const EMBEDDING_MODEL = 'embed-english-light-v3.0';
 
 /**
- * Generate embedding vector for a help request
- * Tries Cohere (free) first, then OpenAI, then returns null
+ * Generate embedding vector for a help request using Cohere.
+ *
+ * Returns null when Cohere is unavailable (no key or API error); callers fall
+ * back to a non-vector similarity search so prioritization still works.
  *
  * @param {Object} request - The help request object
  * @param {string} request.category - Request category
@@ -20,39 +28,23 @@ export async function generateEmbedding(request) {
     `Description: ${request.description}`,
   ].join('\n');
 
-  // Try Cohere first (free tier available)
-  if (cohere) {
-    try {
-      const response = await cohere.embed({
-        texts: [text],
-        model: 'embed-english-light-v3.0',
-        inputType: 'search_document',
-      });
-
-      return response.embeddings[0];
-    } catch (error) {
-      console.error('Error generating Cohere embedding:', error);
-      // Fall through to try OpenAI
-    }
+  if (!cohere) {
+    console.log('⚠️  No embedding API configured (Cohere key missing)');
+    return null;
   }
 
-  // Try OpenAI as fallback
-  if (process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY !== 'sk-your-key-here') {
-    try {
-      const response = await openai.embeddings.create({
-        model: 'text-embedding-3-small',
-        input: text,
-      });
+  try {
+    const response = await cohere.embed({
+      texts: [text],
+      model: EMBEDDING_MODEL,
+      inputType: 'search_document',
+    });
 
-      return response.data[0].embedding;
-    } catch (error) {
-      console.error('Error generating OpenAI embedding:', error);
-    }
+    return response.embeddings[0];
+  } catch (error) {
+    console.error('Error generating Cohere embedding:', error);
+    return null;
   }
-
-  // No embedding service available
-  console.log('⚠️  No embedding API configured (tried Cohere and OpenAI)');
-  return null;
 }
 
 /**
