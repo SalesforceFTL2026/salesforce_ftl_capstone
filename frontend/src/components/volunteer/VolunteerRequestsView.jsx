@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import RequestCard from '../RequestCard/RequestCard';
+import RequestDetailsModal from '../RequestCard/RequestDetailsModal';
 import RequestMap from '../map/RequestMap';
 import NearMeToggle from '../map/NearMeToggle';
 import RequestFilterBar from '../RequestFilterBar/RequestFilterBar';
@@ -35,6 +36,7 @@ const URGENCY_ORDER = { Critical: 0, High: 1, Medium: 2, Low: 3 };
 
 const VolunteerRequestsView = ({
   requests, loading, error, onRetry, onInteract, interactingId, confirmations,
+  onWithdraw, withdrawingId,
   near, onNearChange, filters, onFiltersChange,
 }) => {
   const { t } = useTranslation();
@@ -43,6 +45,8 @@ const VolunteerRequestsView = ({
   const [selectedIds, setSelectedIds] = useState(() => new Set());
   // Sort toggle behind the filter icon: default (priority) vs. by urgency.
   const [sortByUrgency, setSortByUrgency] = useState(false);
+  // The request whose full-details modal is open (List view), or null.
+  const [detailRequest, setDetailRequest] = useState(null);
 
   const rows = useMemo(() => {
     if (!sortByUrgency) return requests;
@@ -69,7 +73,7 @@ const VolunteerRequestsView = ({
   // a time flows through the existing POST /api/requests/:id/interact handler.
   const helpWithSelected = async () => {
     const targets = rows.filter(
-      (r) => selectedIds.has(r.id) && !confirmations[r.id] && interactingId !== r.id
+      (r) => selectedIds.has(r.id) && !r.signedUp && !confirmations[r.id] && interactingId !== r.id
     );
     for (const request of targets) {
       await onInteract(request);
@@ -147,7 +151,10 @@ const VolunteerRequestsView = ({
           onInteract={onInteract}
           interactingId={interactingId}
           confirmations={confirmations}
+          onWithdraw={onWithdraw}
+          withdrawingId={withdrawingId}
           onHelpWithSelected={helpWithSelected}
+          onRowClick={setDetailRequest}
         />
       )}
 
@@ -164,6 +171,8 @@ const VolunteerRequestsView = ({
                   onInteract={onInteract}
                   interacting={interactingId === request.id}
                   confirmation={confirmations[request.id]}
+                  onWithdraw={onWithdraw}
+                  withdrawing={withdrawingId === request.id}
                 />
               ))}
             </div>
@@ -181,6 +190,8 @@ const VolunteerRequestsView = ({
             onInteract={onInteract}
             interactingId={interactingId}
             confirmations={confirmations}
+            onWithdraw={onWithdraw}
+            withdrawingId={withdrawingId}
           />
         </div>
       )}
@@ -191,8 +202,13 @@ const VolunteerRequestsView = ({
           onInteract={onInteract}
           interactingId={interactingId}
           confirmations={confirmations}
+          onWithdraw={onWithdraw}
+          withdrawingId={withdrawingId}
         />
       )}
+
+      {/* Full-details modal, opened by tapping a row in the List view. */}
+      <RequestDetailsModal request={detailRequest} onClose={() => setDetailRequest(null)} />
     </div>
   );
 };
@@ -213,7 +229,7 @@ const URGENCY_DOT = {
 // Local YYYY-M-D key so requests bucket by calendar day in the user's timezone.
 const dayKey = (date) => `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
 
-const CalendarView = ({ rows, onInteract, interactingId, confirmations }) => {
+const CalendarView = ({ rows, onInteract, interactingId, confirmations, onWithdraw, withdrawingId }) => {
   const { t } = useTranslation();
   // Group requests by the day they were submitted.
   const byDay = useMemo(() => {
@@ -357,6 +373,8 @@ const CalendarView = ({ rows, onInteract, interactingId, confirmations }) => {
                 onInteract={onInteract}
                 interacting={interactingId === request.id}
                 confirmation={confirmations[request.id]}
+                onWithdraw={onWithdraw}
+                withdrawing={withdrawingId === request.id}
               />
             ))}
           </div>
@@ -378,7 +396,8 @@ const COLS = 'grid-cols-[2.5rem_minmax(8rem,1.5fr)_1fr_1fr_7rem_1.3fr_12rem]';
 
 const ListView = ({
   rows, allChecked, selectedIds, onToggleAll, onToggleOne, sortByUrgency, onToggleSort,
-  onInteract, interactingId, confirmations, onHelpWithSelected,
+  onInteract, interactingId, confirmations, onWithdraw, withdrawingId, onHelpWithSelected,
+  onRowClick,
 }) => {
   const { t } = useTranslation();
   // Which rows have their AI reasoning expanded.
@@ -457,11 +476,24 @@ const ListView = ({
           const interacting = interactingId === r.id;
           return (
             <div key={r.id} className="border-t border-white/70 dark:border-white/10">
-              <div className={`grid ${COLS} items-center gap-4 px-5 py-5 text-lg text-[#1C2A16] dark:text-gray-100`}>
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={() => onRowClick?.(r)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onRowClick?.(r);
+                  }
+                }}
+                aria-label={t('volunteer.requests.detail.viewFrom', { name: r.submitterName || r.requesterName || r.name || t('volunteer.requests.helpSeekerLower') })}
+                className={`grid ${COLS} items-center gap-4 px-5 py-5 text-lg text-[#1C2A16] dark:text-gray-100 cursor-pointer hover:bg-white/60 dark:hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#6ba3d3]/40 transition-colors`}
+              >
                 <input
                   type="checkbox"
                   checked={selectedIds.has(r.id)}
                   onChange={() => onToggleOne(r.id)}
+                  onClick={(e) => e.stopPropagation()}
                   aria-label={t('volunteer.requests.selectRequestFrom', { name: r.submitterName || r.requesterName || r.name || t('volunteer.requests.helpSeekerLower') })}
                   className="w-5 h-5 rounded accent-[#6ba3d3]"
                 />
@@ -479,6 +511,8 @@ const ListView = ({
                   onInteract={onInteract}
                   interacting={interacting}
                   confirmation={confirmation}
+                  onWithdraw={onWithdraw}
+                  withdrawing={withdrawingId === r.id}
                   t={t}
                 />
               </div>
@@ -509,8 +543,8 @@ const ListView = ({
 
 // Per-row actions: a "Why?" toggle for the AI reasoning and an "I can help"
 // button (which becomes a confirmation once interest is recorded).
-const RowActions = ({ request, expanded, onToggleExpanded, onInteract, interacting, confirmation, t }) => (
-  <div className="flex items-center gap-2 justify-end">
+const RowActions = ({ request, expanded, onToggleExpanded, onInteract, interacting, confirmation, onWithdraw, withdrawing, t }) => (
+  <div className="flex items-center gap-2 justify-end" onClick={(e) => e.stopPropagation()}>
     {request.reasoning && (
       <button
         type="button"
@@ -526,7 +560,25 @@ const RowActions = ({ request, expanded, onToggleExpanded, onInteract, interacti
         {t('volunteer.requests.why')}
       </button>
     )}
-    {confirmation ? (
+    {/* Signed-up rows stay in the feed with a Withdraw action instead of a
+        one-way "I can help". */}
+    {request.signedUp ? (
+      <>
+        <span className="text-sm font-semibold text-green-700 dark:text-green-400 whitespace-nowrap" role="status">
+          {t('volunteer.requests.signedUp')}
+        </span>
+        {onWithdraw && (
+          <button
+            type="button"
+            onClick={() => onWithdraw(request)}
+            disabled={withdrawing}
+            className="px-4 py-2 rounded-lg border-2 border-[#c84444] text-[#c84444] text-sm font-semibold hover:bg-red-50 dark:hover:bg-red-900/20 focus:outline-none focus:ring-2 focus:ring-[#c84444]/40 disabled:opacity-60 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+          >
+            {withdrawing ? t('volunteer.requests.withdrawing') : t('volunteer.requests.withdraw')}
+          </button>
+        )}
+      </>
+    ) : confirmation ? (
       <span className="text-sm font-semibold text-green-700 dark:text-green-400 whitespace-nowrap" role="status">
         {t('volunteer.requests.helping')}
       </span>

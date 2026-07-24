@@ -65,11 +65,12 @@ const priorityScoreClass = (score) => {
   return 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300';
 };
 
-const RequestCard = ({ request, onInteract, interacting, confirmation, onDelete, deleting, onEdit, onStatusChange, updating, onMarkHelped, marking }) => {
+const RequestCard = ({ request, onInteract, interacting, confirmation, onWithdraw, withdrawing, onDelete, deleting, onEdit, onStatusChange, updating, onMarkHelped, marking }) => {
   const { t } = useTranslation();
   const {
     category, urgency, location, description, status, createdAt, reasoning,
     responseStatus, priorityScore, volunteerInterestCount, organizationRespondingCount,
+    signedUp,
   } = request;
 
   // Only show the AI priority score once the request has actually been scored
@@ -227,10 +228,28 @@ const RequestCard = ({ request, onInteract, interacting, confirmation, onDelete,
         </div>
       )}
 
-      {/* On the Priority Feed tab, show the "I can help" button. */}
+      {/* On the Priority Feed tab, show the "I can help" button — or, once the
+          volunteer has signed up, a "Signed up" badge with a Withdraw action so
+          the request stays visible instead of disappearing from the feed. */}
       {onInteract && (
         <div className="mt-auto">
-          {confirmation ? (
+          {signedUp ? (
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="text-base font-semibold text-green-700 dark:text-green-400" role="status">
+                {t('requests.card.signedUp')}
+              </span>
+              {onWithdraw && (
+                <button
+                  type="button"
+                  onClick={() => onWithdraw(request)}
+                  disabled={withdrawing}
+                  className="px-5 py-2.5 rounded-xl border-2 border-[#c84444] text-[#c84444] font-semibold text-base hover:bg-red-50 dark:hover:bg-red-900/20 focus:outline-none focus:ring-2 focus:ring-[#c84444]/40 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+                >
+                  {withdrawing ? t('requests.card.withdrawing') : t('requests.card.withdraw')}
+                </button>
+              )}
+            </div>
+          ) : confirmation ? (
             <p className="text-base font-semibold text-green-700" role="status">
               {confirmation}
             </p>

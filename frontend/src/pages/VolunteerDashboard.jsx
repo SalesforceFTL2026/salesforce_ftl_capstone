@@ -201,6 +201,10 @@ const VolunteerDashboard = () => {
         ...prev,
         [request.id]: result.message || t('volunteer.confirmations.interestRecorded'),
       }));
+      // Refresh so the request stays in the feed as "signed up" (offering to
+      // help moves it to "assigned", which would otherwise drop it) and the
+      // card flips to a Withdraw action.
+      await loadData({ silent: true });
     } catch (err) {
       setError(requestErrorMessage(err, t('volunteer.errors.recordInterest')));
     } finally {
@@ -237,6 +241,10 @@ const VolunteerDashboard = () => {
         delete next[request.id];
         return next;
       });
+      // Reload so the request reappears in the feed as sign-up-able (the backend
+      // rolls it back to pending when no volunteers remain) and any of its tasks
+      // this volunteer was signed up for drop off the available-tasks list.
+      await loadData({ silent: true });
     } catch (err) {
       setError(requestErrorMessage(err, t('volunteer.errors.withdraw')));
     } finally {
@@ -328,6 +336,30 @@ const VolunteerDashboard = () => {
     };
   }, [interests, skills]);
 
+  // The Active Help Requests feed a volunteer sees. The prioritized feed only
+  // returns pending/in-progress requests, so a request drops off it the moment
+  // this volunteer offers to help (their interest moves it to "assigned"). To
+  // keep signed-up requests visible — with a Withdraw action instead of vanishing
+  // — we merge the volunteer's still-active interests back into the feed and tag
+  // every request with a `signedUp` flag.
+  const activeFeed = useMemo(() => {
+    // Requests the volunteer is currently signed up for (exclude finished ones).
+    const isFinished = (r) =>
+      r.responseStatus === 'completed' || ['fulfilled', 'closed'].includes(r.status);
+    const signedUpInterests = interests.filter((r) => !isFinished(r));
+    const signedUpIds = new Set(signedUpInterests.map((r) => r.id));
+
+    const feedIds = new Set(feed.map((r) => r.id));
+    // Interests that have left the prioritized feed (now "assigned") still belong
+    // in the volunteer's view so they can withdraw.
+    const extras = signedUpInterests.filter((r) => !feedIds.has(r.id));
+
+    return [...feed, ...extras].map((r) => ({
+      ...r,
+      signedUp: signedUpIds.has(r.id),
+    }));
+  }, [feed, interests]);
+
   // The dashboard "Tasks" bar shows the org-created tasks this volunteer has
   // signed up for, with a dated chip from each task's scheduled volunteer day.
   const tasks = useMemo(() => {
@@ -359,13 +391,15 @@ const VolunteerDashboard = () => {
 
       {view === 'requests' && (
         <VolunteerRequestsView
-          requests={feed}
+          requests={activeFeed}
           loading={loading}
           error={error}
           onRetry={loadData}
           onInteract={handleInteract}
           interactingId={interactingId}
           confirmations={confirmations}
+          onWithdraw={handleWithdraw}
+          withdrawingId={withdrawingId}
           near={near}
           onNearChange={setNear}
           filters={filters}

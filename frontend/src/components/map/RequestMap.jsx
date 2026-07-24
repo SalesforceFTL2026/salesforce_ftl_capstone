@@ -181,7 +181,7 @@ const ChoroplethLayer = ({ points, onLoadingChange }) => {
   return null;
 };
 
-const RequestMap = ({ requests = [], onInteract, interactingId, confirmations = {} }) => {
+const RequestMap = ({ requests = [], onInteract, interactingId, confirmations = {}, onWithdraw, withdrawingId }) => {
   const { t } = useTranslation();
   // 'pins' shows urgency markers; 'heat' shows the county choropleth.
   const [mode, setMode] = useState('pins');
@@ -271,6 +271,8 @@ const RequestMap = ({ requests = [], onInteract, interactingId, confirmations = 
                     onInteract={onInteract}
                     interacting={interactingId === r.id}
                     confirmation={confirmations[r.id]}
+                    onWithdraw={onWithdraw}
+                    withdrawing={withdrawingId === r.id}
                   />
                 </Popup>
               </Marker>
@@ -313,9 +315,9 @@ const RequestMap = ({ requests = [], onInteract, interactingId, confirmations = 
 };
 
 // The content shown inside a pin's popup: request summary + optional action.
-const RequestPopup = ({ request, onInteract, interacting, confirmation }) => {
+const RequestPopup = ({ request, onInteract, interacting, confirmation, onWithdraw, withdrawing }) => {
   const { t } = useTranslation();
-  const { submitterName, requesterName, name, category, urgency, location, description, priorityScore } = request;
+  const { submitterName, requesterName, name, category, urgency, location, description, priorityScore, signedUp } = request;
   const who = submitterName || requesterName || name || t('requests.map.popup.helpSeeker');
   const hasScore = typeof priorityScore === 'number' && priorityScore > 0;
 
@@ -330,7 +332,21 @@ const RequestPopup = ({ request, onInteract, interacting, confirmation }) => {
       {location && <p className="text-xs text-gray-500 mt-0.5">{location}</p>}
       {description && <p className="text-xs text-gray-700 mt-1">{description}</p>}
 
-      {confirmation ? (
+      {signedUp ? (
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <span className="text-xs font-semibold text-green-700">{t('requests.map.popup.signedUp')}</span>
+          {onWithdraw && (
+            <button
+              type="button"
+              onClick={() => onWithdraw(request)}
+              disabled={withdrawing}
+              className="px-3 py-1.5 rounded-lg border-2 border-[#c84444] text-[#c84444] text-xs font-semibold hover:bg-red-50 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+            >
+              {withdrawing ? t('requests.map.popup.withdrawing') : t('requests.map.popup.withdraw')}
+            </button>
+          )}
+        </div>
+      ) : confirmation ? (
         <p className="text-xs font-semibold text-green-700 mt-2">{t('requests.map.popup.helping')}</p>
       ) : (
         onInteract && (

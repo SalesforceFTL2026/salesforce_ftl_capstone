@@ -1,4 +1,6 @@
 import * as requestModel from '../models/requestModel.js';
+import * as taskModel from '../models/volunteerTaskModel.js';
+import * as notificationModel from '../models/notificationModel.js';
 import prisma from '../services/database/prisma.js';
 import { prioritizeRequest } from '../services/ai/prioritizer.js';
 import { geocodeLocation, haversineMiles } from '../services/geocoding/geocoder.js';
@@ -52,13 +54,30 @@ export const createRequest = async (req, res) => {
       });
     }
 
-    const { category, urgency, location, description, householdSize } = req.body;
+    const { category, urgency, categories, location, description, householdSize } = req.body;
 
-    // Validation
-    if (!category || !urgency || !location || !description) {
+    // A help-seeker can now ask for several kinds of help at once (e.g. Food +
+    // Medical), and each becomes its OWN request so it can be prioritized,
+    // tracked, and fulfilled independently. The client sends `categories`, an
+    // array of { category, urgency } pairs. For backward compatibility (the
+    // voice form and edit flow still send a single category/urgency), we fall
+    // back to wrapping those into a one-item array.
+    const items =
+      Array.isArray(categories) && categories.length > 0
+        ? categories
+        : [{ category, urgency }];
+
+    // Shared-field validation (location + description apply to every request).
+    if (!location || !description) {
       return res.status(400).json({
         success: false,
-        message: 'Missing required fields: category, urgency, location, and description are required'
+        message: 'Missing required fields: location and description are required'
+      });
+    }
+    if (items.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Select at least one category.'
       });
     }
 
@@ -77,58 +96,75 @@ export const createRequest = async (req, res) => {
       });
     }
 
-    // Validate category
+    // Validate every category/urgency pair before creating anything, so a bad
+    // pair fails the whole submission instead of leaving partial requests.
     const validCategories = ['Food', 'Shelter', 'Medical', 'Transport', 'Other'];
-    if (!validCategories.includes(category)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid category. Must be one of: Food, Shelter, Medical, Transport, Other'
-      });
-    }
-
-    // Validate urgency
     const validUrgencies = ['Low', 'Medium', 'High', 'Critical'];
-    if (!validUrgencies.includes(urgency)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid urgency. Must be one of: Low, Medium, High, Critical'
-      });
+    for (const item of items) {
+      if (!item?.category || !item?.urgency) {
+        return res.status(400).json({
+          success: false,
+          message: 'Each selected category needs both a category and an urgency.'
+        });
+      }
+      if (!validCategories.includes(item.category)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid category. Must be one of: Food, Shelter, Medical, Transport, Other'
+        });
+      }
+      if (!validUrgencies.includes(item.urgency)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid urgency. Must be one of: Low, Medium, High, Critical'
+        });
+      }
     }
 
     // Best-effort geocode so the request can be plotted on the map. A location
     // we can't resolve just saves without coordinates (never blocks creation).
+    // Location is shared across all the requests, so we only geocode once.
     const coords = await geocodeLocation(location);
 
-    // Create request, stamping it with the logged-in user's real identity.
-    const newRequest = await requestModel.createRequest({
-      userId: req.user.id,
-      submitterName: req.user.name,
-      submitterRole: req.user.role,
-      category,
-      urgency,
-      location,
-      latitude: coords?.latitude ?? null,
-      longitude: coords?.longitude ?? null,
-      description,
-      householdSize: parsedHouseholdSize
-    });
+    // Create + prioritize one request per selected category. Prioritization is
+    // best-effort per request: if scoring one fails, that request is still
+    // created (score stays 0 until something re-prioritizes it) and the rest
+    // continue.
+    const created = [];
+    for (const item of items) {
+      const newRequest = await requestModel.createRequest({
+        userId: req.user.id,
+        submitterName: req.user.name,
+        submitterRole: req.user.role,
+        category: item.category,
+        urgency: item.urgency,
+        location,
+        latitude: coords?.latitude ?? null,
+        longitude: coords?.longitude ?? null,
+        description,
+        householdSize: parsedHouseholdSize
+      });
 
-    // Run the AI prioritization pipeline so the request gets a real priority
-    // score (and reasoning) right away. This is best-effort: if scoring fails
-    // the request is still created — it just stays at its default score of 0
-    // until something re-prioritizes it.
-    let scored = newRequest;
-    try {
-      const { priorityScore, reasoning } = await prioritizeRequest(newRequest.id);
-      scored = { ...newRequest, priorityScore, reasoning };
-    } catch (scoreError) {
-      console.error('Prioritization failed for new request:', scoreError.message);
+      let scored = newRequest;
+      try {
+        const { priorityScore, reasoning } = await prioritizeRequest(newRequest.id);
+        scored = { ...newRequest, priorityScore, reasoning };
+      } catch (scoreError) {
+        console.error('Prioritization failed for new request:', scoreError.message);
+      }
+      created.push(scored);
     }
 
+    // Legacy single-category callers still get a single object back in `data`;
+    // multi-category callers get the full array. `count` is always present.
     res.status(201).json({
       success: true,
-      message: 'Help request submitted successfully',
-      data: scored
+      message:
+        created.length > 1
+          ? `${created.length} help requests submitted successfully`
+          : 'Help request submitted successfully',
+      count: created.length,
+      data: created.length === 1 ? created[0] : created
     });
   } catch (error) {
     console.error('Error creating request:', error);
@@ -580,6 +616,25 @@ export const interactWithRequest = async (req, res) => {
       await requestModel.updateRequestStatus(id, 'assigned');
     }
 
+    // Let the help-seeker who owns this request know a volunteer stepped up.
+    // Wrapped in try/catch so a notification hiccup can never fail the
+    // volunteer's "I can help" action itself. request.userId is optional in
+    // the schema, so only notify when the request actually has an owner.
+    if (request.userId) {
+      try {
+        await notificationModel.createNotification({
+          userId: request.userId,
+          type: 'status-update',
+          title: 'A volunteer is on the way',
+          message: `${req.user.name} offered to help with your ${request.category} request.`,
+          relatedRequestId: request.id,
+          relatedUserId: req.user.id
+        });
+      } catch (notifyErr) {
+        console.error('Could not create help-seeker notification:', notifyErr);
+      }
+    }
+
     res.status(201).json({
       success: true,
       message: 'Interest recorded. Thanks for stepping up to help!',
@@ -682,6 +737,25 @@ export const withdrawInterest = async (req, res) => {
         responderType: 'volunteer'
       }
     });
+
+    // Withdrawing from the request also drops this volunteer from any org tasks
+    // tied to it — a volunteer who's no longer helping with the need shouldn't
+    // stay signed up for its tasks.
+    await taskModel.withdrawFromRequestTasks(id, req.user.id);
+
+    // If no volunteers remain interested, roll the request back to pending so it
+    // returns to the active feed for someone else to pick up. Only step down
+    // from 'assigned' (the status a volunteer's interest set) — never override a
+    // status an organization has advanced past that.
+    const remainingVolunteers = await prisma.response.count({
+      where: { requestId: id, responderType: 'volunteer' }
+    });
+    if (remainingVolunteers === 0) {
+      const request = await requestModel.getRequestById(id);
+      if (request && request.status === 'assigned') {
+        await requestModel.updateRequestStatus(id, 'pending');
+      }
+    }
 
     res.status(200).json({
       success: true,
