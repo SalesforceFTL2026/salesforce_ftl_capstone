@@ -16,7 +16,8 @@
 import { useTranslation } from 'react-i18next';
 
 const HSDashboardView = ({
-  currentUser, requests, loading, error, deletingId, onDelete, onNewRequest, onVoiceRequest, onChat, nonprofits, nonprofitsAreSample,
+  // onVoiceRequest — Request by Voice temporarily disabled for demo (do not remove)
+  currentUser, requests, loading, error, deletingId, onDelete, onNewRequest, /* onVoiceRequest, */ onChat, nonprofits, nonprofitsAreSample,
 }) => {
   const { t } = useTranslation();
   const firstName = currentUser?.name?.split(' ')[0] || 'Name';
@@ -93,6 +94,7 @@ const HSDashboardView = ({
           >
             {t('dashboardView.makeNewRequest')}
           </button>
+          {/* Request by Voice — temporarily disabled for demo (do not remove)
           {onVoiceRequest && (
             <button
               type="button"
@@ -106,6 +108,7 @@ const HSDashboardView = ({
               {t('dashboardView.requestByVoice')}
             </button>
           )}
+          */}
           {onChat && (
             <button
               type="button"

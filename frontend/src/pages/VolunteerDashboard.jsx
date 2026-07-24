@@ -7,6 +7,7 @@ import VolunteerRequestsView from '../components/volunteer/VolunteerRequestsView
 import VolunteerTasksView from '../components/volunteer/VolunteerTasksView';
 import AvailableTasksSection from '../components/volunteer/AvailableTasksSection';
 import VolunteerSkillsView from '../components/volunteer/VolunteerSkillsView';
+import Toast from '../components/Toast/Toast';
 import { getCurrentUser, logout } from '../utils/auth';
 import { usePolling } from '../hooks/usePolling';
 import { DISASTER_SKILLS } from '../utils/skills';
@@ -127,7 +128,12 @@ const VolunteerDashboard = () => {
   const [savingSkills, setSavingSkills] = useState(false);
 
   const [loading, setLoading] = useState(false);
+  // `error` is only for load failures — it renders inline in the view (with a
+  // Retry). Feedback from an action (expressing interest, marking helped,
+  // withdrawing, task sign-up) goes to `actionMessage` instead, shown as a small
+  // temporary toast so it doesn't push the page content around.
   const [error, setError] = useState('');
+  const [actionMessage, setActionMessage] = useState('');
 
   // Tracks the request id currently being submitted, so we can show a loading
   // state on just that card's button.
@@ -194,7 +200,7 @@ const VolunteerDashboard = () => {
   // Volunteer clicked "I can help with this" on a feed card.
   const handleInteract = async (request) => {
     setInteractingId(request.id);
-    setError('');
+    setActionMessage('');
     try {
       const result = await expressInterest(request.id);
       setConfirmations((prev) => ({
@@ -206,7 +212,7 @@ const VolunteerDashboard = () => {
       // card flips to a Withdraw action.
       await loadData({ silent: true });
     } catch (err) {
-      setError(requestErrorMessage(err, t('volunteer.errors.recordInterest')));
+      setActionMessage(requestErrorMessage(err, t('volunteer.errors.recordInterest')));
     } finally {
       setInteractingId(null);
     }
@@ -216,12 +222,12 @@ const VolunteerDashboard = () => {
   // reloads so the card reflects its new completed status.
   const handleMarkHelped = async (request) => {
     setMarkingId(request.id);
-    setError('');
+    setActionMessage('');
     try {
       await markRequestHelped(request.id);
       await loadData({ silent: true });
     } catch (err) {
-      setError(requestErrorMessage(err, t('volunteer.errors.markHelped')));
+      setActionMessage(requestErrorMessage(err, t('volunteer.errors.markHelped')));
     } finally {
       setMarkingId(null);
     }
@@ -231,7 +237,7 @@ const VolunteerDashboard = () => {
   // from the local interests list so the Tasks view updates immediately.
   const handleWithdraw = async (request) => {
     setWithdrawingId(request.id);
-    setError('');
+    setActionMessage('');
     try {
       await withdrawInterest(request.id);
       setInterests((prev) => prev.filter((r) => r.id !== request.id));
@@ -246,7 +252,7 @@ const VolunteerDashboard = () => {
       // this volunteer was signed up for drop off the available-tasks list.
       await loadData({ silent: true });
     } catch (err) {
-      setError(requestErrorMessage(err, t('volunteer.errors.withdraw')));
+      setActionMessage(requestErrorMessage(err, t('volunteer.errors.withdraw')));
     } finally {
       setWithdrawingId(null);
     }
@@ -256,12 +262,12 @@ const VolunteerDashboard = () => {
   // the card flips to "Signed up" and the volunteer count updates.
   const handleSignUpTask = async (task) => {
     setTaskBusyId(task.id);
-    setError('');
+    setActionMessage('');
     try {
       await signUpForTask(task.id);
       await loadData({ silent: true });
     } catch (err) {
-      setError(requestErrorMessage(err, 'Could not sign up for the task. Please try again.'));
+      setActionMessage(requestErrorMessage(err, 'Could not sign up for the task. Please try again.'));
     } finally {
       setTaskBusyId(null);
     }
@@ -270,12 +276,12 @@ const VolunteerDashboard = () => {
   // Volunteer clicked "Withdraw" on a task they'd signed up for.
   const handleWithdrawTask = async (task) => {
     setTaskBusyId(task.id);
-    setError('');
+    setActionMessage('');
     try {
       await withdrawFromTask(task.id);
       await loadData({ silent: true });
     } catch (err) {
-      setError(requestErrorMessage(err, 'Could not withdraw from the task. Please try again.'));
+      setActionMessage(requestErrorMessage(err, 'Could not withdraw from the task. Please try again.'));
     } finally {
       setTaskBusyId(null);
     }
@@ -454,6 +460,10 @@ const VolunteerDashboard = () => {
       {!['dashboard', 'requests', 'tasks', 'skills'].includes(view) && (
         <ComingSoonPanel title={VIEW_TITLES[view]} />
       )}
+
+      {/* Temporary, corner-anchored feedback for actions (interest, mark helped,
+          withdraw, task sign-up). Auto-dismisses; never shifts page content. */}
+      <Toast message={actionMessage} onDismiss={() => setActionMessage('')} />
     </PortalShell>
   );
 };

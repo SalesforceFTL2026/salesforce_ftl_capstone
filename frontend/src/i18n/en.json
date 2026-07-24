@@ -98,6 +98,7 @@
       "greeting": "Hi, {{name}}",
       "signOut": "SIGN OUT",
       "signIn": "SIGN IN",
+      "chooseRole": "SIGN IN AS",
       "searchAria": "Search",
       "toggleDarkModeAria": "Toggle dark mode",
       "darkModeEnabledAlt": "Dark mode enabled",

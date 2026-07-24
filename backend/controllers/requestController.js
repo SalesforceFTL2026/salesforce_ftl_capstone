@@ -349,6 +349,15 @@ export const getRequestDistances = async (req, res) => {
   }
 };
 
+// Statuses whose real-world conditions we enforce, so a request can't be marked
+// falsely. Everything else (pending, assigned, closed) can be set freely.
+//   - ACTIVE: work is underway. Requires volunteers assigned AND resources
+//     allocated, mirroring the task-level gate in volunteerTaskController.
+//   - DONE: the need has been met. Requires the scheduled volunteer day to have
+//     passed, i.e. the volunteers have had the chance to complete the work.
+const ACTIVE_STATUSES = ['in-progress', 'matched'];
+const DONE_STATUSES = ['fulfilled', 'completed'];
+
 // Update request status
 // Allowed for organizations, or the help-seeker who owns the request.
 export const updateRequestStatus = async (req, res) => {
@@ -385,6 +394,36 @@ export const updateRequestStatus = async (req, res) => {
         success: false,
         message: 'You are not allowed to update this request.'
       });
+    }
+
+    // Guard the meaningful transitions so a request isn't advanced past what has
+    // actually happened. We only check when MOVING INTO a gated status (not when
+    // it's already there), so re-saving or stepping back is never blocked. An org
+    // can still set pending/assigned/closed by hand at any time.
+    const enteringGatedStatus =
+      status !== request.status &&
+      (ACTIVE_STATUSES.includes(status) || DONE_STATUSES.includes(status));
+
+    if (enteringGatedStatus) {
+      const readiness = await requestModel.getRequestReadiness(id);
+
+      if (ACTIVE_STATUSES.includes(status)) {
+        if (!readiness.volunteersAssigned || !readiness.resourcesAllocated) {
+          return res.status(400).json({
+            success: false,
+            message:
+              'This request can only be marked in-progress once the required volunteers are assigned and the necessary resources are allocated.'
+          });
+        }
+      }
+
+      if (DONE_STATUSES.includes(status) && !readiness.volunteerDatePassed) {
+        return res.status(400).json({
+          success: false,
+          message:
+            'This request can only be marked fulfilled after the scheduled volunteer date has passed, confirming the work was completed.'
+        });
+      }
     }
 
     const updatedRequest = await requestModel.updateRequestStatus(id, status);

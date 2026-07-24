@@ -26,9 +26,11 @@ const LandingPage = () => {
     setAuthModal({ role, mode: 'signup' });
   };
 
-  // The header "Sign In" opens the popup on the Log In tab (no role needed).
-  const handleSignInClick = () => {
-    setAuthModal({ role: null, mode: 'login' });
+  // The header "Sign In" menu passes the role the user picked, opening the popup
+  // on the Log In tab labeled for that role. (Login works the same for everyone;
+  // the role just labels the form and the Sign Up tab if they switch.)
+  const handleSignInClick = (role = null) => {
+    setAuthModal({ role, mode: 'login' });
   };
 
   const closeAuthModal = () => setAuthModal(null);
