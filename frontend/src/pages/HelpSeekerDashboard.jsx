@@ -7,7 +7,8 @@ import HSRequestsView from '../components/helpseeker/HSRequestsView';
 import SafetyManual from '../components/SafetyManual/SafetyManual';
 import ChatAssistant from '../components/ChatAssistant/ChatAssistant';
 import HelpRequestForm from '../../components/HelpRequestForm/HelpRequestForm';
-import VoiceIntakeFlow from '../components/VoiceIntake/VoiceIntakeFlow';
+// Request by Voice — temporarily disabled for demo (do not remove)
+// import VoiceIntakeFlow from '../components/VoiceIntake/VoiceIntakeFlow';
 import Toast from '../components/Toast/Toast';
 import api from '../utils/api';
 import { getCurrentUser, logout, updateName, updateLanguage } from '../utils/auth';
@@ -47,7 +48,8 @@ const HelpSeekerDashboard = () => {
   const [deletingId, setDeletingId] = useState(null);
   const [showForm, setShowForm] = useState(false);
   // Whether the voice intake modal (record → review → submit) is open.
-  const [showVoice, setShowVoice] = useState(false);
+  // Request by Voice — temporarily disabled for demo (do not remove)
+  // const [showVoice, setShowVoice] = useState(false);
   // When set, the modal shows the form in edit mode for this request.
   const [editingRequest, setEditingRequest] = useState(null);
   // Controls the AI chat assistant panel (opened from the inline button).
@@ -187,7 +189,8 @@ const HelpSeekerDashboard = () => {
   // Let Escape close each modal while it's open, so backing out of a form is as
   // easy as opening it.
   useModalDismiss(showForm || Boolean(editingRequest), closeRequestModal);
-  useModalDismiss(showVoice, () => setShowVoice(false));
+  // Request by Voice — temporarily disabled for demo (do not remove)
+  // useModalDismiss(showVoice, () => setShowVoice(false));
 
   // Auto-refresh so newly submitted requests (including voice ones) appear
   // without a manual reload (#157). Silent so it doesn't flash the spinner.
@@ -221,6 +224,9 @@ const HelpSeekerDashboard = () => {
       onSignOut={handleLogout}
     >
       {view === 'dashboard' && (
+        // Request by Voice — temporarily disabled for demo (do not remove).
+        // onVoiceRequest prop intentionally omitted so the voice button in
+        // HSDashboardView does not render: onVoiceRequest={() => setShowVoice(true)}
         <HSDashboardView
           currentUser={currentUser}
           requests={activeRequests}
@@ -229,7 +235,6 @@ const HelpSeekerDashboard = () => {
           deletingId={deletingId}
           onDelete={handleDelete}
           onNewRequest={() => setShowForm(true)}
-          onVoiceRequest={() => setShowVoice(true)}
           onChat={() => setChatOpen(true)}
           nonprofits={SAMPLE_NONPROFITS}
         />
@@ -451,8 +456,8 @@ const HelpSeekerDashboard = () => {
         </div>
       )}
 
-      {/* Voice intake modal: record → review → submit. Clicking the backdrop
-          closes it; clicking inside the flow does not. */}
+      {/* Voice intake modal: record → review → submit.
+          Request by Voice — temporarily disabled for demo (do not remove).
       {showVoice && (
         <div
           className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 backdrop-blur-sm p-4 pt-20"
@@ -470,9 +475,6 @@ const HelpSeekerDashboard = () => {
             >
               ×
             </button>
-            {/* Top-aligned with clearance (pt-20) so the modal sits below the
-                admin bar rather than being covered by it, and capped to the
-                visible height with internal scroll. */}
             <div className="max-h-[calc(100vh-7rem)] overflow-y-auto rounded-2xl">
               <VoiceIntakeFlow
                 onSubmitted={() => {
@@ -485,6 +487,7 @@ const HelpSeekerDashboard = () => {
           </div>
         </div>
       )}
+      */}
 
       {/* Temporary, corner-anchored feedback for actions (e.g. a failed delete).
           Auto-dismisses; never shifts page content. */}

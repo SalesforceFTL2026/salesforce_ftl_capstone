@@ -14,6 +14,36 @@ const Header = ({ currentUser, onSignInClick, onSignOutClick }) => {
   const [hidden, setHidden] = useState(false);
   const lastScrollY = useRef(0);
 
+  // The "Sign In" button opens a small menu so the user first picks who they
+  // are (help seeker / volunteer / organization) before the login popup opens.
+  const [roleMenuOpen, setRoleMenuOpen] = useState(false);
+  const roleMenuRef = useRef(null);
+
+  const signInRoles = [
+    { key: 'help-seeker', label: t('auth.roles.helpSeeker') },
+    { key: 'volunteer', label: t('auth.roles.volunteer') },
+    { key: 'organization', label: t('auth.roles.organization') },
+  ];
+
+  // Close the role menu on an outside click or the Escape key.
+  useEffect(() => {
+    if (!roleMenuOpen) return undefined;
+    const onDocClick = (e) => {
+      if (roleMenuRef.current && !roleMenuRef.current.contains(e.target)) {
+        setRoleMenuOpen(false);
+      }
+    };
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') setRoleMenuOpen(false);
+    };
+    document.addEventListener('mousedown', onDocClick);
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', onDocClick);
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [roleMenuOpen]);
+
   useEffect(() => {
     const handleScroll = () => {
       const currentY = window.scrollY;
@@ -80,12 +110,39 @@ const Header = ({ currentUser, onSignInClick, onSignOutClick }) => {
                 </button>
               </>
             ) : (
-              <button
-                onClick={onSignInClick}
-                className="text-[#1C2A16] dark:text-white text-[22px] font-medium hover:opacity-70 transition-opacity"
-              >
-                {t('landing.header.signIn')}
-              </button>
+              <div className="relative" ref={roleMenuRef}>
+                <button
+                  onClick={() => setRoleMenuOpen((v) => !v)}
+                  aria-haspopup="menu"
+                  aria-expanded={roleMenuOpen}
+                  className="text-[#1C2A16] dark:text-white text-[22px] font-medium hover:opacity-70 transition-opacity"
+                >
+                  {t('landing.header.signIn')}
+                </button>
+                {roleMenuOpen && (
+                  <div
+                    role="menu"
+                    className="absolute right-0 mt-3 w-56 bg-white dark:bg-[#273A20] rounded-xl shadow-xl py-2 z-50 ring-1 ring-black/5"
+                  >
+                    <p className="px-4 py-2 text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                      {t('landing.header.chooseRole')}
+                    </p>
+                    {signInRoles.map((r) => (
+                      <button
+                        key={r.key}
+                        role="menuitem"
+                        onClick={() => {
+                          setRoleMenuOpen(false);
+                          onSignInClick(r.key);
+                        }}
+                        className="block w-full text-left px-4 py-2 text-[18px] text-[#1C2A16] dark:text-white hover:bg-gray-100 dark:hover:bg-[#1a2f1a] transition-colors"
+                      >
+                        {r.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             )}
             <button
               className="p-2 text-[#1C2A16] dark:text-white hover:opacity-70 transition-opacity"
