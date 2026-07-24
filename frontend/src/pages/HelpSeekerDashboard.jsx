@@ -402,11 +402,11 @@ const HelpSeekerDashboard = () => {
           not, so a stray click while filling it in won't discard the form. */}
       {(showForm || editingRequest) && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+          className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 backdrop-blur-sm p-4 pt-20"
           onClick={closeRequestModal}
         >
           <div
-            className="w-full max-w-lg relative max-h-[90vh]"
+            className="w-full max-w-lg relative max-h-[calc(100vh-7rem)]"
             onClick={(e) => e.stopPropagation()}
           >
             <button
@@ -417,9 +417,10 @@ const HelpSeekerDashboard = () => {
             >
               ×
             </button>
-            {/* Inner scroll container so a tall form scrolls within the viewport
-                while the floating close button stays pinned and visible. */}
-            <div className="max-h-[90vh] overflow-y-auto rounded-2xl">
+            {/* Top-aligned with clearance (pt-20) so the modal sits below the
+                admin bar rather than being covered by it, and capped to the
+                visible height with internal scroll for a tall form. */}
+            <div className="max-h-[calc(100vh-7rem)] overflow-y-auto rounded-2xl">
               <HelpRequestForm
                 compact
                 request={editingRequest}
@@ -442,11 +443,11 @@ const HelpSeekerDashboard = () => {
           closes it; clicking inside the flow does not. */}
       {showVoice && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+          className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 backdrop-blur-sm p-4 pt-20"
           onClick={() => setShowVoice(false)}
         >
           <div
-            className="w-full max-w-lg relative max-h-[90vh]"
+            className="w-full max-w-lg relative max-h-[calc(100vh-7rem)]"
             onClick={(e) => e.stopPropagation()}
           >
             <button
@@ -457,9 +458,10 @@ const HelpSeekerDashboard = () => {
             >
               ×
             </button>
-            {/* Inner scroll container so tall content scrolls within the
-                viewport while the floating close button stays pinned. */}
-            <div className="max-h-[90vh] overflow-y-auto rounded-2xl">
+            {/* Top-aligned with clearance (pt-20) so the modal sits below the
+                admin bar rather than being covered by it, and capped to the
+                visible height with internal scroll. */}
+            <div className="max-h-[calc(100vh-7rem)] overflow-y-auto rounded-2xl">
               <VoiceIntakeFlow
                 onSubmitted={() => {
                   loadRequests();
