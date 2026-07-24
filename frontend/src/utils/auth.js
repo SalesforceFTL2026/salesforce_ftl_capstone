@@ -84,6 +84,14 @@ export const updateProfile = async (fields) => {
 // Convenience wrapper for the common case of changing just the display name.
 export const updateName = (name) => updateProfile({ name });
 
+// Convenience wrapper for changing just the phone number. Pass an empty string
+// to clear it (it's optional). The backend validates the format.
+export const updatePhone = (phoneNumber) => updateProfile({ phoneNumber });
+
+// Convenience wrapper for changing just the household size. Pass '' or null to
+// clear it (it's optional). The backend validates it's a positive whole number.
+export const updateHousehold = (householdSize) => updateProfile({ householdSize });
+
 // Save the user's UI language to their profile AND switch the live UI to it.
 // Returns the updated user object.
 export const updateLanguage = async (lang) => {

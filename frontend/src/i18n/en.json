@@ -32,6 +32,7 @@
     "deleteRequest": "Delete request",
     "nonprofitsTitle": "Participating Non-Profits Near You",
     "organizationLogo": "Organization Logo",
+    "orgNoTypes": "Community support",
     "sampleOrgsNote": "Sample organizations — live listings coming soon."
   },
   "household": {
@@ -43,7 +44,7 @@
     "fieldPhone": "Phone Number",
     "fieldLocation": "Location",
     "fieldHouseholdSize": "# In Household",
-    "editNote": "Phone number, location, and household size can't be edited here yet — those fields are coming soon."
+    "editNote": "Edit your phone number and household size in Settings. Location can't be edited here yet — that field is coming soon."
   },
   "settings": {
     "title": "Settings",
@@ -53,6 +54,16 @@
     "nameEmptyError": "Name must not be empty.",
     "nameUpdated": "✓ Your name has been updated.",
     "nameUpdateError": "Could not update your name.",
+    "phoneNumber": "Phone Number",
+    "phoneHelp": "Responders use this to reach you about your requests. Leave blank to remove it.",
+    "phonePlaceholder": "e.g. (555) 123-4567",
+    "phoneUpdated": "✓ Your phone number has been updated.",
+    "phoneUpdateError": "Could not update your phone number.",
+    "householdSize": "Household Size",
+    "householdHelp": "How many people live in your household. Used as the default for new requests. Leave blank to remove it.",
+    "householdPlaceholder": "e.g. 4",
+    "householdUpdated": "✓ Your household size has been updated.",
+    "householdUpdateError": "Could not update your household size.",
     "saveChanges": "Save Changes",
     "saving": "Saving…",
     "language": "Language",

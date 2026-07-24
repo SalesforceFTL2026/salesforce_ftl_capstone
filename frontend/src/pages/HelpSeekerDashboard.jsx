@@ -11,7 +11,7 @@ import HelpRequestForm from '../../components/HelpRequestForm/HelpRequestForm';
 // import VoiceIntakeFlow from '../components/VoiceIntake/VoiceIntakeFlow';
 import Toast from '../components/Toast/Toast';
 import api from '../utils/api';
-import { getCurrentUser, logout, updateName, updateLanguage } from '../utils/auth';
+import { getCurrentUser, logout, updateName, updatePhone, updateHousehold, updateLanguage } from '../utils/auth';
 import { isAdminSession } from '../utils/previewMode';
 import { SUPPORTED_LANGUAGES } from '../i18n';
 import { usePolling } from '../hooks/usePolling';
@@ -64,6 +64,21 @@ const HelpSeekerDashboard = () => {
   const [savingName, setSavingName] = useState(false);
   const [nameError, setNameError] = useState('');
   const [nameSaved, setNameSaved] = useState(false);
+  // Settings form: the editable phone number, plus save state and feedback.
+  const [phoneInput, setPhoneInput] = useState(currentUser?.phoneNumber || '');
+  const [savingPhone, setSavingPhone] = useState(false);
+  const [phoneError, setPhoneError] = useState('');
+  const [phoneSaved, setPhoneSaved] = useState(false);
+  // Settings form: the editable household size, plus save state and feedback.
+  const [householdInput, setHouseholdInput] = useState(
+    currentUser?.householdSize != null ? String(currentUser.householdSize) : '',
+  );
+  const [savingHousehold, setSavingHousehold] = useState(false);
+  const [householdError, setHouseholdError] = useState('');
+  const [householdSaved, setHouseholdSaved] = useState(false);
+  // Participating organizations for the dashboard sidebar. Loaded from the API;
+  // falls back to SAMPLE_NONPROFITS when the DB has none (see loadOrganizations).
+  const [organizations, setOrganizations] = useState(null);
   // Settings: language save state and feedback.
   const [savingLanguage, setSavingLanguage] = useState(false);
   const [languageError, setLanguageError] = useState('');
@@ -158,6 +173,60 @@ const HelpSeekerDashboard = () => {
     }
   };
 
+  // Save the edited phone number, then update the live session so the Household
+  // tab reflects it immediately. An empty value clears the saved number.
+  const handleSavePhone = async (e) => {
+    e.preventDefault();
+    const trimmed = phoneInput.trim();
+    setPhoneError('');
+    setPhoneSaved(false);
+
+    if (trimmed === (currentUser?.phoneNumber || '')) {
+      return; // nothing changed
+    }
+
+    setSavingPhone(true);
+    try {
+      const updated = await updatePhone(trimmed);
+      setCurrentUser(updated);
+      setPhoneSaved(true);
+    } catch (err) {
+      setPhoneError(
+        err.response?.data?.message || err.message || t('settings.phoneUpdateError'),
+      );
+    } finally {
+      setSavingPhone(false);
+    }
+  };
+
+  // Save the edited household size, then update the live session so the profile
+  // card and Household tab reflect it immediately. An empty value clears it.
+  const handleSaveHousehold = async (e) => {
+    e.preventDefault();
+    const trimmed = householdInput.trim();
+    setHouseholdError('');
+    setHouseholdSaved(false);
+
+    const currentValue = currentUser?.householdSize != null ? String(currentUser.householdSize) : '';
+    if (trimmed === currentValue) {
+      return; // nothing changed
+    }
+
+    setSavingHousehold(true);
+    try {
+      // Send '' to clear; otherwise the numeric value. Backend validates range.
+      const updated = await updateHousehold(trimmed === '' ? '' : Number(trimmed));
+      setCurrentUser(updated);
+      setHouseholdSaved(true);
+    } catch (err) {
+      setHouseholdError(
+        err.response?.data?.message || err.message || t('settings.householdUpdateError'),
+      );
+    } finally {
+      setSavingHousehold(false);
+    }
+  };
+
   // Load the logged-in user's requests. useCallback so the form's onCreated
   // can re-run it after a new submission.
   //
@@ -186,6 +255,26 @@ const HelpSeekerDashboard = () => {
     loadRequests();
   }, [loadRequests]);
 
+  // Load participating organizations for the sidebar. If the API returns none
+  // (the DB can be sparse), fall back to the sample list so the panel is never
+  // empty during a demo. On error we also fall back rather than show nothing.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data } = await api.get('/api/organizations');
+        if (cancelled) return;
+        const orgs = data.data || [];
+        setOrganizations(orgs.length > 0 ? orgs : SAMPLE_NONPROFITS);
+      } catch {
+        if (!cancelled) setOrganizations(SAMPLE_NONPROFITS);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   // Let Escape close each modal while it's open, so backing out of a form is as
   // easy as opening it.
   useModalDismiss(showForm || Boolean(editingRequest), closeRequestModal);
@@ -213,6 +302,12 @@ const HelpSeekerDashboard = () => {
   const firstName = currentUser?.name?.split(' ')[0] || 'there';
   const activeRequests = requests.filter((r) => ACTIVE_STATUSES.includes(r.status));
 
+  // What to show in the organizations panel: real orgs once loaded, the sample
+  // list while loading or as the fallback. `orgsAreSample` lets the view label
+  // placeholder data honestly and skip the fake distance on real orgs.
+  const displayOrganizations = organizations ?? SAMPLE_NONPROFITS;
+  const orgsAreSample = organizations === null || organizations === SAMPLE_NONPROFITS;
+
   return (
     <PortalShell
       personaLabel="Help Seeker"
@@ -236,7 +331,8 @@ const HelpSeekerDashboard = () => {
           onDelete={handleDelete}
           onNewRequest={() => setShowForm(true)}
           onChat={() => setChatOpen(true)}
-          nonprofits={SAMPLE_NONPROFITS}
+          nonprofits={displayOrganizations}
+          nonprofitsAreSample={orgsAreSample}
         />
       )}
 
@@ -351,6 +447,105 @@ const HelpSeekerDashboard = () => {
               className="mt-5 px-8 py-3 bg-[#1a2740] text-white font-bold rounded-full hover:bg-[#14203a] focus:outline-none focus:ring-2 focus:ring-[#1a2740]/40 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {savingName ? t('settings.saving') : t('settings.saveChanges')}
+            </button>
+          </form>
+
+          {/* Phone number: shown to responders (via the linked request) so they
+              can reach the household. Optional — clearing the field removes it. */}
+          <form
+            onSubmit={handleSavePhone}
+            className="bg-white dark:bg-[#16233a] rounded-3xl shadow-md p-6 mt-6"
+          >
+            <label
+              htmlFor="phoneNumber"
+              className="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-2"
+            >
+              {t('settings.phoneNumber')}
+            </label>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
+              {t('settings.phoneHelp')}
+            </p>
+            <input
+              id="phoneNumber"
+              type="tel"
+              value={phoneInput}
+              onChange={(e) => {
+                setPhoneInput(e.target.value);
+                setPhoneError('');
+                setPhoneSaved(false);
+              }}
+              placeholder={t('settings.phonePlaceholder')}
+              className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-[#3a4f30] bg-white dark:bg-[#1a2f1a] text-gray-900 dark:text-white focus:outline-none focus:border-[#6ba3d3] focus:ring-2 focus:ring-[#6ba3d3]/30 transition-all"
+            />
+
+            {phoneError && (
+              <p className="mt-3 text-sm text-red-600 dark:text-red-400">{phoneError}</p>
+            )}
+            {phoneSaved && (
+              <p className="mt-3 text-sm text-green-700 dark:text-green-400">
+                {t('settings.phoneUpdated')}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              disabled={savingPhone || phoneInput.trim() === (currentUser?.phoneNumber || '')}
+              className="mt-5 px-8 py-3 bg-[#1a2740] text-white font-bold rounded-full hover:bg-[#14203a] focus:outline-none focus:ring-2 focus:ring-[#1a2740]/40 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {savingPhone ? t('settings.saving') : t('settings.saveChanges')}
+            </button>
+          </form>
+
+          {/* Household size: the number of people in the user's household. Shown
+              on the profile card and used as the default for new requests.
+              Optional — clearing the field removes it. */}
+          <form
+            onSubmit={handleSaveHousehold}
+            className="bg-white dark:bg-[#16233a] rounded-3xl shadow-md p-6 mt-6"
+          >
+            <label
+              htmlFor="householdSize"
+              className="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-2"
+            >
+              {t('settings.householdSize')}
+            </label>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
+              {t('settings.householdHelp')}
+            </p>
+            <input
+              id="householdSize"
+              type="number"
+              min="1"
+              max="100"
+              value={householdInput}
+              onChange={(e) => {
+                setHouseholdInput(e.target.value);
+                setHouseholdError('');
+                setHouseholdSaved(false);
+              }}
+              placeholder={t('settings.householdPlaceholder')}
+              className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-[#3a4f30] bg-white dark:bg-[#1a2f1a] text-gray-900 dark:text-white focus:outline-none focus:border-[#6ba3d3] focus:ring-2 focus:ring-[#6ba3d3]/30 transition-all"
+            />
+
+            {householdError && (
+              <p className="mt-3 text-sm text-red-600 dark:text-red-400">{householdError}</p>
+            )}
+            {householdSaved && (
+              <p className="mt-3 text-sm text-green-700 dark:text-green-400">
+                {t('settings.householdUpdated')}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              disabled={
+                savingHousehold ||
+                householdInput.trim() ===
+                  (currentUser?.householdSize != null ? String(currentUser.householdSize) : '')
+              }
+              className="mt-5 px-8 py-3 bg-[#1a2740] text-white font-bold rounded-full hover:bg-[#14203a] focus:outline-none focus:ring-2 focus:ring-[#1a2740]/40 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {savingHousehold ? t('settings.saving') : t('settings.saveChanges')}
             </button>
           </form>
 

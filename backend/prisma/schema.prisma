@@ -54,6 +54,7 @@ model User {
   role              String   // help-seeker, volunteer, organization
   location          String?
   phoneNumber       String?
+  householdSize     Int?     // Number of people in the user's household (profile default for requests)
   languagePreference String? @default("en")  // UI language: "en" | "es" | "zh"
   verified          Boolean  @default(false)
   active            Boolean  @default(true)

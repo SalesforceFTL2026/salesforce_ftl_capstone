@@ -32,7 +32,8 @@
     "deleteRequest": "Eliminar solicitud",
     "nonprofitsTitle": "Organizaciones sin fines de lucro participantes cerca de ti",
     "organizationLogo": "Logotipo de la organización",
-    "sampleOrgsNote": "Organizaciones de muestra — listados en vivo próximamente."
+    "sampleOrgsNote": "Organizaciones de muestra — listados en vivo próximamente.",
+    "orgNoTypes": "Community support"
   },
   "household": {
     "title": "Hogar",
@@ -43,7 +44,7 @@
     "fieldPhone": "Número de teléfono",
     "fieldLocation": "Ubicación",
     "fieldHouseholdSize": "N.º en el hogar",
-    "editNote": "El número de teléfono, la ubicación y el tamaño del hogar aún no se pueden editar aquí — esos campos estarán disponibles pronto."
+    "editNote": "Edit your phone number and household size in Settings. Location cannot be edited here yet — that field is coming soon."
   },
   "settings": {
     "title": "Configuración",
@@ -58,7 +59,17 @@
     "language": "Idioma",
     "languageHelp": "Elige el idioma de tu panel.",
     "languageUpdated": "✓ Tu idioma se ha actualizado.",
-    "languageUpdateError": "No se pudo actualizar tu idioma."
+    "languageUpdateError": "No se pudo actualizar tu idioma.",
+    "phoneNumber": "Phone Number",
+    "phoneHelp": "Responders use this to reach you about your requests. Leave blank to remove it.",
+    "phonePlaceholder": "e.g. (555) 123-4567",
+    "phoneUpdated": "✓ Your phone number has been updated.",
+    "phoneUpdateError": "Could not update your phone number.",
+    "householdSize": "Household Size",
+    "householdHelp": "How many people live in your household. Used as the default for new requests. Leave blank to remove it.",
+    "householdPlaceholder": "e.g. 4",
+    "householdUpdated": "✓ Your household size has been updated.",
+    "householdUpdateError": "Could not update your household size."
   },
   "languages": {
     "en": "English",
