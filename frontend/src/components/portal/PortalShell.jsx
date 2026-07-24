@@ -17,7 +17,12 @@ import PortalTopBar from './PortalTopBar';
 const PortalShell = ({
   personaLabel, navGroups, activeView, onNavigate, title, currentUser, onSignOut, children,
 }) => (
-  <div className="min-h-screen flex bg-[#c9d6c2] dark:bg-[#0f1a0f] transition-colors duration-300">
+  // App-shell layout: fill the available height (h-full — the viewport when
+  // standalone, or the space below the admin bar when embedded there) and keep
+  // the sidebar + top bar fixed while ONLY the main content scrolls. min-h-0 on
+  // the flex children lets the inner scroll area shrink instead of forcing the
+  // whole shell taller than its container.
+  <div className="h-full flex bg-[#c9d6c2] dark:bg-[#0f1a0f] transition-colors duration-300 overflow-hidden">
     <PortalSidebar
       label={personaLabel}
       groups={navGroups}
@@ -25,9 +30,9 @@ const PortalShell = ({
       onNavigate={onNavigate}
     />
 
-    <div className="flex-1 flex flex-col min-w-0">
+    <div className="flex-1 flex flex-col min-w-0 min-h-0">
       <PortalTopBar title={title} currentUser={currentUser} onSignOut={onSignOut} />
-      <main className="flex-1 p-4 sm:p-6 overflow-x-hidden">{children}</main>
+      <main className="flex-1 min-h-0 p-4 sm:p-6 overflow-y-auto overflow-x-hidden">{children}</main>
     </div>
   </div>
 );

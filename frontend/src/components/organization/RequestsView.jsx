@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import HeatMap from './HeatMap';
 import RequestMap from '../map/RequestMap';
 import NearMeToggle from '../map/NearMeToggle';
+import RequestFilterBar from '../RequestFilterBar/RequestFilterBar';
 import AllocationPanel from './AllocationPanel';
 import { getRequestDistances, requestErrorMessage } from '../../utils/requests';
 
@@ -52,6 +53,8 @@ const sortRequests = (requests, sortBy, distances) => {
 // @param {() => void} onOrgLocationChange - persist a new org location
 // @param {object|null} near - active "Near me" geo-radius filter (issue #116)
 // @param {(near) => void} onNearChange - toggle/update the "Near me" filter
+// @param {{search?, category?, urgency?}} filters - committed keyword filters
+// @param {(filters) => void} onFiltersChange - update the keyword filters
 // @param {object[]} resources - the org's inventory, for allocating to requests
 // @param {() => void} onAllocationsChanged - refresh resources after allocating
 // @param {Set<string>} assignedIds - ids of requests assigned to this org
@@ -61,6 +64,7 @@ const RequestsView = ({
   yourRequests, unfiltered, loading, error, onRetry, onStatusChange, updatingId,
   orgLocation, onOrgLocationChange,
   near, onNearChange,
+  filters, onFiltersChange,
   resources = [], onAllocationsChanged,
   assignedIds = new Set(), onToggleAssign, assigningId,
 }) => {
@@ -145,8 +149,20 @@ const RequestsView = ({
 
   return (
     <div className="grid lg:grid-cols-2 gap-6">
-      {/* Left: sort control + two request tables */}
+      {/* Left: keyword filters + sort control + two request tables */}
       <div className="flex flex-col gap-6">
+        {/* Keyword search + category/urgency filters (issues #81, #82, #85).
+            Filtering runs on the backend, so changing these re-fetches the feed
+            via the dashboard's onFiltersChange handler — narrowing the tables
+            and the heat/pin map together. */}
+        {onFiltersChange && (
+          <RequestFilterBar
+            value={filters}
+            onChange={onFiltersChange}
+            resultCount={loading ? undefined : unfiltered.length}
+          />
+        )}
+
         <div className="bg-white dark:bg-[#16233a] rounded-2xl px-5 py-3 shadow-md flex flex-wrap items-center gap-2 transition-colors duration-300">
           <label htmlFor="sort-requests" className="text-sm font-semibold text-[#1C2A16] dark:text-white">
             {t('org.requests.sortBy')}
