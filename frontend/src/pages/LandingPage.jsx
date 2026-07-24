@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import HeroSection from '../components/HeroSection/HeroSection';
 import ImpactSection from '../components/ImpactSection/ImpactSection';
+import WhoWeAreSection from '../components/WhoWeAreSection/WhoWeAreSection';
 import WhatWeDoSection from '../components/WhatWeDoSection/WhatWeDoSection';
 import GetInvolvedSection from '../components/GetInvolvedSection/GetInvolvedSection';
 import PartnerSection from '../components/PartnerSection/PartnerSection';
@@ -55,6 +56,7 @@ const LandingPage = () => {
       />
       <div className="pt-[64px] sm:pt-[124px]">
         <HeroSection onRoleSelect={handleRoleSelect} />
+        <WhoWeAreSection />
         <ImpactSection />
         <WhatWeDoSection />
         <GetInvolvedSection />

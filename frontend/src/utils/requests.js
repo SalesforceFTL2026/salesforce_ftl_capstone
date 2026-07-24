@@ -62,11 +62,14 @@ export const getPrioritizedRequests = async (near, filters) => {
 // Pass an optional { lat, lng, radiusMiles } to geo-filter by distance from a
 // point ("Near me"). The backend handles invalid/missing filters by returning
 // the full list.
-export const getAllRequests = async (near) => {
-  const params =
-    near && near.lat != null && near.lng != null && near.radiusMiles != null
-      ? { lat: near.lat, lng: near.lng, radius: near.radiusMiles }
-      : undefined;
+//
+// Pass an optional { category, urgency, search } to narrow the list by
+// category, urgency, or a free-text keyword (issues #81, #82). These compose
+// with the geo-radius filter. GET /api/requests already runs the shared filter
+// contract (docs/FILTER_CONTRACT.md), so we forward the same params the
+// prioritized feed uses.
+export const getAllRequests = async (near, filters) => {
+  const params = buildFeedParams(near, filters);
   const { data } = await api.get('/api/requests', { params });
 
   if (!data?.success) {
