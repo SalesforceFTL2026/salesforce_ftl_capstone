@@ -1,5 +1,6 @@
 import api from './api';
 import { setLanguage } from '../i18n';
+import { clearPreviewStore } from './previewMode';
 
 // All sign-up / sign-in calls and token storage live here so components stay
 // thin and there is a single source of truth for how we talk to the auth API.
@@ -104,10 +105,13 @@ export const getCurrentUser = () => {
   }
 };
 
-// Clear the stored session so the user is signed out.
+// Clear the stored session so the user is signed out. Also wipe any admin
+// preview overlay so simulated (session-only) edits never carry into a later
+// login or a real user's view.
 export const logout = () => {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
+  clearPreviewStore();
 };
 
 // Turn any auth error (axios or thrown Error) into a safe message to show.

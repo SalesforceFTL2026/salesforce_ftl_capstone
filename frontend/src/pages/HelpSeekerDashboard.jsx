@@ -10,6 +10,7 @@ import HelpRequestForm from '../../components/HelpRequestForm/HelpRequestForm';
 import VoiceIntakeFlow from '../components/VoiceIntake/VoiceIntakeFlow';
 import api from '../utils/api';
 import { getCurrentUser, logout, updateName, updateLanguage } from '../utils/auth';
+import { isAdminSession } from '../utils/previewMode';
 import { SUPPORTED_LANGUAGES } from '../i18n';
 import { usePolling } from '../hooks/usePolling';
 import { useModalDismiss } from '../hooks/useModalDismiss';
@@ -155,11 +156,17 @@ const HelpSeekerDashboard = () => {
   //
   // Pass { silent: true } for background polling refreshes so the list updates
   // in place without flashing the loading spinner.
+  //
+  // When the demo admin is viewing this dashboard, load ALL requests across
+  // users (the global endpoint) instead of just the account's own, so the
+  // Active Requests list is populated for a demo. Real help-seekers always see
+  // only their own requests.
   const loadRequests = useCallback(async ({ silent = false } = {}) => {
     if (!silent) setLoading(true);
     setError('');
     try {
-      const { data } = await api.get('/api/requests/my-requests');
+      const endpoint = isAdminSession() ? '/api/requests' : '/api/requests/my-requests';
+      const { data } = await api.get(endpoint);
       setRequests(data.data || []);
     } catch (err) {
       setError(err.response?.data?.message || 'Could not load your requests.');

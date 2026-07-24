@@ -54,10 +54,11 @@ const AdminDashboard = () => {
   if (!currentUser || currentUser.role !== 'admin') return null;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0f1a2e]">
-      {/* Admin control bar — sticky so it stays reachable while scrolling a
-          persona dashboard underneath it. */}
-      <div className="sticky top-0 z-[1500] bg-[#1C2A16] text-white shadow-lg">
+    <div className="h-screen flex flex-col bg-gray-50 dark:bg-[#0f1a2e]">
+      {/* Admin control bar — a fixed (non-scrolling) header. The persona
+          dashboard below gets the remaining height and scrolls internally, so
+          the bar always stays in view. */}
+      <div className="shrink-0 z-[1500] bg-[#1C2A16] text-white shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <span className="text-sm font-bold uppercase tracking-wide bg-white/15 px-3 py-1 rounded-lg">
@@ -145,9 +146,12 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* The selected persona's real dashboard. Keyed by persona + mode so it
-          fully remounts on a switch, resetting local state and re-fetching. */}
-      <div key={`${persona}-${preview}`}>
+      {/* The selected persona's real dashboard fills the space below the bar and
+          scrolls internally (its PortalShell uses h-full). Keyed by persona +
+          mode so it fully remounts on a switch, resetting local state and
+          re-fetching. min-h-0 lets this flex child shrink so its inner scroll
+          area — not the whole page — is what overflows. */}
+      <div key={`${persona}-${preview}`} className="flex-1 min-h-0">
         {persona === 'help-seeker' && <HelpSeekerDashboard />}
         {persona === 'volunteer' && <VolunteerDashboard />}
         {persona === 'organization' && <OrganizationDashboard />}
