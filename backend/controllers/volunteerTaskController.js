@@ -3,6 +3,7 @@ import * as resourceModel from '../models/resourceModel.js';
 import { getRequestById } from '../models/requestModel.js';
 import { suggestTaskDates } from '../services/ai/taskDateAdvisor.js';
 import { suggestTasksForRequest } from '../services/ai/taskSuggestionAdvisor.js';
+import { hasRole } from '../utils/roles.js';
 
 /**
  * Volunteer Task Controller
@@ -21,9 +22,9 @@ const URGENCIES = ['Low', 'Medium', 'High', 'Critical'];
 // tasks also reach it automatically via the model's auto-progression.
 const SETTABLE_STATUSES = ['open', 'in-progress', 'completed', 'cancelled'];
 
-// Guard: only organizations may use these endpoints.
+// Guard: only organizations may use these endpoints (admin may act as one).
 const ensureOrg = (req, res) => {
-  if (req.user.role !== 'organization') {
+  if (!hasRole(req.user, 'organization')) {
     res.status(403).json({
       success: false,
       message: 'Only organizations can manage volunteer tasks.',
@@ -240,9 +241,9 @@ export const getTaskSuggestions = async (req, res) => {
   }
 };
 
-// Guard: only volunteers may use the sign-up endpoints.
+// Guard: only volunteers may use the sign-up endpoints (admin may act as one).
 const ensureVolunteer = (req, res) => {
-  if (req.user.role !== 'volunteer') {
+  if (!hasRole(req.user, 'volunteer')) {
     res.status(403).json({
       success: false,
       message: 'Only volunteers can sign up for tasks.',

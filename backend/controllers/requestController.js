@@ -7,6 +7,7 @@ import { geocodeLocation, haversineMiles } from '../services/geocoding/geocoder.
 import { parseRadiusFilter, filterWithinRadius } from '../services/geocoding/distance.js';
 import { filterRequestsFromQuery } from '../services/filters/requestFilters.js';
 import { transcribeAudio, extractRequestFields } from '../services/ai/index.js';
+import { hasRole } from '../utils/roles.js';
 
 /**
  * Request Controller
@@ -35,7 +36,9 @@ const parseHouseholdSize = (value) => {
 // The rule: organizations can manage any request, and a help-seeker can manage
 // only the request they submitted themselves. Everyone else is not allowed.
 const canManageRequest = (user, request) => {
-  if (user.role === 'organization') {
+  // Organizations (and the demo admin, who may act as one) can manage any
+  // request; a help-seeker can manage only the request they submitted.
+  if (hasRole(user, 'organization')) {
     return true;
   }
   return user.role === 'help-seeker' && request.userId === user.id;
@@ -47,7 +50,7 @@ const canManageRequest = (user, request) => {
 export const createRequest = async (req, res) => {
   try {
     // Only help-seekers can submit help requests.
-    if (req.user.role !== 'help-seeker') {
+    if (!hasRole(req.user, 'help-seeker')) {
       return res.status(403).json({
         success: false,
         message: 'Only help-seekers can submit a help request.'
@@ -605,7 +608,7 @@ export const interactWithRequest = async (req, res) => {
     const { notes } = req.body;
 
     // Only volunteers can express interest this way.
-    if (req.user.role !== 'volunteer') {
+    if (!hasRole(req.user, 'volunteer')) {
       return res.status(403).json({
         success: false,
         message: 'Only volunteers can express interest in a request.'
@@ -698,7 +701,7 @@ export const completeRequest = async (req, res) => {
     const { id } = req.params;
 
     // Only volunteers can mark a request as helped.
-    if (req.user.role !== 'volunteer') {
+    if (!hasRole(req.user, 'volunteer')) {
       return res.status(403).json({
         success: false,
         message: 'Only volunteers can mark a request as helped.'
@@ -762,7 +765,7 @@ export const withdrawInterest = async (req, res) => {
   try {
     const { id } = req.params;
 
-    if (req.user.role !== 'volunteer') {
+    if (!hasRole(req.user, 'volunteer')) {
       return res.status(403).json({
         success: false,
         message: 'Only volunteers can withdraw interest in a request.'
@@ -817,7 +820,7 @@ export const withdrawInterest = async (req, res) => {
 // Requires authentication; only help-seekers can file requests.
 export const transcribeVoiceRequest = async (req, res) => {
   try {
-    if (req.user.role !== 'help-seeker') {
+    if (!hasRole(req.user, 'help-seeker')) {
       return res.status(403).json({
         success: false,
         message: 'Only help-seekers can submit help requests'
@@ -895,7 +898,7 @@ export const assignToRequest = async (req, res) => {
     const { id } = req.params;
 
     // Only organizations can assign requests to themselves.
-    if (req.user.role !== 'organization') {
+    if (!hasRole(req.user, 'organization')) {
       return res.status(403).json({
         success: false,
         message: 'Only organizations can assign requests to themselves.'
@@ -960,7 +963,7 @@ export const unassignFromRequest = async (req, res) => {
   try {
     const { id } = req.params;
 
-    if (req.user.role !== 'organization') {
+    if (!hasRole(req.user, 'organization')) {
       return res.status(403).json({
         success: false,
         message: 'Only organizations can unassign requests.'
