@@ -59,7 +59,11 @@ const HSDashboardView = ({
         )}
 
         {!loading && !error && requests.length > 0 && (
-          <ul className="flex flex-col gap-3">
+          // Fixed-height scroll area: show ~2.5 request rows so the list stays
+          // compact and the actions below it remain visible, and let the rest
+          // scroll instead of stacking down the page. pr-1 keeps the scrollbar
+          // clear of the delete buttons.
+          <ul className="flex flex-col gap-3 max-h-[13.5rem] overflow-y-auto pr-1">
             {requests.map((r) => (
               <RequestRow
                 key={r.id}

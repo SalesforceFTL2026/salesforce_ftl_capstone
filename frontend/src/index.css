@@ -15,6 +15,16 @@
     font-size: 118.75%; /* ~19px base instead of the default 16px */
   }
 
+  /* Full-height chain so the portal shells can use h-full to fill the viewport
+     and scroll their main content internally (app-shell layout) instead of the
+     whole page scrolling. Pages taller than the viewport still overflow and
+     scroll normally, so the landing page is unaffected. */
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
   html.dark body {
     @apply bg-black text-gray-100;
   }
