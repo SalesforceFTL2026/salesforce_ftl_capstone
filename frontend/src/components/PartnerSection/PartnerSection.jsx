@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 const PartnerSection = () => {
   const { t } = useTranslation();
   return (
-    <section className="py-20 bg-white dark:bg-black transition-colors duration-300">
+    <section id="partner-resources" className="py-20 bg-white dark:bg-black transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-6">
         <h2 className="text-4xl font-bold text-center mb-16 text-[#1C2A16] dark:text-white transition-colors duration-300">
           {t('landing.partners.title')}

@@ -45,7 +45,7 @@ const Header = ({ currentUser, onSignInClick, onSignOutClick }) => {
 
           {/* Navigation */}
           <nav className="hidden lg:flex items-center gap-8">
-            <a href="#give" className="text-[#1C2A16] dark:text-white text-[22px] font-medium hover:opacity-70 transition-opacity">
+            <a href="#get-involved" className="text-[#1C2A16] dark:text-white text-[22px] font-medium hover:opacity-70 transition-opacity">
               {t('landing.header.nav.give')}
             </a>
             <a href="#what-we-do" className="text-[#1C2A16] dark:text-white text-[22px] font-medium hover:opacity-70 transition-opacity">
@@ -54,7 +54,7 @@ const Header = ({ currentUser, onSignInClick, onSignOutClick }) => {
             <a href="#who-we-are" className="text-[#1C2A16] dark:text-white text-[22px] font-medium hover:opacity-70 transition-opacity">
               {t('landing.header.nav.whoWeAre')}
             </a>
-            <a href="#how-to-help" className="text-[#1C2A16] dark:text-white text-[22px] font-medium hover:opacity-70 transition-opacity">
+            <a href="#get-involved" className="text-[#1C2A16] dark:text-white text-[22px] font-medium hover:opacity-70 transition-opacity">
               {t('landing.header.nav.howToHelp')}
             </a>
             <a href="#partner-resources" className="text-[#1C2A16] dark:text-white text-[22px] font-medium hover:opacity-70 transition-opacity">

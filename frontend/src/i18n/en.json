@@ -99,11 +99,32 @@
       "volunteer": "I WANT TO VOLUNTEER",
       "organization": "I'M AN ORGANIZATION"
     },
+    "whoWeAre": {
+      "title": "WHO WE ARE",
+      "lead": "MapResponse is a mapped network that connects people affected by disasters with the volunteers and organizations ready to help.",
+      "body": "When a disaster hits, help is out there — it's just scattered. Requests pile up across calls, texts, and social media while volunteers and relief organizations struggle to see where they're needed most. We bring it all onto one live map. Requests for help become clear, prioritized points that the right helpers can act on fast.",
+      "imageAlt": "Community members helping each other after a disaster"
+    },
     "whatWeDo": {
-      "title": "Title",
-      "graphic": "GRAPHIC",
-      "description": "Description",
-      "learnMore": "LEARN MORE"
+      "title": "WHAT WE DO",
+      "learnMore": "LEARN MORE",
+      "cards": {
+        "map": {
+          "title": "Map the Need",
+          "description": "Help seekers submit requests by text or voice. We plot them on a live map and let AI rank each one by urgency, so the most critical needs rise to the top.",
+          "imageAlt": "A flooded neighborhood seen from above"
+        },
+        "match": {
+          "title": "Match Helpers",
+          "description": "Volunteers and organizations see nearby requests matched to their skills and available resources — no more guessing where to start.",
+          "imageAlt": "Volunteers sorting and distributing food supplies"
+        },
+        "coordinate": {
+          "title": "Coordinate Relief",
+          "description": "Organizations allocate resources and track fulfillment from request to resolution, so no one falls through the cracks.",
+          "imageAlt": "Rescue workers clearing rubble after a disaster"
+        }
+      }
     },
     "impact": {
       "title": "OUR 2026 IMPACT",
@@ -116,21 +137,27 @@
       "statistic": "STATISTIC #{{number}}"
     },
     "getInvolved": {
-      "title": "GET INVOLVED",
-      "graphic": "GRAPHIC",
+      "title": "HOW TO HELP",
+      "subtitle": "However you can give — your time, your resources, or your network — there's a place for you here.",
       "corporatePartnerLine1": "BECOME A CORPORATE",
       "corporatePartnerLine2": "PARTNER",
+      "corporatePartnerBody": "Fund relief efforts and put your company's resources to work where they matter most.",
+      "corporatePartnerImageAlt": "Wildfire burning near a community",
       "nonprofitNetworkLine1": "JOIN OUR NON-PROFIT",
       "nonprofitNetworkLine2": "NETWORK",
-      "helpCommunitiesLine1": "HELP COMMUNITIES IN",
-      "helpCommunitiesLine2": "NEED"
+      "nonprofitNetworkBody": "Bring your organization onto the map to coordinate resources and reach people faster.",
+      "nonprofitNetworkImageAlt": "Relief supplies ready for distribution",
+      "helpCommunitiesLine1": "VOLUNTEER YOUR",
+      "helpCommunitiesLine2": "TIME",
+      "helpCommunitiesBody": "Lend your skills and hands to neighbors recovering from disaster in your area.",
+      "helpCommunitiesImageAlt": "Volunteers helping clear debris"
     },
     "partners": {
       "title": "THANK YOU TO OUR PARTNERS FOR YOUR SUPPORT!",
       "logo": "Logo"
     },
     "oneLiner": {
-      "text": "MAP RESPONSE ONE-LINER",
+      "text": "When disaster scatters help, MapResponse puts it back on the map.",
       "scrollToTopAria": "Scroll to top"
     },
     "footer": {
