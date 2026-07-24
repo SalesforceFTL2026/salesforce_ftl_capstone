@@ -28,4 +28,10 @@
   html.dark body {
     @apply bg-black text-gray-100;
   }
+
+  /* Anchored landing sections sit below the fixed header. Offset their scroll
+     target so clicking a nav link doesn't hide the heading behind the header. */
+  [id] {
+    scroll-margin-top: 124px;
+  }
 }

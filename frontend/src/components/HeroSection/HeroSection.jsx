@@ -25,7 +25,7 @@ const HeroSection = ({ onRoleSelect }) => {
   }, [disasterImages.length]);
 
   return (
-    <section className="relative h-[450px] sm:h-[500px] md:h-[600px] flex items-center justify-center overflow-hidden">
+    <section id="get-help" className="relative h-[450px] sm:h-[500px] md:h-[600px] flex items-center justify-center overflow-hidden">
       {/* Light mode: Rotating Background Images with overlay */}
       <div className="absolute inset-0 dark:hidden">
         {disasterImages.map((image, index) => (
