@@ -7,9 +7,39 @@ const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1';
 
 // Gemini model used as the free fallback when OpenRouter is exhausted.
 // Configurable via env; "flash-latest" auto-tracks the current flash model so
-// we don't 404 when Google retires a specific version. Flash is fast and has a
-// generous free daily quota.
+// we don't 404 when Google retires a specific version.
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-flash-latest';
+
+// Gemini's free tier meters requests PER MODEL, not per project: each Flash
+// model carries its own ~20 requests/day and 5-10 requests/minute allowance.
+// Pointing every call at one model (as GEMINI_MODEL alone did) caps us at ~20
+// free requests/day and wastes the identical allowance sitting on every sibling
+// model. Rotating multiplies the free budget, which is what makes a per-turn
+// voice agent affordable at all.
+//
+// Ordered cheapest-capability-first so the weakest model absorbs the easy calls
+// and the stronger ones stay in reserve. Override with a comma-separated env
+// list as Google's lineup changes (retired ids are skipped automatically —
+// a 404 just falls through to the next entry).
+const GEMINI_MODEL_CHAIN = (
+  process.env.GEMINI_MODEL_CHAIN ||
+  `gemini-2.5-flash-lite,gemini-2.5-flash,${GEMINI_MODEL}`
+)
+  .split(',')
+  .map((m) => m.trim())
+  .filter(Boolean);
+
+// Models we've seen return 429 (per-model daily quota gone). Skipped for the
+// rest of the process so we don't spend a round-trip rediscovering the same
+// exhaustion on every call. Deliberately not persisted: Google's quotas reset at
+// midnight Pacific, and a restart is a cheap enough excuse to re-probe.
+const exhaustedGeminiModels = new Set();
+
+// Whether askLLM may fall through to the PAID OpenAI chat model. Off by default
+// so no code path — including a runaway retry loop — can spend real credits
+// without an explicit opt-in. Set ALLOW_PAID_FALLBACK=true to buy availability
+// once the free tiers are dry.
+const ALLOW_PAID_FALLBACK = process.env.ALLOW_PAID_FALLBACK === 'true';
 
 // Claude model used only for LOCAL testing — the `anthropic` client is null in
 // production (see clients.js), so this branch never runs there.
@@ -134,7 +164,35 @@ export async function askLLM(message, { systemPrompt, history = [], validate } =
     }
   }
 
-  // --- Primary: OpenRouter free models ---
+  // --- Primary: Gemini free tier, rotated across models ---
+  // Ahead of OpenRouter because Gemini's per-model metering gives us a larger
+  // combined free budget (~20 req/day/model across several models) and Flash is
+  // markedly more reliable at "reply with only JSON" than the average free
+  // OpenRouter model, which matters for every structured caller we have.
+  if (gemini) {
+    for (const model of GEMINI_MODEL_CHAIN) {
+      if (exhaustedGeminiModels.has(model)) continue;
+
+      try {
+        const reply = await askGemini(messages, model);
+        if (!validate || validate(reply)) {
+          return reply;
+        }
+        lastError = new Error(`Gemini ${model} returned a reply that failed validation`);
+      } catch (err) {
+        lastError = err;
+
+        // 429 = this model's daily/minute quota is gone. Remember it so the rest
+        // of this process skips straight past it. The SDK surfaces the status on
+        // `status`, but older versions only put it in the message, so check both.
+        if (err.status === 429 || /429|quota|rate limit/i.test(err.message || '')) {
+          exhaustedGeminiModels.add(model);
+        }
+      }
+    }
+  }
+
+  // --- Fallback: OpenRouter free models ---
   try {
     const freeModels = await getFreeModels();
     const modelsToTry = freeModels.slice(0, MAX_MODELS_TO_TRY);
@@ -174,29 +232,19 @@ export async function askLLM(message, { systemPrompt, history = [], validate } =
     lastError = err;
   }
 
-  // --- Fallback: Gemini free tier (separate daily quota from OpenRouter) ---
-  if (gemini) {
+  // --- Final fallback: OpenAI chat (PAID, opt-in) ---
+  // Gated so exhausting the free tiers fails loudly instead of quietly billing
+  // us. Callers already surface a "try again in a moment" message on throw.
+  if (ALLOW_PAID_FALLBACK) {
     try {
-      const reply = await askGemini(messages);
+      const reply = await askOpenAI(messages);
       if (!validate || validate(reply)) {
         return reply;
       }
-      lastError = new Error('Gemini fallback returned a reply that failed validation');
+      lastError = new Error('OpenAI fallback returned a reply that failed validation');
     } catch (err) {
       lastError = err;
     }
-  }
-
-  // --- Final fallback: OpenAI chat (paid) ---
-  // Used when both free tiers are exhausted so the feature still works.
-  try {
-    const reply = await askOpenAI(messages);
-    if (!validate || validate(reply)) {
-      return reply;
-    }
-    lastError = new Error('OpenAI fallback returned a reply that failed validation');
-  } catch (err) {
-    lastError = err;
   }
 
   throw lastError;
@@ -237,9 +285,11 @@ async function askOpenAI(messages) {
 // Send the assembled OpenAI-style message list to Gemini and return its text.
 // Gemini has no "system" role, so we fold any system message into the prompt.
 // @param {Array<{role: string, content: string}>} messages
+// @param {string} [modelName] - which Gemini model to spend quota on; defaults
+//   to GEMINI_MODEL so direct callers keep the previous behaviour.
 // @returns {Promise<string>}
-async function askGemini(messages) {
-  const model = gemini.getGenerativeModel({ model: GEMINI_MODEL });
+async function askGemini(messages, modelName = GEMINI_MODEL) {
+  const model = gemini.getGenerativeModel({ model: modelName });
   const prompt = messages
     .map((m) => (m.role === 'system' ? m.content : `${m.role}: ${m.content}`))
     .join('\n\n');
