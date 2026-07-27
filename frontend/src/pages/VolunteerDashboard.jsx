@@ -7,6 +7,7 @@ import VolunteerRequestsView from '../components/volunteer/VolunteerRequestsView
 import VolunteerTasksView from '../components/volunteer/VolunteerTasksView';
 import AvailableTasksSection from '../components/volunteer/AvailableTasksSection';
 import VolunteerSkillsView from '../components/volunteer/VolunteerSkillsView';
+import ChatAssistant from '../components/ChatAssistant/ChatAssistant';
 import Toast from '../components/Toast/Toast';
 import { getCurrentUser, logout } from '../utils/auth';
 import { usePolling } from '../hooks/usePolling';
@@ -70,6 +71,8 @@ const VolunteerDashboard = () => {
   const navigate = useNavigate();
 
   const [view, setView] = useState('dashboard');
+  // First name, used only for the assistant's friendly opening greeting.
+  const firstName = currentUser?.name?.split(' ')[0] || 'there';
 
   // Sidebar nav + view titles, built from translations so the labels switch
   // with the language. Rebuilt each render — cheap, and always in sync.
@@ -86,7 +89,6 @@ const VolunteerDashboard = () => {
     {
       heading: t('volunteer.nav.tools'),
       items: [
-        { id: 'chat', label: t('volunteer.nav.chat'), icon: 'chat' },
         { id: 'settings', label: t('volunteer.nav.settings'), icon: 'settings' },
       ],
     },
@@ -97,7 +99,6 @@ const VolunteerDashboard = () => {
     requests: t('volunteer.viewTitles.requests'),
     tasks: t('volunteer.nav.tasks'),
     skills: t('volunteer.viewTitles.skills'),
-    chat: t('volunteer.nav.chat'),
     settings: t('volunteer.nav.settings'),
   };
 
@@ -456,6 +457,12 @@ const VolunteerDashboard = () => {
       {!['dashboard', 'requests', 'tasks', 'skills'].includes(view) && (
         <ComingSoonPanel title={VIEW_TITLES[view]} />
       )}
+
+      {/* AI chat assistant, available everywhere in the volunteer portal as a
+          floating icon in the bottom-right corner. The backend grounds
+          replies in this volunteer's skills and the requests they've signed
+          up to help with. */}
+      <ChatAssistant firstName={firstName} />
 
       {/* Temporary, corner-anchored feedback for actions (interest, mark helped,
           withdraw, task sign-up). Auto-dismisses; never shifts page content. */}
