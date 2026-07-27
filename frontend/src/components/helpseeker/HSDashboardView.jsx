@@ -18,7 +18,7 @@ import { useTranslation } from 'react-i18next';
 
 const HSDashboardView = ({
   // onVoiceRequest — Request by Voice temporarily disabled for demo (do not remove)
-  currentUser, requests, loading, error, deletingId, onDelete, onNewRequest, /* onVoiceRequest, */ onVoiceCall, onChat, nonprofits,
+  currentUser, requests, loading, error, deletingId, onDelete, onNewRequest, /* onVoiceRequest, */ onVoiceCall, onChat, nonprofits, nonprofitsAreSample,
 }) => {
   const { t } = useTranslation();
   const firstName = currentUser?.name?.split(' ')[0] || 'Name';
@@ -41,9 +41,17 @@ const HSDashboardView = ({
               </div>
             </div>
             <div className="flex-1 space-y-2 text-sm min-w-0">
-              <ProfileField label={t('dashboardView.name')} value={currentUser?.name} />
-              <ProfileField label={t('dashboardView.phoneNumber')} placeholder={t('common.notSetYet')} />
-              <ProfileField label={t('dashboardView.householdCount')} placeholder={t('common.notSetYet')} />
+              <ProfileField label={t('dashboardView.name')} value={currentUser?.name} placeholder={t('common.notSetYet')} />
+              <ProfileField
+                label={t('dashboardView.phoneNumber')}
+                value={currentUser?.phoneNumber}
+                placeholder={t('common.notSetYet')}
+              />
+              <ProfileField
+                label={t('dashboardView.householdCount')}
+                value={currentUser?.householdSize != null ? String(currentUser.householdSize) : ''}
+                placeholder={t('common.notSetYet')}
+              />
             </div>
           </div>
         </div>
@@ -140,22 +148,33 @@ const HSDashboardView = ({
           {t('dashboardView.nonprofitsTitle')}
         </h2>
         <div className="space-y-4">
-          {nonprofits.map((org) => (
-            <div key={org.id} className="flex items-stretch gap-3">
-              <div className="w-24 shrink-0 rounded-xl bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-[10px] font-bold text-gray-500 text-center px-1">
-                {t('dashboardView.organizationLogo')}
+          {nonprofits.map((org) => {
+            // Real orgs carry resourceTypes[]/location; sample orgs carry
+            // type/distance. Show whichever the record has.
+            const primaryLine =
+              org.type || (org.resourceTypes?.length ? org.resourceTypes.join(', ') : t('dashboardView.orgNoTypes'));
+            const secondaryLine = org.distance || org.location;
+            return (
+              <div key={org.id} className="flex items-stretch gap-3">
+                <div className="w-24 shrink-0 rounded-xl bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-[10px] font-bold text-gray-500 text-center px-1">
+                  {t('dashboardView.organizationLogo')}
+                </div>
+                <div className="flex-1 bg-[#bcd4f1] dark:bg-[#22304a] rounded-xl p-3 text-[#1C2A16] dark:text-gray-100 text-sm min-w-0">
+                  <p className="font-bold truncate">{org.name}</p>
+                  <p className="truncate">{primaryLine}</p>
+                  {secondaryLine && (
+                    <p className="text-[#3a4a30] dark:text-gray-400 truncate">{secondaryLine}</p>
+                  )}
+                </div>
               </div>
-              <div className="flex-1 bg-[#bcd4f1] dark:bg-[#22304a] rounded-xl p-3 text-[#1C2A16] dark:text-gray-100 text-sm min-w-0">
-                <p className="font-bold truncate">{org.name}</p>
-                <p className="truncate">{org.type}</p>
-                <p className="text-[#3a4a30] dark:text-gray-400">{org.distance}</p>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
-        <p className="text-white/70 text-xs text-center mt-4 italic">
-          {t('dashboardView.sampleOrgsNote')}
-        </p>
+        {nonprofitsAreSample && (
+          <p className="text-white/70 text-xs text-center mt-4 italic">
+            {t('dashboardView.sampleOrgsNote')}
+          </p>
+        )}
       </div>
     </div>
   );

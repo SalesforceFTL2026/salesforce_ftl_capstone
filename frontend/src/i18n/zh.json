@@ -32,7 +32,8 @@
     "deleteRequest": "删除请求",
     "nonprofitsTitle": "你附近参与的非营利组织",
     "organizationLogo": "组织徽标",
-    "sampleOrgsNote": "示例组织——实时列表即将推出。"
+    "sampleOrgsNote": "示例组织——实时列表即将推出。",
+    "orgNoTypes": "Community support"
   },
   "household": {
     "title": "家庭",
@@ -43,7 +44,7 @@
     "fieldPhone": "电话号码",
     "fieldLocation": "位置",
     "fieldHouseholdSize": "家庭人数",
-    "editNote": "电话号码、位置和家庭人数暂时无法在此处编辑——这些字段即将推出。"
+    "editNote": "Edit your phone number and household size in Settings. Location cannot be edited here yet — that field is coming soon."
   },
   "settings": {
     "title": "设置",
@@ -58,7 +59,17 @@
     "language": "语言",
     "languageHelp": "选择你仪表板的显示语言。",
     "languageUpdated": "✓ 你的语言已更新。",
-    "languageUpdateError": "无法更新你的语言。"
+    "languageUpdateError": "无法更新你的语言。",
+    "phoneNumber": "Phone Number",
+    "phoneHelp": "Responders use this to reach you about your requests. Leave blank to remove it.",
+    "phonePlaceholder": "e.g. (555) 123-4567",
+    "phoneUpdated": "✓ Your phone number has been updated.",
+    "phoneUpdateError": "Could not update your phone number.",
+    "householdSize": "Household Size",
+    "householdHelp": "How many people live in your household. Used as the default for new requests. Leave blank to remove it.",
+    "householdPlaceholder": "e.g. 4",
+    "householdUpdated": "✓ Your household size has been updated.",
+    "householdUpdateError": "Could not update your household size."
   },
   "languages": {
     "en": "English",

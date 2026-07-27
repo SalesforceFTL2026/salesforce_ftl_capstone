@@ -55,14 +55,12 @@ const OrganizationDashboard = () => {
         { id: 'tasks', label: t('org.nav.tasks'), icon: 'tasks' },
         { id: 'metrics', label: t('org.nav.metrics'), icon: 'metrics' },
         { id: 'resources', label: t('org.nav.resources'), icon: 'resources' },
-        { id: 'volunteers', label: t('org.nav.volunteers'), icon: 'volunteers' },
       ],
     },
     {
       heading: t('nav.tools'),
       items: [
         { id: 'chat', label: t('org.nav.chat'), icon: 'chat' },
-        { id: 'documents', label: t('org.nav.documents'), icon: 'documents' },
         { id: 'settings', label: t('nav.settings'), icon: 'settings' },
       ],
     },
@@ -74,9 +72,7 @@ const OrganizationDashboard = () => {
     tasks: t('org.nav.tasks'),
     metrics: t('org.nav.metrics'),
     resources: t('org.nav.resources'),
-    volunteers: t('org.nav.volunteers'),
     chat: t('org.nav.chat'),
-    documents: t('org.nav.documents'),
     settings: t('nav.settings'),
   };
 

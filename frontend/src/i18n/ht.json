@@ -32,7 +32,8 @@
     "deleteRequest": "Efase demand",
     "nonprofitsTitle": "Òganizasyon San Bi Likratif Toupre Ou",
     "organizationLogo": "Logo Òganizasyon",
-    "sampleOrgsNote": "Egzanp òganizasyon — lis reyèl ap vini talè."
+    "sampleOrgsNote": "Egzanp òganizasyon — lis reyèl ap vini talè.",
+    "orgNoTypes": "Community support"
   },
   "household": {
     "title": "Kay",
@@ -43,7 +44,7 @@
     "fieldPhone": "Nimewo Telefòn",
     "fieldLocation": "Kote",
     "fieldHouseholdSize": "# Nan Kay la",
-    "editNote": "Nimewo telefòn, kote, ak gwosè kay la pa ka modifye isit la ankò — chan sa yo ap vini talè."
+    "editNote": "Edit your phone number and household size in Settings. Location cannot be edited here yet — that field is coming soon."
   },
   "settings": {
     "title": "Paramèt",
@@ -58,7 +59,17 @@
     "language": "Lang",
     "languageHelp": "Chwazi lang pou tablo ou.",
     "languageUpdated": "✓ Lang ou mete ajou.",
-    "languageUpdateError": "Nou pa t kapab mete lang ou ajou."
+    "languageUpdateError": "Nou pa t kapab mete lang ou ajou.",
+    "phoneNumber": "Phone Number",
+    "phoneHelp": "Responders use this to reach you about your requests. Leave blank to remove it.",
+    "phonePlaceholder": "e.g. (555) 123-4567",
+    "phoneUpdated": "✓ Your phone number has been updated.",
+    "phoneUpdateError": "Could not update your phone number.",
+    "householdSize": "Household Size",
+    "householdHelp": "How many people live in your household. Used as the default for new requests. Leave blank to remove it.",
+    "householdPlaceholder": "e.g. 4",
+    "householdUpdated": "✓ Your household size has been updated.",
+    "householdUpdateError": "Could not update your household size."
   },
   "languages": {
     "en": "English",

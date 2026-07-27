@@ -206,6 +206,9 @@ export async function login(req, res) {
           name: user.name,
           email: user.email,
           role: user.role,
+          location: user.location,
+          phoneNumber: user.phoneNumber,
+          householdSize: user.householdSize,
           languagePreference: user.languagePreference,
         },
       },
@@ -237,6 +240,8 @@ export async function me(req, res) {
       email: user.email,
       role: user.role,
       location: user.location,
+      phoneNumber: user.phoneNumber,
+      householdSize: user.householdSize,
       languagePreference: user.languagePreference,
     },
   });
@@ -255,17 +260,19 @@ const VALID_LANGUAGES = ['en', 'es', 'zh', 'tl', 'vi', 'fr', 'ko', 'ru', 'ht', '
 
 export async function updateProfile(req, res) {
   try {
-    const { name, location, languagePreference } = req.body;
+    const { name, location, languagePreference, phoneNumber, householdSize } = req.body;
 
     // At least one editable field must be provided.
     if (
       name === undefined &&
       location === undefined &&
-      languagePreference === undefined
+      languagePreference === undefined &&
+      phoneNumber === undefined &&
+      householdSize === undefined
     ) {
       return res.status(400).json({
         success: false,
-        message: 'Provide a name, location, or language to update.',
+        message: 'Provide a name, location, phone number, household size, or language to update.',
       });
     }
 
@@ -304,6 +311,52 @@ export async function updateProfile(req, res) {
       data.languagePreference = languagePreference;
     }
 
+    // Phone (if provided) is optional and format-lenient — numbers vary by
+    // country. An empty string clears it; otherwise allow digits and the usual
+    // separators (+, -, spaces, parentheses) and cap the length. We don't
+    // enforce a strict pattern so international numbers all work.
+    if (phoneNumber !== undefined) {
+      if (typeof phoneNumber !== 'string') {
+        return res.status(400).json({
+          success: false,
+          message: 'Phone number must be text.',
+        });
+      }
+      const trimmedPhone = phoneNumber.trim();
+      if (trimmedPhone === '') {
+        // Allow clearing the phone number since it's optional.
+        data.phoneNumber = null;
+      } else if (!/^[0-9+\-()\s]{4,20}$/.test(trimmedPhone)) {
+        return res.status(400).json({
+          success: false,
+          message:
+            'Enter a valid phone number (4–20 characters: digits, spaces, and + - ( ) only).',
+        });
+      } else {
+        data.phoneNumber = trimmedPhone;
+      }
+    }
+
+    // Household size (if provided) is optional. null / '' clears it; otherwise
+    // it must be a positive whole number. Accept a numeric string from the form
+    // too. Cap it at a sane upper bound to reject typos.
+    if (householdSize !== undefined) {
+      if (householdSize === null || householdSize === '') {
+        // Allow clearing it since it's optional.
+        data.householdSize = null;
+      } else {
+        const parsed =
+          typeof householdSize === 'number' ? householdSize : Number(householdSize);
+        if (!Number.isInteger(parsed) || parsed < 1 || parsed > 100) {
+          return res.status(400).json({
+            success: false,
+            message: 'Household size must be a whole number between 1 and 100.',
+          });
+        }
+        data.householdSize = parsed;
+      }
+    }
+
     const updated = await prisma.user.update({
       where: { id: req.user.id },
       data,
@@ -318,6 +371,8 @@ export async function updateProfile(req, res) {
         email: updated.email,
         role: updated.role,
         location: updated.location,
+        phoneNumber: updated.phoneNumber,
+        householdSize: updated.householdSize,
         languagePreference: updated.languagePreference,
       },
     });

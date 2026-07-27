@@ -59,6 +59,28 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
+    // Admin Preview mode: role-specific GET endpoints (the org/volunteer
+    // dashboards, resources, volunteer tasks) reject the admin account with 403,
+    // since the admin isn't literally an organization/volunteer. Rather than let
+    // those reads fail — which would leave the preview lists empty and swallow
+    // simulated assignments/interests/allocations — we treat a failed GET as an
+    // empty server list and layer the session overlay onto it, so preview
+    // changes still show. Scoped to admin preview + GET, so real users and real
+    // writes are never affected.
+    const config = error.config || {};
+    const method = String(config.method || 'get').toLowerCase();
+    if (isPreviewMode() && method === 'get') {
+      const data = applyPreviewOverlay(config.url || '', { success: true, data: [] });
+      return Promise.resolve({
+        data,
+        status: 200,
+        statusText: 'OK (preview fallback)',
+        headers: {},
+        config,
+        request: null,
+      });
+    }
+
     console.error('API Error:', error);
     return Promise.reject(error);
   }

@@ -32,7 +32,8 @@
     "deleteRequest": "Удалить запрос",
     "nonprofitsTitle": "Участвующие некоммерческие организации рядом с вами",
     "organizationLogo": "Логотип организации",
-    "sampleOrgsNote": "Примеры организаций — актуальные списки скоро появятся."
+    "sampleOrgsNote": "Примеры организаций — актуальные списки скоро появятся.",
+    "orgNoTypes": "Community support"
   },
   "household": {
     "title": "Домохозяйство",
@@ -43,7 +44,7 @@
     "fieldPhone": "Номер телефона",
     "fieldLocation": "Местоположение",
     "fieldHouseholdSize": "Кол-во в домохозяйстве",
-    "editNote": "Номер телефона, местоположение и размер домохозяйства пока нельзя изменить здесь — эти поля скоро появятся."
+    "editNote": "Edit your phone number and household size in Settings. Location cannot be edited here yet — that field is coming soon."
   },
   "settings": {
     "title": "Настройки",
@@ -58,7 +59,17 @@
     "language": "Язык",
     "languageHelp": "Выберите язык для вашей панели управления.",
     "languageUpdated": "✓ Ваш язык обновлён.",
-    "languageUpdateError": "Не удалось обновить ваш язык."
+    "languageUpdateError": "Не удалось обновить ваш язык.",
+    "phoneNumber": "Phone Number",
+    "phoneHelp": "Responders use this to reach you about your requests. Leave blank to remove it.",
+    "phonePlaceholder": "e.g. (555) 123-4567",
+    "phoneUpdated": "✓ Your phone number has been updated.",
+    "phoneUpdateError": "Could not update your phone number.",
+    "householdSize": "Household Size",
+    "householdHelp": "How many people live in your household. Used as the default for new requests. Leave blank to remove it.",
+    "householdPlaceholder": "e.g. 4",
+    "householdUpdated": "✓ Your household size has been updated.",
+    "householdUpdateError": "Could not update your household size."
   },
   "languages": {
     "en": "English",

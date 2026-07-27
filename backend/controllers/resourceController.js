@@ -2,6 +2,7 @@ import * as resourceModel from '../models/resourceModel.js';
 import * as requestModel from '../models/requestModel.js';
 import prisma from '../services/database/prisma.js';
 import { suggestAllocations } from '../services/ai/resourceAdvisor.js';
+import { hasRole } from '../utils/roles.js';
 
 /**
  * Resource Controller
@@ -20,7 +21,7 @@ const RESOURCE_TYPES = ['food', 'wood', 'health-care-kits'];
 // List the signed-in organization's resources.
 export const getMyResources = async (req, res) => {
   try {
-    if (req.user.role !== 'organization') {
+    if (!hasRole(req.user, 'organization')) {
       return res.status(403).json({
         success: false,
         message: 'Only organizations can manage resources.',
@@ -45,7 +46,7 @@ export const getMyResources = async (req, res) => {
 // Add a resource to the signed-in organization's inventory.
 export const createResource = async (req, res) => {
   try {
-    if (req.user.role !== 'organization') {
+    if (!hasRole(req.user, 'organization')) {
       return res.status(403).json({
         success: false,
         message: 'Only organizations can add resources.',
@@ -110,7 +111,7 @@ export const createResource = async (req, res) => {
 // Toggle whether a resource is currently available.
 export const updateResourceAvailability = async (req, res) => {
   try {
-    if (req.user.role !== 'organization') {
+    if (!hasRole(req.user, 'organization')) {
       return res.status(403).json({
         success: false,
         message: 'Only organizations can update resources.',
@@ -158,7 +159,7 @@ export const updateResourceAvailability = async (req, res) => {
 // Remove a resource from the signed-in organization's inventory.
 export const deleteResource = async (req, res) => {
   try {
-    if (req.user.role !== 'organization') {
+    if (!hasRole(req.user, 'organization')) {
       return res.status(403).json({
         success: false,
         message: 'Only organizations can delete resources.',
@@ -197,7 +198,7 @@ export const deleteResource = async (req, res) => {
 // List the resources currently allocated to a given request.
 export const getRequestAllocations = async (req, res) => {
   try {
-    if (req.user.role !== 'organization') {
+    if (!hasRole(req.user, 'organization')) {
       return res.status(403).json({
         success: false,
         message: 'Only organizations can view resource allocations.',
@@ -223,7 +224,7 @@ export const getRequestAllocations = async (req, res) => {
 // request, and how much of each, based on the request's profile.
 export const getAllocationSuggestions = async (req, res) => {
   try {
-    if (req.user.role !== 'organization') {
+    if (!hasRole(req.user, 'organization')) {
       return res.status(403).json({
         success: false,
         message: 'Only organizations can request allocation suggestions.',
@@ -257,7 +258,7 @@ export const getAllocationSuggestions = async (req, res) => {
 // { resourceId, quantity, note? }. Decrements the resource's on-hand count.
 export const allocateResource = async (req, res) => {
   try {
-    if (req.user.role !== 'organization') {
+    if (!hasRole(req.user, 'organization')) {
       return res.status(403).json({
         success: false,
         message: 'Only organizations can allocate resources.',
@@ -346,7 +347,7 @@ export const allocateResource = async (req, res) => {
 // Remove an allocation, returning its quantity to the resource's on-hand count.
 export const deallocateResource = async (req, res) => {
   try {
-    if (req.user.role !== 'organization') {
+    if (!hasRole(req.user, 'organization')) {
       return res.status(403).json({
         success: false,
         message: 'Only organizations can remove allocations.',

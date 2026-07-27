@@ -1,4 +1,5 @@
 import prisma from '../services/database/prisma.js';
+import { hasRole } from '../utils/roles.js';
 
 /**
  * Dashboard Controller
@@ -14,7 +15,7 @@ import prisma from '../services/database/prisma.js';
 export async function getVolunteerDashboard(req, res) {
   try {
     // Verify user is a volunteer
-    if (req.user.role !== 'volunteer') {
+    if (!hasRole(req.user, 'volunteer')) {
       return res.status(403).json({
         success: false,
         message: 'Access denied. This endpoint is for volunteers only.',
@@ -70,7 +71,7 @@ export async function getVolunteerDashboard(req, res) {
  */
 export async function getVolunteerProfile(req, res) {
   try {
-    if (req.user.role !== 'volunteer') {
+    if (!hasRole(req.user, 'volunteer')) {
       return res.status(403).json({
         success: false,
         message: 'Access denied. This endpoint is for volunteers only.',
@@ -106,7 +107,7 @@ export async function getVolunteerProfile(req, res) {
  */
 export async function updateVolunteerSkills(req, res) {
   try {
-    if (req.user.role !== 'volunteer') {
+    if (!hasRole(req.user, 'volunteer')) {
       return res.status(403).json({
         success: false,
         message: 'Access denied. This endpoint is for volunteers only.',
@@ -201,7 +202,7 @@ function parseSkills(skillsJson) {
 export async function getOrganizationDashboard(req, res) {
   try {
     // Verify user is an organization
-    if (req.user.role !== 'organization') {
+    if (!hasRole(req.user, 'organization')) {
       return res.status(403).json({
         success: false,
         message: 'Access denied. This endpoint is for organizations only.',
@@ -251,7 +252,7 @@ export async function getOrganizationDashboard(req, res) {
 export async function getHelpSeekerDashboard(req, res) {
   try {
     // Verify user is a help-seeker
-    if (req.user.role !== 'help-seeker') {
+    if (!hasRole(req.user, 'help-seeker')) {
       return res.status(403).json({
         success: false,
         message: 'Access denied. This endpoint is for help-seekers only.',
