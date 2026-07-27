@@ -92,6 +92,27 @@ export const updatePhone = (phoneNumber) => updateProfile({ phoneNumber });
 // clear it (it's optional). The backend validates it's a positive whole number.
 export const updateHousehold = (householdSize) => updateProfile({ householdSize });
 
+// Upload a new profile picture. Sends the file as multipart/form-data to the
+// avatar endpoint, stores the returned signed URL on the session user, and
+// returns it so the UI can show the new picture immediately.
+export const uploadAvatar = async (file) => {
+  const formData = new FormData();
+  formData.append('avatar', file); // field name must match multer's .single('avatar')
+
+  const { data } = await api.post('/api/users/me/avatar', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+
+  if (!data?.success) {
+    throw new Error(data?.message || 'Could not upload your photo.');
+  }
+
+  // Merge the fresh signed URL into the stored user so the session stays current.
+  const merged = { ...getCurrentUser(), avatarUrl: data.avatarUrl };
+  setCurrentUser(merged);
+  return data.avatarUrl;
+};
+
 // Save the user's UI language to their profile AND switch the live UI to it.
 // Returns the updated user object.
 export const updateLanguage = async (lang) => {

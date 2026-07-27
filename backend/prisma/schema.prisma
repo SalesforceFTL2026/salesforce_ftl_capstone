@@ -55,6 +55,7 @@ model User {
   location          String?
   phoneNumber       String?
   householdSize     Int?     // Number of people in the user's household (profile default for requests)
+  avatarKey         String?  // S3 object key for the user's profile picture (null = no picture yet)
   languagePreference String? @default("en")  // UI language: "en" | "es" | "zh"
   verified          Boolean  @default(false)
   active            Boolean  @default(true)
