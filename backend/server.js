@@ -14,6 +14,7 @@ import crisisEventRoutes from './routes/crisisEvents.js';
 import volunteerTaskRoutes from './routes/volunteerTasks.js';
 import notificationRoutes from './routes/notifications.js';
 import organizationRoutes from './routes/organizations.js';
+import userRoutes from './routes/users.js';
 
 dotenv.config();
 
@@ -47,6 +48,7 @@ app.use('/api/crisis-events', crisisEventRoutes);
 app.use('/api/volunteer-tasks', volunteerTaskRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/organizations', organizationRoutes);
+app.use('/api/users', userRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
