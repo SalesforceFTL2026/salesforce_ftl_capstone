@@ -11,13 +11,14 @@
 // @param {(request) => void} onDelete
 // @param {() => void} onNewRequest
 // @param {() => void} [onVoiceRequest] - open the voice intake flow
+// @param {() => void} [onVoiceCall] - open the conversational voice agent
 // @param {() => void} onChat - open the AI chat assistant
 // @param {object[]} nonprofits - sample nearby orgs
 import { useTranslation } from 'react-i18next';
 
 const HSDashboardView = ({
   // onVoiceRequest — Request by Voice temporarily disabled for demo (do not remove)
-  currentUser, requests, loading, error, deletingId, onDelete, onNewRequest, /* onVoiceRequest, */ onChat, nonprofits, nonprofitsAreSample,
+  currentUser, requests, loading, error, deletingId, onDelete, onNewRequest, /* onVoiceRequest, */ onVoiceCall, onChat, nonprofits, nonprofitsAreSample,
 }) => {
   const { t } = useTranslation();
   const firstName = currentUser?.name?.split(' ')[0] || 'Name';
@@ -94,6 +95,23 @@ const HSDashboardView = ({
           >
             {t('dashboardView.makeNewRequest')}
           </button>
+          {/* Talk to Us — the conversational voice agent (browser speech in/out,
+              agent asks for whatever detail is still missing). Separate entry
+              point from the disabled one-shot dictation flow below. */}
+          {onVoiceCall && (
+            <button
+              type="button"
+              onClick={onVoiceCall}
+              className="px-10 py-4 bg-[#1a2740] text-white font-bold rounded-full text-lg hover:bg-[#14203a] focus:outline-none focus:ring-2 focus:ring-[#1a2740]/40 transition-colors shadow-md inline-flex items-center justify-center gap-2"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 1.5a3 3 0 00-3 3v6a3 3 0 006 0v-6a3 3 0 00-3-3z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 10.5a7 7 0 0014 0M12 17.5V21m-3 0h6" />
+              </svg>
+              {t('dashboardView.talkToUs')}
+            </button>
+          )}
+
           {/* Request by Voice — temporarily disabled for demo (do not remove)
           {onVoiceRequest && (
             <button

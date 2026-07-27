@@ -9,6 +9,7 @@ import ChatAssistant from '../components/ChatAssistant/ChatAssistant';
 import HelpRequestForm from '../../components/HelpRequestForm/HelpRequestForm';
 // Request by Voice — temporarily disabled for demo (do not remove)
 // import VoiceIntakeFlow from '../components/VoiceIntake/VoiceIntakeFlow';
+import VoiceCallFlow from '../components/VoiceIntake/VoiceCallFlow';
 import Toast from '../components/Toast/Toast';
 import api from '../utils/api';
 import { getCurrentUser, logout, updateName, updatePhone, updateHousehold, updateLanguage } from '../utils/auth';
@@ -50,6 +51,8 @@ const HelpSeekerDashboard = () => {
   // Whether the voice intake modal (record → review → submit) is open.
   // Request by Voice — temporarily disabled for demo (do not remove)
   // const [showVoice, setShowVoice] = useState(false);
+  // Whether the conversational voice agent modal (talk → review → submit) is open.
+  const [showVoiceCall, setShowVoiceCall] = useState(false);
   // When set, the modal shows the form in edit mode for this request.
   const [editingRequest, setEditingRequest] = useState(null);
   // Controls the AI chat assistant panel (opened from the inline button).
@@ -280,6 +283,7 @@ const HelpSeekerDashboard = () => {
   useModalDismiss(showForm || Boolean(editingRequest), closeRequestModal);
   // Request by Voice — temporarily disabled for demo (do not remove)
   // useModalDismiss(showVoice, () => setShowVoice(false));
+  useModalDismiss(showVoiceCall, () => setShowVoiceCall(false));
 
   // Auto-refresh so newly submitted requests (including voice ones) appear
   // without a manual reload (#157). Silent so it doesn't flash the spinner.
@@ -330,6 +334,7 @@ const HelpSeekerDashboard = () => {
           deletingId={deletingId}
           onDelete={handleDelete}
           onNewRequest={() => setShowForm(true)}
+          onVoiceCall={() => setShowVoiceCall(true)}
           onChat={() => setChatOpen(true)}
           nonprofits={displayOrganizations}
           nonprofitsAreSample={orgsAreSample}
@@ -645,6 +650,35 @@ const HelpSeekerDashboard = () => {
                   loadRequests();
                   setEditingRequest(null);
                 }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Voice agent modal: talk → review → submit. Speech recognition and
+          playback both run in the browser, so this needs a mic permission but no
+          audio upload. Not dismissed by a backdrop click while a call is in
+          progress — Escape and the in-panel Cancel button are the ways out, so a
+          stray click can't drop someone mid-sentence. */}
+      {showVoiceCall && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 backdrop-blur-sm p-4 pt-20">
+          <div className="w-full max-w-lg relative max-h-[calc(100vh-7rem)]">
+            <button
+              type="button"
+              onClick={() => setShowVoiceCall(false)}
+              aria-label={t('common.close')}
+              className="absolute -top-3 -right-3 z-10 w-9 h-9 rounded-full bg-white text-gray-600 hover:text-gray-900 shadow-md text-2xl leading-none"
+            >
+              ×
+            </button>
+            <div className="max-h-[calc(100vh-7rem)] overflow-y-auto rounded-2xl">
+              <VoiceCallFlow
+                onSubmitted={() => {
+                  loadRequests();
+                  setShowVoiceCall(false);
+                }}
+                onCancel={() => setShowVoiceCall(false)}
               />
             </div>
           </div>

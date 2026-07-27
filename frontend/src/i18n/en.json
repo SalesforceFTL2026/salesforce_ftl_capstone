@@ -27,6 +27,7 @@
     "noActiveRequests": "You have no active requests right now.",
     "makeNewRequest": "Make New Request",
     "requestByVoice": "Request by Voice",
+    "talkToUs": "Talk to Us",
     "chatWithAssistant": "Chat with Assistant",
     "requestSuffix": "Request",
     "deleteRequest": "Delete request",
@@ -735,6 +736,31 @@
         "location": "City, zip code, or address",
         "householdSize": "How many people need help?",
         "description": "Describe what help you need..."
+      }
+    },
+    "call": {
+      "title": "Talk to Us",
+      "subtitle": "Have a conversation instead of filling a form. We'll ask for anything we still need.",
+      "greeting": "Hi, I'm here to help. Tell me what you need and where you are.",
+      "start": "Start the conversation",
+      "tapToStart": "Tap the microphone to start talking",
+      "listening": "Listening…",
+      "speaking": "Speaking…",
+      "thinking": "One moment…",
+      "yourTurn": "Your turn — go ahead",
+      "done": "Got everything — opening your request to review",
+      "remaining": "{{count}} more detail needed",
+      "remaining_plural": "{{count}} more details needed",
+      "speakAgain": "Speak again",
+      "switchToForm": "Finish on the form",
+      "continueOnForm": "Continue on the form instead",
+      "useForm": "Use the form instead",
+      "unsupported": "Your browser can't do voice conversations. Chrome, Edge, or Safari support it — or you can use the form.",
+      "cancel": "Cancel",
+      "errors": {
+        "turnFailed": "The voice assistant is unavailable right now. Your answers are saved.",
+        "listenFailed": "We couldn't hear you. Check your microphone and try again.",
+        "stillThere": "We didn't hear anything. Tap “Speak again” when you're ready."
       }
     }
   },
