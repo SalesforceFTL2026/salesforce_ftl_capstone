@@ -81,14 +81,12 @@ const VolunteerDashboard = () => {
         { id: 'requests', label: t('volunteer.nav.requests'), icon: 'requests' },
         { id: 'tasks', label: t('volunteer.nav.tasks'), icon: 'tasks' },
         { id: 'skills', label: t('volunteer.nav.skills'), icon: 'skills' },
-        { id: 'groups', label: t('volunteer.nav.groups'), icon: 'groups' },
       ],
     },
     {
       heading: t('volunteer.nav.tools'),
       items: [
         { id: 'chat', label: t('volunteer.nav.chat'), icon: 'chat' },
-        { id: 'documents', label: t('volunteer.nav.documents'), icon: 'documents' },
         { id: 'settings', label: t('volunteer.nav.settings'), icon: 'settings' },
       ],
     },
@@ -99,9 +97,7 @@ const VolunteerDashboard = () => {
     requests: t('volunteer.viewTitles.requests'),
     tasks: t('volunteer.nav.tasks'),
     skills: t('volunteer.viewTitles.skills'),
-    groups: t('volunteer.nav.groups'),
     chat: t('volunteer.nav.chat'),
-    documents: t('volunteer.nav.documents'),
     settings: t('volunteer.nav.settings'),
   };
 
