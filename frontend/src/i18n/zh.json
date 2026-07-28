@@ -867,6 +867,7 @@
   },
   "chat": {
     "greeting": "你好，{{name}}！我是 Mappie，你的 MapResponse 助手。你可以向我咨询你的请求、安全提示或如何获取帮助。",
+    "orgGreeting": "你好，{{name}}！我是 Mappie，你的 MapResponse 助手。你可以向我咨询新的求助请求、要发布的志愿任务，或该分配哪些资源。",
     "unavailable": "助手目前不可用。请重试。",
     "openAssistant": "打开聊天助手",
     "closeAssistant": "关闭聊天助手",

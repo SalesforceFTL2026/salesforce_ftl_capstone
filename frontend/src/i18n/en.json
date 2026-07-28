@@ -948,6 +948,7 @@
   },
   "chat": {
     "greeting": "Hi {{name}}! I'm Mappie, your MapResponse assistant. Ask me about your requests, safety tips, or how to get help.",
+    "orgGreeting": "Hi {{name}}! I'm Mappie, your MapResponse assistant. Ask me about new help requests, volunteer tasks to post, or which resources to allocate.",
     "unavailable": "The assistant is unavailable right now. Please try again.",
     "openAssistant": "Open chat assistant",
     "closeAssistant": "Close chat assistant",

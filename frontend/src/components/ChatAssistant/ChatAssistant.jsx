@@ -19,7 +19,17 @@ import { useModalDismiss } from '../../hooks/useModalDismiss';
 // @param {(open: boolean) => void} [onOpenChange] - controlled setter (optional)
 // @param {boolean} [hideLauncher] - hide the built-in floating round button,
 //   e.g. when the parent renders its own trigger button
-const ChatAssistant = ({ firstName = 'there', open: openProp, onOpenChange, hideLauncher = false }) => {
+// @param {string} [greetingKey] - i18n key for the opening greeting, so each
+//   portal can offer examples that fit what that role can actually ask about.
+//   The backend already tailors the reply prompt by role; this only changes the
+//   first line the user sees.
+const ChatAssistant = ({
+  firstName = 'there',
+  open: openProp,
+  onOpenChange,
+  hideLauncher = false,
+  greetingKey = 'chat.greeting',
+}) => {
   const { t } = useTranslation();
   const [openState, setOpenState] = useState(false);
   // Use the controlled value when provided, otherwise fall back to local state.
@@ -32,7 +42,7 @@ const ChatAssistant = ({ firstName = 'there', open: openProp, onOpenChange, hide
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: t('chat.greeting', { name: firstName }),
+      content: t(greetingKey, { name: firstName }),
     },
   ]);
   const [input, setInput] = useState('');
