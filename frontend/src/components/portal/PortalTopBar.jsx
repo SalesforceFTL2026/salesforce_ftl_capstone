@@ -1,9 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { useTheme } from '../../context/ThemeContext';
-import lightModeToggle from '../../assets/light_mode_toggle.png';
-import darkModeToggle from '../../assets/dark_mode_toggle.png';
 import {
   getNotifications,
   markNotificationRead,
@@ -27,8 +24,8 @@ const formatRelativeTime = (iso) => {
   return `${days}d`;
 };
 
-// Shared top bar for both portals: page title, search, theme toggle,
-// notification bell, and the signed-in user's name/avatar.
+// Shared top bar for both portals: page title, search, notification bell, and
+// the signed-in user's name/avatar. Theme is switched from Settings, not here.
 //
 // The search box is only interactive when a portal wires it up: pass
 // `onSearchChange` (and `searchResults`) to make it a live, controlled search
@@ -53,7 +50,6 @@ const PortalTopBar = ({
   searchResults = [],
 }) => {
   const { t } = useTranslation();
-  const { isDark, toggleTheme } = useTheme();
   const name = currentUser?.name || 'Name';
 
   const [notifications, setNotifications] = useState([]);
@@ -243,20 +239,6 @@ const PortalTopBar = ({
         >
           HOME
         </Link>
-        <button
-          onClick={toggleTheme}
-          role="switch"
-          aria-checked={isDark}
-          aria-label={t('portal.toggleDarkMode')}
-          className="rounded-full hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/50"
-        >
-          <img
-            src={isDark ? darkModeToggle : lightModeToggle}
-            alt={isDark ? t('portal.darkModeEnabled') : t('portal.lightModeEnabled')}
-            className="h-8 w-auto"
-          />
-        </button>
-
         {/* Notification bell + dropdown */}
         <div className="relative" ref={bellRef}>
           <button

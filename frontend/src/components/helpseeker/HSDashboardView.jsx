@@ -1,10 +1,12 @@
-// Help-seeker dashboard view, matching the wireframe: greeting + a list of the
-// user's help requests (dated chips, expand, delete), a "Make New Request"
-// button, a profile card, and a right column of nearby participating
-// non-profits.
+// Help-seeker dashboard view. Follows the wireframe — greeting, a profile card,
+// an Active Requests list (dated chips with Expand + delete), the primary
+// actions, and a right column of nearby participating non-profits — but styled
+// to match the landing page: shared design tokens (surface/ink/hairline/forest/
+// pin), the Alumni Sans display face on headings, soft card shadows, and the
+// coral map-pin accent reserved for the primary CTA and urgent requests.
 //
 // @param {object} currentUser
-// @param {object[]} requests - the user's requests
+// @param {object[]} requests - the user's active requests
 // @param {boolean} loading
 // @param {string} error
 // @param {string|null} deletingId
@@ -13,75 +15,58 @@
 // @param {() => void} [onVoiceRequest] - open the voice intake flow
 // @param {() => void} [onVoiceCall] - open the conversational voice agent
 // @param {() => void} onChat - open the AI chat assistant
-// @param {object[]} nonprofits - sample nearby orgs
+// @param {(fields) => Promise<void>} [onSaveProfile] - persist inline profile edits
+// @param {object[]} nonprofits - nearby orgs (real or sample)
+// @param {boolean} nonprofitsAreSample
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 const HSDashboardView = ({
   // onVoiceRequest — Request by Voice temporarily disabled for demo (do not remove)
-  currentUser, requests, loading, error, deletingId, onDelete, onNewRequest, /* onVoiceRequest, */ onVoiceCall, onChat, nonprofits, nonprofitsAreSample,
+  currentUser, requests, loading, error, deletingId, onDelete, onNewRequest,
+  /* onVoiceRequest, */ onVoiceCall, onChat, onSaveProfile, nonprofits, nonprofitsAreSample,
 }) => {
   const { t } = useTranslation();
   const firstName = currentUser?.name?.split(' ')[0] || 'Name';
 
   return (
-    <div className="grid lg:grid-cols-[1fr_minmax(300px,400px)] gap-6">
-      {/* Left column */}
-      <div className="bg-[#dce8f7] dark:bg-[#16233a] rounded-3xl p-6 sm:p-8 transition-colors duration-300">
-        <h2 className="text-2xl sm:text-3xl font-bold text-[#1C2A16] dark:text-white mb-1">
+    <div className="grid lg:grid-cols-[1fr_minmax(300px,380px)] gap-6">
+      {/* ---- Left column: greeting, profile, requests, actions ---- */}
+      <div className="bg-surface-2 dark:bg-surface-2 rounded-3xl p-6 sm:p-8 ring-1 ring-hairline shadow-card transition-colors duration-300">
+        <h2 className="font-display text-4xl sm:text-5xl text-ink tracking-wide leading-none">
           {t('dashboardView.greeting', { name: firstName })}
         </h2>
 
-        {/* Profile card */}
-        <div className="bg-[#5b8bb0] dark:bg-[#1a3a52] rounded-2xl p-5 text-white mt-4">
-          <div className="flex items-center gap-5">
-            <div className="flex flex-col items-center gap-2">
-              <span className="font-bold uppercase text-sm">{t('dashboardView.profile')}</span>
-              {currentUser?.avatarUrl ? (
-                <img
-                  src={currentUser.avatarUrl}
-                  alt={t('dashboardView.profile')}
-                  className="w-14 h-14 rounded-full object-cover bg-white/90"
-                />
-              ) : (
-                <div className="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center text-[#1a2740] text-xl font-bold">
-                  {(currentUser?.name?.[0] || '?').toUpperCase()}
-                </div>
-              )}
-            </div>
-            <div className="flex-1 space-y-2 text-sm min-w-0">
-              <ProfileField label={t('dashboardView.name')} value={currentUser?.name} placeholder={t('common.notSetYet')} />
-              <ProfileField
-                label={t('dashboardView.phoneNumber')}
-                value={currentUser?.phoneNumber}
-                placeholder={t('common.notSetYet')}
-              />
-              <ProfileField
-                label={t('dashboardView.householdCount')}
-                value={currentUser?.householdSize != null ? String(currentUser.householdSize) : ''}
-                placeholder={t('common.notSetYet')}
-              />
-            </div>
-          </div>
+        {/* Profile card — deep forest, one accent (the coral Edit action). */}
+        <ProfileCard currentUser={currentUser} onSaveProfile={onSaveProfile} t={t} />
+
+        {/* Active requests header + count pill */}
+        <div className="flex items-center justify-between mt-8 mb-3">
+          <h3 className="font-display text-2xl text-ink tracking-wide">
+            {t('dashboardView.activeRequests')}
+          </h3>
+          {!loading && !error && requests.length > 0 && (
+            <span className="px-3 py-1 rounded-full bg-forest-100 dark:bg-surface-3 text-forest-700 dark:text-forest-300 text-xs font-bold uppercase tracking-wide">
+              {t('dashboardView.activeCount', { count: requests.length })}
+            </span>
+          )}
         </div>
 
-        <h3 className="text-lg font-bold text-[#1C2A16] dark:text-white mt-6">{t('dashboardView.activeRequests')}</h3>
-        <div className="grid grid-cols-[auto_1fr] gap-x-4 text-[10px] font-semibold uppercase tracking-wide text-[#3a4a30] dark:text-gray-400 mb-2 px-1">
-          <span>{t('dashboardView.expectedFulfillment')}</span>
-          <span>{t('dashboardView.typeOfRequest')}</span>
-        </div>
-
-        {loading && <p className="text-gray-500 dark:text-gray-400" role="status">{t('dashboardView.loadingRequests')}</p>}
-        {!loading && error && <p className="text-red-700 dark:text-red-300">{error}</p>}
+        {loading && (
+          <p className="text-ink-muted" role="status">{t('dashboardView.loadingRequests')}</p>
+        )}
+        {!loading && error && <p className="text-pin-600 dark:text-pin-400">{error}</p>}
         {!loading && !error && requests.length === 0 && (
-          <p className="text-gray-600 dark:text-gray-300">{t('dashboardView.noActiveRequests')}</p>
+          <div className="rounded-2xl border border-dashed border-hairline p-6 text-center">
+            <p className="text-ink font-semibold">{t('dashboardView.noActiveRequests')}</p>
+            <p className="text-ink-muted text-sm mt-1">{t('dashboardView.noActiveRequestsHint')}</p>
+          </div>
         )}
 
         {!loading && !error && requests.length > 0 && (
-          // Fixed-height scroll area: show ~2.5 request rows so the list stays
-          // compact and the actions below it remain visible, and let the rest
-          // scroll instead of stacking down the page. pr-1 keeps the scrollbar
-          // clear of the delete buttons.
-          <ul className="flex flex-col gap-3 max-h-[13.5rem] overflow-y-auto pr-1">
+          // Scroll area caps the list so the actions below stay in view; pr-1
+          // keeps the scrollbar off the delete buttons.
+          <ul className="flex flex-col gap-3 max-h-[22rem] overflow-y-auto pr-1">
             {requests.map((r) => (
               <RequestRow
                 key={r.id}
@@ -94,65 +79,43 @@ const HSDashboardView = ({
           </ul>
         )}
 
-        {/* Primary actions: make a request, or chat with the assistant. */}
-        <div className="flex flex-col sm:flex-row justify-center items-stretch gap-3 my-8">
+        {/* Primary actions. The coral CTA is the one bold accent; the secondary
+            actions are quiet outlined buttons so the hierarchy is clear. */}
+        <div className="flex flex-col sm:flex-row flex-wrap justify-center items-stretch gap-3 mt-8">
           <button
             type="button"
             onClick={onNewRequest}
-            className="px-10 py-4 bg-[#1a2740] text-white font-bold rounded-full text-lg hover:bg-[#14203a] focus:outline-none focus:ring-2 focus:ring-[#1a2740]/40 transition-colors shadow-md"
+            className="px-8 py-4 bg-pin-500 text-white font-bold rounded-full text-lg hover:bg-pin-600 focus:outline-none focus:ring-2 focus:ring-pin-500/40 transition-colors shadow-card"
           >
             {t('dashboardView.makeNewRequest')}
           </button>
-          {/* Talk to Us — the conversational voice agent (browser speech in/out,
-              agent asks for whatever detail is still missing). Separate entry
-              point from the disabled one-shot dictation flow below. */}
+          {/* Talk to Us — conversational voice agent (browser speech in/out). */}
           {onVoiceCall && (
-            <button
-              type="button"
-              onClick={onVoiceCall}
-              className="px-10 py-4 bg-[#1a2740] text-white font-bold rounded-full text-lg hover:bg-[#14203a] focus:outline-none focus:ring-2 focus:ring-[#1a2740]/40 transition-colors shadow-md inline-flex items-center justify-center gap-2"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 1.5a3 3 0 00-3 3v6a3 3 0 006 0v-6a3 3 0 00-3-3z" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 10.5a7 7 0 0014 0M12 17.5V21m-3 0h6" />
-              </svg>
-              {t('dashboardView.talkToUs')}
-            </button>
+            <SecondaryAction onClick={onVoiceCall} label={t('dashboardView.talkToUs')}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 1.5a3 3 0 00-3 3v6a3 3 0 006 0v-6a3 3 0 00-3-3z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 10.5a7 7 0 0014 0M12 17.5V21m-3 0h6" />
+            </SecondaryAction>
           )}
 
           {/* Request by Voice — temporarily disabled for demo (do not remove)
           {onVoiceRequest && (
-            <button
-              type="button"
-              onClick={onVoiceRequest}
-              className="px-10 py-4 bg-[#1a2740] text-white font-bold rounded-full text-lg hover:bg-[#14203a] focus:outline-none focus:ring-2 focus:ring-[#1a2740]/40 transition-colors shadow-md inline-flex items-center justify-center gap-2"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 1.5a3 3 0 00-3 3v6a3 3 0 006 0v-6a3 3 0 00-3-3z" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 10.5a7 7 0 0014 0M12 17.5V21m-3 0h6" />
-              </svg>
-              {t('dashboardView.requestByVoice')}
-            </button>
+            <SecondaryAction onClick={onVoiceRequest} label={t('dashboardView.requestByVoice')}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 1.5a3 3 0 00-3 3v6a3 3 0 006 0v-6a3 3 0 00-3-3z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 10.5a7 7 0 0014 0M12 17.5V21m-3 0h6" />
+            </SecondaryAction>
           )}
           */}
           {onChat && (
-            <button
-              type="button"
-              onClick={onChat}
-              className="px-10 py-4 bg-[#1a2740] text-white font-bold rounded-full text-lg hover:bg-[#14203a] focus:outline-none focus:ring-2 focus:ring-[#1a2740]/40 transition-colors shadow-md inline-flex items-center justify-center gap-2"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12a8 8 0 01-8 8 8.5 8.5 0 01-3.5-.75L3 21l1.5-4A8 8 0 1121 12z" />
-              </svg>
-              {t('dashboardView.chatWithAssistant')}
-            </button>
+            <SecondaryAction onClick={onChat} label={t('dashboardView.chatWithAssistant')}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12a8 8 0 01-8 8 8.5 8.5 0 01-3.5-.75L3 21l1.5-4A8 8 0 1121 12z" />
+            </SecondaryAction>
           )}
         </div>
       </div>
 
-      {/* Right column: participating non-profits */}
-      <div className="bg-[#5b8bb0] dark:bg-[#16233a] rounded-3xl p-6 transition-colors duration-300">
-        <h2 className="text-2xl font-bold text-white text-center mb-6 leading-tight">
+      {/* ---- Right column: participating non-profits ---- */}
+      <div className="bg-forest-800 dark:bg-surface-2 rounded-3xl p-6 ring-1 ring-hairline shadow-card transition-colors duration-300">
+        <h2 className="font-display text-2xl sm:text-3xl text-white dark:text-forest-300 text-center mb-6 leading-tight tracking-wide">
           {t('dashboardView.nonprofitsTitle')}
         </h2>
         <div className="space-y-4">
@@ -164,22 +127,12 @@ const HSDashboardView = ({
             const secondaryLine = org.distance || org.location;
             return (
               <div key={org.id} className="flex items-stretch gap-3">
-                {org.logoUrl ? (
-                  <img
-                    src={org.logoUrl}
-                    alt={org.name}
-                    className="w-24 h-24 shrink-0 rounded-xl object-cover bg-gray-200 dark:bg-gray-700"
-                  />
-                ) : (
-                  <div className="w-24 h-24 shrink-0 rounded-xl bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-[10px] font-bold text-gray-500 text-center px-1">
-                    {t('dashboardView.organizationLogo')}
-                  </div>
-                )}
-                <div className="flex-1 bg-[#bcd4f1] dark:bg-[#22304a] rounded-xl p-3 text-[#1C2A16] dark:text-gray-100 text-sm min-w-0">
-                  <p className="font-bold truncate">{org.name}</p>
+                <OrgLogo org={org} t={t} />
+                <div className="flex-1 bg-white/95 dark:bg-surface-3 rounded-xl p-3 text-forest-900 dark:text-ink text-sm min-w-0">
+                  <p className="font-bold truncate">{org.organizationName || org.name}</p>
                   <p className="truncate">{primaryLine}</p>
                   {secondaryLine && (
-                    <p className="text-[#3a4a30] dark:text-gray-400 truncate">{secondaryLine}</p>
+                    <p className="text-forest-600 dark:text-ink-muted truncate">{secondaryLine}</p>
                   )}
                 </div>
               </div>
@@ -187,7 +140,7 @@ const HSDashboardView = ({
           })}
         </div>
         {nonprofitsAreSample && (
-          <p className="text-white/70 text-xs text-center mt-4 italic">
+          <p className="text-white/70 dark:text-ink-muted text-xs text-center mt-4 italic">
             {t('dashboardView.sampleOrgsNote')}
           </p>
         )}
@@ -196,48 +149,336 @@ const HSDashboardView = ({
   );
 };
 
-// One dated request row with expand + delete, styled like the maroon pills.
+// An organization's logo tile. Shows the hosted logo when it loads; if there's
+// no URL or the image fails to load (e.g. the domain has no logo), it falls
+// back to the org's initials so the panel never shows a broken image. Uses
+// object-contain + padding so wide wordmark logos aren't cropped.
+const OrgLogo = ({ org, t }) => {
+  const [failed, setFailed] = useState(false);
+  const displayName = org.organizationName || org.name || '';
+  const showImage = org.logoUrl && !failed;
+
+  if (showImage) {
+    return (
+      <img
+        src={org.logoUrl}
+        alt={displayName || t('dashboardView.organizationLogo')}
+        onError={() => setFailed(true)}
+        className="w-20 h-20 shrink-0 rounded-xl object-contain bg-white p-2"
+      />
+    );
+  }
+
+  return (
+    <div className="w-20 h-20 shrink-0 rounded-xl bg-white/90 flex items-center justify-center text-forest-700 font-display text-2xl font-bold uppercase">
+      {displayName ? displayName.charAt(0) : t('dashboardView.organizationLogo')}
+    </div>
+  );
+};
+
+// A quiet, outlined secondary action button. Children are the <path> elements
+// for the leading icon so each caller supplies its own glyph.
+const SecondaryAction = ({ onClick, label, children }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className="px-8 py-4 bg-transparent text-ink font-bold rounded-full text-lg ring-1 ring-hairline hover:bg-surface-3 focus:outline-none focus:ring-2 focus:ring-forest-400/50 transition-colors inline-flex items-center justify-center gap-2"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      {children}
+    </svg>
+    {label}
+  </button>
+);
+
+// Urgency badge — coral for the two urgent levels (the brand's one accent),
+// quiet neutral for the rest. Falls back to nothing when urgency is unknown.
+const UrgencyBadge = ({ urgency, t }) => {
+  if (!urgency) return null;
+  const urgent = urgency === 'Critical' || urgency === 'High';
+  const cls = urgent
+    ? 'bg-pin-500 text-white'
+    : 'bg-forest-100 text-forest-700 dark:bg-surface-3 dark:text-forest-300';
+  const label = t(`requests.urgencies.${urgency}`, { defaultValue: urgency });
+  return (
+    <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide ${cls}`}>
+      {label}
+    </span>
+  );
+};
+
+// Status pill — a neutral chip on the forest card so the request's current
+// stage (pending, assigned, in-progress, matched…) is visible at a glance
+// without expanding. Falls back to "pending" when status is unset.
+const StatusBadge = ({ status, t }) => {
+  const value = status || 'pending';
+  const label = t(`requests.statusOptions.${value}`, { defaultValue: value });
+  return (
+    <span className="px-2 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide bg-white/15 text-forest-100 capitalize">
+      {label}
+    </span>
+  );
+};
+
+// One request: a dated chip that expands in place to reveal the details and the
+// AI priority score + reasoning (Crisis360's core value), plus a delete button.
 const RequestRow = ({ request, deleting, onDelete, t }) => {
+  const [expanded, setExpanded] = useState(false);
+
   const d = request.createdAt ? new Date(request.createdAt) : null;
   const day = d ? d.getDate() : '—';
   const month = d ? d.toLocaleString(undefined, { month: 'short' }) : '';
+  const typeLabel = request.category
+    ? `${t(`requests.categories.${request.category}`, { defaultValue: request.category })} ${t('dashboardView.requestSuffix')}`
+    : t('dashboardView.requestSuffix');
+  const hasScore = typeof request.priorityScore === 'number' && request.priorityScore > 0;
+
   return (
-    <li className="flex items-center gap-3">
-      <div className="flex-1 flex items-center gap-4 bg-[#7a2e2e] rounded-2xl px-4 py-3 text-white">
-        <div className="w-14 h-14 rounded-xl bg-[#efe9dd] text-[#1C2A16] flex flex-col items-center justify-center leading-none shrink-0">
-          <span className="text-lg font-bold">{day}</span>
-          <span className="text-[10px] font-semibold uppercase">{month}</span>
+    <li>
+      <div className="flex items-center gap-3">
+        <div className="flex-1 flex items-center gap-4 bg-forest-800 dark:bg-surface-3 rounded-2xl px-4 py-3 text-white min-w-0">
+          <div className="w-14 h-14 rounded-xl bg-forest-100 text-forest-900 flex flex-col items-center justify-center leading-none shrink-0">
+            <span className="text-lg font-bold">{day}</span>
+            <span className="text-[10px] font-semibold uppercase">{month}</span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <span className="font-display text-lg tracking-wide truncate block">{typeLabel}</span>
+            <div className="flex items-center flex-wrap gap-2 mt-0.5">
+              <UrgencyBadge urgency={request.urgency} t={t} />
+              <StatusBadge status={request.status} t={t} />
+              {hasScore && (
+                <span className="text-forest-100 text-xs font-semibold">
+                  {t('dashboardView.detailPriority')} {Math.round(request.priorityScore)}
+                </span>
+              )}
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            aria-expanded={expanded}
+            aria-label={expanded ? t('dashboardView.collapseRequest') : t('dashboardView.expandRequest')}
+            className="shrink-0 px-3 py-1.5 rounded-full bg-white/15 hover:bg-white/25 text-white text-sm font-bold uppercase tracking-wide transition-colors focus:outline-none focus:ring-2 focus:ring-white/50"
+          >
+            {expanded ? t('dashboardView.collapse') : t('dashboardView.expand')}
+          </button>
         </div>
-        <span className="flex-1 font-bold uppercase truncate">
-          {request.category || t('dashboardView.requestSuffix')} {t('dashboardView.requestSuffix')}
-        </span>
+        <button
+          type="button"
+          onClick={() => onDelete(request)}
+          disabled={deleting}
+          aria-label={t('dashboardView.deleteRequest')}
+          className="w-10 h-10 shrink-0 flex items-center justify-center text-ink-muted hover:text-pin-600 disabled:opacity-50 transition-colors"
+        >
+          {deleting ? (
+            <span className="text-xs">…</span>
+          ) : (
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.9 12a2 2 0 01-2 1.9H7.9a2 2 0 01-2-1.9L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3M4 7h16" />
+            </svg>
+          )}
+        </button>
       </div>
-      <button
-        type="button"
-        onClick={() => onDelete(request)}
-        disabled={deleting}
-        aria-label={t('dashboardView.deleteRequest')}
-        className="w-10 h-10 flex items-center justify-center text-[#1C2A16] dark:text-gray-200 hover:text-red-600 disabled:opacity-50 transition-colors"
-      >
-        {deleting ? (
-          <span className="text-xs">…</span>
-        ) : (
-          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.9 12a2 2 0 01-2 1.9H7.9a2 2 0 01-2-1.9L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3M4 7h16" />
-          </svg>
-        )}
-      </button>
+
+      {/* Expanded details — real fields only; never invents data. */}
+      {expanded && (
+        <div className="mt-2 mr-12 rounded-2xl bg-surface ring-1 ring-hairline p-4 text-sm">
+          <dl className="grid sm:grid-cols-2 gap-x-6 gap-y-3">
+            <Detail label={t('dashboardView.detailStatus')} value={request.status && t(`requests.statusOptions.${request.status}`, { defaultValue: request.status })} />
+            <Detail label={t('dashboardView.detailUrgency')} value={request.urgency && t(`requests.urgencies.${request.urgency}`, { defaultValue: request.urgency })} />
+            <Detail label={t('dashboardView.detailLocation')} value={request.location} />
+            {hasScore && (
+              <Detail label={t('dashboardView.detailPriority')} value={`${Math.round(request.priorityScore)} / 100`} />
+            )}
+          </dl>
+          <div className="mt-3">
+            <p className="font-bold uppercase text-[11px] tracking-wide text-ink-muted mb-1">
+              {t('dashboardView.detailDescription')}
+            </p>
+            <p className="text-ink">{request.description || t('dashboardView.noDescription')}</p>
+          </div>
+          {request.reasoning && (
+            <div className="mt-3 rounded-xl bg-surface-3 p-3">
+              <p className="font-bold uppercase text-[11px] tracking-wide text-forest-700 dark:text-forest-300 mb-1">
+                {t('dashboardView.whyPrioritized')}
+              </p>
+              <p className="text-ink">{request.reasoning}</p>
+            </div>
+          )}
+        </div>
+      )}
     </li>
   );
 };
 
-const ProfileField = ({ label, value, placeholder }) => (
+// One label/value pair in the expanded details grid. Renders nothing when the
+// value is empty so the grid never shows blank rows.
+const Detail = ({ label, value }) => {
+  if (!value) return null;
+  return (
+    <div className="min-w-0">
+      <dt className="font-bold uppercase text-[11px] tracking-wide text-ink-muted">{label}</dt>
+      <dd className="text-ink capitalize truncate">{value}</dd>
+    </div>
+  );
+};
+
+// The forest profile card. Reads as a summary until Edit is pressed, then the
+// three fields become inputs edited in place and saved via onSaveProfile —
+// no navigating away to Settings. Cancel restores the last saved values.
+const ProfileCard = ({ currentUser, onSaveProfile, t }) => {
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  // Draft values, seeded from the current user each time editing opens.
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [household, setHousehold] = useState('');
+
+  const startEditing = () => {
+    setName(currentUser?.name || '');
+    setPhone(currentUser?.phoneNumber || '');
+    setHousehold(currentUser?.householdSize != null ? String(currentUser.householdSize) : '');
+    setError('');
+    setEditing(true);
+  };
+
+  const cancelEditing = () => {
+    setError('');
+    setEditing(false);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSaving(true);
+    try {
+      await onSaveProfile({ name, phoneNumber: phone, householdSize: household });
+      setEditing(false);
+    } catch (err) {
+      setError(err.response?.data?.message || err.message || t('dashboardView.editSaveError'));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="bg-forest-800 dark:bg-surface-3 rounded-2xl p-5 text-white mt-6">
+      <form onSubmit={handleSubmit} className="flex items-start gap-5">
+        <div className="flex flex-col items-center gap-2 shrink-0">
+          <span className="font-display text-sm tracking-wider uppercase text-forest-100">
+            {t('dashboardView.profile')}
+          </span>
+          {currentUser?.avatarUrl ? (
+            <img
+              src={currentUser.avatarUrl}
+              alt={t('dashboardView.profile')}
+              className="w-16 h-16 rounded-full object-cover bg-white/90"
+            />
+          ) : (
+            <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center text-forest-900 text-2xl font-bold">
+              {(currentUser?.name?.[0] || '?').toUpperCase()}
+            </div>
+          )}
+        </div>
+
+        <div className="flex-1 space-y-2 text-sm min-w-0">
+          <ProfileField
+            label={t('dashboardView.name')}
+            value={currentUser?.name}
+            placeholder={t('common.notSetYet')}
+            editing={editing}
+            inputProps={{
+              type: 'text',
+              value: name,
+              onChange: (e) => setName(e.target.value),
+              placeholder: t('dashboardView.name'),
+              'aria-label': t('dashboardView.name'),
+            }}
+          />
+          <ProfileField
+            label={t('dashboardView.phoneNumber')}
+            value={currentUser?.phoneNumber}
+            placeholder={t('common.notSetYet')}
+            editing={editing}
+            inputProps={{
+              type: 'tel',
+              value: phone,
+              onChange: (e) => setPhone(e.target.value),
+              placeholder: t('dashboardView.phoneNumber'),
+              'aria-label': t('dashboardView.phoneNumber'),
+            }}
+          />
+          <ProfileField
+            label={t('dashboardView.householdCount')}
+            value={currentUser?.householdSize != null ? String(currentUser.householdSize) : ''}
+            placeholder={t('common.notSetYet')}
+            editing={editing}
+            inputProps={{
+              type: 'number',
+              min: '1',
+              max: '100',
+              value: household,
+              onChange: (e) => setHousehold(e.target.value),
+              placeholder: t('dashboardView.householdCount'),
+              'aria-label': t('dashboardView.householdCount'),
+            }}
+          />
+          {error && <p className="text-pin-200 text-xs pt-1">{error}</p>}
+        </div>
+
+        {onSaveProfile && (
+          <div className="shrink-0 self-start flex flex-col gap-2">
+            {editing ? (
+              <>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="px-4 py-1.5 rounded-full bg-pin-500 text-white text-sm font-bold hover:bg-pin-600 focus:outline-none focus:ring-2 focus:ring-white/60 disabled:opacity-50 transition-colors"
+                >
+                  {saving ? t('dashboardView.editSaving') : t('dashboardView.editSave')}
+                </button>
+                <button
+                  type="button"
+                  onClick={cancelEditing}
+                  disabled={saving}
+                  className="px-4 py-1.5 rounded-full bg-white/15 text-white text-sm font-bold hover:bg-white/25 focus:outline-none focus:ring-2 focus:ring-white/60 disabled:opacity-50 transition-colors"
+                >
+                  {t('dashboardView.editCancel')}
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={startEditing}
+                className="px-4 py-1.5 rounded-full bg-forest-100 text-forest-900 text-sm font-bold hover:bg-white focus:outline-none focus:ring-2 focus:ring-white/60 transition-colors"
+              >
+                {t('dashboardView.editProfile')}
+              </button>
+            )}
+          </div>
+        )}
+      </form>
+    </div>
+  );
+};
+
+// One profile row. In read mode it shows the saved value (or a muted
+// placeholder); in edit mode it swaps in an input styled to sit on the forest
+// card. `inputProps` are spread onto the <input> so each field sets its own type.
+const ProfileField = ({ label, value, placeholder, editing, inputProps }) => (
   <div className="flex items-center gap-3">
-    <span className="font-bold uppercase text-xs w-28 shrink-0">{label}</span>
-    {value ? (
-      <span className="flex-1 bg-white/30 rounded px-2 py-1 truncate">{value}</span>
+    <span className="font-bold uppercase text-xs w-28 shrink-0 text-forest-100">{label}</span>
+    {editing ? (
+      <input
+        {...inputProps}
+        className="flex-1 min-w-0 bg-white/20 rounded px-2 py-1 text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-white/60"
+      />
+    ) : value ? (
+      <span className="flex-1 bg-white/20 rounded px-2 py-1 truncate">{value}</span>
     ) : (
-      <span className="flex-1 bg-white/30 rounded px-2 py-1 text-white/70 italic">{placeholder}</span>
+      <span className="flex-1 bg-white/20 rounded px-2 py-1 text-white/60 italic">{placeholder}</span>
     )}
   </div>
 );

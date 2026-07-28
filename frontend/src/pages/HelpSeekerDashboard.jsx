@@ -19,6 +19,19 @@ import { SUPPORTED_LANGUAGES } from '../i18n';
 import { usePolling } from '../hooks/usePolling';
 import { useModalDismiss } from '../hooks/useModalDismiss';
 import { useDebounce } from '../hooks/useDebounce';
+import { useTheme } from '../context/ThemeContext';
+
+// Shared form field styling — one source of truth so every Settings input,
+// label, help line, and Save button matches the dashboard's token-based look.
+const FIELD_LABEL = 'block font-display text-lg tracking-wide text-ink mb-1';
+const FIELD_HELP = 'text-sm text-ink-muted mb-3';
+const FIELD_INPUT =
+  'w-full px-4 py-3 rounded-xl bg-surface ring-1 ring-hairline text-ink placeholder:text-ink-muted/70 focus:outline-none focus:ring-2 focus:ring-pin-500/40 transition-shadow';
+const FIELD_CARD = 'bg-surface-2 rounded-2xl ring-1 ring-hairline shadow-card p-6';
+const SAVE_BUTTON =
+  'mt-5 px-8 py-3 bg-pin-500 text-white font-bold rounded-full hover:bg-pin-600 focus:outline-none focus:ring-2 focus:ring-pin-500/40 disabled:opacity-50 disabled:cursor-not-allowed transition-colors';
+const FIELD_ERROR = 'mt-3 text-sm text-pin-600 dark:text-pin-400';
+const FIELD_SUCCESS = 'mt-3 text-sm text-forest-700 dark:text-forest-300';
 
 // Views that are actually built. Anything else shows the "coming soon" panel.
 const BUILT_VIEWS = new Set(['dashboard', 'requests', 'household', 'documents', 'settings']);
@@ -27,12 +40,21 @@ const BUILT_VIEWS = new Set(['dashboard', 'requests', 'household', 'documents', 
 // only these; the Requests tab shows every request the user has made.
 const ACTIVE_STATUSES = ['pending', 'assigned', 'in-progress', 'matched'];
 
-// Placeholder data for "Participating Non-Profits Near You" — no endpoint yet.
+// Fallback list for "Participating Non-Profits Near You" until the live
+// organizations endpoint returns real, geolocated partners. These are real
+// disaster-relief non-profits under consideration for the network; the panel
+// labels them as sample data (sampleOrgsNote) and the distances are
+// illustrative, so nothing here is presented as a confirmed live listing.
+// logoUrl is served from each org's own domain via Clearbit's logo endpoint, so
+// we don't bundle image files. If a logo fails to load, the view falls back to
+// the lettered placeholder (see HSDashboardView), so the panel never breaks.
 const SAMPLE_NONPROFITS = [
-  { id: 1, name: 'Sample Relief Org', type: 'Food & supplies', distance: '1.2 mi away' },
-  { id: 2, name: 'Sample Shelter Network', type: 'Emergency shelter', distance: '2.8 mi away' },
-  { id: 3, name: 'Sample Health Alliance', type: 'Medical aid', distance: '3.5 mi away' },
-  { id: 4, name: 'Sample Community Fund', type: 'Financial assistance', distance: '4.0 mi away' },
+  { id: 1, name: 'American Red Cross', type: 'Shelter & emergency relief', distance: '1.2 mi away', logoUrl: 'https://logo.clearbit.com/redcross.org' },
+  { id: 2, name: 'The Salvation Army', type: 'Food, shelter & recovery', distance: '2.1 mi away', logoUrl: 'https://logo.clearbit.com/salvationarmyusa.org' },
+  { id: 3, name: 'Team Rubicon', type: 'Disaster response & cleanup', distance: '2.8 mi away', logoUrl: 'https://logo.clearbit.com/teamrubiconusa.org' },
+  { id: 4, name: 'World Central Kitchen', type: 'Meals & food relief', distance: '3.4 mi away', logoUrl: 'https://logo.clearbit.com/wck.org' },
+  { id: 5, name: 'Direct Relief', type: 'Medical aid & supplies', distance: '4.0 mi away', logoUrl: 'https://logo.clearbit.com/directrelief.org' },
+  { id: 6, name: 'Feeding America', type: 'Food assistance', distance: '4.6 mi away', logoUrl: 'https://logo.clearbit.com/feedingamerica.org' },
 ];
 
 // Help-Seeker portal. Shares the sidebar + top bar chrome with the organization
@@ -41,6 +63,7 @@ const HelpSeekerDashboard = () => {
   // t() looks up UI text in the active language; changing the language
   // re-renders this component with the translated strings.
   const { t } = useTranslation();
+  const { isDark, toggleTheme } = useTheme();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   // `error` is only for load failures — it renders inline in the view. Feedback
@@ -238,6 +261,33 @@ const HelpSeekerDashboard = () => {
     }
   };
 
+  // Save the profile fields edited inline on the dashboard home card. Only the
+  // fields that actually changed are sent, so a partial edit never clears the
+  // rest. Returns nothing on success; throws so the card can show an error.
+  const handleSaveProfile = async ({ name, phoneNumber, householdSize }) => {
+    const trimmedName = (name ?? '').trim();
+    const trimmedPhone = (phoneNumber ?? '').trim();
+    const trimmedHousehold = (householdSize ?? '').trim();
+    const currentHousehold =
+      currentUser?.householdSize != null ? String(currentUser.householdSize) : '';
+
+    if (!trimmedName) {
+      throw new Error(t('dashboardView.editNameRequired'));
+    }
+
+    let updated = currentUser;
+    if (trimmedName !== (currentUser?.name || '')) {
+      updated = await updateName(trimmedName);
+    }
+    if (trimmedPhone !== (currentUser?.phoneNumber || '')) {
+      updated = await updatePhone(trimmedPhone);
+    }
+    if (trimmedHousehold !== currentHousehold) {
+      updated = await updateHousehold(trimmedHousehold === '' ? '' : Number(trimmedHousehold));
+    }
+    setCurrentUser(updated);
+  };
+
   // Load the logged-in user's requests. useCallback so the form's onCreated
   // can re-run it after a new submission.
   //
@@ -428,6 +478,7 @@ const HelpSeekerDashboard = () => {
           onNewRequest={() => setShowForm(true)}
           onVoiceCall={() => setShowVoiceCall(true)}
           onChat={() => setChatOpen(true)}
+          onSaveProfile={handleSaveProfile}
           nonprofits={displayOrganizations}
           nonprofitsAreSample={orgsAreSample}
         />
@@ -448,38 +499,38 @@ const HelpSeekerDashboard = () => {
 
       {view === 'household' && (
         <div className="max-w-2xl">
-          <h2 className="text-2xl sm:text-3xl font-bold text-[#1C2A16] dark:text-white mb-1">
+          <h2 className="font-display text-3xl sm:text-4xl tracking-wide text-ink mb-1">
             {t('household.title')}
           </h2>
-          <p className="text-gray-600 dark:text-gray-300 mb-6">
+          <p className="text-ink-muted mb-6">
             {t('household.subtitle')}
           </p>
 
           {/* Account info card */}
-          <div className="bg-white dark:bg-[#16233a] rounded-3xl shadow-md p-6 mb-6">
-            <div className="flex items-center gap-4 mb-6">
+          <div className="bg-surface-2 rounded-3xl ring-1 ring-hairline shadow-card p-6 mb-6">
+            <div className="flex items-center gap-4 mb-6 pb-6 border-b border-hairline">
               {currentUser?.avatarUrl ? (
                 <img
                   src={currentUser.avatarUrl}
                   alt={currentUser?.name || t('household.yourAccount')}
-                  className="w-16 h-16 rounded-full object-cover bg-[#5b8bb0] shrink-0"
+                  className="w-16 h-16 rounded-full object-cover bg-forest-100 shrink-0"
                 />
               ) : (
-                <div className="w-16 h-16 rounded-full bg-[#5b8bb0] flex items-center justify-center text-white text-2xl font-bold shrink-0">
+                <div className="w-16 h-16 rounded-full bg-forest-800 flex items-center justify-center text-white text-2xl font-bold shrink-0">
                   {(currentUser?.name?.[0] || '?').toUpperCase()}
                 </div>
               )}
               <div className="min-w-0">
-                <p className="text-xl font-bold text-[#1C2A16] dark:text-white truncate">
+                <p className="font-display text-2xl tracking-wide text-ink truncate">
                   {currentUser?.name || t('household.yourAccount')}
                 </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400 capitalize">
+                <p className="text-sm text-ink-muted capitalize">
                   {currentUser?.role || 'help-seeker'}
                 </p>
               </div>
             </div>
 
-            <dl className="divide-y divide-gray-100 dark:divide-gray-700">
+            <dl className="divide-y divide-hairline">
               {[
                 { label: t('household.fieldName'), value: currentUser?.name },
                 { label: t('household.fieldEmail'), value: currentUser?.email },
@@ -488,12 +539,12 @@ const HelpSeekerDashboard = () => {
                 { label: t('household.fieldHouseholdSize'), value: currentUser?.householdSize },
               ].map((row) => (
                 <div key={row.label} className="flex justify-between gap-4 py-3">
-                  <dt className="text-sm font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                  <dt className="text-sm font-bold uppercase tracking-wide text-ink-muted">
                     {row.label}
                   </dt>
-                  <dd className="text-sm text-right min-w-0 truncate text-gray-800 dark:text-gray-100">
+                  <dd className="text-sm text-right min-w-0 truncate text-ink">
                     {row.value || (
-                      <span className="text-gray-400 dark:text-gray-500 italic">{t('common.notSetYet')}</span>
+                      <span className="text-ink-muted/70 italic">{t('common.notSetYet')}</span>
                     )}
                   </dd>
                 </div>
@@ -501,215 +552,211 @@ const HelpSeekerDashboard = () => {
             </dl>
           </div>
 
-          <p className="text-xs text-gray-500 dark:text-gray-400 italic">
+          <p className="text-xs text-ink-muted italic">
             {t('household.editNote')}
           </p>
         </div>
       )}
 
       {view === 'settings' && (
-        <div className="max-w-2xl">
-          <h2 className="text-2xl sm:text-3xl font-bold text-[#1C2A16] dark:text-white mb-1">
+        <div className="max-w-2xl mx-auto">
+          <h2 className="font-display text-3xl sm:text-4xl tracking-wide text-ink mb-1 text-center">
             {t('settings.title')}
           </h2>
-          <p className="text-gray-600 dark:text-gray-300 mb-6">
+          <p className="text-ink-muted mb-8 text-center">
             {t('settings.subtitle')}
           </p>
 
-          {/* Profile picture: uploaded to S3, displayed via a short-lived signed URL. */}
-          <AvatarUploader
-            currentUser={currentUser}
-            onUploaded={(url) => setCurrentUser({ ...currentUser, avatarUrl: url })}
-          />
-
-          <form
-            onSubmit={handleSaveName}
-            className="bg-white dark:bg-[#16233a] rounded-3xl shadow-md p-6"
+          {/* --- Profile: photo + display name --- */}
+          <SettingsSection
+            title={t('settings.sectionProfile')}
+            help={t('settings.sectionProfileHelp')}
           >
-            <label
-              htmlFor="displayName"
-              className="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-2"
-            >
-              {t('settings.displayName')}
-            </label>
-            <input
-              id="displayName"
-              type="text"
-              value={nameInput}
-              onChange={(e) => {
-                setNameInput(e.target.value);
-                setNameError('');
-                setNameSaved(false);
-              }}
-              placeholder={t('settings.namePlaceholder')}
-              className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-[#3a4f30] bg-white dark:bg-[#1a2f1a] text-gray-900 dark:text-white focus:outline-none focus:border-[#6ba3d3] focus:ring-2 focus:ring-[#6ba3d3]/30 transition-all"
+            {/* Profile picture: uploaded to S3, displayed via a short-lived signed URL. */}
+            <AvatarUploader
+              currentUser={currentUser}
+              onUploaded={(url) => setCurrentUser({ ...currentUser, avatarUrl: url })}
             />
 
-            {nameError && (
-              <p className="mt-3 text-sm text-red-600 dark:text-red-400">{nameError}</p>
-            )}
-            {nameSaved && (
-              <p className="mt-3 text-sm text-green-700 dark:text-green-400">
-                {t('settings.nameUpdated')}
-              </p>
-            )}
+            <form onSubmit={handleSaveName} className={FIELD_CARD}>
+              <label htmlFor="displayName" className={FIELD_LABEL}>
+                {t('settings.displayName')}
+              </label>
+              <input
+                id="displayName"
+                type="text"
+                value={nameInput}
+                onChange={(e) => {
+                  setNameInput(e.target.value);
+                  setNameError('');
+                  setNameSaved(false);
+                }}
+                placeholder={t('settings.namePlaceholder')}
+                className={FIELD_INPUT}
+              />
 
-            <button
-              type="submit"
-              disabled={savingName || !nameInput.trim() || nameInput.trim() === currentUser?.name}
-              className="mt-5 px-8 py-3 bg-[#1a2740] text-white font-bold rounded-full hover:bg-[#14203a] focus:outline-none focus:ring-2 focus:ring-[#1a2740]/40 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {savingName ? t('settings.saving') : t('settings.saveChanges')}
-            </button>
-          </form>
+              {nameError && <p className={FIELD_ERROR}>{nameError}</p>}
+              {nameSaved && <p className={FIELD_SUCCESS}>{t('settings.nameUpdated')}</p>}
 
-          {/* Phone number: shown to responders (via the linked request) so they
-              can reach the household. Optional — clearing the field removes it. */}
-          <form
-            onSubmit={handleSavePhone}
-            className="bg-white dark:bg-[#16233a] rounded-3xl shadow-md p-6 mt-6"
+              <button
+                type="submit"
+                disabled={savingName || !nameInput.trim() || nameInput.trim() === currentUser?.name}
+                className={SAVE_BUTTON}
+              >
+                {savingName ? t('settings.saving') : t('settings.saveChanges')}
+              </button>
+            </form>
+          </SettingsSection>
+
+          {/* --- Contact & Household --- */}
+          <SettingsSection
+            title={t('settings.sectionContact')}
+            help={t('settings.sectionContactHelp')}
           >
-            <label
-              htmlFor="phoneNumber"
-              className="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-2"
-            >
-              {t('settings.phoneNumber')}
-            </label>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
-              {t('settings.phoneHelp')}
-            </p>
-            <input
-              id="phoneNumber"
-              type="tel"
-              value={phoneInput}
-              onChange={(e) => {
-                setPhoneInput(e.target.value);
-                setPhoneError('');
-                setPhoneSaved(false);
-              }}
-              placeholder={t('settings.phonePlaceholder')}
-              className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-[#3a4f30] bg-white dark:bg-[#1a2f1a] text-gray-900 dark:text-white focus:outline-none focus:border-[#6ba3d3] focus:ring-2 focus:ring-[#6ba3d3]/30 transition-all"
-            />
+            {/* Phone number: shown to responders (via the linked request) so they
+                can reach the household. Optional — clearing the field removes it. */}
+            <form onSubmit={handleSavePhone} className={FIELD_CARD}>
+              <label htmlFor="phoneNumber" className={FIELD_LABEL}>
+                {t('settings.phoneNumber')}
+              </label>
+              <p className={FIELD_HELP}>{t('settings.phoneHelp')}</p>
+              <input
+                id="phoneNumber"
+                type="tel"
+                value={phoneInput}
+                onChange={(e) => {
+                  setPhoneInput(e.target.value);
+                  setPhoneError('');
+                  setPhoneSaved(false);
+                }}
+                placeholder={t('settings.phonePlaceholder')}
+                className={FIELD_INPUT}
+              />
 
-            {phoneError && (
-              <p className="mt-3 text-sm text-red-600 dark:text-red-400">{phoneError}</p>
-            )}
-            {phoneSaved && (
-              <p className="mt-3 text-sm text-green-700 dark:text-green-400">
-                {t('settings.phoneUpdated')}
-              </p>
-            )}
+              {phoneError && <p className={FIELD_ERROR}>{phoneError}</p>}
+              {phoneSaved && <p className={FIELD_SUCCESS}>{t('settings.phoneUpdated')}</p>}
 
-            <button
-              type="submit"
-              disabled={savingPhone || phoneInput.trim() === (currentUser?.phoneNumber || '')}
-              className="mt-5 px-8 py-3 bg-[#1a2740] text-white font-bold rounded-full hover:bg-[#14203a] focus:outline-none focus:ring-2 focus:ring-[#1a2740]/40 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {savingPhone ? t('settings.saving') : t('settings.saveChanges')}
-            </button>
-          </form>
+              <button
+                type="submit"
+                disabled={savingPhone || phoneInput.trim() === (currentUser?.phoneNumber || '')}
+                className={SAVE_BUTTON}
+              >
+                {savingPhone ? t('settings.saving') : t('settings.saveChanges')}
+              </button>
+            </form>
 
-          {/* Household size: the number of people in the user's household. Shown
-              on the profile card and used as the default for new requests.
-              Optional — clearing the field removes it. */}
-          <form
-            onSubmit={handleSaveHousehold}
-            className="bg-white dark:bg-[#16233a] rounded-3xl shadow-md p-6 mt-6"
+            {/* Household size: the number of people in the user's household. Shown
+                on the profile card and used as the default for new requests.
+                Optional — clearing the field removes it. */}
+            <form onSubmit={handleSaveHousehold} className={FIELD_CARD}>
+              <label htmlFor="householdSize" className={FIELD_LABEL}>
+                {t('settings.householdSize')}
+              </label>
+              <p className={FIELD_HELP}>{t('settings.householdHelp')}</p>
+              <input
+                id="householdSize"
+                type="number"
+                min="1"
+                max="100"
+                value={householdInput}
+                onChange={(e) => {
+                  setHouseholdInput(e.target.value);
+                  setHouseholdError('');
+                  setHouseholdSaved(false);
+                }}
+                placeholder={t('settings.householdPlaceholder')}
+                className={FIELD_INPUT}
+              />
+
+              {householdError && <p className={FIELD_ERROR}>{householdError}</p>}
+              {householdSaved && <p className={FIELD_SUCCESS}>{t('settings.householdUpdated')}</p>}
+
+              <button
+                type="submit"
+                disabled={
+                  savingHousehold ||
+                  householdInput.trim() ===
+                    (currentUser?.householdSize != null ? String(currentUser.householdSize) : '')
+                }
+                className={SAVE_BUTTON}
+              >
+                {savingHousehold ? t('settings.saving') : t('settings.saveChanges')}
+              </button>
+            </form>
+          </SettingsSection>
+
+          {/* --- Preferences: appearance + language --- */}
+          <SettingsSection
+            title={t('settings.sectionPreferences')}
+            help={t('settings.sectionPreferencesHelp')}
           >
-            <label
-              htmlFor="householdSize"
-              className="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-2"
-            >
-              {t('settings.householdSize')}
-            </label>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
-              {t('settings.householdHelp')}
-            </p>
-            <input
-              id="householdSize"
-              type="number"
-              min="1"
-              max="100"
-              value={householdInput}
-              onChange={(e) => {
-                setHouseholdInput(e.target.value);
-                setHouseholdError('');
-                setHouseholdSaved(false);
-              }}
-              placeholder={t('settings.householdPlaceholder')}
-              className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-[#3a4f30] bg-white dark:bg-[#1a2f1a] text-gray-900 dark:text-white focus:outline-none focus:border-[#6ba3d3] focus:ring-2 focus:ring-[#6ba3d3]/30 transition-all"
-            />
+            {/* Appearance: light / dark mode. Reads and writes the global theme
+                (persisted to localStorage by ThemeProvider), so this segmented
+                control stays in sync with the top-bar toggle. */}
+            <div className={FIELD_CARD}>
+              <p className={FIELD_LABEL}>{t('settings.appearance')}</p>
+              <p className={FIELD_HELP}>{t('settings.appearanceHelp')}</p>
+              <div
+                role="radiogroup"
+                aria-label={t('settings.appearance')}
+                className="inline-flex rounded-full bg-surface-3 ring-1 ring-hairline p-1"
+              >
+                <AppearanceOption
+                  active={!isDark}
+                  onClick={() => { if (isDark) toggleTheme(); }}
+                  label={t('settings.lightMode')}
+                >
+                  <circle cx="12" cy="12" r="4" />
+                  <path strokeLinecap="round" d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19" />
+                </AppearanceOption>
+                <AppearanceOption
+                  active={isDark}
+                  onClick={() => { if (!isDark) toggleTheme(); }}
+                  label={t('settings.darkMode')}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z" />
+                </AppearanceOption>
+              </div>
+            </div>
 
-            {householdError && (
-              <p className="mt-3 text-sm text-red-600 dark:text-red-400">{householdError}</p>
-            )}
-            {householdSaved && (
-              <p className="mt-3 text-sm text-green-700 dark:text-green-400">
-                {t('settings.householdUpdated')}
-              </p>
-            )}
+            {/* Language preference: switching this instantly re-renders the UI in
+                the chosen language and saves the choice to the user's profile so
+                it follows them across devices. Serves accessibility for
+                non-English-speaking help-seekers. */}
+            <div className={FIELD_CARD}>
+              <label htmlFor="language" className={FIELD_LABEL}>
+                {t('settings.language')}
+              </label>
+              <p className={FIELD_HELP}>{t('settings.languageHelp')}</p>
+              <select
+                id="language"
+                value={currentUser?.languagePreference || 'en'}
+                onChange={handleChangeLanguage}
+                disabled={savingLanguage}
+                className={`${FIELD_INPUT} disabled:opacity-50`}
+              >
+                {SUPPORTED_LANGUAGES.map((lang) => (
+                  <option key={lang} value={lang}>
+                    {t(`languages.${lang}`)}
+                  </option>
+                ))}
+              </select>
 
-            <button
-              type="submit"
-              disabled={
-                savingHousehold ||
-                householdInput.trim() ===
-                  (currentUser?.householdSize != null ? String(currentUser.householdSize) : '')
-              }
-              className="mt-5 px-8 py-3 bg-[#1a2740] text-white font-bold rounded-full hover:bg-[#14203a] focus:outline-none focus:ring-2 focus:ring-[#1a2740]/40 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {savingHousehold ? t('settings.saving') : t('settings.saveChanges')}
-            </button>
-          </form>
-
-          {/* Language preference: switching this instantly re-renders the UI in
-              the chosen language and saves the choice to the user's profile so
-              it follows them across devices. Serves accessibility for
-              non-English-speaking help-seekers. */}
-          <div className="bg-white dark:bg-[#16233a] rounded-3xl shadow-md p-6 mt-6">
-            <label
-              htmlFor="language"
-              className="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-2"
-            >
-              {t('settings.language')}
-            </label>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
-              {t('settings.languageHelp')}
-            </p>
-            <select
-              id="language"
-              value={currentUser?.languagePreference || 'en'}
-              onChange={handleChangeLanguage}
-              disabled={savingLanguage}
-              className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-[#3a4f30] bg-white dark:bg-[#1a2f1a] text-gray-900 dark:text-white focus:outline-none focus:border-[#6ba3d3] focus:ring-2 focus:ring-[#6ba3d3]/30 transition-all disabled:opacity-50"
-            >
-              {SUPPORTED_LANGUAGES.map((lang) => (
-                <option key={lang} value={lang}>
-                  {t(`languages.${lang}`)}
-                </option>
-              ))}
-            </select>
-
-            {languageError && (
-              <p className="mt-3 text-sm text-red-600 dark:text-red-400">{languageError}</p>
-            )}
-            {languageSaved && (
-              <p className="mt-3 text-sm text-green-700 dark:text-green-400">
-                {t('settings.languageUpdated')}
-              </p>
-            )}
-          </div>
+              {languageError && <p className={FIELD_ERROR}>{languageError}</p>}
+              {languageSaved && <p className={FIELD_SUCCESS}>{t('settings.languageUpdated')}</p>}
+            </div>
+          </SettingsSection>
         </div>
       )}
 
       {view === 'documents' && <SafetyManual />}
 
       {!BUILT_VIEWS.has(view) && (
-        <div className="bg-white dark:bg-[#16233a] rounded-3xl p-12 text-center shadow-md">
-          <h2 className="text-2xl font-bold text-[#1C2A16] dark:text-white mb-2">
+        <div className="bg-surface-2 rounded-3xl ring-1 ring-hairline shadow-card p-12 text-center">
+          <h2 className="font-display text-3xl tracking-wide text-ink mb-2">
             {VIEW_TITLES[view]}
           </h2>
-          <p className="text-gray-500 dark:text-gray-400">{t('common.comingSoon')}</p>
+          <p className="text-ink-muted">{t('common.comingSoon')}</p>
         </div>
       )}
 
@@ -832,5 +879,38 @@ const HelpSeekerDashboard = () => {
     </PortalShell>
   );
 };
+
+// A titled group of Settings cards. The display-face heading + hairline rule
+// gives the page a clear structure (Profile · Contact · Preferences) instead of
+// a flat stack of look-alike cards.
+const SettingsSection = ({ title, help, children }) => (
+  <section className="mb-10">
+    <div className="mb-4 pb-2 border-b border-hairline text-center">
+      <h3 className="font-display text-2xl tracking-wide text-ink">{title}</h3>
+      {help && <p className="text-sm text-ink-muted mt-0.5">{help}</p>}
+    </div>
+    <div className="space-y-6">{children}</div>
+  </section>
+);
+
+// One segment of the light/dark appearance control. Children are the <path>/
+// <circle> elements for the leading icon. The active segment gets the coral
+// accent so the current mode reads at a glance.
+const AppearanceOption = ({ active, onClick, label, children }) => (
+  <button
+    type="button"
+    role="radio"
+    aria-checked={active}
+    onClick={onClick}
+    className={`inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-bold transition-colors focus:outline-none focus:ring-2 focus:ring-pin-500/40 ${
+      active ? 'bg-pin-500 text-white shadow-card' : 'text-ink-muted hover:text-ink'
+    }`}
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      {children}
+    </svg>
+    {label}
+  </button>
+);
 
 export default HelpSeekerDashboard;
