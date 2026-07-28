@@ -866,6 +866,7 @@
   },
   "chat": {
     "greeting": "¡Hola {{name}}! Soy Mappie, tu asistente de MapResponse. Pregúntame sobre tus solicitudes, consejos de seguridad o cómo obtener ayuda.",
+    "orgGreeting": "¡Hola {{name}}! Soy Mappie, tu asistente de MapResponse. Pregúntame sobre nuevas solicitudes de ayuda, tareas de voluntariado que publicar o qué recursos asignar.",
     "unavailable": "El asistente no está disponible en este momento. Por favor intenta de nuevo.",
     "openAssistant": "Abrir asistente de chat",
     "closeAssistant": "Cerrar asistente de chat",

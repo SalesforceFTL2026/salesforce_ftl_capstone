@@ -866,6 +866,7 @@
   },
   "chat": {
     "greeting": "Bonjou {{name}}! Mwen se Mappie, asistan MapResponse ou. Mande m sou demand ou yo, konsèy sekirite, oswa kijan pou jwenn èd.",
+    "orgGreeting": "Bonjou {{name}}! Mwen se Mappie, asistan MapResponse ou. Mande m sou nouvo demand èd, travay volontè pou pibliye, oswa ki resous pou bay.",
     "unavailable": "Asistan an pa disponib kounye a. Tanpri eseye ankò.",
     "openAssistant": "Ouvri asistan chat",
     "closeAssistant": "Fèmen asistan chat",

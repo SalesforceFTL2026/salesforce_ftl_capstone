@@ -866,6 +866,7 @@
   },
   "chat": {
     "greeting": "Kumusta {{name}}! Ako si Mappie, ang iyong MapResponse assistant. Magtanong sa akin tungkol sa iyong mga kahilingan, mga tip sa kaligtasan, o kung paano humingi ng tulong.",
+    "orgGreeting": "Kumusta {{name}}! Ako si Mappie, ang iyong MapResponse assistant. Magtanong sa akin tungkol sa mga bagong kahilingan ng tulong, mga volunteer task na ipo-post, o kung anong resources ang ilalaan.",
     "unavailable": "Hindi available ang assistant sa ngayon. Pakisubukang muli.",
     "openAssistant": "Buksan ang chat assistant",
     "closeAssistant": "Isara ang chat assistant",
