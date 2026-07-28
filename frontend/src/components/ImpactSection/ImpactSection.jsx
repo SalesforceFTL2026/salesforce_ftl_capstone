@@ -3,24 +3,27 @@ import StatCard from '../StatCard/StatCard';
 
 const ImpactSection = () => {
   const { t } = useTranslation();
-  const stats = [
-    { number: 1, description: t('landing.impact.fact') },
-    { number: 2, description: t('landing.impact.fact') },
-  ];
+
+  // Illustrative demo figures for the pilot network. Keyed to the i18n
+  // "impact.stats" block so copy and translations stay in one place.
+  const stats = ['requests', 'volunteers', 'response', 'counties'];
 
   return (
-    <section className="py-12 sm:py-16 md:py-20 lg:py-24 bg-[#7F9764] dark:bg-[#273A20] transition-colors duration-300">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-center mb-10 sm:mb-16 md:mb-20 text-white dark:text-[#B0BF9F] transition-colors duration-300">
+    <section className="py-16 sm:py-20 md:py-24 bg-forest-800 dark:bg-surface-2">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
+        <h2 className="font-display text-3xl sm:text-4xl md:text-5xl text-white dark:text-forest-300 tracking-wide">
           {t('landing.impact.title')}
         </h2>
+        <p className="text-white/70 dark:text-ink-muted mt-3 mb-12 sm:mb-16">
+          {t('landing.impact.subtitle')}
+        </p>
 
-        <div className="space-y-8 sm:space-y-12 md:space-y-16">
-          {stats.map((stat) => (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          {stats.map((key) => (
             <StatCard
-              key={stat.number}
-              number={stat.number}
-              description={stat.description}
+              key={key}
+              value={t(`landing.impact.stats.${key}.value`)}
+              label={t(`landing.impact.stats.${key}.label`)}
             />
           ))}
         </div>

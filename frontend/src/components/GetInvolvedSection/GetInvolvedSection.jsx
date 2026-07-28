@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
-import fireImg from '../../assets/hero_disaster_pictures/fire.jpeg';
-import foodImg from '../../assets/hero_disaster_pictures/food.jpeg';
-import rubbleImg from '../../assets/hero_disaster_pictures/rubble.jpg';
+import fireImg from '../../assets/hero_disaster_pictures/firerescue.jpeg';
+import foodImg from '../../assets/hero_disaster_pictures/workers.jpg';
+import rubbleImg from '../../assets/hero_disaster_pictures/foodbank.jpg';
 
 const GetInvolvedSection = () => {
   const { t } = useTranslation();
@@ -31,33 +31,33 @@ const GetInvolvedSection = () => {
   ];
 
   return (
-    <section id="get-involved" className="py-24 bg-[#C1DAFF] dark:bg-[#1a2f3a] transition-colors duration-300">
+    <section id="get-involved" className="py-24 bg-surface">
       <div className="max-w-7xl mx-auto px-6">
-        <h2 className="text-4xl sm:text-5xl font-bold text-center mb-4 text-[#1C2A16] dark:text-white transition-colors duration-300">
+        <h2 className="font-display text-4xl sm:text-5xl text-center mb-4 text-ink tracking-wide">
           {t('landing.getInvolved.title')}
         </h2>
-        <p className="text-center text-lg text-[#1C2A16] dark:text-gray-300 max-w-2xl mx-auto mb-16 transition-colors duration-300">
+        <p className="text-center text-lg text-ink-muted max-w-2xl mx-auto mb-16">
           {t('landing.getInvolved.subtitle')}
         </p>
 
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
           {cards.map((card) => (
             <div
               key={card.line1}
-              className="bg-[#e8e8e8] dark:bg-[#273A20] rounded-[2rem] overflow-hidden flex flex-col transition-colors duration-300"
+              className="group rounded-3xl overflow-hidden flex flex-col shadow-card hover:shadow-card-hover ring-1 ring-hairline transition-shadow duration-300"
             >
-              <div className="h-72 overflow-hidden">
+              <div className="h-60 overflow-hidden">
                 <img
                   src={card.image}
                   alt={card.imageAlt}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
               </div>
-              <div className="bg-[#1C2A16] dark:bg-[#0f1419] p-8 text-center flex flex-col flex-grow transition-colors duration-300">
-                <p className="text-white text-xl font-medium leading-snug mb-3">
+              <div className="bg-forest-900 dark:bg-surface-2 p-7 text-center flex flex-col flex-grow">
+                <p className="font-display text-white dark:text-ink text-2xl leading-tight mb-3 tracking-wide">
                   {card.line1}<br />{card.line2}
                 </p>
-                <p className="text-gray-300 text-sm leading-relaxed">
+                <p className="text-forest-200 dark:text-ink-muted text-sm leading-relaxed">
                   {card.body}
                 </p>
               </div>
