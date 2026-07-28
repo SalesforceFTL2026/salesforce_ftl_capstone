@@ -217,7 +217,8 @@
     "darkModeEnabled": "Тёмный режим включён",
     "lightModeEnabled": "Светлый режим включён",
     "notifications": "Уведомления",
-    "signOut": "Выйти"
+    "signOut": "Выйти",
+    "searchNoResults": "Нет результатов по запросу «{{query}}»"
   },
   "org": {
     "nav": {
@@ -886,5 +887,18 @@
     "successCreate": "✓ Запрос отправлен!",
     "successEdit": "✓ Изменения сохранены!",
     "errorRequired": "Пожалуйста, заполните все обязательные поля"
+  },
+  "hsSearch": {
+    "placeholder": "Поиск заявок, организаций…",
+    "groups": {
+      "requests": "Ваши заявки",
+      "organizations": "Организации",
+      "actions": "Быстрые действия"
+    },
+    "actions": {
+      "newRequest": "Создать новую заявку",
+      "viewRequests": "Мои заявки",
+      "safetyManual": "Руководство по безопасности"
+    }
   }
 }

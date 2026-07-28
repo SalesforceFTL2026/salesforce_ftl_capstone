@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext';
 import lightModeToggle from '../../assets/light_mode_toggle.png';
 import darkModeToggle from '../../assets/dark_mode_toggle.png';
@@ -29,10 +30,28 @@ const formatRelativeTime = (iso) => {
 // Shared top bar for both portals: page title, search, theme toggle,
 // notification bell, and the signed-in user's name/avatar.
 //
+// The search box is only interactive when a portal wires it up: pass
+// `onSearchChange` (and `searchResults`) to make it a live, controlled search
+// with a grouped results dropdown. Portals that omit those props get the
+// original decorative box, so this stays reusable and backward-compatible.
+//
 // @param {string} title - the current view's title (e.g. "Dashboard")
 // @param {object} [currentUser] - signed-in user, for the name + sign out
 // @param {() => void} [onSignOut]
-const PortalTopBar = ({ title, currentUser, onSignOut }) => {
+// @param {string} [searchValue] - controlled value of the search input
+// @param {(value: string) => void} [onSearchChange] - enables live search
+// @param {string} [searchPlaceholder] - overrides the placeholder text
+// @param {{key: string, heading: string, items: {id: string, title: string, subtitle?: string, onSelect: () => void}[]}[]} [searchResults]
+//        grouped results to show in the dropdown while there's a query
+const PortalTopBar = ({
+  title,
+  currentUser,
+  onSignOut,
+  searchValue = '',
+  onSearchChange,
+  searchPlaceholder,
+  searchResults = [],
+}) => {
   const { t } = useTranslation();
   const { isDark, toggleTheme } = useTheme();
   const name = currentUser?.name || 'Name';
@@ -42,6 +61,35 @@ const PortalTopBar = ({ title, currentUser, onSignOut }) => {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState(false);
   const bellRef = useRef(null);
+
+  // Live-search state. `searchable` gates every search behavior so a portal
+  // that doesn't pass onSearchChange keeps the plain, decorative input.
+  const searchable = typeof onSearchChange === 'function';
+  const [searchOpen, setSearchOpen] = useState(false);
+  const searchRef = useRef(null);
+  const hasQuery = searchable && searchValue.trim().length > 0;
+  const showResults = searchOpen && hasQuery;
+  const resultCount = searchResults.reduce((sum, g) => sum + g.items.length, 0);
+
+  // Close the results dropdown when clicking outside the search box.
+  useEffect(() => {
+    if (!searchOpen) return undefined;
+    const handleClick = (e) => {
+      if (searchRef.current && !searchRef.current.contains(e.target)) {
+        setSearchOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [searchOpen]);
+
+  // Run a result's action, then clear the query and close — so the box resets
+  // and the user lands on the view/item they picked.
+  const handleSelectResult = (item) => {
+    item.onSelect?.();
+    onSearchChange('');
+    setSearchOpen(false);
+  };
 
   // Pull the latest notifications + unread count from the backend.
   const loadNotifications = async () => {
@@ -108,7 +156,7 @@ const PortalTopBar = ({ title, currentUser, onSignOut }) => {
   return (
     <header className="bg-[#7f9976] dark:bg-[#141d11] px-4 sm:px-6 py-4 flex items-center gap-4 transition-colors duration-300">
       {/* Search */}
-      <div className="relative flex-1 max-w-md">
+      <div className="relative flex-1 max-w-md" ref={searchRef}>
         <svg
           className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6ba3d3]"
           fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
@@ -117,9 +165,69 @@ const PortalTopBar = ({ title, currentUser, onSignOut }) => {
         </svg>
         <input
           type="search"
-          placeholder={t('portal.searchPlaceholder')}
+          role={searchable ? 'combobox' : undefined}
+          aria-label={t('portal.searchPlaceholder')}
+          aria-expanded={searchable ? showResults : undefined}
+          aria-controls={searchable ? 'portal-search-results' : undefined}
+          placeholder={searchPlaceholder || t('portal.searchPlaceholder')}
+          value={searchable ? searchValue : undefined}
+          onChange={searchable ? (e) => onSearchChange(e.target.value) : undefined}
+          onFocus={searchable ? () => setSearchOpen(true) : undefined}
+          onKeyDown={
+            searchable
+              ? (e) => {
+                  if (e.key === 'Escape') {
+                    if (searchValue) onSearchChange('');
+                    setSearchOpen(false);
+                  }
+                }
+              : undefined
+          }
           className="w-full rounded-full bg-white/90 dark:bg-[#1f2d18] text-gray-800 dark:text-gray-100 text-lg pl-12 pr-4 py-2.5 shadow-inner focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/50"
         />
+
+        {showResults && (
+          <div
+            id="portal-search-results"
+            role="listbox"
+            className="absolute left-0 right-0 mt-2 bg-white dark:bg-[#1f2d18] rounded-2xl shadow-lg ring-1 ring-black/5 z-50 overflow-hidden max-h-[70vh] overflow-y-auto"
+          >
+            {resultCount === 0 ? (
+              <p className="px-4 py-6 text-sm text-center text-gray-500 dark:text-gray-400">
+                {t('portal.searchNoResults', { query: searchValue.trim() })}
+              </p>
+            ) : (
+              searchResults
+                .filter((group) => group.items.length > 0)
+                .map((group) => (
+                  <div key={group.key} className="py-1">
+                    <p className="px-4 pt-2 pb-1 text-[11px] font-bold uppercase tracking-wide text-gray-400 dark:text-gray-500">
+                      {group.heading}
+                    </p>
+                    {group.items.map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        role="option"
+                        aria-selected={false}
+                        onClick={() => handleSelectResult(item)}
+                        className="w-full text-left px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+                      >
+                        <p className="text-sm font-semibold text-[#1C2A16] dark:text-white truncate">
+                          {item.title}
+                        </p>
+                        {item.subtitle && (
+                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                            {item.subtitle}
+                          </p>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                ))
+            )}
+          </div>
+        )}
       </div>
 
       {/* Page title — hidden on small screens where space is tight */}
@@ -129,6 +237,12 @@ const PortalTopBar = ({ title, currentUser, onSignOut }) => {
 
       {/* Right controls */}
       <div className="flex items-center gap-3 ml-auto">
+        <Link
+          to="/"
+          className="px-3 py-1.5 rounded-full bg-white/90 dark:bg-[#1f2d18] text-[#1C2A16] dark:text-white text-sm font-bold hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/50"
+        >
+          HOME
+        </Link>
         <button
           onClick={toggleTheme}
           role="switch"
@@ -231,9 +345,17 @@ const PortalTopBar = ({ title, currentUser, onSignOut }) => {
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-[#1a2332] dark:text-white font-bold">
-            {name.charAt(0).toUpperCase()}
-          </span>
+          {currentUser?.avatarUrl ? (
+            <img
+              src={currentUser.avatarUrl}
+              alt={name}
+              className="w-10 h-10 rounded-full object-cover bg-gray-200 dark:bg-gray-600"
+            />
+          ) : (
+            <span className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-[#1a2332] dark:text-white font-bold">
+              {name.charAt(0).toUpperCase()}
+            </span>
+          )}
           <div className="hidden sm:flex flex-col leading-tight">
             <span className="text-[#1C2A16] dark:text-white font-semibold">{name}</span>
             {onSignOut && (

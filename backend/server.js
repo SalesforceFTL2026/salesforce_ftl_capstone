@@ -1,8 +1,8 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import dotenv from 'dotenv';
 import prioritizeRoutes from './routes/prioritize.js';
 import authRoutes from './routes/auth.js';
 import requestRoutes from './routes/requests.js';
@@ -15,8 +15,7 @@ import crisisEventRoutes from './routes/crisisEvents.js';
 import volunteerTaskRoutes from './routes/volunteerTasks.js';
 import notificationRoutes from './routes/notifications.js';
 import organizationRoutes from './routes/organizations.js';
-
-dotenv.config();
+import userRoutes from './routes/users.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -49,6 +48,7 @@ app.use('/api/crisis-events', crisisEventRoutes);
 app.use('/api/volunteer-tasks', volunteerTaskRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/organizations', organizationRoutes);
+app.use('/api/users', userRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

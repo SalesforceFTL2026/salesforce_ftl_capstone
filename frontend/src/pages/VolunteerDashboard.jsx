@@ -7,6 +7,7 @@ import VolunteerRequestsView from '../components/volunteer/VolunteerRequestsView
 import VolunteerTasksView from '../components/volunteer/VolunteerTasksView';
 import AvailableTasksSection from '../components/volunteer/AvailableTasksSection';
 import VolunteerSkillsView from '../components/volunteer/VolunteerSkillsView';
+import AvatarUploader from '../components/portal/AvatarUploader';
 import ChatAssistant from '../components/ChatAssistant/ChatAssistant';
 import Toast from '../components/Toast/Toast';
 import { getCurrentUser, logout } from '../utils/auth';
@@ -67,7 +68,7 @@ const AVG_HOUSEHOLD_SIZE = 3;
 
 const VolunteerDashboard = () => {
   const { t } = useTranslation();
-  const [currentUser] = useState(getCurrentUser);
+  const [currentUser, setCurrentUser] = useState(getCurrentUser);
   const navigate = useNavigate();
 
   const [view, setView] = useState('dashboard');
@@ -454,7 +455,19 @@ const VolunteerDashboard = () => {
         />
       )}
 
-      {!['dashboard', 'requests', 'tasks', 'skills'].includes(view) && (
+      {view === 'settings' && (
+        <div className="max-w-2xl">
+          <h2 className="text-2xl sm:text-3xl font-bold text-[#1C2A16] dark:text-white mb-6">
+            {t('volunteer.nav.settings')}
+          </h2>
+          <AvatarUploader
+            currentUser={currentUser}
+            onUploaded={(url) => setCurrentUser({ ...currentUser, avatarUrl: url })}
+          />
+        </div>
+      )}
+
+      {!['dashboard', 'requests', 'tasks', 'skills', 'settings'].includes(view) && (
         <ComingSoonPanel title={VIEW_TITLES[view]} />
       )}
 

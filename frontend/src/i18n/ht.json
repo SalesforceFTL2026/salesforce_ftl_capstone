@@ -217,7 +217,8 @@
     "darkModeEnabled": "Mòd fonse aktive",
     "lightModeEnabled": "Mòd klè aktive",
     "notifications": "Notifikasyon",
-    "signOut": "Dekonekte"
+    "signOut": "Dekonekte",
+    "searchNoResults": "Pa gen rezilta pou “{{query}}”"
   },
   "org": {
     "nav": {
@@ -886,5 +887,18 @@
     "successCreate": "✓ Demand soumèt!",
     "successEdit": "✓ Chanjman anrejistre!",
     "errorRequired": "Tanpri ranpli tout chan obligatwa yo"
+  },
+  "hsSearch": {
+    "placeholder": "Chèche demann, òganizasyon…",
+    "groups": {
+      "requests": "Demann ou yo",
+      "organizations": "Òganizasyon",
+      "actions": "Aksyon rapid"
+    },
+    "actions": {
+      "newRequest": "Fè yon nouvo demann",
+      "viewRequests": "Gade demann mwen yo",
+      "safetyManual": "Manyèl sekirite"
+    }
   }
 }
