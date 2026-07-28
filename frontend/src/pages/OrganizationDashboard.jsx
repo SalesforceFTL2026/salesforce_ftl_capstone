@@ -6,6 +6,7 @@ import DashboardView from '../components/organization/DashboardView';
 import RequestsView from '../components/organization/RequestsView';
 import ResourcesView from '../components/organization/ResourcesView';
 import TasksView from '../components/organization/TasksView';
+import AccountSettings from '../components/portal/AccountSettings';
 import Toast from '../components/Toast/Toast';
 import { getCurrentUser, logout, updateProfile } from '../utils/auth';
 import { usePolling } from '../hooks/usePolling';
@@ -376,7 +377,11 @@ const OrganizationDashboard = () => {
         />
       )}
 
-      {!['dashboard', 'requests', 'resources', 'tasks'].includes(view) && (
+      {view === 'settings' && (
+        <AccountSettings currentUser={currentUser} onUserChange={setCurrentUser} />
+      )}
+
+      {!['dashboard', 'requests', 'resources', 'tasks', 'settings'].includes(view) && (
         <ComingSoonPanel title={VIEW_TITLES[view]} />
       )}
 

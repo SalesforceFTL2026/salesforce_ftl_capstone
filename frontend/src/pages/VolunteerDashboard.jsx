@@ -7,6 +7,7 @@ import VolunteerRequestsView from '../components/volunteer/VolunteerRequestsView
 import VolunteerTasksView from '../components/volunteer/VolunteerTasksView';
 import AvailableTasksSection from '../components/volunteer/AvailableTasksSection';
 import VolunteerSkillsView from '../components/volunteer/VolunteerSkillsView';
+import AccountSettings from '../components/portal/AccountSettings';
 import ChatAssistant from '../components/ChatAssistant/ChatAssistant';
 import Toast from '../components/Toast/Toast';
 import { getCurrentUser, logout } from '../utils/auth';
@@ -67,7 +68,9 @@ const AVG_HOUSEHOLD_SIZE = 3;
 
 const VolunteerDashboard = () => {
   const { t } = useTranslation();
-  const [currentUser] = useState(getCurrentUser);
+  // Stateful so profile edits in Settings (name, phone, avatar, language)
+  // re-render the greeting and profile card live.
+  const [currentUser, setCurrentUser] = useState(getCurrentUser);
   const navigate = useNavigate();
 
   const [view, setView] = useState('dashboard');
@@ -454,7 +457,11 @@ const VolunteerDashboard = () => {
         />
       )}
 
-      {!['dashboard', 'requests', 'tasks', 'skills'].includes(view) && (
+      {view === 'settings' && (
+        <AccountSettings currentUser={currentUser} onUserChange={setCurrentUser} />
+      )}
+
+      {!['dashboard', 'requests', 'tasks', 'skills', 'settings'].includes(view) && (
         <ComingSoonPanel title={VIEW_TITLES[view]} />
       )}
 
