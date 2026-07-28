@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import PortalShell from '../components/portal/PortalShell';
@@ -17,6 +17,7 @@ import { isAdminSession } from '../utils/previewMode';
 import { SUPPORTED_LANGUAGES } from '../i18n';
 import { usePolling } from '../hooks/usePolling';
 import { useModalDismiss } from '../hooks/useModalDismiss';
+import { useDebounce } from '../hooks/useDebounce';
 
 // Views that are actually built. Anything else shows the "coming soon" panel.
 const BUILT_VIEWS = new Set(['dashboard', 'requests', 'household', 'documents', 'settings']);
@@ -55,6 +56,10 @@ const HelpSeekerDashboard = () => {
   const [showVoiceCall, setShowVoiceCall] = useState(false);
   // Requests-tab keyword/category/urgency filters via shared RequestFilterBar.
   const [requestFilters, setRequestFilters] = useState({ search: '', category: '', urgency: '' });
+  // Global top-bar search query. Debounced so we only recompute results after
+  // the user pauses typing (see searchResults below).
+  const [topSearch, setTopSearch] = useState('');
+  const debouncedTopSearch = useDebounce(topSearch, 200);
   // When set, the modal shows the form in edit mode for this request.
   const [editingRequest, setEditingRequest] = useState(null);
   // Controls the AI chat assistant panel (opened from the inline button).
@@ -337,6 +342,86 @@ const HelpSeekerDashboard = () => {
   const displayOrganizations = organizations ?? SAMPLE_NONPROFITS;
   const orgsAreSample = organizations === null || organizations === SAMPLE_NONPROFITS;
 
+  // Jump to the Requests tab with the top-bar query pre-loaded into the shared
+  // RequestFilterBar, so selecting a request reuses the existing filter view.
+  const openRequestsFiltered = useCallback((term) => {
+    setRequestFilters({ search: term, category: '', urgency: '' });
+    setView('requests');
+  }, []);
+
+  // Grouped results for the top-bar search: the user's own requests, nearby
+  // organizations, and quick actions. Recomputed only when the debounced query
+  // or the underlying data changes. Each item carries an onSelect that navigates
+  // to the right place — the top bar just renders and invokes it.
+  const searchResults = useMemo(() => {
+    const q = debouncedTopSearch.trim().toLowerCase();
+    if (!q) return [];
+
+    // Matching requests (same fields the Requests-tab filter searches).
+    const requestItems = requests
+      .filter((r) =>
+        [r.submitterName, r.description, r.location, r.category, r.urgency, r.status]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase()
+          .includes(q),
+      )
+      .slice(0, 5)
+      .map((r) => ({
+        id: `request-${r.id}`,
+        title: r.description || r.category || t('requests.table.requestFallback'),
+        subtitle: [r.category, r.urgency, r.status].filter(Boolean).join(' · '),
+        onSelect: () => openRequestsFiltered(debouncedTopSearch.trim()),
+      }));
+
+    // Matching organizations. Real orgs use organizationName/resourceTypes;
+    // the sample fallback uses name/type — support both shapes.
+    const orgItems = displayOrganizations
+      .filter((o) => {
+        const types = Array.isArray(o.resourceTypes) ? o.resourceTypes.join(' ') : o.type;
+        return [o.organizationName || o.name, o.description, types]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase()
+          .includes(q);
+      })
+      .slice(0, 5)
+      .map((o) => ({
+        id: `org-${o.id}`,
+        title: o.organizationName || o.name,
+        subtitle: Array.isArray(o.resourceTypes) ? o.resourceTypes.join(', ') : o.type,
+        onSelect: () => setView('dashboard'),
+      }));
+
+    // Quick actions — always offer the most useful jumps, filtered by the query.
+    const actionItems = [
+      {
+        id: 'action-new-request',
+        title: t('hsSearch.actions.newRequest'),
+        keywords: 'new request help create add',
+        onSelect: () => setShowForm(true),
+      },
+      {
+        id: 'action-view-requests',
+        title: t('hsSearch.actions.viewRequests'),
+        keywords: 'requests list my',
+        onSelect: () => setView('requests'),
+      },
+      {
+        id: 'action-safety',
+        title: t('hsSearch.actions.safetyManual'),
+        keywords: 'safety manual documents guide',
+        onSelect: () => setView('documents'),
+      },
+    ].filter((a) => a.title.toLowerCase().includes(q) || a.keywords.includes(q));
+
+    return [
+      { key: 'requests', heading: t('hsSearch.groups.requests'), items: requestItems },
+      { key: 'organizations', heading: t('hsSearch.groups.organizations'), items: orgItems },
+      { key: 'actions', heading: t('hsSearch.groups.actions'), items: actionItems },
+    ].filter((g) => g.items.length > 0);
+  }, [debouncedTopSearch, requests, displayOrganizations, t, openRequestsFiltered]);
+
   return (
     <PortalShell
       personaLabel="Help Seeker"
@@ -346,6 +431,10 @@ const HelpSeekerDashboard = () => {
       title={VIEW_TITLES[view]}
       currentUser={currentUser}
       onSignOut={handleLogout}
+      searchValue={topSearch}
+      onSearchChange={setTopSearch}
+      searchPlaceholder={t('hsSearch.placeholder')}
+      searchResults={searchResults}
     >
       {view === 'dashboard' && (
         // Request by Voice — temporarily disabled for demo (do not remove).

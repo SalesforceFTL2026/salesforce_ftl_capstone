@@ -249,7 +249,8 @@
     "notificationsEmpty": "No notifications yet",
     "notificationsMarkAllRead": "Mark all as read",
     "notificationsError": "Couldn't load notifications",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "searchNoResults": "No results for “{{query}}”"
   },
   "org": {
     "nav": {
@@ -962,5 +963,18 @@
     "successCreate": "✓ Request submitted!",
     "successEdit": "✓ Changes saved!",
     "errorRequired": "Please fill in all required fields"
+  },
+  "hsSearch": {
+    "placeholder": "Search requests, organizations…",
+    "groups": {
+      "requests": "Your requests",
+      "organizations": "Organizations",
+      "actions": "Quick actions"
+    },
+    "actions": {
+      "newRequest": "Make a new request",
+      "viewRequests": "View my requests",
+      "safetyManual": "Safety manual"
+    }
   }
 }
