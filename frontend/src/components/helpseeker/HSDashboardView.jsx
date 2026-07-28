@@ -36,9 +36,17 @@ const HSDashboardView = ({
           <div className="flex items-center gap-5">
             <div className="flex flex-col items-center gap-2">
               <span className="font-bold uppercase text-sm">{t('dashboardView.profile')}</span>
-              <div className="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center text-[#1a2740] text-xl font-bold">
-                {(currentUser?.name?.[0] || '?').toUpperCase()}
-              </div>
+              {currentUser?.avatarUrl ? (
+                <img
+                  src={currentUser.avatarUrl}
+                  alt={t('dashboardView.profile')}
+                  className="w-14 h-14 rounded-full object-cover bg-white/90"
+                />
+              ) : (
+                <div className="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center text-[#1a2740] text-xl font-bold">
+                  {(currentUser?.name?.[0] || '?').toUpperCase()}
+                </div>
+              )}
             </div>
             <div className="flex-1 space-y-2 text-sm min-w-0">
               <ProfileField label={t('dashboardView.name')} value={currentUser?.name} placeholder={t('common.notSetYet')} />
@@ -156,9 +164,17 @@ const HSDashboardView = ({
             const secondaryLine = org.distance || org.location;
             return (
               <div key={org.id} className="flex items-stretch gap-3">
-                <div className="w-24 shrink-0 rounded-xl bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-[10px] font-bold text-gray-500 text-center px-1">
-                  {t('dashboardView.organizationLogo')}
-                </div>
+                {org.logoUrl ? (
+                  <img
+                    src={org.logoUrl}
+                    alt={org.name}
+                    className="w-24 h-24 shrink-0 rounded-xl object-cover bg-gray-200 dark:bg-gray-700"
+                  />
+                ) : (
+                  <div className="w-24 h-24 shrink-0 rounded-xl bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-[10px] font-bold text-gray-500 text-center px-1">
+                    {t('dashboardView.organizationLogo')}
+                  </div>
+                )}
                 <div className="flex-1 bg-[#bcd4f1] dark:bg-[#22304a] rounded-xl p-3 text-[#1C2A16] dark:text-gray-100 text-sm min-w-0">
                   <p className="font-bold truncate">{org.name}</p>
                   <p className="truncate">{primaryLine}</p>

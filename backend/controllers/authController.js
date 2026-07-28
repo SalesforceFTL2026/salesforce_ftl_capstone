@@ -1,5 +1,6 @@
 import prisma from '../services/database/prisma.js';
 import { hashPassword, comparePassword, createToken } from '../services/auth/authService.js';
+import { getSignedViewUrl } from '../services/s3.js';
 
 /**
  * The three roles a user is allowed to pick at signup.
@@ -197,6 +198,7 @@ export async function login(req, res) {
     const token = createToken(user);
 
     // 6. Send back the token + safe user info (never the password hash).
+    //    A short-lived signed URL lets the frontend show the avatar right away.
     return res.status(200).json({
       success: true,
       data: {
@@ -210,6 +212,7 @@ export async function login(req, res) {
           phoneNumber: user.phoneNumber,
           householdSize: user.householdSize,
           languagePreference: user.languagePreference,
+          avatarUrl: await getSignedViewUrl(user.avatarKey),
         },
       },
     });
@@ -243,6 +246,7 @@ export async function me(req, res) {
       phoneNumber: user.phoneNumber,
       householdSize: user.householdSize,
       languagePreference: user.languagePreference,
+      avatarUrl: await getSignedViewUrl(user.avatarKey),
     },
   });
 }
