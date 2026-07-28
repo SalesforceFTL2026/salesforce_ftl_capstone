@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext';
 import lightModeToggle from '../../assets/light_mode_toggle.png';
 import darkModeToggle from '../../assets/dark_mode_toggle.png';
@@ -129,6 +130,12 @@ const PortalTopBar = ({ title, currentUser, onSignOut }) => {
 
       {/* Right controls */}
       <div className="flex items-center gap-3 ml-auto">
+        <Link
+          to="/"
+          className="px-3 py-1.5 rounded-full bg-white/90 dark:bg-[#1f2d18] text-[#1C2A16] dark:text-white text-sm font-bold hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/50"
+        >
+          HOME
+        </Link>
         <button
           onClick={toggleTheme}
           role="switch"
