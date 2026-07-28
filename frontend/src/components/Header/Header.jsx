@@ -5,7 +5,7 @@ import MRLogo from '../../assets/logos/MRLogo.png';
 import lightModeToggle from '../../assets/light_mode_toggle.png';
 import darkModeToggle from '../../assets/dark_mode_toggle.png';
 
-const Header = ({ currentUser, onSignInClick, onSignOutClick }) => {
+const Header = ({ currentUser, onSignInClick, onSignOutClick, onDashboardClick }) => {
   const { t } = useTranslation();
   const { isDark, toggleTheme } = useTheme();
 
@@ -99,6 +99,12 @@ const Header = ({ currentUser, onSignInClick, onSignOutClick }) => {
           <div className="flex items-center gap-3">
             {currentUser ? (
               <>
+                <button
+                  onClick={onDashboardClick}
+                  className="text-[#1C2A16] dark:text-white text-[22px] font-medium hover:opacity-70 transition-opacity"
+                >
+                  DASHBOARD
+                </button>
                 <span className="hidden sm:inline text-[#1C2A16] dark:text-white text-[22px] font-medium">
                   {t('landing.header.greeting', { name: currentUser.name })}
                 </span>

@@ -1,8 +1,8 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import dotenv from 'dotenv';
 import prioritizeRoutes from './routes/prioritize.js';
 import authRoutes from './routes/auth.js';
 import requestRoutes from './routes/requests.js';
@@ -16,8 +16,6 @@ import volunteerTaskRoutes from './routes/volunteerTasks.js';
 import notificationRoutes from './routes/notifications.js';
 import organizationRoutes from './routes/organizations.js';
 import userRoutes from './routes/users.js';
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;

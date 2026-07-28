@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import RequestCard from '../RequestCard/RequestCard';
+import RequestFilterBar from '../RequestFilterBar/RequestFilterBar';
 import { estimateFulfillment } from '../../utils/fulfillment';
 
 // Help-seeker Requests view, matching the wireframe: a Calendar / List / Cards
@@ -20,12 +21,55 @@ const SUB_TABS = [
   { id: 'cards', labelKey: 'requests.hsRequests.tabs.cards', icon: CardsIcon },
 ];
 
-const HSRequestsView = ({ requests, loading, error, deletingId, onDelete, onEdit }) => {
+const HSRequestsView = ({
+  requests,
+  loading,
+  error,
+  deletingId,
+  onDelete,
+  onEdit,
+  filters = { search: '', category: '', urgency: '' },
+  onFiltersChange,
+}) => {
   const { t } = useTranslation();
   const [tab, setTab] = useState('list');
+  const filteredRequests = useMemo(() => {
+    const search = (filters.search || '').trim().toLowerCase();
+    const category = filters.category || '';
+    const urgency = filters.urgency || '';
+
+    return requests.filter((r) => {
+      if (category && r.category !== category) return false;
+      if (urgency && r.urgency !== urgency) return false;
+      if (!search) return true;
+
+      const haystack = [
+        r.submitterName,
+        r.description,
+        r.location,
+        r.category,
+        r.urgency,
+        r.status,
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+      return haystack.includes(search);
+    });
+  }, [requests, filters]);
 
   return (
     <div>
+      {onFiltersChange && (
+        <div className="mb-6">
+          <RequestFilterBar
+            value={filters}
+            onChange={onFiltersChange}
+            resultCount={loading ? undefined : filteredRequests.length}
+          />
+        </div>
+      )}
+
       {/* Tab switcher pill */}
       <div className="bg-[#9db29a] dark:bg-[#1f3320] rounded-3xl px-4 py-3 flex gap-6 mb-6 transition-colors duration-300">
         {SUB_TABS.map(({ id, labelKey, icon: renderIcon }) => {
@@ -50,18 +94,18 @@ const HSRequestsView = ({ requests, loading, error, deletingId, onDelete, onEdit
 
       {loading && <p className="text-gray-600 dark:text-gray-300" role="status">{t('requests.hsRequests.loading')}</p>}
       {!loading && error && <p className="text-red-700 dark:text-red-300">{error}</p>}
-      {!loading && !error && requests.length === 0 && (
+      {!loading && !error && filteredRequests.length === 0 && (
         <p className="text-gray-600 dark:text-gray-300">{t('requests.hsRequests.empty')}</p>
       )}
 
-      {!loading && !error && requests.length > 0 && (
+      {!loading && !error && filteredRequests.length > 0 && (
         <>
           {tab === 'list' && (
-            <RequestTable requests={requests} deletingId={deletingId} onDelete={onDelete} />
+            <RequestTable requests={filteredRequests} deletingId={deletingId} onDelete={onDelete} />
           )}
           {tab === 'cards' && (
             <div className="grid sm:grid-cols-2 gap-4">
-              {requests.map((r) => (
+              {filteredRequests.map((r) => (
                 <RequestCard
                   key={r.id}
                   request={r}
@@ -72,7 +116,7 @@ const HSRequestsView = ({ requests, loading, error, deletingId, onDelete, onEdit
               ))}
             </div>
           )}
-          {tab === 'calendar' && <RequestsCalendar requests={requests} />}
+          {tab === 'calendar' && <RequestsCalendar requests={filteredRequests} />}
         </>
       )}
     </div>
