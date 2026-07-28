@@ -231,9 +231,17 @@ const PortalTopBar = ({ title, currentUser, onSignOut }) => {
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-[#1a2332] dark:text-white font-bold">
-            {name.charAt(0).toUpperCase()}
-          </span>
+          {currentUser?.avatarUrl ? (
+            <img
+              src={currentUser.avatarUrl}
+              alt={name}
+              className="w-10 h-10 rounded-full object-cover bg-gray-200 dark:bg-gray-600"
+            />
+          ) : (
+            <span className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-[#1a2332] dark:text-white font-bold">
+              {name.charAt(0).toUpperCase()}
+            </span>
+          )}
           <div className="hidden sm:flex flex-col leading-tight">
             <span className="text-[#1C2A16] dark:text-white font-semibold">{name}</span>
             {onSignOut && (

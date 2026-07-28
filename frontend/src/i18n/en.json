@@ -70,7 +70,11 @@
     "language": "Language",
     "languageHelp": "Choose the language for your dashboard.",
     "languageUpdated": "✓ Your language has been updated.",
-    "languageUpdateError": "Could not update your language."
+    "languageUpdateError": "Could not update your language.",
+    "profilePicture": "Profile picture",
+    "changePhoto": "Change photo",
+    "uploading": "Uploading…",
+    "avatarUploadError": "Could not upload your photo."
   },
   "languages": {
     "en": "English",

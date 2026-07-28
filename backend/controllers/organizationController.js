@@ -1,4 +1,5 @@
 import prisma from '../services/database/prisma.js';
+import { getSignedViewUrl } from '../services/s3.js';
 
 /**
  * Organization Controller
@@ -32,16 +33,21 @@ export async function listOrganizations(req, res) {
   try {
     const orgs = await prisma.organization.findMany({
       orderBy: [{ verified: 'desc' }, { createdAt: 'desc' }],
-      include: { user: { select: { location: true } } },
+      include: { user: { select: { location: true, avatarKey: true } } },
     });
 
-    const data = orgs.map((org) => ({
-      id: org.id,
-      name: org.organizationName,
-      resourceTypes: parseResourceTypes(org.resourceTypes),
-      verified: org.verified,
-      location: org.user?.location || null,
-    }));
+    // Sign each org's avatar (if any) so the help-seeker dashboard can show the
+    // uploaded logo. Runs in parallel to keep the endpoint fast.
+    const data = await Promise.all(
+      orgs.map(async (org) => ({
+        id: org.id,
+        name: org.organizationName,
+        resourceTypes: parseResourceTypes(org.resourceTypes),
+        verified: org.verified,
+        location: org.user?.location || null,
+        logoUrl: await getSignedViewUrl(org.user?.avatarKey),
+      }))
+    );
 
     return res.status(200).json({ success: true, data });
   } catch (error) {

@@ -12,7 +12,8 @@ import HelpRequestForm from '../../components/HelpRequestForm/HelpRequestForm';
 import VoiceCallFlow from '../components/VoiceIntake/VoiceCallFlow';
 import Toast from '../components/Toast/Toast';
 import api from '../utils/api';
-import { getCurrentUser, logout, updateName, updatePhone, updateHousehold, updateLanguage, uploadAvatar } from '../utils/auth';
+import { getCurrentUser, logout, updateName, updatePhone, updateHousehold, updateLanguage } from '../utils/auth';
+import AvatarUploader from '../components/portal/AvatarUploader';
 import { isAdminSession } from '../utils/previewMode';
 import { SUPPORTED_LANGUAGES } from '../i18n';
 import { usePolling } from '../hooks/usePolling';
@@ -86,10 +87,6 @@ const HelpSeekerDashboard = () => {
   const [savingLanguage, setSavingLanguage] = useState(false);
   const [languageError, setLanguageError] = useState('');
   const [languageSaved, setLanguageSaved] = useState(false);
-  // Settings: profile picture. avatarUrl is a short-lived signed URL from S3.
-  const [avatarUrl, setAvatarUrl] = useState(currentUser?.avatarUrl || '');
-  const [uploadingAvatar, setUploadingAvatar] = useState(false);
-  const [avatarError, setAvatarError] = useState('');
   const navigate = useNavigate();
 
   // Sidebar nav, built from translations so the labels switch with the
@@ -149,25 +146,6 @@ const HelpSeekerDashboard = () => {
       );
     } finally {
       setSavingLanguage(false);
-    }
-  };
-
-  // Upload a chosen image as the profile picture. uploadAvatar persists the
-  // signed URL to the session; here we just reflect it in local state.
-  const handleAvatarChange = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setAvatarError('');
-    setUploadingAvatar(true);
-    try {
-      const url = await uploadAvatar(file);
-      setAvatarUrl(url);
-      setCurrentUser({ ...currentUser, avatarUrl: url });
-    } catch (err) {
-      setAvatarError(err.response?.data?.message || err.message || 'Could not upload your photo.');
-    } finally {
-      setUploadingAvatar(false);
-      e.target.value = ''; // let the user re-pick the same file if they want
     }
   };
 
@@ -387,9 +365,17 @@ const HelpSeekerDashboard = () => {
           {/* Account info card */}
           <div className="bg-white dark:bg-[#16233a] rounded-3xl shadow-md p-6 mb-6">
             <div className="flex items-center gap-4 mb-6">
-              <div className="w-16 h-16 rounded-full bg-[#5b8bb0] flex items-center justify-center text-white text-2xl font-bold shrink-0">
-                {(currentUser?.name?.[0] || '?').toUpperCase()}
-              </div>
+              {currentUser?.avatarUrl ? (
+                <img
+                  src={currentUser.avatarUrl}
+                  alt={currentUser?.name || t('household.yourAccount')}
+                  className="w-16 h-16 rounded-full object-cover bg-[#5b8bb0] shrink-0"
+                />
+              ) : (
+                <div className="w-16 h-16 rounded-full bg-[#5b8bb0] flex items-center justify-center text-white text-2xl font-bold shrink-0">
+                  {(currentUser?.name?.[0] || '?').toUpperCase()}
+                </div>
+              )}
               <div className="min-w-0">
                 <p className="text-xl font-bold text-[#1C2A16] dark:text-white truncate">
                   {currentUser?.name || t('household.yourAccount')}
@@ -438,37 +424,10 @@ const HelpSeekerDashboard = () => {
           </p>
 
           {/* Profile picture: uploaded to S3, displayed via a short-lived signed URL. */}
-          <div className="bg-white dark:bg-[#16233a] rounded-3xl shadow-md p-6 mb-6 flex items-center gap-5">
-            {avatarUrl ? (
-              <img
-                src={avatarUrl}
-                alt="Profile"
-                className="w-20 h-20 rounded-full object-cover border-2 border-gray-200 dark:border-[#3a4f30] bg-gray-100"
-              />
-            ) : (
-              <div className="w-20 h-20 rounded-full border-2 border-gray-200 dark:border-[#3a4f30] bg-gray-100 dark:bg-[#1a2f1a] flex items-center justify-center text-2xl font-bold text-gray-400">
-                {(currentUser?.name || '?').charAt(0).toUpperCase()}
-              </div>
-            )}
-            <div>
-              <label className="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-2">
-                Profile picture
-              </label>
-              <label className="inline-block px-6 py-2.5 bg-[#1a2740] text-white font-bold rounded-full hover:bg-[#14203a] cursor-pointer transition-colors">
-                {uploadingAvatar ? 'Uploading…' : 'Change photo'}
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  onChange={handleAvatarChange}
-                  disabled={uploadingAvatar}
-                  className="hidden"
-                />
-              </label>
-              {avatarError && (
-                <p className="mt-2 text-sm text-red-600 dark:text-red-400">{avatarError}</p>
-              )}
-            </div>
-          </div>
+          <AvatarUploader
+            currentUser={currentUser}
+            onUploaded={(url) => setCurrentUser({ ...currentUser, avatarUrl: url })}
+          />
 
           <form
             onSubmit={handleSaveName}
