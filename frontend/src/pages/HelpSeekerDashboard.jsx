@@ -53,6 +53,8 @@ const HelpSeekerDashboard = () => {
   // const [showVoice, setShowVoice] = useState(false);
   // Whether the conversational voice agent modal (talk → review → submit) is open.
   const [showVoiceCall, setShowVoiceCall] = useState(false);
+  // Requests-tab keyword/category/urgency filters via shared RequestFilterBar.
+  const [requestFilters, setRequestFilters] = useState({ search: '', category: '', urgency: '' });
   // When set, the modal shows the form in edit mode for this request.
   const [editingRequest, setEditingRequest] = useState(null);
   // Controls the AI chat assistant panel (opened from the inline button).
@@ -372,6 +374,8 @@ const HelpSeekerDashboard = () => {
           deletingId={deletingId}
           onDelete={handleDelete}
           onEdit={setEditingRequest}
+          filters={requestFilters}
+          onFiltersChange={setRequestFilters}
         />
       )}
 
