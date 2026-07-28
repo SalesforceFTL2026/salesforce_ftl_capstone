@@ -1,27 +1,27 @@
 import { useTranslation } from 'react-i18next';
-import communityImg from '../../assets/hero_disaster_pictures/food.jpeg';
+import communityImg from '../../assets/hero_disaster_pictures/team.jpg';
 
 const WhoWeAreSection = () => {
   const { t } = useTranslation();
   return (
-    <section id="who-we-are" className="py-24 bg-[#7F9764] dark:bg-[#1a2f1a] transition-colors duration-300">
+    <section id="who-we-are" className="py-24 bg-surface">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Text */}
           <div>
-            <h2 className="text-4xl sm:text-5xl font-bold mb-8 text-white dark:text-[#B0BF9F] transition-colors duration-300">
+            <p className="font-display text-pin-500 text-lg tracking-[0.2em] mb-3">
               {t('landing.whoWeAre.title')}
-            </h2>
-            <p className="text-xl sm:text-2xl font-semibold mb-6 text-white dark:text-gray-200 leading-snug transition-colors duration-300">
-              {t('landing.whoWeAre.lead')}
             </p>
-            <p className="text-gray-100 dark:text-gray-300 leading-relaxed transition-colors duration-300">
+            <h2 className="text-3xl sm:text-4xl md:text-[2.75rem] font-semibold mb-6 text-ink leading-tight">
+              {t('landing.whoWeAre.lead')}
+            </h2>
+            <p className="text-ink-muted text-lg leading-relaxed">
               {t('landing.whoWeAre.body')}
             </p>
           </div>
 
           {/* Image */}
-          <div className="rounded-[2rem] overflow-hidden shadow-lg h-80 lg:h-96">
+          <div className="rounded-[2rem] overflow-hidden shadow-card h-80 lg:h-[28rem] ring-1 ring-hairline">
             <img
               src={communityImg}
               alt={t('landing.whoWeAre.imageAlt')}

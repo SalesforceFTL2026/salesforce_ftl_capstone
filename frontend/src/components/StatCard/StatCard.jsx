@@ -1,24 +1,14 @@
-import { useTranslation } from 'react-i18next';
-
-const StatCard = ({ number, description }) => {
-  const { t } = useTranslation();
+// A single impact figure: a large number over a short label. Used in the
+// Impact section's stat grid. Purely presentational — copy comes from the parent.
+const StatCard = ({ value, label }) => {
   return (
-    <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 md:gap-8">
-      <div className="w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 bg-[#e8e8e8] dark:bg-[#1a2332] rounded-xl flex items-center justify-center flex-shrink-0 transition-colors duration-300">
-        <div className="text-center">
-          <p className="text-xs text-gray-600 dark:text-gray-400 leading-tight transition-colors duration-300">
-            {t('landing.statCard.graphicLine1')}<br />
-            {t('landing.statCard.graphicLine2')}<br />
-            {t('landing.statCard.graphicLine3')}
-          </p>
-        </div>
-      </div>
-      <div className="text-center sm:text-left">
-        <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white dark:text-[#B0BF9F] mb-1 transition-colors duration-300">
-          {t('landing.statCard.statistic', { number })}
-        </h3>
-        <p className="text-base sm:text-lg md:text-xl text-white dark:text-[#B0BF9F] transition-colors duration-300">{description}</p>
-      </div>
+    <div className="rounded-2xl bg-white/5 dark:bg-surface-3/60 ring-1 ring-white/10 dark:ring-hairline p-6 sm:p-8 flex flex-col items-center text-center">
+      <p className="font-display text-4xl sm:text-5xl md:text-6xl text-white dark:text-forest-300 leading-none mb-2 tracking-wide">
+        {value}
+      </p>
+      <p className="text-sm sm:text-base text-white/70 dark:text-ink-muted leading-snug">
+        {label}
+      </p>
     </div>
   );
 }

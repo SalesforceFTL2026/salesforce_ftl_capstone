@@ -2,8 +2,22 @@ import { createContext, useContext, useState, useEffect } from 'react';
 
 const ThemeContext = createContext();
 
+// Resolve the initial theme once: a saved choice wins, otherwise fall back to
+// the OS preference so the page opens in the mode the user already lives in.
+const getInitialTheme = () => {
+  if (typeof window === 'undefined') return false;
+  const saved = localStorage.getItem('theme');
+  if (saved) return saved === 'dark';
+  return window.matchMedia('(prefers-color-scheme: dark)').matches;
+};
+
 export const ThemeProvider = ({ children }) => {
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState(getInitialTheme);
+
+  useEffect(() => {
+    // Remember the choice so a refresh keeps the user's theme.
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  }, [isDark]);
 
   useEffect(() => {
     // Apply theme class to html element

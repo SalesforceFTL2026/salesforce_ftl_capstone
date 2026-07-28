@@ -97,8 +97,7 @@
         "whatWeDo": "WHAT WE DO",
         "whoWeAre": "WHO WE ARE",
         "howToHelp": "HOW TO HELP",
-        "partnerResources": "PARTNER RESOURCES",
-        "getHelp": "GET HELP"
+        "partnerResources": "PARTNER RESOURCES"
       },
       "greeting": "Hi, {{name}}",
       "signOut": "SIGN OUT",
@@ -145,13 +144,13 @@
     },
     "impact": {
       "title": "OUR 2026 IMPACT",
-      "fact": "Fact"
-    },
-    "statCard": {
-      "graphicLine1": "GRAPHIC",
-      "graphicLine2": "PERTAINING TO",
-      "graphicLine3": "FACT",
-      "statistic": "STATISTIC #{{number}}"
+      "subtitle": "Illustrative figures from our pilot response network.",
+      "stats": {
+        "requests": { "value": "12,480", "label": "Help requests mapped and routed" },
+        "volunteers": { "value": "3,200+", "label": "Volunteers mobilized on the ground" },
+        "response": { "value": "18 min", "label": "Median time to first response" },
+        "counties": { "value": "42", "label": "Counties covered across 6 states" }
+      }
     },
     "getInvolved": {
       "title": "HOW TO HELP",
@@ -170,16 +169,16 @@
       "helpCommunitiesImageAlt": "Volunteers helping clear debris"
     },
     "partners": {
-      "title": "THANK YOU TO OUR PARTNERS FOR YOUR SUPPORT!",
-      "logo": "Logo"
+      "title": "THANK YOU TO OUR PARTNERS FOR YOUR SUPPORT!"
     },
     "oneLiner": {
-      "text": "When disaster scatters help, MapResponse puts it back on the map.",
+      "text": "MapResponse works to keep you connected during times of disaster.",
       "scrollToTopAria": "Scroll to top"
     },
     "footer": {
       "logoAlt": "MapResponse logo",
-      "description": "Description"
+      "phone": "(555) 234-1092",
+      "description": "MapResponse connects people affected by disasters with the volunteers and organizations ready to help — all on one live, prioritized map."
     }
   },
   "auth": {

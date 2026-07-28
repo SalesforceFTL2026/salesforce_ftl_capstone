@@ -57,7 +57,7 @@ const LandingPage = () => {
         onSignOutClick={handleLogout}
         onDashboardClick={() => navigate(pathForRole(currentUser?.role))}
       />
-      <div className="pt-[64px] sm:pt-[124px]">
+      <div className="pt-[56px] sm:pt-[76px]">
         <HeroSection onRoleSelect={handleRoleSelect} />
         <WhoWeAreSection />
         <ImpactSection />

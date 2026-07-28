@@ -25,9 +25,11 @@ const HeroSection = ({ onRoleSelect }) => {
   }, [disasterImages.length]);
 
   return (
-    <section id="get-help" className="relative h-[450px] sm:h-[500px] md:h-[600px] flex items-center justify-center overflow-hidden">
-      {/* Light mode: Rotating Background Images with overlay */}
-      <div className="absolute inset-0 dark:hidden">
+    <section id="get-help" className="relative h-[480px] sm:h-[540px] md:h-[640px] flex items-center justify-center overflow-hidden">
+      {/* Rotating disaster imagery — the emotional core of the page. Kept in both
+          themes; dark mode just deepens the overlay so the scene stays visible
+          instead of collapsing to a flat black block. */}
+      <div className="absolute inset-0">
         {disasterImages.map((image, index) => (
           <div
             key={image}
@@ -39,48 +41,48 @@ const HeroSection = ({ onRoleSelect }) => {
             }}
           />
         ))}
-        {/* Light mode overlay for text contrast */}
-        <div className="absolute inset-0 bg-black/60" />
+        {/* Forest-tinted overlay for text contrast — a brand gradient, not raw
+            black. Darker in dark mode. */}
+        <div className="absolute inset-0 bg-gradient-to-b from-forest-900/70 via-forest-900/55 to-forest-900/80 dark:from-forest-900/85 dark:via-forest-900/80 dark:to-black/90" />
       </div>
 
-      {/* Dark mode: Solid black background */}
-      <div className="hidden dark:block absolute inset-0 bg-black" />
-
       {/* Content */}
-      <div className="relative z-10 text-center px-4 sm:px-6 max-w-6xl mx-auto">
+      <div className="relative z-10 text-center px-4 sm:px-6 max-w-4xl mx-auto">
         {/* Heading */}
-        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-3 sm:mb-4 leading-tight flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4">
-          <span>{t('landing.hero.welcomeTo')}</span>
+        <h1 className="font-display text-white mb-4 leading-none flex flex-col items-center justify-center gap-1">
+          <span className="text-2xl sm:text-3xl md:text-4xl tracking-[0.2em] text-white/80">
+            {t('landing.hero.welcomeTo')}
+          </span>
           <img
             src={MRLogo}
             alt="MapResponse"
-            className="h-12 sm:h-16 md:h-20 lg:h-24 w-auto object-contain"
+            className="h-16 sm:h-20 md:h-28 w-auto object-contain drop-shadow-lg mt-1"
           />
-          <span>!</span>
         </h1>
 
         {/* Subtitle */}
-        <p className="text-sm sm:text-base md:text-lg lg:text-xl text-white font-semibold mb-6 sm:mb-10 md:mb-12 tracking-wide px-2">
+        <p className="text-base sm:text-lg md:text-xl text-white/90 font-normal max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed">
           {t('landing.hero.subtitle')}
         </p>
 
-        {/* Role Selection Buttons */}
+        {/* Role selection. "I need help" carries the coral accent — help-seekers
+            are the priority audience; the other two are quiet outlines. */}
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center max-w-3xl mx-auto">
           <button
             onClick={() => onRoleSelect('help-seeker')}
-            className="px-6 sm:px-8 md:px-10 py-3 bg-[#1C2A16] dark:bg-[#7F9764] text-white text-sm sm:text-base font-semibold rounded-full hover:opacity-90 transition-opacity w-full sm:w-auto shadow-lg"
+            className="px-8 py-3.5 bg-pin-500 text-white text-base font-semibold rounded-full hover:bg-pin-600 transition-colors w-full sm:w-auto shadow-lg shadow-pin-600/30"
           >
             {t('landing.hero.needHelp')}
           </button>
           <button
             onClick={() => onRoleSelect('volunteer')}
-            className="px-6 sm:px-8 md:px-10 py-3 bg-[#1C2A16] dark:bg-[#7F9764] text-white text-sm sm:text-base font-semibold rounded-full hover:opacity-90 transition-opacity w-full sm:w-auto shadow-lg"
+            className="px-8 py-3.5 bg-white/10 backdrop-blur-sm text-white text-base font-semibold rounded-full ring-1 ring-white/40 hover:bg-white/20 transition-colors w-full sm:w-auto"
           >
             {t('landing.hero.volunteer')}
           </button>
           <button
             onClick={() => onRoleSelect('organization')}
-            className="px-6 sm:px-8 md:px-10 py-3 bg-[#1C2A16] dark:bg-[#7F9764] text-white text-sm sm:text-base font-semibold rounded-full hover:opacity-90 transition-opacity w-full sm:w-auto shadow-lg"
+            className="px-8 py-3.5 bg-white/10 backdrop-blur-sm text-white text-base font-semibold rounded-full ring-1 ring-white/40 hover:bg-white/20 transition-colors w-full sm:w-auto"
           >
             {t('landing.hero.organization')}
           </button>

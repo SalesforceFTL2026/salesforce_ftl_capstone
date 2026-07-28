@@ -2,8 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import MRLogo from '../../assets/logos/MRLogo.png';
-import lightModeToggle from '../../assets/light_mode_toggle.png';
-import darkModeToggle from '../../assets/dark_mode_toggle.png';
 
 const Header = ({ currentUser, onSignInClick, onSignOutClick, onDashboardClick }) => {
   const { t } = useTranslation();
@@ -59,8 +57,8 @@ const Header = ({ currentUser, onSignInClick, onSignOutClick, onDashboardClick }
   }, []);
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 bg-[#79A7ED]/86 dark:bg-[#1a2332] shadow-sm transition-[transform,background-color] duration-300 ${hidden ? '-translate-y-full' : 'translate-y-0'}`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+    <header className={`fixed top-0 left-0 right-0 z-50 bg-surface/80 dark:bg-surface/80 backdrop-blur-md border-b border-hairline/70 transition-[transform] duration-300 ${hidden ? '-translate-y-full' : 'translate-y-0'}`}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5">
         <div className="flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center gap-2">
@@ -68,30 +66,25 @@ const Header = ({ currentUser, onSignInClick, onSignOutClick, onDashboardClick }
               <img
                 src={MRLogo}
                 alt={t('landing.header.logoAlt')}
-                className="h-10 sm:h-[80px] w-auto object-contain"
+                className="h-9 sm:h-14 w-auto object-contain"
               />
             </div>
           </div>
 
-          {/* Navigation */}
+          {/* Navigation — links follow the page's top-to-bottom section order so
+              each anchor lands on its matching section. */}
           <nav className="hidden lg:flex items-center gap-8">
-            <a href="#get-involved" className="text-[#1C2A16] dark:text-white text-[22px] font-medium hover:opacity-70 transition-opacity">
-              {t('landing.header.nav.give')}
-            </a>
-            <a href="#what-we-do" className="text-[#1C2A16] dark:text-white text-[22px] font-medium hover:opacity-70 transition-opacity">
-              {t('landing.header.nav.whatWeDo')}
-            </a>
-            <a href="#who-we-are" className="text-[#1C2A16] dark:text-white text-[22px] font-medium hover:opacity-70 transition-opacity">
+            <a href="#who-we-are" className="font-display text-ink text-xl tracking-wide hover:text-pin-500 transition-colors">
               {t('landing.header.nav.whoWeAre')}
             </a>
-            <a href="#get-involved" className="text-[#1C2A16] dark:text-white text-[22px] font-medium hover:opacity-70 transition-opacity">
+            <a href="#what-we-do" className="font-display text-ink text-xl tracking-wide hover:text-pin-500 transition-colors">
+              {t('landing.header.nav.whatWeDo')}
+            </a>
+            <a href="#get-involved" className="font-display text-ink text-xl tracking-wide hover:text-pin-500 transition-colors">
               {t('landing.header.nav.howToHelp')}
             </a>
-            <a href="#partner-resources" className="text-[#1C2A16] dark:text-white text-[22px] font-medium hover:opacity-70 transition-opacity">
+            <a href="#partner-resources" className="font-display text-ink text-xl tracking-wide hover:text-pin-500 transition-colors">
               {t('landing.header.nav.partnerResources')}
-            </a>
-            <a href="#get-help" className="text-[#1C2A16] dark:text-white text-[22px] font-medium hover:opacity-70 transition-opacity">
-              {t('landing.header.nav.getHelp')}
             </a>
           </nav>
 
@@ -101,16 +94,16 @@ const Header = ({ currentUser, onSignInClick, onSignOutClick, onDashboardClick }
               <>
                 <button
                   onClick={onDashboardClick}
-                  className="text-[#1C2A16] dark:text-white text-[22px] font-medium hover:opacity-70 transition-opacity"
+                  className="font-display text-ink text-xl tracking-wide hover:text-pin-500 transition-colors"
                 >
                   DASHBOARD
                 </button>
-                <span className="hidden sm:inline text-[#1C2A16] dark:text-white text-[22px] font-medium">
+                <span className="hidden sm:inline font-display text-ink-muted text-xl tracking-wide">
                   {t('landing.header.greeting', { name: currentUser.name })}
                 </span>
                 <button
                   onClick={onSignOutClick}
-                  className="text-[#1C2A16] dark:text-white text-[22px] font-medium hover:opacity-70 transition-opacity"
+                  className="font-display text-ink text-xl tracking-wide hover:text-pin-500 transition-colors"
                 >
                   {t('landing.header.signOut')}
                 </button>
@@ -121,16 +114,16 @@ const Header = ({ currentUser, onSignInClick, onSignOutClick, onDashboardClick }
                   onClick={() => setRoleMenuOpen((v) => !v)}
                   aria-haspopup="menu"
                   aria-expanded={roleMenuOpen}
-                  className="text-[#1C2A16] dark:text-white text-[22px] font-medium hover:opacity-70 transition-opacity"
+                  className="font-display text-xl tracking-wide px-4 py-1.5 rounded-full bg-pin-500 text-white hover:bg-pin-600 transition-colors"
                 >
                   {t('landing.header.signIn')}
                 </button>
                 {roleMenuOpen && (
                   <div
                     role="menu"
-                    className="absolute right-0 mt-3 w-56 bg-white dark:bg-[#273A20] rounded-xl shadow-xl py-2 z-50 ring-1 ring-black/5"
+                    className="absolute right-0 mt-3 w-56 bg-surface rounded-2xl shadow-card py-2 z-50 border border-hairline"
                   >
-                    <p className="px-4 py-2 text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                    <p className="px-4 py-2 text-xs font-bold uppercase tracking-wider text-ink-muted">
                       {t('landing.header.chooseRole')}
                     </p>
                     {signInRoles.map((r) => (
@@ -141,7 +134,7 @@ const Header = ({ currentUser, onSignInClick, onSignOutClick, onDashboardClick }
                           setRoleMenuOpen(false);
                           onSignInClick(r.key);
                         }}
-                        className="block w-full text-left px-4 py-2 text-[18px] text-[#1C2A16] dark:text-white hover:bg-gray-100 dark:hover:bg-[#1a2f1a] transition-colors"
+                        className="block w-full text-left px-4 py-2 text-ink hover:bg-surface-2 transition-colors"
                       >
                         {r.label}
                       </button>
@@ -151,7 +144,7 @@ const Header = ({ currentUser, onSignInClick, onSignOutClick, onDashboardClick }
               </div>
             )}
             <button
-              className="p-2 text-[#1C2A16] dark:text-white hover:opacity-70 transition-opacity"
+              className="p-2 text-ink hover:text-pin-500 transition-colors"
               aria-label={t('landing.header.searchAria')}
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -163,13 +156,20 @@ const Header = ({ currentUser, onSignInClick, onSignOutClick, onDashboardClick }
               role="switch"
               aria-checked={isDark}
               aria-label={t('landing.header.toggleDarkModeAria')}
-              className="rounded-full hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/50"
+              className="p-2 rounded-full text-ink hover:text-pin-500 hover:bg-surface-2 transition-colors"
             >
-              <img
-                src={isDark ? darkModeToggle : lightModeToggle}
-                alt={isDark ? t('landing.header.darkModeEnabledAlt') : t('landing.header.lightModeEnabledAlt')}
-                className="h-8 w-auto"
-              />
+              {isDark ? (
+                // Sun — click to return to light mode
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <circle cx="12" cy="12" r="4" />
+                  <path strokeLinecap="round" d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41m11.32-11.32l1.41-1.41" />
+                </svg>
+              ) : (
+                // Moon — click for dark mode
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+                </svg>
+              )}
             </button>
           </div>
         </div>
