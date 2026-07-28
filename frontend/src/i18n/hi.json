@@ -217,7 +217,8 @@
     "darkModeEnabled": "डार्क मोड सक्षम है",
     "lightModeEnabled": "लाइट मोड सक्षम है",
     "notifications": "सूचनाएँ",
-    "signOut": "साइन आउट"
+    "signOut": "साइन आउट",
+    "searchNoResults": "“{{query}}” के लिए कोई परिणाम नहीं"
   },
   "org": {
     "nav": {
@@ -885,5 +886,18 @@
     "successCreate": "✓ अनुरोध प्रस्तुत किया गया!",
     "successEdit": "✓ परिवर्तन सहेजे गए!",
     "errorRequired": "कृपया सभी आवश्यक फ़ील्ड भरें"
+  },
+  "hsSearch": {
+    "placeholder": "अनुरोध, संगठन खोजें…",
+    "groups": {
+      "requests": "आपके अनुरोध",
+      "organizations": "संगठन",
+      "actions": "त्वरित कार्रवाइयाँ"
+    },
+    "actions": {
+      "newRequest": "नया अनुरोध करें",
+      "viewRequests": "मेरे अनुरोध देखें",
+      "safetyManual": "सुरक्षा नियमावली"
+    }
   }
 }

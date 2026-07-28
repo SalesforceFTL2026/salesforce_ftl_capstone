@@ -217,7 +217,8 @@
     "darkModeEnabled": "Đã bật chế độ tối",
     "lightModeEnabled": "Đã bật chế độ sáng",
     "notifications": "Thông báo",
-    "signOut": "Đăng xuất"
+    "signOut": "Đăng xuất",
+    "searchNoResults": "Không có kết quả cho “{{query}}”"
   },
   "org": {
     "nav": {
@@ -885,5 +886,18 @@
     "successCreate": "✓ Đã gửi yêu cầu!",
     "successEdit": "✓ Đã lưu thay đổi!",
     "errorRequired": "Vui lòng điền tất cả các trường bắt buộc"
+  },
+  "hsSearch": {
+    "placeholder": "Tìm yêu cầu, tổ chức…",
+    "groups": {
+      "requests": "Yêu cầu của bạn",
+      "organizations": "Tổ chức",
+      "actions": "Thao tác nhanh"
+    },
+    "actions": {
+      "newRequest": "Tạo yêu cầu mới",
+      "viewRequests": "Xem yêu cầu của tôi",
+      "safetyManual": "Sổ tay an toàn"
+    }
   }
 }

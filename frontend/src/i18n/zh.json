@@ -217,7 +217,8 @@
     "darkModeEnabled": "已启用深色模式",
     "lightModeEnabled": "已启用浅色模式",
     "notifications": "通知",
-    "signOut": "退出登录"
+    "signOut": "退出登录",
+    "searchNoResults": "没有“{{query}}”的结果"
   },
   "org": {
     "nav": {
@@ -885,5 +886,18 @@
     "successCreate": "✓ 请求已提交！",
     "successEdit": "✓ 更改已保存！",
     "errorRequired": "请填写所有必填字段"
+  },
+  "hsSearch": {
+    "placeholder": "搜索请求、组织…",
+    "groups": {
+      "requests": "您的请求",
+      "organizations": "组织",
+      "actions": "快捷操作"
+    },
+    "actions": {
+      "newRequest": "创建新请求",
+      "viewRequests": "查看我的请求",
+      "safetyManual": "安全手册"
+    }
   }
 }

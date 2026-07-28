@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import PortalShell from '../components/portal/PortalShell';
@@ -12,11 +12,13 @@ import HelpRequestForm from '../../components/HelpRequestForm/HelpRequestForm';
 import VoiceCallFlow from '../components/VoiceIntake/VoiceCallFlow';
 import Toast from '../components/Toast/Toast';
 import api from '../utils/api';
-import { getCurrentUser, logout, updateName, updatePhone, updateHousehold, updateLanguage, uploadAvatar } from '../utils/auth';
+import { getCurrentUser, logout, updateName, updatePhone, updateHousehold, updateLanguage } from '../utils/auth';
+import AvatarUploader from '../components/portal/AvatarUploader';
 import { isAdminSession } from '../utils/previewMode';
 import { SUPPORTED_LANGUAGES } from '../i18n';
 import { usePolling } from '../hooks/usePolling';
 import { useModalDismiss } from '../hooks/useModalDismiss';
+import { useDebounce } from '../hooks/useDebounce';
 
 // Views that are actually built. Anything else shows the "coming soon" panel.
 const BUILT_VIEWS = new Set(['dashboard', 'requests', 'household', 'documents', 'settings']);
@@ -55,6 +57,10 @@ const HelpSeekerDashboard = () => {
   const [showVoiceCall, setShowVoiceCall] = useState(false);
   // Requests-tab keyword/category/urgency filters via shared RequestFilterBar.
   const [requestFilters, setRequestFilters] = useState({ search: '', category: '', urgency: '' });
+  // Global top-bar search query. Debounced so we only recompute results after
+  // the user pauses typing (see searchResults below).
+  const [topSearch, setTopSearch] = useState('');
+  const debouncedTopSearch = useDebounce(topSearch, 200);
   // When set, the modal shows the form in edit mode for this request.
   const [editingRequest, setEditingRequest] = useState(null);
   // Controls the AI chat assistant panel (opened from the inline button).
@@ -88,10 +94,6 @@ const HelpSeekerDashboard = () => {
   const [savingLanguage, setSavingLanguage] = useState(false);
   const [languageError, setLanguageError] = useState('');
   const [languageSaved, setLanguageSaved] = useState(false);
-  // Settings: profile picture. avatarUrl is a short-lived signed URL from S3.
-  const [avatarUrl, setAvatarUrl] = useState(currentUser?.avatarUrl || '');
-  const [uploadingAvatar, setUploadingAvatar] = useState(false);
-  const [avatarError, setAvatarError] = useState('');
   const navigate = useNavigate();
 
   // Sidebar nav, built from translations so the labels switch with the
@@ -151,25 +153,6 @@ const HelpSeekerDashboard = () => {
       );
     } finally {
       setSavingLanguage(false);
-    }
-  };
-
-  // Upload a chosen image as the profile picture. uploadAvatar persists the
-  // signed URL to the session; here we just reflect it in local state.
-  const handleAvatarChange = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setAvatarError('');
-    setUploadingAvatar(true);
-    try {
-      const url = await uploadAvatar(file);
-      setAvatarUrl(url);
-      setCurrentUser({ ...currentUser, avatarUrl: url });
-    } catch (err) {
-      setAvatarError(err.response?.data?.message || err.message || 'Could not upload your photo.');
-    } finally {
-      setUploadingAvatar(false);
-      e.target.value = ''; // let the user re-pick the same file if they want
     }
   };
 
@@ -337,6 +320,86 @@ const HelpSeekerDashboard = () => {
   const displayOrganizations = organizations ?? SAMPLE_NONPROFITS;
   const orgsAreSample = organizations === null || organizations === SAMPLE_NONPROFITS;
 
+  // Jump to the Requests tab with the top-bar query pre-loaded into the shared
+  // RequestFilterBar, so selecting a request reuses the existing filter view.
+  const openRequestsFiltered = useCallback((term) => {
+    setRequestFilters({ search: term, category: '', urgency: '' });
+    setView('requests');
+  }, []);
+
+  // Grouped results for the top-bar search: the user's own requests, nearby
+  // organizations, and quick actions. Recomputed only when the debounced query
+  // or the underlying data changes. Each item carries an onSelect that navigates
+  // to the right place — the top bar just renders and invokes it.
+  const searchResults = useMemo(() => {
+    const q = debouncedTopSearch.trim().toLowerCase();
+    if (!q) return [];
+
+    // Matching requests (same fields the Requests-tab filter searches).
+    const requestItems = requests
+      .filter((r) =>
+        [r.submitterName, r.description, r.location, r.category, r.urgency, r.status]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase()
+          .includes(q),
+      )
+      .slice(0, 5)
+      .map((r) => ({
+        id: `request-${r.id}`,
+        title: r.description || r.category || t('requests.table.requestFallback'),
+        subtitle: [r.category, r.urgency, r.status].filter(Boolean).join(' · '),
+        onSelect: () => openRequestsFiltered(debouncedTopSearch.trim()),
+      }));
+
+    // Matching organizations. Real orgs use organizationName/resourceTypes;
+    // the sample fallback uses name/type — support both shapes.
+    const orgItems = displayOrganizations
+      .filter((o) => {
+        const types = Array.isArray(o.resourceTypes) ? o.resourceTypes.join(' ') : o.type;
+        return [o.organizationName || o.name, o.description, types]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase()
+          .includes(q);
+      })
+      .slice(0, 5)
+      .map((o) => ({
+        id: `org-${o.id}`,
+        title: o.organizationName || o.name,
+        subtitle: Array.isArray(o.resourceTypes) ? o.resourceTypes.join(', ') : o.type,
+        onSelect: () => setView('dashboard'),
+      }));
+
+    // Quick actions — always offer the most useful jumps, filtered by the query.
+    const actionItems = [
+      {
+        id: 'action-new-request',
+        title: t('hsSearch.actions.newRequest'),
+        keywords: 'new request help create add',
+        onSelect: () => setShowForm(true),
+      },
+      {
+        id: 'action-view-requests',
+        title: t('hsSearch.actions.viewRequests'),
+        keywords: 'requests list my',
+        onSelect: () => setView('requests'),
+      },
+      {
+        id: 'action-safety',
+        title: t('hsSearch.actions.safetyManual'),
+        keywords: 'safety manual documents guide',
+        onSelect: () => setView('documents'),
+      },
+    ].filter((a) => a.title.toLowerCase().includes(q) || a.keywords.includes(q));
+
+    return [
+      { key: 'requests', heading: t('hsSearch.groups.requests'), items: requestItems },
+      { key: 'organizations', heading: t('hsSearch.groups.organizations'), items: orgItems },
+      { key: 'actions', heading: t('hsSearch.groups.actions'), items: actionItems },
+    ].filter((g) => g.items.length > 0);
+  }, [debouncedTopSearch, requests, displayOrganizations, t, openRequestsFiltered]);
+
   return (
     <PortalShell
       personaLabel="Help Seeker"
@@ -346,6 +409,10 @@ const HelpSeekerDashboard = () => {
       title={VIEW_TITLES[view]}
       currentUser={currentUser}
       onSignOut={handleLogout}
+      searchValue={topSearch}
+      onSearchChange={setTopSearch}
+      searchPlaceholder={t('hsSearch.placeholder')}
+      searchResults={searchResults}
     >
       {view === 'dashboard' && (
         // Request by Voice — temporarily disabled for demo (do not remove).
@@ -391,9 +458,17 @@ const HelpSeekerDashboard = () => {
           {/* Account info card */}
           <div className="bg-white dark:bg-[#16233a] rounded-3xl shadow-md p-6 mb-6">
             <div className="flex items-center gap-4 mb-6">
-              <div className="w-16 h-16 rounded-full bg-[#5b8bb0] flex items-center justify-center text-white text-2xl font-bold shrink-0">
-                {(currentUser?.name?.[0] || '?').toUpperCase()}
-              </div>
+              {currentUser?.avatarUrl ? (
+                <img
+                  src={currentUser.avatarUrl}
+                  alt={currentUser?.name || t('household.yourAccount')}
+                  className="w-16 h-16 rounded-full object-cover bg-[#5b8bb0] shrink-0"
+                />
+              ) : (
+                <div className="w-16 h-16 rounded-full bg-[#5b8bb0] flex items-center justify-center text-white text-2xl font-bold shrink-0">
+                  {(currentUser?.name?.[0] || '?').toUpperCase()}
+                </div>
+              )}
               <div className="min-w-0">
                 <p className="text-xl font-bold text-[#1C2A16] dark:text-white truncate">
                   {currentUser?.name || t('household.yourAccount')}
@@ -442,37 +517,10 @@ const HelpSeekerDashboard = () => {
           </p>
 
           {/* Profile picture: uploaded to S3, displayed via a short-lived signed URL. */}
-          <div className="bg-white dark:bg-[#16233a] rounded-3xl shadow-md p-6 mb-6 flex items-center gap-5">
-            {avatarUrl ? (
-              <img
-                src={avatarUrl}
-                alt="Profile"
-                className="w-20 h-20 rounded-full object-cover border-2 border-gray-200 dark:border-[#3a4f30] bg-gray-100"
-              />
-            ) : (
-              <div className="w-20 h-20 rounded-full border-2 border-gray-200 dark:border-[#3a4f30] bg-gray-100 dark:bg-[#1a2f1a] flex items-center justify-center text-2xl font-bold text-gray-400">
-                {(currentUser?.name || '?').charAt(0).toUpperCase()}
-              </div>
-            )}
-            <div>
-              <label className="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-2">
-                Profile picture
-              </label>
-              <label className="inline-block px-6 py-2.5 bg-[#1a2740] text-white font-bold rounded-full hover:bg-[#14203a] cursor-pointer transition-colors">
-                {uploadingAvatar ? 'Uploading…' : 'Change photo'}
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  onChange={handleAvatarChange}
-                  disabled={uploadingAvatar}
-                  className="hidden"
-                />
-              </label>
-              {avatarError && (
-                <p className="mt-2 text-sm text-red-600 dark:text-red-400">{avatarError}</p>
-              )}
-            </div>
-          </div>
+          <AvatarUploader
+            currentUser={currentUser}
+            onUploaded={(url) => setCurrentUser({ ...currentUser, avatarUrl: url })}
+          />
 
           <form
             onSubmit={handleSaveName}

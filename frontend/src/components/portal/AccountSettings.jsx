@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { updateName, updatePhone, updateLanguage, uploadAvatar } from '../../utils/auth';
+import AvatarUploader from './AvatarUploader';
+import { updateName, updatePhone, updateLanguage } from '../../utils/auth';
 import { SUPPORTED_LANGUAGES } from '../../i18n';
 
 // Shared account settings for the org & volunteer portals: profile picture,
@@ -31,11 +32,6 @@ const AccountSettings = ({ currentUser, onUserChange }) => {
   const [languageError, setLanguageError] = useState('');
   const [languageSaved, setLanguageSaved] = useState(false);
 
-  // Profile picture. avatarUrl is a short-lived signed URL from S3.
-  const [avatarUrl, setAvatarUrl] = useState(currentUser?.avatarUrl || '');
-  const [uploadingAvatar, setUploadingAvatar] = useState(false);
-  const [avatarError, setAvatarError] = useState('');
-
   // Save the chosen UI language to the user's profile and switch the live UI.
   const handleChangeLanguage = async (e) => {
     const lang = e.target.value;
@@ -52,25 +48,6 @@ const AccountSettings = ({ currentUser, onUserChange }) => {
       );
     } finally {
       setSavingLanguage(false);
-    }
-  };
-
-  // Upload a chosen image as the profile picture. uploadAvatar persists the
-  // signed URL to the session; here we just reflect it in local state.
-  const handleAvatarChange = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setAvatarError('');
-    setUploadingAvatar(true);
-    try {
-      const url = await uploadAvatar(file);
-      setAvatarUrl(url);
-      onUserChange({ ...currentUser, avatarUrl: url });
-    } catch (err) {
-      setAvatarError(err.response?.data?.message || err.message || 'Could not upload your photo.');
-    } finally {
-      setUploadingAvatar(false);
-      e.target.value = ''; // let the user re-pick the same file if they want
     }
   };
 
@@ -137,38 +114,11 @@ const AccountSettings = ({ currentUser, onUserChange }) => {
         {t('settings.subtitle')}
       </p>
 
-      {/* Profile picture: uploaded to S3, displayed via a short-lived signed URL. */}
-      <div className="bg-white dark:bg-[#16233a] rounded-3xl shadow-md p-6 mb-6 flex items-center gap-5">
-        {avatarUrl ? (
-          <img
-            src={avatarUrl}
-            alt="Profile"
-            className="w-20 h-20 rounded-full object-cover border-2 border-gray-200 dark:border-[#3a4f30] bg-gray-100"
-          />
-        ) : (
-          <div className="w-20 h-20 rounded-full border-2 border-gray-200 dark:border-[#3a4f30] bg-gray-100 dark:bg-[#1a2f1a] flex items-center justify-center text-2xl font-bold text-gray-400">
-            {(currentUser?.name || '?').charAt(0).toUpperCase()}
-          </div>
-        )}
-        <div>
-          <label className="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-2">
-            Profile picture
-          </label>
-          <label className="inline-block px-6 py-2.5 bg-[#1a2740] text-white font-bold rounded-full hover:bg-[#14203a] cursor-pointer transition-colors">
-            {uploadingAvatar ? 'Uploading…' : 'Change photo'}
-            <input
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              onChange={handleAvatarChange}
-              disabled={uploadingAvatar}
-              className="hidden"
-            />
-          </label>
-          {avatarError && (
-            <p className="mt-2 text-sm text-red-600 dark:text-red-400">{avatarError}</p>
-          )}
-        </div>
-      </div>
+      {/* Profile picture: shared uploader (uploads to S3, returns a signed URL). */}
+      <AvatarUploader
+        currentUser={currentUser}
+        onUploaded={(url) => onUserChange({ ...currentUser, avatarUrl: url })}
+      />
 
       <form
         onSubmit={handleSaveName}

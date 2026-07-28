@@ -13,9 +13,14 @@ import PortalTopBar from './PortalTopBar';
 // @param {string} title - top bar title
 // @param {object} [currentUser]
 // @param {() => void} [onSignOut]
+// @param {string} [searchValue] - controlled top-bar search value
+// @param {(value: string) => void} [onSearchChange] - enables live top-bar search
+// @param {string} [searchPlaceholder] - overrides the search placeholder
+// @param {object[]} [searchResults] - grouped results for the search dropdown
 // @param {React.ReactNode} children - the active view's content
 const PortalShell = ({
-  personaLabel, navGroups, activeView, onNavigate, title, currentUser, onSignOut, children,
+  personaLabel, navGroups, activeView, onNavigate, title, currentUser, onSignOut,
+  searchValue, onSearchChange, searchPlaceholder, searchResults, children,
 }) => (
   // App-shell layout: fill the available height (h-full — the viewport when
   // standalone, or the space below the admin bar when embedded there) and keep
@@ -31,7 +36,15 @@ const PortalShell = ({
     />
 
     <div className="flex-1 flex flex-col min-w-0 min-h-0">
-      <PortalTopBar title={title} currentUser={currentUser} onSignOut={onSignOut} />
+      <PortalTopBar
+        title={title}
+        currentUser={currentUser}
+        onSignOut={onSignOut}
+        searchValue={searchValue}
+        onSearchChange={onSearchChange}
+        searchPlaceholder={searchPlaceholder}
+        searchResults={searchResults}
+      />
       <main className="flex-1 min-h-0 p-4 sm:p-6 overflow-y-auto overflow-x-hidden">{children}</main>
     </div>
   </div>
