@@ -6,7 +6,7 @@ import DashboardView from '../components/organization/DashboardView';
 import RequestsView from '../components/organization/RequestsView';
 import ResourcesView from '../components/organization/ResourcesView';
 import TasksView from '../components/organization/TasksView';
-import AvatarUploader from '../components/portal/AvatarUploader';
+import AccountSettings from '../components/portal/AccountSettings';
 import Toast from '../components/Toast/Toast';
 import { getCurrentUser, logout, updateProfile } from '../utils/auth';
 import { usePolling } from '../hooks/usePolling';
@@ -378,15 +378,7 @@ const OrganizationDashboard = () => {
       )}
 
       {view === 'settings' && (
-        <div className="max-w-2xl">
-          <h2 className="text-2xl sm:text-3xl font-bold text-[#1C2A16] dark:text-white mb-6">
-            {t('nav.settings')}
-          </h2>
-          <AvatarUploader
-            currentUser={currentUser}
-            onUploaded={(url) => setCurrentUser({ ...currentUser, avatarUrl: url })}
-          />
-        </div>
+        <AccountSettings currentUser={currentUser} onUserChange={setCurrentUser} />
       )}
 
       {!['dashboard', 'requests', 'resources', 'tasks', 'settings'].includes(view) && (
