@@ -228,6 +228,11 @@
       "signUp": "Sign Up",
       "logIn": "Log In"
     },
+    "chooseRolePrompt": "First, choose how you'd like to use MapResponse:",
+    "orDivider": "or",
+    "google": {
+      "error": "Google sign-in failed. Please try again."
+    },
     "roles": {
       "helpSeeker": "Help Seeker",
       "volunteer": "Volunteer",

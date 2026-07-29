@@ -43,7 +43,14 @@ services:
         sync: false
       - key: COHERE_API_KEY
         sync: false
-      - key: JWT_SECRET
+      # Secret used to sign login tokens (JWTs). Name MUST match the code, which
+      # reads process.env.JWT_SECRET_KEY (services/auth/authService.js).
+      - key: JWT_SECRET_KEY
+        sync: false
+      # Google Sign-In client id — the backend verifies Google ID tokens with
+      # it (services/auth/authService.js). Public value, but set per-environment.
+      # Same value as the frontend's VITE_GOOGLE_CLIENT_ID.
+      - key: GOOGLE_CLIENT_ID
         sync: false
 
   # --- Daily real-event ingestion -----------------------------------------
