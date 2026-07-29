@@ -7,7 +7,8 @@ import { clearPreviewStore } from './previewMode';
 //
 // Backend contract (backend/controllers/authController.js):
 //   POST /api/auth/signup -> { success, data: { id, name, email, role } }   (no token)
-//   POST /api/auth/login  -> { success, data: { token, user: {...} } }
+//   POST /api/auth/login  -> { success, data: { token, user: {...} } }      (needs role)
+//   POST /api/auth/google -> { success, data: { token, user: {...} } }      (needs role)
 
 const TOKEN_KEY = 'token';
 const USER_KEY = 'user';
@@ -20,8 +21,10 @@ const persistSession = ({ token, user }) => {
 
 // Log in an existing user. Returns the user object on success.
 // Throws an Error with a user-friendly message on failure.
-export const login = async ({ email, password }) => {
-  const { data } = await api.post('/api/auth/login', { email, password });
+// `role` is required: one email can hold a separate account per role, so the
+// email alone no longer identifies which account to sign into.
+export const login = async ({ email, password, role }) => {
+  const { data } = await api.post('/api/auth/login', { email, password, role });
 
   if (!data?.success) {
     throw new Error(data?.message || 'Sign in failed. Please try again.');
@@ -56,7 +59,27 @@ export const signup = async ({ name, email, password, role, location, skills }) 
   }
 
   // Signup doesn't return a token, so log in immediately with the same creds.
-  return login({ email, password });
+  return login({ email, password, role });
+};
+
+// Sign in OR sign up using a Google ID token, for a chosen role. The backend
+// verifies the token with Google, then finds-or-creates the (email, role)
+// account and returns a token exactly like password login. `idToken` is the
+// credential string from Google's "Sign in with Google" button.
+export const googleAuth = async ({ idToken, role }) => {
+  const { data } = await api.post('/api/auth/google', { idToken, role });
+
+  if (!data?.success) {
+    throw new Error(data?.message || 'Google sign-in failed. Please try again.');
+  }
+
+  const { token, user } = data.data;
+  persistSession({ token, user });
+  // Follow the user's saved language preference to this device, like login().
+  if (user?.languagePreference) {
+    setLanguage(user.languagePreference);
+  }
+  return user;
 };
 
 // Overwrite the stored user (keeping the existing token), so UI that reads

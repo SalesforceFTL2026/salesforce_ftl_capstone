@@ -1,5 +1,5 @@
 import prisma from '../services/database/prisma.js';
-import { hashPassword, comparePassword, createToken } from '../services/auth/authService.js';
+import { hashPassword, comparePassword, createToken, verifyGoogleToken } from '../services/auth/authService.js';
 import { getSignedViewUrl } from '../services/s3.js';
 
 /**
@@ -107,12 +107,15 @@ export async function signup(req, res) {
       });
     }
 
-    // 5. Check the email isn't already taken.
-    const existingUser = await prisma.user.findUnique({ where: { email } });
+    // 5. Check this email isn't already taken FOR THIS ROLE. The same email may
+    //    hold a separate account per role, so we check the (email, role) pair.
+    const existingUser = await prisma.user.findUnique({
+      where: { email_role: { email, role } },
+    });
     if (existingUser) {
       return res.status(409).json({
         success: false,
-        message: 'An account with this email already exists.',
+        message: 'An account with this email already exists for this role.',
       });
     }
 
@@ -167,23 +170,27 @@ export async function signup(req, res) {
 export async function login(req, res) {
   try {
     // 1. Pull the login fields from the request body.
-    const { email, password } = req.body;
+    const { email, password, role } = req.body;
 
-    // 2. Validate: both fields are required.
-    if (!email || !password) {
+    // 2. Validate: all three are required. Role is needed because one email can
+    //    hold a separate account per role, so email alone doesn't identify one.
+    if (!email || !password || !role) {
       return res.status(400).json({
         success: false,
-        message: 'Email and password are required.',
+        message: 'Email, password, and role are required.',
       });
     }
 
-    // 3. Look up the user by email.
-    const user = await prisma.user.findUnique({ where: { email } });
+    // 3. Look up the ONE account for this email + role.
+    const user = await prisma.user.findUnique({
+      where: { email_role: { email, role } },
+    });
 
-    // 4. Check password. We use the SAME generic message whether the email
-    //    doesn't exist OR the password is wrong — so attackers can't tell
-    //    which emails are registered.
-    const passwordMatches = user
+    // 4. Check password. We use the SAME generic message whether the account
+    //    doesn't exist OR the password is wrong — so attackers can't tell which
+    //    emails are registered. A Google-only account has no passwordHash, so
+    //    guard the compare and let it fall through to the generic 401.
+    const passwordMatches = user?.passwordHash
       ? await comparePassword(password, user.passwordHash)
       : false;
 
@@ -222,6 +229,107 @@ export async function login(req, res) {
     return res.status(500).json({
       success: false,
       message: 'Something went wrong logging in.',
+    });
+  }
+}
+
+/**
+ * Handle POST /api/auth/google
+ * Sign in (or sign up) using a Google ID token, for a chosen role.
+ * Flow: verify the token with Google -> find the (email, role) account or
+ * create one -> return OUR own JWT (same shape as password login). This is an
+ * ADDITIONAL option; password login/signup still work unchanged.
+ */
+export async function googleAuth(req, res) {
+  try {
+    const { idToken, role } = req.body;
+
+    // 1. Both are required — role because one email can hold an account per role.
+    if (!idToken || !role) {
+      return res.status(400).json({
+        success: false,
+        message: 'Google token and role are required.',
+      });
+    }
+    if (!VALID_ROLES.includes(role)) {
+      return res.status(400).json({
+        success: false,
+        message: `Role must be one of: ${VALID_ROLES.join(', ')}.`,
+      });
+    }
+
+    // 2. Prove the token really came from Google. Throws if forged/expired.
+    let identity;
+    try {
+      identity = await verifyGoogleToken(idToken);
+    } catch {
+      return res.status(401).json({
+        success: false,
+        message: 'Could not verify your Google sign-in. Please try again.',
+      });
+    }
+    if (!identity.emailVerified) {
+      return res.status(401).json({
+        success: false,
+        message: 'Your Google email is not verified.',
+      });
+    }
+
+    // 3. Find the account for THIS email + role, or create it on first use.
+    let user = await prisma.user.findUnique({
+      where: { email_role: { email: identity.email, role } },
+    });
+
+    if (!user) {
+      // First time this email uses this role — create the account. No password:
+      // this is a Google account. Volunteers get an empty skills profile (they
+      // can add skills later on their dashboard), mirroring password signup's
+      // volunteerProfile creation.
+      user = await prisma.user.create({
+        data: {
+          email: identity.email,
+          name: identity.name,
+          role,
+          googleId: identity.googleId,
+          passwordHash: null,
+          ...(role === 'volunteer'
+            ? { volunteerProfile: { create: { skills: JSON.stringify([]) } } }
+            : {}),
+        },
+      });
+    } else if (!user.googleId) {
+      // An existing password account for this role — link the Google id so
+      // future Google logins recognize it. They can still use their password.
+      user = await prisma.user.update({
+        where: { id: user.id },
+        data: { googleId: identity.googleId },
+      });
+    }
+
+    // 4. Issue OUR token — identical to password login from here on.
+    const token = createToken(user);
+    return res.status(200).json({
+      success: true,
+      data: {
+        token,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          location: user.location,
+          phoneNumber: user.phoneNumber,
+          householdSize: user.householdSize,
+          languagePreference: user.languagePreference,
+          avatarUrl: await getSignedViewUrl(user.avatarKey),
+        },
+      },
+    });
+  } catch (error) {
+    console.error('Google auth error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Something went wrong with Google sign-in.',
     });
   }
 }
