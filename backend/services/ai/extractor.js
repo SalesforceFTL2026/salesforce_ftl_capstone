@@ -45,6 +45,81 @@ export async function extractRequestFields(transcript) {
 }
 
 /**
+ * Decide whether a help-seeker's chat describes a NEW aid need they'd want
+ * submitted, and if so extract the request fields.
+ *
+ * Used by the chat assistant's "fully automatic" draft flow: after each reply
+ * we run this over the recent conversation, and only show an editable draft
+ * card when `isRequest` is true. Status questions, safety chat, and general
+ * conversation return `{ isRequest: false }` so no card appears.
+ *
+ * Reuses the same defensive JSON parsing and normalization as
+ * extractRequestFields, so a draft's shape matches what createRequest expects.
+ *
+ * @param {string} conversationText - Recent conversation, oldest turn first
+ * @returns {Promise<{isRequest: boolean, category?: string, urgency?: string,
+ *   location?: string, description?: string, householdSize?: number|null,
+ *   confidence?: Object}>}
+ */
+export async function detectHelpRequest(conversationText) {
+  const text = (conversationText || '').trim();
+  if (!text) return { isRequest: false };
+
+  const reply = await askLLM(buildDetectionPrompt(text), {
+    systemPrompt:
+      'You analyze a help-seeker chat and decide if the user is describing a NEW ' +
+      'aid need they want submitted as a request. You reply with ONLY a single JSON ' +
+      'object and no other text, code fences, or commentary.',
+    // Reject any reply we can't parse as JSON so askLLM falls through to the
+    // next free model instead of us failing the whole chat turn.
+    validate: (r) => parseJsonObject(r) !== null,
+  });
+
+  const parsed = parseJsonObject(reply);
+  if (!parsed || parsed.isRequest !== true) {
+    return { isRequest: false };
+  }
+
+  return { isRequest: true, ...normalizeExtraction(parsed) };
+}
+
+/**
+ * Build the instruction prompt for detecting a new help request in a chat.
+ *
+ * @param {string} conversationText - Trimmed recent conversation
+ * @returns {string}
+ */
+function buildDetectionPrompt(conversationText) {
+  return `A help-seeker is chatting with a disaster-relief assistant. Decide whether, in their
+most recent message, they are describing a NEW concrete need they want help with (e.g. they
+need food, water, shelter, medical supplies, a ride). Questions about existing requests,
+safety tips, thanks, or general chat are NOT new requests.
+
+Return ONLY a JSON object with exactly these keys:
+{
+  "isRequest": true or false,
+  "category": one of ${JSON.stringify(VALID_CATEGORIES)},
+  "urgency": one of ${JSON.stringify(VALID_URGENCIES)},
+  "location": string (where help is needed, exactly as said; "" if none given),
+  "description": string (a neutral 1-2 sentence summary of the need),
+  "householdSize": integer number of people affected, or null if not stated,
+  "confidence": { "category": 0-1, "urgency": 0-1, "location": 0-1, "description": 0-1, "householdSize": 0-1 }
+}
+
+Rules:
+- If isRequest is false, still include the other keys (use "" / null).
+- Only use information actually present in the conversation. Do NOT invent details.
+- category: use "Other" if it does not clearly fit the rest.
+- urgency: infer from tone and content (e.g. "trapped", "no water", "injured" => higher urgency).
+- Output the JSON object only — no markdown, no code fences, no explanation.
+
+Conversation:
+"""
+${conversationText}
+"""`;
+}
+
+/**
  * Build the instruction prompt wrapped around the caller's transcript.
  *
  * @param {string} transcript - Trimmed transcript text

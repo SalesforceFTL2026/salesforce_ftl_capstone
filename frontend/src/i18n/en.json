@@ -990,7 +990,37 @@
     "assistantSubtitle": "Your MapResponse assistant",
     "thinking": "Thinking…",
     "inputPlaceholder": "Type your message…",
-    "send": "Send"
+    "send": "Send",
+    "draft": {
+      "title": "Want me to submit this request?",
+      "category": "Type of help",
+      "categories": {
+        "food": "Food",
+        "shelter": "Shelter",
+        "medical": "Medical",
+        "transport": "Transport",
+        "other": "Other"
+      },
+      "urgency": "Urgency",
+      "urgencies": {
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High",
+        "critical": "Critical"
+      },
+      "location": "Location",
+      "locationPlaceholder": "Where do you need help?",
+      "household": "People in your household",
+      "householdPlaceholder": "e.g. 4",
+      "description": "Details",
+      "descriptionPlaceholder": "Describe what you need",
+      "submit": "Submit request",
+      "submitting": "Submitting…",
+      "dismiss": "Not now",
+      "submitted": "✅ Your request has been submitted. You can track it on your dashboard.",
+      "required": "Please add a location, household size, and details.",
+      "failed": "Couldn't submit that request. Please try again."
+    }
   },
   "misc": {
     "comingSoon": "You're signed in! This page is coming soon."
