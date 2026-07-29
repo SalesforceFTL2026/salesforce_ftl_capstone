@@ -767,6 +767,7 @@ const HelpSeekerDashboard = () => {
         open={chatOpen}
         onOpenChange={setChatOpen}
         hideLauncher
+        onRequestCreated={loadRequests}
       />
 
       {/* Make New Request / Edit Request modal. Clicking the dark backdrop

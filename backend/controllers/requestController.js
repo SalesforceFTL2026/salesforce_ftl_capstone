@@ -129,10 +129,13 @@ export const createRequest = async (req, res) => {
     // Location is shared across all the requests, so we only geocode once.
     const coords = await geocodeLocation(location);
 
-    // Create + prioritize one request per selected category. Prioritization is
-    // best-effort per request: if scoring one fails, that request is still
-    // created (score stays 0 until something re-prioritizes it) and the rest
-    // continue.
+    // Create one request per selected category. This is DB-only and fast, so we
+    // respond as soon as the rows exist. Prioritization (embedding + LLM calls)
+    // takes several seconds per request, so we deliberately DON'T await it here:
+    // a multi-category submission would otherwise blow past the client's 10s
+    // timeout and show a false "failed to submit" even though the rows were
+    // created. Scoring runs in the background below and the dashboard's polling
+    // picks up the updated priorityScore.
     const created = [];
     for (const item of items) {
       const newRequest = await requestModel.createRequest({
@@ -147,15 +150,7 @@ export const createRequest = async (req, res) => {
         description,
         householdSize: parsedHouseholdSize
       });
-
-      let scored = newRequest;
-      try {
-        const { priorityScore, reasoning } = await prioritizeRequest(newRequest.id);
-        scored = { ...newRequest, priorityScore, reasoning };
-      } catch (scoreError) {
-        console.error('Prioritization failed for new request:', scoreError.message);
-      }
-      created.push(scored);
+      created.push(newRequest);
     }
 
     // Legacy single-category callers still get a single object back in `data`;
@@ -169,6 +164,15 @@ export const createRequest = async (req, res) => {
       count: created.length,
       data: created.length === 1 ? created[0] : created
     });
+
+    // Prioritize each new request in the background (best-effort). The response
+    // has already been sent, so a slow or failing LLM never delays or breaks the
+    // submission. prioritizeRequest writes the score/reasoning to the row itself.
+    for (const r of created) {
+      prioritizeRequest(r.id).catch((scoreError) =>
+        console.error('Prioritization failed for new request:', scoreError.message)
+      );
+    }
   } catch (error) {
     console.error('Error creating request:', error);
     res.status(500).json({

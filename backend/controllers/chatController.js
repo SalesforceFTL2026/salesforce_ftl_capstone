@@ -1,4 +1,5 @@
 import { askLLM } from '../services/ai/chatbot.js';
+import { detectHelpRequest } from '../services/ai/extractor.js';
 import * as requestModel from '../models/requestModel.js';
 import prisma from '../services/database/prisma.js';
 import { hasRole } from '../utils/roles.js';
@@ -394,9 +395,36 @@ export const chat = async (req, res) => {
 
     const reply = await askLLM(message, { systemPrompt, history: safeHistory });
 
+    // For help-seekers, also check whether this message describes a NEW need. If
+    // it does, return a draft the chat renders as an editable card so they can
+    // submit it in one tap (via the same POST /api/requests the form uses).
+    // Best-effort: a detection failure must never break the chat reply itself.
+    let draft = null;
+    if (isHelpSeeker) {
+      try {
+        const convo = [...safeHistory, { role: 'user', content: message }]
+          .map((m) => `${m.role}: ${m.content}`)
+          .join('\n');
+        const detection = await detectHelpRequest(convo);
+        if (detection.isRequest) {
+          draft = {
+            category: detection.category,
+            urgency: detection.urgency,
+            // Fall back to their profile location if they never named one.
+            location: detection.location || req.user.location || '',
+            description: detection.description,
+            householdSize: detection.householdSize,
+          };
+        }
+      } catch (detectError) {
+        console.error('Request detection failed:', detectError.message);
+      }
+    }
+
     res.status(200).json({
       success: true,
       reply,
+      draft,
     });
   } catch (error) {
     console.error('Error in chat:', error);
