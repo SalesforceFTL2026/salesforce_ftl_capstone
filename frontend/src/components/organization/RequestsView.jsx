@@ -415,7 +415,7 @@ const PriorityLabel = ({ request, t }) => {
   if (!label && typeof priorityScore === 'number' && priorityScore > 0) {
     label = priorityScore >= 70 ? 'High' : priorityScore >= 40 ? 'Medium' : 'Low';
   }
-  if (!label) return <span className="text-gray-400 dark:text-gray-500 italic">{t('org.requests.priority.notSet')}</span>;
+  if (!label) return <span className="text-gray-500 dark:text-gray-500 italic">{t('org.requests.priority.notSet')}</span>;
 
   const tone = {
     Critical: 'text-red-700 dark:text-red-400',
