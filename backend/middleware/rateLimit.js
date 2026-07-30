@@ -22,6 +22,20 @@ const keyByUserOrIp = (req /*, res */) => req.user?.id || req.ip;
 
 const jsonLimitMessage = (message) => ({ success: false, message });
 
+// Escape hatch for automated tests / local E2E runs, where a whole suite of
+// signups + logins would otherwise trip the (deliberately tight) auth limiter.
+// OFF by default: production and normal dev keep full rate limiting. Enable it
+// only for test runs, e.g. `DISABLE_RATE_LIMIT=1 npm run dev`. Never set this in
+// production. When on, each limiter is replaced by a no-op passthrough.
+const RATE_LIMIT_DISABLED = process.env.DISABLE_RATE_LIMIT === '1';
+
+const passthrough = (req, res, next) => next();
+
+// Build a limiter unless rate limiting is disabled, in which case return a
+// no-op middleware so the app wiring stays identical.
+const makeLimiter = (options) =>
+  RATE_LIMIT_DISABLED ? passthrough : rateLimit(options);
+
 // Standard config shared by every limiter: return RateLimit-* headers, drop the
 // legacy X-RateLimit-* ones, and key per user/IP.
 const base = {
@@ -30,7 +44,7 @@ const base = {
   keyGenerator: keyByUserOrIp,
 };
 
-export const authLimiter = rateLimit({
+export const authLimiter = makeLimiter({
   ...base,
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 20, // 20 auth attempts per IP per window
@@ -39,7 +53,7 @@ export const authLimiter = rateLimit({
   ),
 });
 
-export const aiLimiter = rateLimit({
+export const aiLimiter = makeLimiter({
   ...base,
   windowMs: 60 * 1000, // 1 minute
   max: 15, // 15 AI turns per user/IP per minute
@@ -48,7 +62,7 @@ export const aiLimiter = rateLimit({
   ),
 });
 
-export const apiLimiter = rateLimit({
+export const apiLimiter = makeLimiter({
   ...base,
   windowMs: 60 * 1000, // 1 minute
   max: 120, // generous catch-all
