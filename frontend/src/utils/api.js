@@ -124,8 +124,8 @@ api.interceptors.response.use(
     const sentWithToken = Boolean(config.headers?.Authorization);
     const isAuthEndpoint = url.includes('/api/auth/');
     if (error.response?.status === 401 && sentWithToken && !isAuthEndpoint) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      sessionStorage.removeItem('token');
+      sessionStorage.removeItem('user');
       // Only redirect if we're not already on the landing page, to avoid a loop.
       if (typeof window !== 'undefined' && window.location.pathname !== '/') {
         window.location.assign('/');
