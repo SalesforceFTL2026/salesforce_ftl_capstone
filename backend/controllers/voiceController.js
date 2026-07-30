@@ -40,9 +40,9 @@ const ALLOWED_SLOTS = ['category', 'urgency', 'location', 'description', 'househ
  */
 export const voiceTurn = async (req, res) => {
   try {
-    // Voice intake creates help requests, so it's help-seekers only — matching
-    // the guard on requestController.transcribeVoiceRequest.
-    if (req.user.role !== 'help-seeker') {
+    // Voice intake is primarily for help-seekers. We also allow the seeded
+    // admin account so demo mode can exercise the full help-seeker flow.
+    if (!['help-seeker', 'admin'].includes(req.user.role)) {
       return res.status(403).json({
         success: false,
         message: 'Voice intake is only available to help-seekers.',

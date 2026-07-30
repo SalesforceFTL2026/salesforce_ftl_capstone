@@ -14,6 +14,16 @@ const api = axios.create({
   },
 });
 
+// Some POST endpoints are conversational/compute requests, not persistent writes.
+// In admin Preview mode they must still hit the backend, otherwise callers get
+// synthetic preview payloads that do not match the real API contract.
+const shouldBypassPreviewWrite = (config) => {
+  const method = String(config?.method || 'get').toLowerCase();
+  if (!isWriteMethod(method)) return false;
+  const url = String(config?.url || '');
+  return url.includes('/api/voice/') || url.includes('/api/chat/');
+};
+
 // Request interceptor: attach the login token (if we have one) to every
 // request so protected endpoints like GET /api/auth/me recognize the user.
 api.interceptors.request.use(
@@ -29,7 +39,7 @@ api.interceptors.request.use(
     // succeeded (and the change sticks for the session) while the database stays
     // untouched. Reads are never intercepted here; the overlay is layered onto
     // GET responses in the response interceptor below.
-    if (isPreviewMode() && isWriteMethod(config.method)) {
+    if (isPreviewMode() && isWriteMethod(config.method) && !shouldBypassPreviewWrite(config)) {
       config.adapter = async (cfg) => ({
         data: handlePreviewWrite(cfg),
         status: 200,
