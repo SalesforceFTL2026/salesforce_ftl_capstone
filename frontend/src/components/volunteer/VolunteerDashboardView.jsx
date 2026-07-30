@@ -97,8 +97,15 @@ const VolunteerDashboardView = ({ currentUser, stats, requests = [], onViewReque
         </h2>
         {/* The real interactive request map — geocoded requests drop urgency
             pins, and the Heatmap toggle renders the county-level choropleth so
-            volunteers see where demand actually clusters. */}
-        <RequestMap requests={requests} height="20rem" />
+            volunteers see where demand actually clusters.
+
+            RequestMap styles its own toggle/legend text for a light card (it's
+            shared with the Requests view). This panel's background is deep
+            forest green, so we seat the map in a light inset — otherwise those
+            dark controls would be dark-on-dark and fail contrast. */}
+        <div className="bg-white dark:bg-surface-3 rounded-2xl p-3">
+          <RequestMap requests={requests} height="20rem" />
+        </div>
 
         <div className="flex items-center justify-between mt-6 mb-2">
           <h3 className="font-display text-white tracking-wide text-lg">{t('volunteer.dashboard.tasks')}</h3>
