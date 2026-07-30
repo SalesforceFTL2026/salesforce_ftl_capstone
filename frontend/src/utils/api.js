@@ -8,11 +8,24 @@ import {
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
+  // Default timeout for ordinary CRUD calls. AI-backed endpoints (chat, voice,
+  // transcription) routinely take longer than this, so they opt into a longer
+  // timeout via AI_TIMEOUT_MS below instead of spuriously failing here.
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
   },
 });
+
+// AI/LLM + speech endpoints can legitimately take 20-30s (model latency, free-
+// tier fallbacks, Whisper transcription). Give them a generous timeout so a slow
+// but successful turn isn't reported to the user as an error.
+const AI_TIMEOUT_MS = 45000;
+const isAiEndpoint = (url = '') =>
+  url.includes('/api/voice/') ||
+  url.includes('/api/chat') ||
+  url.includes('/api/requests/voice') ||
+  url.includes('/api/prioritize');
 
 // Some POST endpoints are conversational/compute requests, not persistent writes.
 // In admin Preview mode they must still hit the backend, otherwise callers get
@@ -31,6 +44,15 @@ api.interceptors.request.use(
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    // Give AI/speech calls a longer timeout than ordinary CRUD (unless a caller
+    // already set one explicitly), so a slow-but-successful turn doesn't get
+    // cut off at the 10s default and surface as a false failure.
+    if (config.timeout === undefined || config.timeout === 10000) {
+      if (isAiEndpoint(String(config.url || ''))) {
+        config.timeout = AI_TIMEOUT_MS;
+      }
     }
 
     // Admin "Preview only" mode: don't let writes reach the server. We swap in a
@@ -89,6 +111,25 @@ api.interceptors.response.use(
         config,
         request: null,
       });
+    }
+
+    // Expired/invalid session handling. A 401 on a request we sent WITH a token
+    // means the stored token is no longer good, so clear the session and send
+    // the user to the landing page to sign in again — otherwise a stale token
+    // just yields repeated silent failures. We scope this to requests that
+    // actually carried a token and exclude the auth endpoints themselves, so a
+    // failed login/signup (also 401) surfaces its own error instead of wiping
+    // state and redirecting mid-form.
+    const url = String(config.url || '');
+    const sentWithToken = Boolean(config.headers?.Authorization);
+    const isAuthEndpoint = url.includes('/api/auth/');
+    if (error.response?.status === 401 && sentWithToken && !isAuthEndpoint) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      // Only redirect if we're not already on the landing page, to avoid a loop.
+      if (typeof window !== 'undefined' && window.location.pathname !== '/') {
+        window.location.assign('/');
+      }
     }
 
     console.error('API Error:', error);

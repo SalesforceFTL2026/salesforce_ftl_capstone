@@ -279,7 +279,7 @@ const SafetyManual = () => {
                 {c.label}
               </p>
               {c.placeholder ? (
-                <p className="text-lg font-bold text-gray-400 dark:text-gray-500 italic mt-1">
+                <p className="text-lg font-bold text-gray-500 dark:text-gray-500 italic mt-1">
                   {c.value}
                 </p>
               ) : (
@@ -325,7 +325,7 @@ const SafetyManual = () => {
                   </span>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className={`h-5 w-5 text-gray-400 shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                    className={`h-5 w-5 text-gray-500 shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`}
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -363,7 +363,7 @@ const SafetyManual = () => {
         </div>
       </section>
 
-      <p className="text-xs text-gray-400 dark:text-gray-500 mt-8 italic">
+      <p className="text-xs text-gray-500 dark:text-gray-500 mt-8 italic">
         {t('safety.disclaimer')}
       </p>
     </div>

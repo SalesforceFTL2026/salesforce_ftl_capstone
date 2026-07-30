@@ -187,7 +187,7 @@ const RoleSelectionModal = ({ role, embedded = false, onClose, onSubmit }) => {
               >
                 <span className="block text-sm font-bold text-gray-800 uppercase tracking-wide">
                   {t('auth.fields.skills')} <span className="text-red-500">*</span>
-                  <span className="ml-2 text-gray-400 text-xs font-normal normal-case tracking-normal">
+                  <span className="ml-2 text-gray-500 text-xs font-normal normal-case tracking-normal">
                     {skills.length > 0
                       ? t('auth.signUp.skillsSelected', { count: skills.length })
                       : t('auth.signUp.selectAllThatApply')}
@@ -274,7 +274,7 @@ const RoleSelectionModal = ({ role, embedded = false, onClose, onSubmit }) => {
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-3xl leading-none -mt-2"
+            className="text-gray-500 hover:text-gray-600 text-3xl leading-none -mt-2"
             aria-label={t('auth.close')}
           >
             ×

@@ -5,6 +5,7 @@ import VolunteerDashboard from './VolunteerDashboard';
 import OrganizationDashboard from './OrganizationDashboard';
 import { getCurrentUser, logout } from '../utils/auth';
 import { isPreviewMode, setPreviewMode } from '../utils/previewMode';
+import { AdminEmbedProvider } from '../context/AdminEmbedContext';
 
 // Admin dashboard — a demo tool, reachable by logging in as the seeded admin
 // account (admin / admin, see backend/prisma/seedAdmin.js).
@@ -151,11 +152,15 @@ const AdminDashboard = () => {
           mode so it fully remounts on a switch, resetting local state and
           re-fetching. min-h-0 lets this flex child shrink so its inner scroll
           area — not the whole page — is what overflows. */}
-      <div key={`${persona}-${preview}`} className="flex-1 min-h-0">
-        {persona === 'help-seeker' && <HelpSeekerDashboard />}
-        {persona === 'volunteer' && <VolunteerDashboard />}
-        {persona === 'organization' && <OrganizationDashboard />}
-      </div>
+      {/* Flag the embedded persona dashboards so their PortalTopBar hides its
+          own "Sign out" — the admin bar above already provides one (issue #242). */}
+      <AdminEmbedProvider value={true}>
+        <div key={`${persona}-${preview}`} className="flex-1 min-h-0">
+          {persona === 'help-seeker' && <HelpSeekerDashboard />}
+          {persona === 'volunteer' && <VolunteerDashboard />}
+          {persona === 'organization' && <OrganizationDashboard />}
+        </div>
+      </AdminEmbedProvider>
     </div>
   );
 };

@@ -1,6 +1,7 @@
 import express from 'express';
 import * as requestController from '../controllers/requestController.js';
 import { requireAuth } from '../middleware/auth.js';
+import { aiLimiter } from '../middleware/rateLimit.js';
 import { uploadAudio } from '../middleware/upload.js';
 
 const router = express.Router();
@@ -32,7 +33,9 @@ router.post('/', requireAuth, requestController.createRequest);
 // Voice intake: upload recorded audio, get back transcript + extracted draft
 // fields for review (does not create the request). (must be logged in)
 // POST /api/requests/voice
-router.post('/voice', requireAuth, handleAudioUpload, requestController.transcribeVoiceRequest);
+// aiLimiter: transcription spends paid Whisper + LLM quota, so throttle it like
+// the other AI routes.
+router.post('/voice', requireAuth, aiLimiter, handleAudioUpload, requestController.transcribeVoiceRequest);
 
 // Get all requests (must be logged in)
 // GET /api/requests

@@ -37,7 +37,6 @@ export const getMyResources = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch resources',
-      error: error.message,
     });
   }
 };
@@ -102,7 +101,6 @@ export const createResource = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to add resource',
-      error: error.message,
     });
   }
 };
@@ -150,7 +148,6 @@ export const updateResourceAvailability = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to update resource',
-      error: error.message,
     });
   }
 };
@@ -189,7 +186,6 @@ export const deleteResource = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to delete resource',
-      error: error.message,
     });
   }
 };
@@ -214,7 +210,6 @@ export const getRequestAllocations = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch allocations',
-      error: error.message,
     });
   }
 };
@@ -248,7 +243,6 @@ export const getAllocationSuggestions = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to generate suggestions',
-      error: error.message,
     });
   }
 };
@@ -338,7 +332,6 @@ export const allocateResource = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to allocate resource',
-      error: error.message,
     });
   }
 };
@@ -371,7 +364,6 @@ export const deallocateResource = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to remove allocation',
-      error: error.message,
     });
   }
 };
