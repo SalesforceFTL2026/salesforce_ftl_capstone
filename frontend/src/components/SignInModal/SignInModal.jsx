@@ -139,7 +139,7 @@ const SignInModal = ({ role, embedded = false, onClose, onSuccess }) => {
           <h2 className="text-3xl font-bold text-black">{t('auth.signIn.welcomeBack')}</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-3xl leading-none -mt-2"
+            className="text-gray-500 hover:text-gray-600 text-3xl leading-none -mt-2"
             aria-label={t('auth.close')}
           >
             ×

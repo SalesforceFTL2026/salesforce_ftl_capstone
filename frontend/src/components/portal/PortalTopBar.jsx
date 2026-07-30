@@ -6,6 +6,7 @@ import {
   markNotificationRead,
   markAllNotificationsRead,
 } from '../../utils/notifications';
+import { useIsAdminEmbed } from '../../context/AdminEmbedContext';
 
 // How often to re-check for new notifications while the portal is open.
 const POLL_INTERVAL_MS = 30000;
@@ -51,6 +52,11 @@ const PortalTopBar = ({
 }) => {
   const { t } = useTranslation();
   const name = currentUser?.name || 'Name';
+
+  // When embedded in the admin view switcher, the admin bar already shows a
+  // "Sign out", so suppress this one to avoid two sign-out buttons (issue #242).
+  const isAdminEmbed = useIsAdminEmbed();
+  const showSignOut = onSignOut && !isAdminEmbed;
 
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -197,7 +203,7 @@ const PortalTopBar = ({
                 .filter((group) => group.items.length > 0)
                 .map((group) => (
                   <div key={group.key} className="py-1">
-                    <p className="px-4 pt-2 pb-1 text-[11px] font-bold uppercase tracking-wide text-gray-400 dark:text-gray-500">
+                    <p className="px-4 pt-2 pb-1 text-[11px] font-bold uppercase tracking-wide text-gray-500 dark:text-gray-500">
                       {group.heading}
                     </p>
                     {group.items.map((item) => (
@@ -313,7 +319,7 @@ const PortalTopBar = ({
                           <p className="text-sm text-gray-600 dark:text-gray-300 break-words">
                             {n.message}
                           </p>
-                          <p className="mt-0.5 text-[11px] text-gray-400 dark:text-gray-500">
+                          <p className="mt-0.5 text-[11px] text-gray-500 dark:text-gray-500">
                             {formatRelativeTime(n.createdAt)}
                           </p>
                         </div>
@@ -338,17 +344,21 @@ const PortalTopBar = ({
               {name.charAt(0).toUpperCase()}
             </span>
           )}
-          <div className="hidden sm:flex flex-col leading-tight">
-            <span className="text-[#1C2A16] dark:text-white font-semibold">{name}</span>
-            {onSignOut && (
-              <button
-                onClick={onSignOut}
-                className="text-left text-xs text-[#3a4a30] dark:text-gray-400 hover:underline"
-              >
-                {t('portal.signOut')}
-              </button>
-            )}
-          </div>
+          {/* Name only shows on >= sm; on phones the avatar stands in for it. */}
+          <span className="hidden sm:block text-[#1C2A16] dark:text-white font-semibold leading-tight">
+            {name}
+          </span>
+          {/* Sign out must be reachable on every screen size, so it lives
+              OUTSIDE the name column (which is hidden on mobile). Without this,
+              phone users had no way to log out of the portal. */}
+          {showSignOut && (
+            <button
+              onClick={onSignOut}
+              className="text-xs text-[#3a4a30] dark:text-gray-300 hover:underline whitespace-nowrap"
+            >
+              {t('portal.signOut')}
+            </button>
+          )}
         </div>
       </div>
     </header>

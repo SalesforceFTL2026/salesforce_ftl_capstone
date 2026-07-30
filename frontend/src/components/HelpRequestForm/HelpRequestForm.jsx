@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import api from '../../src/utils/api';
+import api from '../../utils/api';
 import './HelpRequestForm.css';
 
 // Compact, theme-coherent help request form.
