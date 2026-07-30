@@ -41,7 +41,7 @@ const AvatarUploader = ({ currentUser, onUploaded }) => {
           className="w-20 h-20 rounded-full object-cover border-2 border-gray-200 dark:border-[#3a4f30] bg-gray-100"
         />
       ) : (
-        <div className="w-20 h-20 rounded-full border-2 border-gray-200 dark:border-[#3a4f30] bg-gray-100 dark:bg-[#1a2f1a] flex items-center justify-center text-2xl font-bold text-gray-400">
+        <div className="w-20 h-20 rounded-full border-2 border-gray-200 dark:border-[#3a4f30] bg-gray-100 dark:bg-[#1a2f1a] flex items-center justify-center text-2xl font-bold text-gray-500">
           {(currentUser?.name || '?').charAt(0).toUpperCase()}
         </div>
       )}

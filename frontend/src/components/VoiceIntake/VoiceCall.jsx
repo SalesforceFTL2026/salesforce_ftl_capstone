@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
+import { useVoiceRecognition } from '../../hooks/useVoiceRecognition';
 import { useSpeechSynthesis } from '../../hooks/useSpeechSynthesis';
 import { postVoiceTurn } from '../../utils/voice';
 import { requestErrorMessage } from '../../utils/requests';
@@ -86,33 +86,37 @@ const VoiceCall = ({ onComplete, onCancel }) => {
         });
         if (cancelledRef.current) return;
 
-        slotsRef.current = result.slots || {};
+        if (!result || typeof result !== 'object') {
+          throw new Error(t('voice.call.errors.turnFailed'));
+        }
+
+        slotsRef.current = result?.slots || {};
         setSlots(slotsRef.current);
 
-        const withReply = [...turnsRef.current, { role: 'assistant', content: result.say }];
+        const withReply = [...turnsRef.current, { role: 'assistant', content: result?.say || '' }];
         turnsRef.current = withReply;
         setTurns(withReply);
 
         // The agent gave up (too many turns) — send the partial draft onward so
         // the caller finishes on the review form.
-        if (result.handoff) {
+        if (result?.handoff) {
           setPhase(PHASE.DONE);
-          speak(result.say, () => finish());
+          speak(result?.say || t('voice.call.errors.turnFailed'), () => finish());
           return;
         }
 
         // Everything collected and confirmed aloud: stop here and let the caller
         // eyeball the fields. We do NOT auto-submit.
-        if (result.readyToSubmit) {
+        if (result?.readyToSubmit) {
           setPhase(PHASE.DONE);
-          speak(result.say, () => finish());
+          speak(result?.say || t('voice.call.errors.turnFailed'), () => finish());
           return;
         }
 
         // Life-safety turns still continue the conversation — the caller may be
         // calling 911 while we keep the request open — so fall through.
         setPhase(PHASE.ACTIVE);
-        speak(result.say, () => {
+        speak(result?.say || t('voice.call.errors.turnFailed'), () => {
           if (!cancelledRef.current) startListening();
         });
       } catch (err) {
@@ -130,7 +134,7 @@ const VoiceCall = ({ onComplete, onCancel }) => {
     [onComplete, speak, t]
   );
 
-  const { start, stop, listening, interim, supported } = useSpeechRecognition({
+  const { start, stop, listening, interim, supported } = useVoiceRecognition({
     onResult: handleTurn,
     onError: (code) => {
       // Hearing nothing for a while isn't a fault — stay on the call so the
@@ -286,7 +290,7 @@ const VoiceCall = ({ onComplete, onCancel }) => {
             </p>
           ))}
           {interim && (
-            <p className="text-sm text-gray-400 dark:text-gray-500 italic text-right">
+            <p className="text-sm text-gray-500 dark:text-gray-500 italic text-right">
               {interim}…
             </p>
           )}

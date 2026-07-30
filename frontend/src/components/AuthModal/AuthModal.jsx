@@ -83,7 +83,7 @@ const AuthModal = ({ role: initialRole = null, initialMode = 'signup', onClose, 
           <h2 className="text-2xl font-bold text-black dark:text-white">{title}</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-3xl leading-none -mt-2"
+            className="text-gray-500 hover:text-gray-600 text-3xl leading-none -mt-2"
             aria-label={t('auth.close')}
           >
             ×
@@ -113,7 +113,7 @@ const AuthModal = ({ role: initialRole = null, initialMode = 'signup', onClose, 
             )}
 
             {/* OR divider + Google sign-in (uses the role chosen above). */}
-            <div className="my-5 flex items-center gap-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
+            <div className="my-5 flex items-center gap-3 text-xs font-semibold uppercase tracking-wide text-gray-500">
               <span className="h-px flex-1 bg-gray-200 dark:bg-[#3a5230]" />
               {t('auth.orDivider')}
               <span className="h-px flex-1 bg-gray-200 dark:bg-[#3a5230]" />

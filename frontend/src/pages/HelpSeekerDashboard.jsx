@@ -6,7 +6,7 @@ import HSDashboardView from '../components/helpseeker/HSDashboardView';
 import HSRequestsView from '../components/helpseeker/HSRequestsView';
 import SafetyManual from '../components/SafetyManual/SafetyManual';
 import ChatAssistant from '../components/ChatAssistant/ChatAssistant';
-import HelpRequestForm from '../../components/HelpRequestForm/HelpRequestForm';
+import HelpRequestForm from '../components/HelpRequestForm/HelpRequestForm';
 // Request by Voice — temporarily disabled for demo (do not remove)
 // import VoiceIntakeFlow from '../components/VoiceIntake/VoiceIntakeFlow';
 import VoiceCallFlow from '../components/VoiceIntake/VoiceCallFlow';

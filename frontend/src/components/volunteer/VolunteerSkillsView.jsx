@@ -106,7 +106,7 @@ const VolunteerSkillsView = ({ skills, loading, error, onRetry, onSave, saving }
                       type="button"
                       onClick={() => removeSkill(skill.name)}
                       aria-label={t('volunteer.skills.removeSkill', { name: skill.name })}
-                      className="text-gray-400 hover:text-[#c84444] text-xl leading-none"
+                      className="text-gray-500 hover:text-[#c84444] text-xl leading-none"
                     >
                       ×
                     </button>

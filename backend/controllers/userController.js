@@ -1,8 +1,6 @@
-import { PrismaClient } from '@prisma/client';
 import { randomUUID } from 'crypto';
+import prisma from '../services/database/prisma.js';
 import { uploadToS3, getSignedViewUrl, deleteFromS3 } from '../services/s3.js';
-
-const prisma = new PrismaClient();
 
 // Map an upload's mimetype to a file extension for a clean S3 key.
 const EXT = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' };

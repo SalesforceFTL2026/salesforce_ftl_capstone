@@ -605,7 +605,7 @@ const URGENCY_STYLES = {
 };
 
 const UrgencyBadge = ({ urgency, t }) => {
-  if (!urgency) return <span className="text-gray-400 italic text-base">{t('volunteer.requests.notSet')}</span>;
+  if (!urgency) return <span className="text-gray-500 italic text-base">{t('volunteer.requests.notSet')}</span>;
   const tone = URGENCY_STYLES[urgency] || 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300';
   return (
     <span className={`inline-block w-fit text-sm font-semibold px-3 py-1.5 rounded-full ${tone}`}>
@@ -628,7 +628,7 @@ const PRIORITY_STYLES = (score) => {
 // requests show a muted dash. The Claude reasoning rides along as a tooltip.
 const PriorityBadge = ({ score, reasoning, t }) => {
   const hasScore = typeof score === 'number' && score > 0;
-  if (!hasScore) return <span className="text-gray-400 italic text-base">—</span>;
+  if (!hasScore) return <span className="text-gray-500 italic text-base">—</span>;
   return (
     <span
       className={`inline-block w-fit text-base font-bold px-3 py-1.5 rounded-full ${PRIORITY_STYLES(score)}`}

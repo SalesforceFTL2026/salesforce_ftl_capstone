@@ -1,6 +1,7 @@
 {
-  "dependencies": {
-    "topojson-client": "^3.1.0",
-    "us-atlas": "^3.0.1"
-  }
+  "name": "salesforce_ftl_capstone",
+  "version": "1.0.0",
+  "description": "MapResponse — AI-powered crisis coordination platform. See backend/ and frontend/ for the two apps.",
+  "private": true,
+  "license": "MIT"
 }

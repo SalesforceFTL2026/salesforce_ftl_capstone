@@ -431,7 +431,6 @@ export const chat = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'The assistant is unavailable right now. Please try again in a moment.',
-      error: error.message,
     });
   }
 };

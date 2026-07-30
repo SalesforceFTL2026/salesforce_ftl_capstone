@@ -44,6 +44,15 @@ const canManageRequest = (user, request) => {
   return user.role === 'help-seeker' && request.userId === user.id;
 };
 
+// Who may read the shared request feeds and any request's full detail (which
+// includes submitter name, exact location, and coordinates). Volunteers and
+// organizations need the whole feed to find people to help; the demo admin acts
+// as any role. Help-seekers must NOT be able to browse other people's requests —
+// they see only their own via GET /api/requests/my-requests. Gating this here
+// (rather than at the route) keeps the rule next to the data it protects.
+const canReadAllRequests = (user) =>
+  hasRole(user, 'volunteer') || hasRole(user, 'organization');
+
 // Create a new help request
 // Requires authentication: the submitter's identity comes from the logged-in
 // user (req.user), NOT from the request body, so clients can't spoof who they are.
@@ -177,8 +186,7 @@ export const createRequest = async (req, res) => {
     console.error('Error creating request:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to create request',
-      error: error.message
+      message: 'Failed to create request'
     });
   }
 };
@@ -195,6 +203,16 @@ export const createRequest = async (req, res) => {
 // name). Unknown/blank filter values are ignored. See docs/FILTER_CONTRACT.md.
 export const getAllRequests = async (req, res) => {
   try {
+    // Only volunteers/orgs (and the demo admin) may browse everyone's requests.
+    // A help-seeker hitting this would otherwise enumerate other people's names,
+    // exact locations, and coordinates — they get their own via /my-requests.
+    if (!canReadAllRequests(req.user)) {
+      return res.status(403).json({
+        success: false,
+        message: 'You are not allowed to view all requests.'
+      });
+    }
+
     let requests = await requestModel.getAllRequests();
 
     const radiusFilter = parseRadiusFilter(req.query);
@@ -212,8 +230,7 @@ export const getAllRequests = async (req, res) => {
     console.error('Error fetching requests:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch requests',
-      error: error.message
+      message: 'Failed to fetch requests'
     });
   }
 };
@@ -231,8 +248,7 @@ export const getMyRequests = async (req, res) => {
     console.error('Error fetching user requests:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch your requests',
-      error: error.message
+      message: 'Failed to fetch your requests'
     });
   }
 };
@@ -251,6 +267,17 @@ export const getRequestById = async (req, res) => {
       });
     }
 
+    // Detail includes PII (submitter name, exact location, coordinates). A
+    // help-seeker may only read their OWN request; volunteers/orgs/admin may
+    // read any. This mirrors the feed gate in getAllRequests.
+    const isOwner = request.userId && request.userId === req.user.id;
+    if (!canReadAllRequests(req.user) && !isOwner) {
+      return res.status(403).json({
+        success: false,
+        message: 'You are not allowed to view this request.'
+      });
+    }
+
     res.status(200).json({
       success: true,
       data: request
@@ -259,8 +286,7 @@ export const getRequestById = async (req, res) => {
     console.error('Error fetching request:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch request',
-      error: error.message
+      message: 'Failed to fetch request'
     });
   }
 };
@@ -280,6 +306,16 @@ export const getRequestById = async (req, res) => {
 // See docs/FILTER_CONTRACT.md for the full param contract (issue #83).
 export const getPrioritizedRequests = async (req, res) => {
   try {
+    // The prioritized feed is the volunteer/org triage view over everyone's
+    // requests, so it carries the same PII as the full feed — gate it the same
+    // way. Help-seekers track their own via /my-requests.
+    if (!canReadAllRequests(req.user)) {
+      return res.status(403).json({
+        success: false,
+        message: 'You are not allowed to view the prioritized feed.'
+      });
+    }
+
     let requests = await requestModel.getPrioritizedRequests();
 
     const radiusFilter = parseRadiusFilter(req.query);
@@ -297,8 +333,7 @@ export const getPrioritizedRequests = async (req, res) => {
     console.error('Error fetching prioritized requests:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch prioritized requests',
-      error: error.message
+      message: 'Failed to fetch prioritized requests'
     });
   }
 };
@@ -350,8 +385,7 @@ export const getRequestDistances = async (req, res) => {
     console.error('Error computing request distances:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to compute distances',
-      error: error.message
+      message: 'Failed to compute distances'
     });
   }
 };
@@ -444,8 +478,7 @@ export const updateRequestStatus = async (req, res) => {
     console.error('Error updating request status:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to update request status',
-      error: error.message
+      message: 'Failed to update request status'
     });
   }
 };
@@ -482,8 +515,7 @@ export const deleteRequest = async (req, res) => {
     console.error('Error deleting request:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to delete request',
-      error: error.message
+      message: 'Failed to delete request'
     });
   }
 };
@@ -596,8 +628,7 @@ export const updateRequestDetails = async (req, res) => {
     console.error('Error updating request details:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to update request',
-      error: error.message
+      message: 'Failed to update request'
     });
   }
 };
@@ -645,15 +676,33 @@ export const interactWithRequest = async (req, res) => {
       });
     }
 
-    const response = await prisma.response.create({
-      data: {
-        requestId: id,
-        responderId: req.user.id,
-        responderType: 'volunteer',
-        status: 'offered',
-        notes: notes || null
+    let response;
+    try {
+      response = await prisma.response.create({
+        data: {
+          requestId: id,
+          responderId: req.user.id,
+          responderType: 'volunteer',
+          status: 'offered',
+          notes: notes || null
+        }
+      });
+    } catch (createError) {
+      // A concurrent duplicate click can slip past the findFirst above and hit
+      // the DB unique constraint (P2002). Treat that as "already interested"
+      // rather than a 500 — the desired end state is reached either way.
+      if (createError.code === 'P2002') {
+        const raced = await prisma.response.findFirst({
+          where: { requestId: id, responderId: req.user.id, responderType: 'volunteer' }
+        });
+        return res.status(200).json({
+          success: true,
+          message: 'You have already expressed interest in this request.',
+          data: raced
+        });
       }
-    });
+      throw createError;
+    }
 
     // A volunteer stepping up moves the request from pending to assigned so the
     // help-seeker sees someone is on it. Only upgrade from pending — don't
@@ -690,8 +739,7 @@ export const interactWithRequest = async (req, res) => {
     console.error('Error recording interest in request:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to record interest',
-      error: error.message
+      message: 'Failed to record interest'
     });
   }
 };
@@ -754,8 +802,7 @@ export const completeRequest = async (req, res) => {
     console.error('Error completing request:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to mark as helped',
-      error: error.message
+      message: 'Failed to mark as helped'
     });
   }
 };
@@ -811,8 +858,7 @@ export const withdrawInterest = async (req, res) => {
     console.error('Error withdrawing interest in request:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to withdraw interest',
-      error: error.message
+      message: 'Failed to withdraw interest'
     });
   }
 };
@@ -884,8 +930,7 @@ export const transcribeVoiceRequest = async (req, res) => {
     console.error('Error handling voice intake:', error);
     return res.status(500).json({
       success: false,
-      message: 'Failed to process voice intake',
-      error: error.message
+      message: 'Failed to process voice intake'
     });
   }
 };
@@ -935,14 +980,31 @@ export const assignToRequest = async (req, res) => {
       });
     }
 
-    const response = await prisma.response.create({
-      data: {
-        requestId: id,
-        responderId: req.user.id,
-        responderType: 'organization',
-        status: 'accepted'
+    let response;
+    try {
+      response = await prisma.response.create({
+        data: {
+          requestId: id,
+          responderId: req.user.id,
+          responderType: 'organization',
+          status: 'accepted'
+        }
+      });
+    } catch (createError) {
+      // Concurrent double-assign can race past the findFirst above and hit the
+      // DB unique constraint (P2002). Treat as already-assigned, not a 500.
+      if (createError.code === 'P2002') {
+        const raced = await prisma.response.findFirst({
+          where: { requestId: id, responderId: req.user.id, responderType: 'organization' }
+        });
+        return res.status(200).json({
+          success: true,
+          message: 'This request is already assigned to your organization.',
+          data: raced
+        });
       }
-    });
+      throw createError;
+    }
 
     res.status(201).json({
       success: true,
@@ -953,8 +1015,7 @@ export const assignToRequest = async (req, res) => {
     console.error('Error assigning request to organization:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to assign request',
-      error: error.message
+      message: 'Failed to assign request'
     });
   }
 };
@@ -990,8 +1051,7 @@ export const unassignFromRequest = async (req, res) => {
     console.error('Error unassigning request:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to unassign request',
-      error: error.message
+      message: 'Failed to unassign request'
     });
   }
 };

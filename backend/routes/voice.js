@@ -10,12 +10,18 @@ const router = express.Router();
  *
  * All routes require authentication.
  *
- * Note: no upload middleware here, unlike POST /api/requests/voice. Speech
- * recognition happens in the browser, so these routes exchange text only.
+ * Note: no upload middleware here, unlike POST /api/requests/voice. Even with
+ * Deepgram streaming, audio goes browser -> Deepgram directly; these routes
+ * exchange only text (a turn) and a short-lived streaming token.
  */
 
 // Run one turn of the spoken intake conversation.
 // POST /api/voice/turn
 router.post('/turn', requireAuth, voiceController.voiceTurn);
+
+// Mint a short-lived Deepgram token for browser-side streaming STT. Returns 501
+// when Deepgram isn't configured, so the client falls back to Web Speech.
+// POST /api/voice/token
+router.post('/token', requireAuth, voiceController.voiceToken);
 
 export default router;
