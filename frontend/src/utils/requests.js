@@ -25,6 +25,7 @@ const buildFeedParams = (near, filters) => {
 
   if (filters?.category) params.category = filters.category;
   if (filters?.urgency) params.urgency = filters.urgency;
+  if (filters?.coverage) params.coverage = filters.coverage; // issue #92
   if (filters?.search && filters.search.trim() !== '') {
     params.search = filters.search.trim();
   }

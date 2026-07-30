@@ -1,4 +1,5 @@
 import prisma from '../services/database/prisma.js';
+import { coverageAdjustedScore } from '../services/ai/scoring.js';
 
 /**
  * Request Model
@@ -72,8 +73,11 @@ export const getPrioritizedRequests = async () => {
     },
   });
 
-  // Add interaction counts to each request
-  return requests.map((request) => {
+  // Add interaction counts to each request, plus a coverage flag and the
+  // coverage-adjusted score used to re-rank the feed (issue #92). The stored
+  // priorityScore is left untouched; the lift is applied here from the live
+  // response counts so uncovered needs surface without re-running the scorer.
+  const withCounts = requests.map((request) => {
     const volunteerInterestCount = request.responses.filter(
       (r) => r.responderType === 'volunteer'
     ).length;
@@ -85,12 +89,27 @@ export const getPrioritizedRequests = async () => {
     // Remove the responses array and replace with counts
     const { responses, ...requestWithoutResponses } = request;
 
+    // "Uncovered" = no one has picked it up yet: no interested volunteers and
+    // no responding orgs. This is the signal the feed and dashboard surface.
+    const uncovered = volunteerInterestCount === 0 && organizationRespondingCount === 0;
+
     return {
       ...requestWithoutResponses,
       volunteerInterestCount,
       organizationRespondingCount,
+      uncovered,
+      // Score the feed sorts by: stored AI score + a lift for low coverage.
+      coverageAdjustedScore: coverageAdjustedScore(request.priorityScore, {
+        volunteerInterestCount,
+        organizationRespondingCount,
+      }),
     };
   });
+
+  // Prisma already sorted by the raw priorityScore; re-sort by the
+  // coverage-adjusted score so uncovered needs rise above equally-urgent but
+  // already-covered ones. Ties keep the raw-score order (stable sort).
+  return withCounts.sort((a, b) => b.coverageAdjustedScore - a.coverageAdjustedScore);
 };
 
 // Update request priority score and reasoning

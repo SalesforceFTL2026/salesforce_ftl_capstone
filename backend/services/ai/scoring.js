@@ -153,6 +153,47 @@ export function calculatePriorityScore(request, similarRequests = [], lifeSafety
   return Math.min(Math.round(total), 100);
 }
 
+// Coverage lift (issue #92): unmet needs — requests no one has picked up yet —
+// should surface above equally-urgent needs that already have volunteers or
+// orgs working them. This is a *sorting* adjustment applied to the live feed,
+// NOT part of the stored priorityScore. Coverage changes every time someone
+// responds, and re-running the (LLM-backed) scoring pipeline on each response
+// would be wasteful and would make the stored score non-reproducible. So the
+// deterministic priorityScore stays pure, and this boost is layered on at
+// feed-assembly time from the current response counts.
+const COVERAGE_LIFT_MAX = 15;
+
+// Decay scale for the lift: same diminishing-returns shape as the cluster
+// component. 0 responders -> full lift, 1 -> 61%, 2 -> 37%, 4 -> 14% — so a
+// need slides from "uncovered" to "covered" gradually rather than in one step.
+const COVERAGE_DECAY_SCALE = 2;
+
+/**
+ * Ranking boost for a request based on how little coverage it has. Pure math,
+ * so it's deterministic and independently testable.
+ *
+ * @param {{volunteerInterestCount?: number, organizationRespondingCount?: number}} counts
+ * @returns {number} boost in priority points (0 to COVERAGE_LIFT_MAX)
+ */
+export function coverageBoost({ volunteerInterestCount = 0, organizationRespondingCount = 0 } = {}) {
+  const responders = Math.max(0, volunteerInterestCount) + Math.max(0, organizationRespondingCount);
+  return COVERAGE_LIFT_MAX * Math.exp(-responders / COVERAGE_DECAY_SCALE);
+}
+
+/**
+ * The stored AI priority score plus the coverage lift, capped at 100. This is
+ * the value the feed sorts by so uncovered needs float up; the stored
+ * priorityScore itself is left untouched.
+ *
+ * @param {number} priorityScore - stored AI score (0-100)
+ * @param {{volunteerInterestCount?: number, organizationRespondingCount?: number}} counts
+ * @returns {number}
+ */
+export function coverageAdjustedScore(priorityScore, counts) {
+  const base = typeof priorityScore === 'number' ? priorityScore : 0;
+  return Math.min(100, base + coverageBoost(counts));
+}
+
 /**
  * Get breakdown of score components (rounded points) for the explanation and
  * for debugging.

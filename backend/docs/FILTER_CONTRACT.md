@@ -11,7 +11,7 @@ return the standard envelope `{ success, data: [ ...requests ] }`.
 
 | Endpoint | What it returns | Sorted by |
 | --- | --- | --- |
-| `GET /api/requests/prioritized` | Active requests (`pending`, `in-progress`), each annotated with `volunteerInterestCount` and `organizationRespondingCount` | AI `priorityScore`, high → low |
+| `GET /api/requests/prioritized` | Active requests (`pending`, `in-progress`), each annotated with `volunteerInterestCount`, `organizationRespondingCount`, and an `uncovered` flag | Coverage-adjusted priority (AI `priorityScore` + a lift for low coverage, issue #92), high → low |
 | `GET /api/requests` | Every request, any status | `createdAt`, newest first |
 
 All query params below apply to **both** endpoints.
@@ -23,7 +23,15 @@ All query params below apply to **both** endpoints.
 | `search` | string | `?search=water` | Keyword. Case-insensitive substring match against the request's **description, location, category, and submitter name**. |
 | `category` | enum | `?category=Food` | Exact category. One of `Food`, `Shelter`, `Medical`, `Transport`, `Other`. Case-insensitive on input; matched to the canonical spelling. |
 | `urgency` | enum | `?urgency=Critical` | Exact urgency. One of `Low`, `Medium`, `High`, `Critical`. Case-insensitive on input. |
+| `coverage` | enum | `?coverage=uncovered` | Coverage state (issue #92). One of `uncovered` (no volunteers interested and no orgs responding) or `covered` (at least one responder). Case-insensitive. **Prioritized feed only** — see note below. |
 | `lat`, `lng`, `radius` | number | `?lat=30.26&lng=-97.74&radius=10` | Geo-radius filter (issues #115/#116). Keeps requests within `radius` **miles** of the point and annotates each with `distanceMiles`. All three are required together. |
+
+> **`coverage` caveat:** the filter reads `volunteerInterestCount` /
+> `organizationRespondingCount`, which only the `/api/requests/prioritized` feed
+> annotates. On `/api/requests` (which returns raw requests without counts)
+> every request looks uncovered, so `coverage=covered` there returns nothing and
+> `coverage=uncovered` returns everything. Only use `coverage` against the
+> prioritized feed.
 
 ### Composition
 
@@ -57,7 +65,7 @@ So `GET /api/requests/prioritized` (no params) and
 
 ```js
 // near:    { lat, lng, radiusMiles } | undefined     ("Near me")
-// filters: { search, category, urgency }              (empty strings = no filter)
+// filters: { search, category, urgency, coverage }    (empty strings = no filter)
 getPrioritizedRequests(near, filters);
 getAllRequests(near, filters); // same filter object shape
 ```

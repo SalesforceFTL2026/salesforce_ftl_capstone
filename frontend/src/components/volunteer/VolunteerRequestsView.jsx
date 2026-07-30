@@ -55,6 +55,23 @@ const VolunteerRequestsView = ({
     );
   }, [requests, sortByUrgency]);
 
+  // How many of the current feed's requests still have no coverage (issue #92).
+  // Prefer the backend flag, falling back to the counts. Drives the summary
+  // banner and its one-click "show only these" shortcut.
+  const uncoveredCount = useMemo(
+    () =>
+      requests.filter((r) =>
+        typeof r.uncovered === 'boolean'
+          ? r.uncovered
+          : (r.volunteerInterestCount || 0) === 0 &&
+            (r.organizationRespondingCount || 0) === 0
+      ).length,
+    [requests]
+  );
+
+  // Whether the coverage filter is already pinned to "uncovered".
+  const showingUncoveredOnly = filters?.coverage === 'uncovered';
+
   const allChecked = rows.length > 0 && selectedIds.size === rows.length;
 
   const toggleAll = () =>
@@ -92,6 +109,32 @@ const VolunteerRequestsView = ({
           onChange={onFiltersChange}
           resultCount={loading ? undefined : requests.length}
         />
+      )}
+
+      {/* Uncovered-needs summary (issue #92): how many requests still have no
+          volunteer or org on them, with a one-click shortcut to focus on them.
+          Hidden while loading and when nothing is uncovered. */}
+      {!loading && !error && onFiltersChange && uncoveredCount > 0 && (
+        <div className="flex flex-wrap items-center justify-between gap-3 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-2xl px-4 sm:px-6 py-3">
+          <p className="font-semibold text-amber-900 dark:text-amber-200" role="status">
+            {t('volunteer.requests.uncoveredSummary', { count: uncoveredCount })}
+          </p>
+          <button
+            type="button"
+            onClick={() =>
+              onFiltersChange({
+                ...filters,
+                coverage: showingUncoveredOnly ? '' : 'uncovered',
+              })
+            }
+            aria-pressed={showingUncoveredOnly}
+            className="px-3 py-2 rounded-xl text-sm font-semibold text-amber-900 dark:text-amber-100 bg-amber-100 dark:bg-amber-800/50 hover:bg-amber-200 dark:hover:bg-amber-800 focus:outline-none focus:ring-2 focus:ring-amber-500/40 transition-colors"
+          >
+            {t(showingUncoveredOnly
+              ? 'volunteer.requests.showAllCoverage'
+              : 'volunteer.requests.showUncoveredOnly')}
+          </button>
+        </div>
       )}
 
       {/* View switcher + "Near me" geo-radius filter (issue #116). */}

@@ -501,6 +501,10 @@
         "map": "Map"
       },
       "noOpenRequests": "No open requests right now. Check back soon.",
+      "uncoveredSummary_one": "{{count}} request still has no one helping",
+      "uncoveredSummary_other": "{{count}} requests still have no one helping",
+      "showUncoveredOnly": "Show only these",
+      "showAllCoverage": "Show all requests",
       "whereHelpNeeded": "Where help is needed",
       "selectedCount": "{{count}} request selected",
       "helpWithSelected": "I can help with selected",
@@ -596,6 +600,7 @@
       "volunteersInterested_other": "{{count}} volunteers interested",
       "orgsResponding_one": "{{count}} org responding",
       "orgsResponding_other": "{{count}} orgs responding",
+      "noCoverage": "No coverage yet",
       "status": "Status",
       "saving": "Saving…",
       "statusLabel": "Status:",
@@ -622,6 +627,12 @@
       "allCategories": "All categories",
       "urgencyAriaLabel": "Filter by urgency",
       "allUrgencies": "All urgencies",
+      "coverageAriaLabel": "Filter by coverage",
+      "allCoverage": "All coverage",
+      "coverage": {
+        "uncovered": "No coverage yet",
+        "covered": "Being helped"
+      },
       "matching": "{{count}} matching",
       "clear": "Clear"
     },
