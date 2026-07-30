@@ -230,6 +230,7 @@ const VolunteerRequestsView = ({
           </h2>
           <RequestMap
             requests={rows}
+            height="min(55vh, 26rem)"
             onInteract={onInteract}
             interactingId={interactingId}
             confirmations={confirmations}
