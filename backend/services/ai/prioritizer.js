@@ -1,11 +1,9 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '../database/prisma.js';
 import { generateEmbedding } from './embeddings.js';
 import { findSimilarRequests } from './vectorSearch.js';
 import { calculatePriorityScore, getScoreBreakdown } from './scoring.js';
 import { classifyLifeSafety } from './lifeSafetyClassifier.js';
 import { generatePriorityExplanation } from './explainer.js';
-
-const prisma = new PrismaClient();
 
 /**
  * Complete AI prioritization pipeline for a help request

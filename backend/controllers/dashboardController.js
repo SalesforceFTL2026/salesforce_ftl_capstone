@@ -54,7 +54,6 @@ export async function getVolunteerDashboard(req, res) {
     return res.status(500).json({
       success: false,
       message: 'Failed to fetch volunteer dashboard',
-      error: error.message,
     });
   }
 }
@@ -93,7 +92,6 @@ export async function getVolunteerProfile(req, res) {
     return res.status(500).json({
       success: false,
       message: 'Failed to fetch volunteer profile',
-      error: error.message,
     });
   }
 }
@@ -161,7 +159,6 @@ export async function updateVolunteerSkills(req, res) {
     return res.status(500).json({
       success: false,
       message: 'Failed to update skills',
-      error: error.message,
     });
   }
 }
@@ -240,7 +237,6 @@ export async function getOrganizationDashboard(req, res) {
     return res.status(500).json({
       success: false,
       message: 'Failed to fetch organization dashboard',
-      error: error.message,
     });
   }
 }
@@ -288,7 +284,6 @@ export async function getHelpSeekerDashboard(req, res) {
     return res.status(500).json({
       success: false,
       message: 'Failed to fetch help-seeker dashboard',
-      error: error.message,
     });
   }
 }

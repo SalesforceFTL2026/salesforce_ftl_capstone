@@ -44,7 +44,6 @@ router.post('/batch', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to prioritize requests',
-      error: error.message,
     });
   }
 });
@@ -68,7 +67,6 @@ router.post('/all', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to reprioritize all requests',
-      error: error.message,
     });
   }
 });
@@ -93,7 +91,6 @@ router.post('/:requestId', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to prioritize request',
-      error: error.message,
     });
   }
 });

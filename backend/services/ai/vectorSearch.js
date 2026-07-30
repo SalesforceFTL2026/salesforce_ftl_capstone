@@ -1,7 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '../database/prisma.js';
 import { cosineSimilarity } from './embeddings.js';
-
-const prisma = new PrismaClient();
 
 /**
  * Find similar requests based on embedding similarity
