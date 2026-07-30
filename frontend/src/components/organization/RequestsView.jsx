@@ -1,6 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import HeatMap from './HeatMap';
 import RequestMap from '../map/RequestMap';
 import NearMeToggle from '../map/NearMeToggle';
 import RequestFilterBar from '../RequestFilterBar/RequestFilterBar';
@@ -71,11 +70,9 @@ const RequestsView = ({
   const { t } = useTranslation();
   // Which request's details show in the bottom-right panel.
   const [selected, setSelected] = useState(null);
-  // Top-right panel view: the density heat map, or the interactive pin map.
-  const [geoView, setGeoView] = useState('heat');
 
-  // Every request the org can see (its own + the open feed), for the heat map
-  // and pin map. De-duplicated so a request the org is responding to that also
+  // Every request the org can see (its own + the open feed), for the map.
+  // De-duplicated so a request the org is responding to that also
   // appears in the open feed is only plotted once.
   const allRequests = useMemo(() => {
     const byId = new Map();
@@ -115,13 +112,13 @@ const RequestsView = ({
     }
   };
 
-  // When the org picks "nearest", fetch distances from its location (once we
-  // have one). We key off orgLocation so switching orgs re-fetches.
+  // Fetch distances from the org's location whenever it has one, so every row
+  // can show its distance regardless of the active sort. We key off orgLocation
+  // so switching orgs (or editing the location) re-fetches. When there's no
+  // location and the org is sorting by "nearest", we surface the hint to add one.
   useEffect(() => {
-    if (sortBy !== 'nearest') return;
-
     if (!orgLocation) {
-      setDistanceError(t('org.requests.addLocationToSort'));
+      if (sortBy === 'nearest') setDistanceError(t('org.requests.addLocationToSort'));
       return;
     }
 
@@ -148,9 +145,11 @@ const RequestsView = ({
   );
 
   return (
-    <div className="grid lg:grid-cols-2 gap-6">
-      {/* Left: keyword filters + sort control + two request tables */}
-      <div className="flex flex-col gap-6">
+    <div className="grid lg:grid-cols-2 gap-6 lg:items-stretch">
+      {/* Left: keyword filters + sort control + two request tables. min-h-0 lets
+          the tables below scroll (rather than overflow) so this column's bottom
+          lines up with the request-detail rectangle in the right column. */}
+      <div className="flex flex-col gap-6 min-h-0">
         {/* Keyword search + category/urgency filters (issues #81, #82, #85).
             Filtering runs on the backend, so changing these re-fetches the feed
             via the dashboard's onFiltersChange handler — narrowing the tables
@@ -238,7 +237,6 @@ const RequestsView = ({
           selectedId={selected?.id}
           onSelect={setSelected}
           emptyText={t('org.requests.yourRequestsEmpty')}
-          sortBy={sortBy}
           distances={distances}
           t={t}
         />
@@ -251,7 +249,6 @@ const RequestsView = ({
           selectedId={selected?.id}
           onSelect={setSelected}
           emptyText={t('org.requests.unfilteredRequestsEmpty')}
-          sortBy={sortBy}
           distances={distances}
           t={t}
         />
@@ -273,35 +270,14 @@ const RequestsView = ({
           )}
           <div className="flex items-center justify-between mb-3 gap-3">
             <h2 className="text-xl font-bold text-[#1C2A16] dark:text-white">
-              {geoView === 'heat' ? t('org.requests.heatMapTitle') : t('org.requests.mapTitle')}
+              {t('org.requests.mapTitle')}
             </h2>
-            {/* Toggle between the density heat map and the interactive pin map. */}
-            <div className="flex rounded-xl bg-black/5 dark:bg-white/10 p-1">
-              {[
-                { id: 'heat', label: t('org.requests.heatToggle') },
-                { id: 'map', label: t('org.requests.mapToggle') },
-              ].map((opt) => (
-                <button
-                  key={opt.id}
-                  type="button"
-                  onClick={() => setGeoView(opt.id)}
-                  aria-pressed={geoView === opt.id}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/40 ${
-                    geoView === opt.id
-                      ? 'bg-[#6ba3d3] text-white'
-                      : 'text-[#1C2A16] dark:text-gray-200 hover:bg-black/5 dark:hover:bg-white/10'
-                  }`}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
           </div>
-          {geoView === 'heat' ? (
-            <HeatMap requests={allRequests} caption={t('org.requests.heatMapCaption')} />
-          ) : (
-            <RequestMap requests={allRequests} />
-          )}
+          {/* One real map. RequestMap has its own Pins / Heatmap toggle (the
+              county choropleth), so the old block "heat map" and its duplicate
+              toggle are gone. Height is capped so the map doesn't dominate the
+              screen. */}
+          <RequestMap requests={allRequests} height="min(55vh, 26rem)" />
         </div>
 
         <RequestDetail
@@ -320,83 +296,95 @@ const RequestsView = ({
   );
 };
 
-// Column label + per-row value for the right-hand column, which follows the
-// active sort: priority label, request date, or distance from the org.
-const secondColumnHeader = (sortBy, t) =>
-  sortBy === 'newest' ? t('org.requests.columnDate') : sortBy === 'nearest' ? t('org.requests.columnDistance') : t('org.requests.columnPriority');
+// Every row shows the same three metrics — priority, date, and distance from
+// the org — so the data doesn't shift around when the sort changes. The active
+// sort only reorders the rows; it no longer decides which value is displayed.
+// Three fixed-width metric columns keep the header and rows aligned.
+const METRICS_GRID = 'grid grid-cols-[1fr_5rem_5rem_6rem] gap-3';
 
 // --- Request table ---
+// The header stays fixed while the rows scroll. `max-h-[24.5rem]` caps the
+// scroll body at ~8 rows (each row is px-5 py-3 ≈ 3rem tall) so long lists don't
+// stretch the page. On large screens the table also flex-grows (flex-1 +
+// min-h-0) so the two stacked tables fill the left column and its bottom lines
+// up with the request-detail rectangle on the right.
 const RequestTable = ({
   title, requests, loading, error, onRetry, selectedId, onSelect, emptyText,
-  sortBy = 'priority', distances = {}, t,
+  distances = {}, t,
 }) => (
-  <div>
-    <div className="inline-block bg-[#9db29a] dark:bg-[#1f3320] text-[#1C2A16] dark:text-white font-bold rounded-t-2xl px-6 py-2 mb-[-8px] relative z-10">
+  <div className="flex flex-col min-h-0 lg:flex-1">
+    <div className="inline-block bg-[#9db29a] dark:bg-[#1f3320] text-[#1C2A16] dark:text-white font-bold rounded-t-2xl px-6 py-2 mb-[-8px] relative z-10 shrink-0">
       {title}
     </div>
-    <div className="bg-[#eef4fb] dark:bg-[#16233a] rounded-2xl rounded-tl-none shadow-md overflow-hidden transition-colors duration-300">
-      {/* Header row */}
-      <div className="grid grid-cols-[1fr_auto] gap-4 bg-[#c5d9ef] dark:bg-[#22304a] px-5 py-3 font-bold text-[#1C2A16] dark:text-white">
+    <div className="flex flex-col min-h-0 flex-1 bg-[#eef4fb] dark:bg-[#16233a] rounded-2xl rounded-tl-none shadow-md overflow-hidden transition-colors duration-300">
+      {/* Header row — fixed above the scrolling body. */}
+      <div className={`${METRICS_GRID} bg-[#c5d9ef] dark:bg-[#22304a] px-5 py-3 font-bold text-[#1C2A16] dark:text-white shrink-0`}>
         <span>{t('org.requests.columnName')}</span>
-        <span>{secondColumnHeader(sortBy, t)}</span>
+        <span className="text-right">{t('org.requests.columnPriority')}</span>
+        <span className="text-right">{t('org.requests.columnDate')}</span>
+        <span className="text-right">{t('org.requests.columnDistance')}</span>
       </div>
 
-      {loading && (
-        <p className="px-5 py-4 text-gray-500 dark:text-gray-400 text-sm" role="status">{t('org.requests.loading')}</p>
-      )}
-      {!loading && error && (
-        <div className="px-5 py-4">
-          <p className="text-red-700 dark:text-red-300 text-sm">{error}</p>
-          <button onClick={onRetry} className="text-sm font-semibold underline mt-1">{t('org.requests.tryAgain')}</button>
-        </div>
-      )}
-      {!loading && !error && requests.length === 0 && (
-        <p className="px-5 py-4 text-gray-500 dark:text-gray-400 text-sm">{emptyText}</p>
-      )}
-      {!loading && !error && requests.map((r) => {
-        const isSelected = r.id === selectedId;
-        return (
-          <button
-            key={r.id}
-            type="button"
-            onClick={() => onSelect(r)}
-            className={`w-full grid grid-cols-[1fr_auto] gap-4 px-5 py-3 text-left border-t border-white/60 dark:border-white/10 transition-colors ${
-              isSelected ? 'bg-[#bcd4f1] dark:bg-[#2b3b55]' : 'hover:bg-white/60 dark:hover:bg-white/5'
-            }`}
-          >
-            <span className="text-[#1C2A16] dark:text-gray-100 font-medium truncate">
-              {r.submitterName || r.requesterName || r.name || t('org.requests.helpSeeker')}
-            </span>
-            <SecondColumn request={r} sortBy={sortBy} distances={distances} t={t} />
-          </button>
-        );
-      })}
+      {/* Scrolling body — shows ~8 rows at a time, then scrolls. */}
+      <div className="flex-1 min-h-0 overflow-y-auto max-h-[24.5rem]">
+        {loading && (
+          <p className="px-5 py-4 text-gray-500 dark:text-gray-400 text-sm" role="status">{t('org.requests.loading')}</p>
+        )}
+        {!loading && error && (
+          <div className="px-5 py-4">
+            <p className="text-red-700 dark:text-red-300 text-sm">{error}</p>
+            <button onClick={onRetry} className="text-sm font-semibold underline mt-1">{t('org.requests.tryAgain')}</button>
+          </div>
+        )}
+        {!loading && !error && requests.length === 0 && (
+          <p className="px-5 py-4 text-gray-500 dark:text-gray-400 text-sm">{emptyText}</p>
+        )}
+        {!loading && !error && requests.map((r) => {
+          const isSelected = r.id === selectedId;
+          return (
+            <button
+              key={r.id}
+              type="button"
+              onClick={() => onSelect(r)}
+              className={`w-full ${METRICS_GRID} items-center px-5 py-3 text-left border-t border-white/60 dark:border-white/10 transition-colors ${
+                isSelected ? 'bg-[#bcd4f1] dark:bg-[#2b3b55]' : 'hover:bg-white/60 dark:hover:bg-white/5'
+              }`}
+            >
+              <span className="text-[#1C2A16] dark:text-gray-100 font-medium truncate">
+                {r.submitterName || r.requesterName || r.name || t('org.requests.helpSeeker')}
+              </span>
+              <span className="text-right">
+                <PriorityLabel request={r} t={t} />
+              </span>
+              <DateValue request={r} />
+              <DistanceValue request={r} distances={distances} t={t} />
+            </button>
+          );
+        })}
+      </div>
     </div>
   </div>
 );
 
-// Right-hand column value for a row, matching the active sort: the priority
-// label, the request's date, or its distance from the org.
-const SecondColumn = ({ request, sortBy, distances, t }) => {
-  if (sortBy === 'newest') {
-    const d = request.createdAt ? new Date(request.createdAt) : null;
-    return (
-      <span className="text-sm text-gray-700 dark:text-gray-300 whitespace-nowrap">
-        {d ? d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '—'}
-      </span>
-    );
-  }
+// A row's submission date, formatted short (e.g. "Mar 4"). "—" when unknown.
+const DateValue = ({ request }) => {
+  const d = request.createdAt ? new Date(request.createdAt) : null;
+  return (
+    <span className="text-right text-sm text-gray-700 dark:text-gray-300 whitespace-nowrap">
+      {d ? d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '—'}
+    </span>
+  );
+};
 
-  if (sortBy === 'nearest') {
-    const miles = distances[request.id];
-    return (
-      <span className="text-sm text-gray-700 dark:text-gray-300 whitespace-nowrap">
-        {typeof miles === 'number' ? t('org.requests.milesAway', { miles }) : '—'}
-      </span>
-    );
-  }
-
-  return <PriorityLabel request={request} t={t} />;
+// A row's distance from the org. "—" when we have no distance yet (no org
+// location set, or still loading).
+const DistanceValue = ({ request, distances, t }) => {
+  const miles = distances[request.id];
+  return (
+    <span className="text-right text-sm text-gray-700 dark:text-gray-300 whitespace-nowrap">
+      {typeof miles === 'number' ? t('org.requests.milesAway', { miles }) : '—'}
+    </span>
+  );
 };
 
 // Display labels for each priority level. The raw level values (Critical/High/
