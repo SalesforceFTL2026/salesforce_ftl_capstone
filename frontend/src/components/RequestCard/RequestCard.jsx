@@ -170,7 +170,7 @@ const RequestCard = ({ request, onInteract, interacting, confirmation, onWithdra
       )}
 
       <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-        <span>📍 {location}</span>
+        <span>{location}</span>
         {when && <span>{urgency} · {when}</span>}
       </div>
 
@@ -181,12 +181,12 @@ const RequestCard = ({ request, onInteract, interacting, confirmation, onWithdra
         <div className="flex flex-wrap gap-2 text-sm">
           {typeof volunteerInterestCount === 'number' && (
             <span className="px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 font-medium">
-              🙋 {t('requests.card.volunteersInterested', { count: volunteerInterestCount })}
+              {t('requests.card.volunteersInterested', { count: volunteerInterestCount })}
             </span>
           )}
           {typeof organizationRespondingCount === 'number' && (
             <span className="px-3 py-1.5 rounded-full bg-green-50 text-green-700 dark:bg-green-900/40 dark:text-green-300 font-medium">
-              🏢 {t('requests.card.orgsResponding', { count: organizationRespondingCount })}
+              {t('requests.card.orgsResponding', { count: organizationRespondingCount })}
             </span>
           )}
         </div>

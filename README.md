@@ -80,8 +80,8 @@ Full templates live in [`backend/.env.example`](backend/.env.example) and [`fron
 **Backend**
 | Variable | Required | Purpose |
 | --- | --- | --- |
-| `DATABASE_URL` | ✅ | PostgreSQL connection string |
-| `JWT_SECRET_KEY` | ✅ | Signs login tokens |
+| `DATABASE_URL` | | PostgreSQL connection string |
+| `JWT_SECRET_KEY` | | Signs login tokens |
 | `GOOGLE_CLIENT_ID` | for Google Sign-In | Verifies Google ID tokens |
 | `OPENROUTER_API_KEY` / `GOOGLE_API_KEY` / `OPENAI_API_KEY` / `COHERE_API_KEY` | for AI features | LLM + embedding providers (free-first fallback chain) |
 | `AWS_*` | for image upload | S3 bucket for avatars / request photos |
