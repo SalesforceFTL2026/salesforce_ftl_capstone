@@ -6,6 +6,7 @@
   "main": "server.js",
   "scripts": {
     "dev": "nodemon server.js",
+    "dev:e2e": "DISABLE_RATE_LIMIT=1 nodemon server.js",
     "start": "node server.js",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
