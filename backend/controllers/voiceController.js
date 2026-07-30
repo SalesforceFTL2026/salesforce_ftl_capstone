@@ -91,7 +91,6 @@ export const voiceTurn = async (req, res) => {
         missing: missingSlots(sanitizeSlots(req.body?.slots)),
         handoff: true,
       },
-      error: error.message,
     });
   }
 };
@@ -173,7 +172,18 @@ function sanitizeSlots(slots) {
   for (const key of ALLOWED_SLOTS) {
     const value = slots[key];
     if (value === null || value === undefined || value === '') continue;
-    clean[key] = key === 'householdSize' ? Number(value) : String(value);
+    if (key === 'householdSize') {
+      // Only accept a positive whole number. A non-numeric echo (e.g. "a few")
+      // would otherwise become NaN, which missingSlots treats as "filled" — so
+      // the completeness gate would pass on garbage. Drop anything invalid so
+      // the slot stays unfilled and the agent asks again.
+      const n = Number(value);
+      if (Number.isInteger(n) && n >= 1) {
+        clean[key] = n;
+      }
+      continue;
+    }
+    clean[key] = String(value);
   }
   return clean;
 }

@@ -26,7 +26,6 @@ export const getMyNotifications = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch notifications',
-      error: error.message,
     });
   }
 };
@@ -42,7 +41,6 @@ export const getUnreadCount = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch unread count',
-      error: error.message,
     });
   }
 };
@@ -64,7 +62,6 @@ export const markRead = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to update notification',
-      error: error.message,
     });
   }
 };
@@ -84,7 +81,6 @@ export const markAllRead = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to update notifications',
-      error: error.message,
     });
   }
 };

@@ -49,7 +49,6 @@ export const getMyTasks = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch volunteer tasks',
-      error: error.message,
     });
   }
 };
@@ -100,7 +99,6 @@ export const createTask = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to create volunteer task',
-      error: error.message,
     });
   }
 };
@@ -147,7 +145,6 @@ export const updateTask = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to update volunteer task',
-      error: error.message,
     });
   }
 };
@@ -169,7 +166,6 @@ export const deleteTask = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to delete volunteer task',
-      error: error.message,
     });
   }
 };
@@ -199,7 +195,6 @@ export const getDateSuggestions = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to generate date suggestions',
-      error: error.message,
     });
   }
 };
@@ -236,7 +231,6 @@ export const getTaskSuggestions = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to generate task suggestions',
-      error: error.message,
     });
   }
 };
@@ -268,7 +262,6 @@ export const getAvailableTasks = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch available tasks',
-      error: error.message,
     });
   }
 };
@@ -307,7 +300,6 @@ export const signUpForTask = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to sign up for task',
-      error: error.message,
     });
   }
 };
@@ -329,7 +321,6 @@ export const withdrawFromTask = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to withdraw from task',
-      error: error.message,
     });
   }
 };

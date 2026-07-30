@@ -238,6 +238,12 @@ model Response {
   request         Request  @relation(fields: [requestId], references: [id], onDelete: Cascade)
   responder       User     @relation(fields: [responderId], references: [id], onDelete: Cascade)
 
+  // One response per responder per request per role. The controllers dedupe in
+  // app code (findFirst-then-create), but two concurrent "I can help" clicks
+  // could still slip past that check and create duplicates — this makes the DB
+  // the source of truth. responderType is included so the same user acting as
+  // both a volunteer and an org (the demo admin) isn't wrongly blocked.
+  @@unique([requestId, responderId, responderType])
   @@index([requestId])
   @@index([responderId])
   @@index([status])
