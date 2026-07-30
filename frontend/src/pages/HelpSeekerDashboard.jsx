@@ -14,6 +14,7 @@ import Toast from '../components/Toast/Toast';
 import api from '../utils/api';
 import { getCurrentUser, logout, updateName, updatePhone, updateHousehold, updateLanguage } from '../utils/auth';
 import AvatarUploader from '../components/portal/AvatarUploader';
+import ThemeToggle from '../components/portal/ThemeToggle';
 import { isAdminSession } from '../utils/previewMode';
 import { SUPPORTED_LANGUAGES } from '../i18n';
 import { usePolling } from '../hooks/usePolling';
@@ -746,6 +747,9 @@ const HelpSeekerDashboard = () => {
               {languageSaved && <p className={FIELD_SUCCESS}>{t('settings.languageUpdated')}</p>}
             </div>
           </SettingsSection>
+
+          {/* Appearance: light/dark mode (moved here from the top bar). */}
+          <ThemeToggle />
         </div>
       )}
 

@@ -181,7 +181,7 @@ const ChoroplethLayer = ({ points, onLoadingChange }) => {
   return null;
 };
 
-const RequestMap = ({ requests = [], onInteract, interactingId, confirmations = {}, onWithdraw, withdrawingId }) => {
+const RequestMap = ({ requests = [], onInteract, interactingId, confirmations = {}, onWithdraw, withdrawingId, height = 'min(80vh, 900px)' }) => {
   const { t } = useTranslation();
   // 'pins' shows urgency markers; 'heat' shows the county choropleth.
   const [mode, setMode] = useState('pins');
@@ -249,7 +249,7 @@ const RequestMap = ({ requests = [], onInteract, interactingId, confirmations = 
           maxBounds={MAX_BOUNDS}
           maxBoundsViscosity={1.0}
           scrollWheelZoom={false}
-          style={{ height: 'min(80vh, 900px)', width: '100%' }}
+          style={{ height, width: '100%' }}
         >
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

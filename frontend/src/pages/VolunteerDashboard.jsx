@@ -392,7 +392,13 @@ const VolunteerDashboard = () => {
       onSignOut={handleLogout}
     >
       {view === 'dashboard' && (
-        <VolunteerDashboardView currentUser={currentUser} stats={dashboardStats} tasks={tasks} />
+        <VolunteerDashboardView
+          currentUser={currentUser}
+          stats={dashboardStats}
+          requests={activeFeed}
+          onViewRequests={() => setView('requests')}
+          tasks={tasks}
+        />
       )}
 
       {view === 'requests' && (

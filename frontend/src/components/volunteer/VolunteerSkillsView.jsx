@@ -77,7 +77,7 @@ const VolunteerSkillsView = ({ skills, loading, error, onRetry, onSave, saving }
   );
 
   return (
-    <div className="max-w-3xl flex flex-col gap-6">
+    <div className="max-w-3xl mx-auto flex flex-col gap-6">
       <div className="bg-white dark:bg-[#16233a] rounded-3xl p-6 sm:p-8 shadow-md flex flex-col gap-5">
         <div>
           <h2 className="text-2xl font-bold text-[#1C2A16] dark:text-white">{t('volunteer.skills.yourSkills')}</h2>

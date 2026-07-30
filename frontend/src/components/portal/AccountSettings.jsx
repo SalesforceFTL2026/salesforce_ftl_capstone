@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import AvatarUploader from './AvatarUploader';
+import ThemeToggle from './ThemeToggle';
 import { updateName, updatePhone, updateLanguage } from '../../utils/auth';
 import { SUPPORTED_LANGUAGES } from '../../i18n';
 
@@ -106,7 +107,7 @@ const AccountSettings = ({ currentUser, onUserChange }) => {
   };
 
   return (
-    <div className="max-w-2xl">
+    <div className="max-w-2xl mx-auto">
       <h2 className="text-2xl sm:text-3xl font-bold text-[#1C2A16] dark:text-white mb-1">
         {t('settings.title')}
       </h2>
@@ -243,6 +244,9 @@ const AccountSettings = ({ currentUser, onUserChange }) => {
           </p>
         )}
       </div>
+
+      {/* Appearance: light/dark mode (moved here from the top bar). */}
+      <ThemeToggle />
     </div>
   );
 };
