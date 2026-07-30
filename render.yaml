@@ -25,6 +25,9 @@ services:
     # deploy (safe/no-op when already applied); generate builds the client.
     buildCommand: npm install && npx prisma generate && npx prisma migrate deploy
     startCommand: npm start
+    # Render pings this to know the service is up; must match the route the app
+    # actually exposes (server.js GET /health), else Render hits / and gets a 404.
+    healthCheckPath: /health
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -32,6 +35,16 @@ services:
           property: connectionString
       - key: NODE_VERSION
         value: "24"
+      # Turn on production behavior in the code: NODE_ENV gates the "Anthropic is
+      # off in prod" guarantee (services/ai/clients.js) and suppresses internal
+      # error messages in responses (server.js). Without it, the app runs in its
+      # 'development' fallback on Render and those safeguards never engage.
+      - key: NODE_ENV
+        value: production
+      # Origin(s) the browser app is served from, used to lock down CORS
+      # (server.js). Set to the deployed frontend URL below once it exists.
+      - key: FRONTEND_URL
+        sync: false
       # Secrets — set these in the Render dashboard (never commit them):
       # NOTE: ANTHROPIC_API_KEY is intentionally absent — Anthropic is used only
       # for local testing and is disabled in production (see services/ai/clients.js).
@@ -69,3 +82,30 @@ services:
           property: connectionString
       - key: NODE_VERSION
         value: "24"
+
+  # --- Frontend (React SPA) ------------------------------------------------
+  # Vite builds to frontend/dist; Render serves it as a static site. Without
+  # this service the API is deployed but nothing serves the app to users.
+  - type: web
+    name: mapresponse-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    # Vite inlines VITE_* vars at BUILD time, so these must be set on Render
+    # before the build runs (not injected at runtime).
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      # Base URL of the backend API above (e.g. https://mapresponse-backend.onrender.com).
+      - key: VITE_API_URL
+        sync: false
+      # Google Sign-In client id (same value as the backend's GOOGLE_CLIENT_ID).
+      - key: VITE_GOOGLE_CLIENT_ID
+        sync: false
+    # SPA routing: serve index.html for any path so client-side routes (e.g.
+    # /admin, /dashboard) don't 404 on refresh.
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
