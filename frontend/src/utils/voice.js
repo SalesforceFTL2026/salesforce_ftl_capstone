@@ -36,3 +36,26 @@ export const postVoiceTurn = async ({ message, slots = {}, history = [] }) => {
 
   return data.data;
 };
+
+/**
+ * Fetch a short-lived Deepgram streaming token, or null if unavailable.
+ *
+ * Deepgram is an opt-in accuracy upgrade over the browser's Web Speech API. This
+ * returns null — rather than throwing — whenever streaming can't be used (the
+ * backend hasn't configured a Deepgram key, so it answers 501, or minting
+ * failed), which is the signal for the caller to stay on browser recognition.
+ * Only genuine surprises are logged; the "not configured" case is expected.
+ *
+ * @returns {Promise<{token: string, expiresIn: number}|null>}
+ */
+export const fetchDeepgramToken = async () => {
+  try {
+    const { data } = await api.post('/api/voice/token', {}, { timeout: 8000 });
+    if (!data?.success || !data?.data?.token) return null;
+    return data.data;
+  } catch {
+    // 501 (not configured), 403, network error — all mean "fall back to Web
+    // Speech". The hook handles that transparently, so no need to surface this.
+    return null;
+  }
+};
