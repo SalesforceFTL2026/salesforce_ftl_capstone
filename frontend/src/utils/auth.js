@@ -13,10 +13,13 @@ import { clearPreviewStore } from './previewMode';
 const TOKEN_KEY = 'token';
 const USER_KEY = 'user';
 
-// Save the login token + user so refreshing the page keeps you signed in.
+// Save the login token + user in sessionStorage so the session is PER-TAB:
+// refreshing/navigating within a tab keeps you signed in, a new tab starts as a
+// fresh login (so one person can be a help-seeker in one tab and a volunteer in
+// another), and closing the tab signs that tab out.
 const persistSession = ({ token, user }) => {
-  localStorage.setItem(TOKEN_KEY, token);
-  localStorage.setItem(USER_KEY, JSON.stringify(user));
+  sessionStorage.setItem(TOKEN_KEY, token);
+  sessionStorage.setItem(USER_KEY, JSON.stringify(user));
 };
 
 // Log in an existing user. Returns the user object on success.
@@ -85,7 +88,7 @@ export const googleAuth = async ({ idToken, role }) => {
 // Overwrite the stored user (keeping the existing token), so UI that reads
 // getCurrentUser() picks up profile changes after a page refresh too.
 export const setCurrentUser = (user) => {
-  localStorage.setItem(USER_KEY, JSON.stringify(user));
+  sessionStorage.setItem(USER_KEY, JSON.stringify(user));
 };
 
 // Update the logged-in user's profile. Pass any of { name, location }; only the
@@ -147,7 +150,7 @@ export const updateLanguage = async (lang) => {
 // Read the signed-in user saved at login, or null if nobody is signed in.
 // Used to restore the session when the app first loads.
 export const getCurrentUser = () => {
-  const stored = localStorage.getItem(USER_KEY);
+  const stored = sessionStorage.getItem(USER_KEY);
   if (!stored) return null;
   try {
     return JSON.parse(stored);
@@ -161,8 +164,8 @@ export const getCurrentUser = () => {
 // preview overlay so simulated (session-only) edits never carry into a later
 // login or a real user's view.
 export const logout = () => {
-  localStorage.removeItem(TOKEN_KEY);
-  localStorage.removeItem(USER_KEY);
+  sessionStorage.removeItem(TOKEN_KEY);
+  sessionStorage.removeItem(USER_KEY);
   clearPreviewStore();
 };
 
