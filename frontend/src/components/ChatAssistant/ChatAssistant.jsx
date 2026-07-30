@@ -264,21 +264,34 @@ const ChatAssistant = ({
 
   return (
     <>
-      {/* Floating launcher button — hidden when the parent supplies its own. */}
+      {/* Floating launcher — hidden when the parent supplies its own. Shows the
+          Mappie mascot on a soft gradient disc so it reads as "our assistant"
+          rather than a generic chat bubble; a small greeting bubble and a gentle
+          pulse ring invite a first click. Flips to a close (×) when open. */}
       {!hideLauncher && (
         <button
           type="button"
           onClick={() => setOpen((o) => !o)}
           aria-label={open ? t('chat.closeAssistant') : t('chat.openAssistant')}
-          className="fixed bottom-16 right-6 z-50 w-16 h-16 rounded-full bg-[#1e3a5f] text-white shadow-xl flex items-center justify-center hover:bg-[#182f4d] focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/50 transition-colors"
+          className="group fixed bottom-16 right-6 z-50 flex items-center justify-center focus:outline-none"
         >
-          {open ? (
-            <span className="text-2xl leading-none">×</span>
-          ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M21 12a8 8 0 01-8 8 8.5 8.5 0 01-3.5-.75L3 21l1.5-4A8 8 0 1121 12z" />
-            </svg>
+          {/* Pulse ring — only while closed, to draw the eye. */}
+          {!open && (
+            <span className="absolute inline-flex h-16 w-16 rounded-full bg-[#1e3a5f]/30 animate-ping" aria-hidden="true" />
           )}
+          <span
+            className={`relative w-16 h-16 rounded-full flex items-center justify-center shadow-xl ring-2 ring-white/70 transition-transform duration-200 group-hover:scale-105 group-focus:ring-4 group-focus:ring-[#6ba3d3]/50 ${
+              open
+                ? 'bg-[#1e3a5f] text-white'
+                : 'bg-gradient-to-br from-[#2f5c8f] to-[#1e3a5f]'
+            }`}
+          >
+            {open ? (
+              <span className="text-3xl leading-none">×</span>
+            ) : (
+              <MappieMascot className="w-11 h-11 drop-shadow-sm" />
+            )}
+          </span>
         </button>
       )}
 
