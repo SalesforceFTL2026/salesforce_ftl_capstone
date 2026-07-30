@@ -73,6 +73,21 @@ const RequestCard = ({ request, onInteract, interacting, confirmation, onWithdra
     signedUp,
   } = request;
 
+  // "Uncovered" (issue #92): an active request no one has picked up yet — no
+  // interested volunteers and no responding orgs. Prefer the backend's flag,
+  // but derive it from the counts if it wasn't sent. Only meaningful once the
+  // counts are actually present (the volunteer/org feed), and never for a
+  // request that's already moved past the open queue.
+  const hasCounts =
+    typeof volunteerInterestCount === 'number' ||
+    typeof organizationRespondingCount === 'number';
+  const isUncovered =
+    (typeof request.uncovered === 'boolean'
+      ? request.uncovered
+      : (volunteerInterestCount || 0) === 0 && (organizationRespondingCount || 0) === 0) &&
+    hasCounts &&
+    (!status || status === 'pending' || status === 'in-progress');
+
   // Only show the AI priority score once the request has actually been scored
   // (score > 0). Help-seeker "My Requests" cards stay unscored and hide it.
   const hasPriorityScore = typeof priorityScore === 'number' && priorityScore > 0;
@@ -96,6 +111,13 @@ const RequestCard = ({ request, onInteract, interacting, confirmation, onWithdra
           <h3 className="font-bold text-xl text-black dark:text-white">{category}</h3>
         </div>
         <div className="flex items-center gap-2">
+          {/* Uncovered need (issue #92): no one has picked this up yet. Amber,
+              distinct from the score/status pills, so it draws the eye. */}
+          {isUncovered && (
+            <span className="text-sm font-bold px-3 py-1.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">
+              {t('requests.card.noCoverage')}
+            </span>
+          )}
           {/* AI priority score — the headline signal on the volunteer feed. */}
           {hasPriorityScore && (
             <span

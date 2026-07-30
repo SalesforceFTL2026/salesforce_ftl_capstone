@@ -3,6 +3,7 @@ import {
   parseCategoryFilter,
   parseUrgencyFilter,
   parseSearchTerm,
+  parseCoverageFilter,
   applyRequestFilters,
   filterRequestsFromQuery,
 } from './requestFilters.js';
@@ -44,6 +45,19 @@ describe('parseSearchTerm', () => {
   });
 });
 
+describe('parseCoverageFilter', () => {
+  it('normalizes known coverage values', () => {
+    expect(parseCoverageFilter('uncovered')).toBe('uncovered');
+    expect(parseCoverageFilter('COVERED')).toBe('covered');
+  });
+
+  it('returns null for unknown or blank values', () => {
+    expect(parseCoverageFilter('partial')).toBeNull();
+    expect(parseCoverageFilter('')).toBeNull();
+    expect(parseCoverageFilter(undefined)).toBeNull();
+  });
+});
+
 describe('applyRequestFilters', () => {
   const requests = [
     { id: 1, category: 'Food', urgency: 'High', description: 'Need water and canned food', location: 'Oakland', submitterName: 'Maria' },
@@ -80,8 +94,28 @@ describe('applyRequestFilters', () => {
   });
 
   it('ignores null filter values (the parsers "not provided" signal)', () => {
-    const ids = applyRequestFilters(requests, { category: null, urgency: null, search: null }).map((r) => r.id);
+    const ids = applyRequestFilters(requests, { category: null, urgency: null, search: null, coverage: null }).map((r) => r.id);
     expect(ids).toEqual([1, 2, 3]);
+  });
+
+  describe('coverage filter (issue #92)', () => {
+    // Same shape the feed annotates each request with: interaction counts.
+    const withCoverage = [
+      { id: 1, volunteerInterestCount: 0, organizationRespondingCount: 0 }, // uncovered
+      { id: 2, volunteerInterestCount: 2, organizationRespondingCount: 0 }, // covered (volunteer)
+      { id: 3, volunteerInterestCount: 0, organizationRespondingCount: 1 }, // covered (org)
+      { id: 4 }, // counts absent -> treated as uncovered
+    ];
+
+    it('keeps only requests with no responders when coverage=uncovered', () => {
+      const ids = applyRequestFilters(withCoverage, { coverage: 'uncovered' }).map((r) => r.id);
+      expect(ids).toEqual([1, 4]);
+    });
+
+    it('keeps only requests with at least one responder when coverage=covered', () => {
+      const ids = applyRequestFilters(withCoverage, { coverage: 'covered' }).map((r) => r.id);
+      expect(ids).toEqual([2, 3]);
+    });
   });
 });
 

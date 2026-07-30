@@ -425,6 +425,10 @@
         "map": "Mapa"
       },
       "noOpenRequests": "Walang bukas na kahilingan sa ngayon. Bumalik ka mamaya.",
+      "uncoveredSummary_one": "{{count}} kahilingan ang wala pang tumutulong",
+      "uncoveredSummary_other": "{{count}} kahilingan ang wala pang tumutulong",
+      "showUncoveredOnly": "Ipakita lang ang mga ito",
+      "showAllCoverage": "Ipakita lahat ng kahilingan",
       "whereHelpNeeded": "Kung saan kailangan ang tulong",
       "selectedCount": "{{count}} napiling kahilingan",
       "helpWithSelected": "Maaari akong tumulong sa napili",
@@ -506,6 +510,7 @@
       "volunteersInterested_other": "{{count}} volunteer ang interesado",
       "orgsResponding_one": "{{count}} org ang tumutugon",
       "orgsResponding_other": "{{count}} org ang tumutugon",
+      "noCoverage": "Wala pang tumutulong",
       "status": "Status",
       "saving": "Nagse-save…",
       "statusLabel": "Status:",
@@ -529,6 +534,12 @@
       "allCategories": "Lahat ng kategorya",
       "urgencyAriaLabel": "I-filter ayon sa pagkaapurahan",
       "allUrgencies": "Lahat ng pagkaapurahan",
+      "coverageAriaLabel": "I-filter ayon sa saklaw",
+      "allCoverage": "Lahat ng saklaw",
+      "coverage": {
+        "uncovered": "Wala pang tumutulong",
+        "covered": "Tinutulungan na"
+      },
       "matching": "{{count}} tumutugma",
       "clear": "I-clear"
     },

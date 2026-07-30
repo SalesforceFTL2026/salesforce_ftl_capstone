@@ -16,10 +16,13 @@ import { useDebounce } from '../../hooks/useDebounce';
 // @param {number} [resultCount] - optional count to show ("N matching")
 const CATEGORIES = ['Food', 'Shelter', 'Medical', 'Transport', 'Other'];
 const URGENCIES = ['Critical', 'High', 'Medium', 'Low'];
+// Coverage filter (issue #92): surface only unmet needs, or only ones already
+// being worked. Empty = show everything.
+const COVERAGES = ['uncovered', 'covered'];
 
 const RequestFilterBar = ({ value = {}, onChange, resultCount }) => {
   const { t } = useTranslation();
-  const { search = '', category = '', urgency = '' } = value;
+  const { search = '', category = '', urgency = '', coverage = '' } = value;
 
   // Local, un-debounced copy of the text field so typing stays responsive.
   const [term, setTerm] = useState(search);
@@ -41,11 +44,11 @@ const RequestFilterBar = ({ value = {}, onChange, resultCount }) => {
     setTerm(search);
   }, [search]);
 
-  const hasActiveFilter = Boolean(term || category || urgency);
+  const hasActiveFilter = Boolean(term || category || urgency || coverage);
 
   const clearAll = () => {
     setTerm('');
-    onChange({ search: '', category: '', urgency: '' });
+    onChange({ search: '', category: '', urgency: '', coverage: '' });
   };
 
   return (
@@ -90,6 +93,19 @@ const RequestFilterBar = ({ value = {}, onChange, resultCount }) => {
         <option value="">{t('requests.filterBar.allUrgencies')}</option>
         {URGENCIES.map((u) => (
           <option key={u} value={u}>{t(`requests.urgencies.${u}`)}</option>
+        ))}
+      </select>
+
+      {/* Coverage filter (issue #92) */}
+      <select
+        value={coverage}
+        onChange={(e) => onChange({ ...value, coverage: e.target.value })}
+        aria-label={t('requests.filterBar.coverageAriaLabel')}
+        className="px-3 py-2.5 rounded-xl bg-white/80 dark:bg-[#0f1a0f] text-[#1C2A16] dark:text-white font-semibold focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/40"
+      >
+        <option value="">{t('requests.filterBar.allCoverage')}</option>
+        {COVERAGES.map((c) => (
+          <option key={c} value={c}>{t(`requests.filterBar.coverage.${c}`)}</option>
         ))}
       </select>
 
