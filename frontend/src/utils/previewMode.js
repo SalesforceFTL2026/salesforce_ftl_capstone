@@ -25,7 +25,7 @@ const KEY = 'adminPreviewMode';
 // a circular import via api.js) and treat a corrupt/absent value as "not admin".
 export const isAdminSession = () => {
   try {
-    const stored = localStorage.getItem('user');
+    const stored = sessionStorage.getItem('user');
     return stored ? JSON.parse(stored)?.role === 'admin' : false;
   } catch {
     return false;
@@ -106,7 +106,7 @@ export const clearPreviewStore = () => {
 // Read the signed-in user (used to stamp a simulated record's owner).
 const storedUser = () => {
   try {
-    const raw = localStorage.getItem('user');
+    const raw = sessionStorage.getItem('user');
     return raw ? JSON.parse(raw) : null;
   } catch {
     return null;

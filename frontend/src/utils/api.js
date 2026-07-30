@@ -41,7 +41,7 @@ const shouldBypassPreviewWrite = (config) => {
 // request so protected endpoints like GET /api/auth/me recognize the user.
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
