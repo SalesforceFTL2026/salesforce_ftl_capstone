@@ -217,7 +217,7 @@ const RequestsView = ({
                 className="text-xs font-semibold text-[#1C2A16] dark:text-gray-200 hover:underline"
                 title={t('org.requests.locationTitle')}
               >
-                📍 {orgLocation ? t('org.requests.yourLocation', { location: orgLocation }) : t('org.requests.setYourLocation')}
+                {orgLocation ? t('org.requests.yourLocation', { location: orgLocation }) : t('org.requests.setYourLocation')}
               </button>
             )}
           </div>
