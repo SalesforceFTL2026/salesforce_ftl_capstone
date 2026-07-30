@@ -2,6 +2,7 @@ import OpenAI from 'openai';
 import Anthropic from '@anthropic-ai/sdk';
 import { CohereClient } from 'cohere-ai';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { createClient as createDeepgramClient } from '@deepgram/sdk';
 
 /**
  * Initialize OpenAI client for embeddings and Whisper transcription.
@@ -49,4 +50,22 @@ export const cohere = process.env.COHERE_API_KEY
  */
 export const gemini = process.env.GOOGLE_API_KEY
   ? new GoogleGenerativeAI(process.env.GOOGLE_API_KEY)
+  : null;
+
+/**
+ * Initialize Deepgram client for real-time speech-to-text in the voice agent.
+ *
+ * Optional and opt-in: the conversational voice call defaults to the browser's
+ * free Web Speech API (see frontend useSpeechRecognition). Deepgram is a paid,
+ * higher-accuracy upgrade for accents and background noise — the disaster-relief
+ * caller profile — so it only turns on when a key is configured. When null, the
+ * token endpoint returns "not configured" and the frontend stays on Web Speech,
+ * keeping the zero-cost story intact.
+ *
+ * The browser streams mic audio straight to Deepgram over a WebSocket, so this
+ * server-side client exists only to mint the short-lived scoped tokens that
+ * authorize those connections — the API key itself never reaches the browser.
+ */
+export const deepgram = process.env.DEEPGRAM_API_KEY
+  ? createDeepgramClient(process.env.DEEPGRAM_API_KEY)
   : null;

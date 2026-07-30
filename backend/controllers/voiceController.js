@@ -1,4 +1,5 @@
 import { runVoiceTurn, missingSlots } from '../services/ai/voiceAgent.js';
+import { deepgram } from '../services/ai/clients.js';
 import * as requestModel from '../models/requestModel.js';
 
 /**
@@ -95,6 +96,69 @@ export const voiceTurn = async (req, res) => {
   }
 };
 
+// How long a minted Deepgram token stays valid. Kept short: it's handed to the
+// browser to open one streaming connection, which happens within seconds of the
+// request, so a small window limits exposure if the token leaks.
+const DEEPGRAM_TOKEN_TTL_SECONDS = 60;
+
+/**
+ * POST /api/voice/token
+ *
+ * Mint a short-lived, scoped Deepgram token so the browser can open a streaming
+ * speech-to-text WebSocket directly to Deepgram. Audio then flows browser ->
+ * Deepgram without transiting this server, which keeps latency low; the API key
+ * stays here and is never exposed.
+ *
+ * Returns 501 when Deepgram isn't configured, which is the signal the frontend
+ * uses to fall back to the browser's Web Speech API.
+ *
+ * Reply: { success, data: { token, expiresIn } }
+ */
+export const voiceToken = async (req, res) => {
+  try {
+    // Same gate as voiceTurn: voice intake is for help-seekers (plus the seeded
+    // admin for demos). Don't hand streaming credentials to other roles.
+    if (!['help-seeker', 'admin'].includes(req.user.role)) {
+      return res.status(403).json({
+        success: false,
+        message: 'Voice intake is only available to help-seekers.',
+      });
+    }
+
+    if (!deepgram) {
+      // Not an error: the deployment simply hasn't opted into Deepgram, so the
+      // client should stay on the free browser recognizer.
+      return res.status(501).json({
+        success: false,
+        message: 'Deepgram streaming is not configured; using browser speech recognition.',
+      });
+    }
+
+    // A grant token is temporary and scoped, unlike the long-lived API key —
+    // safe to send to the browser for a single streaming session.
+    const { result, error } = await deepgram.auth.grantToken({
+      ttl_seconds: DEEPGRAM_TOKEN_TTL_SECONDS,
+    });
+    if (error) throw error;
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        token: result.access_token,
+        expiresIn: result.expires_in ?? DEEPGRAM_TOKEN_TTL_SECONDS,
+      },
+    });
+  } catch (error) {
+    console.error('Error minting Deepgram token:', error);
+    // The frontend treats any failure here as "fall back to Web Speech", so this
+    // never dead-ends the caller.
+    return res.status(502).json({
+      success: false,
+      message: 'Could not start streaming speech recognition.',
+    });
+  }
+};
+
 /**
  * Keep only the slot keys the agent owns, so the client can't smuggle extra
  * fields into the draft it will later submit.
@@ -135,4 +199,4 @@ function sanitizeHistory(history) {
     .map((m) => ({ role: m.role, content: m.content }));
 }
 
-export default { voiceTurn };
+export default { voiceTurn, voiceToken };

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
+import { useVoiceRecognition } from '../../hooks/useVoiceRecognition';
 import { useSpeechSynthesis } from '../../hooks/useSpeechSynthesis';
 import { postVoiceTurn } from '../../utils/voice';
 import { requestErrorMessage } from '../../utils/requests';
@@ -134,7 +134,7 @@ const VoiceCall = ({ onComplete, onCancel }) => {
     [onComplete, speak, t]
   );
 
-  const { start, stop, listening, interim, supported } = useSpeechRecognition({
+  const { start, stop, listening, interim, supported } = useVoiceRecognition({
     onResult: handleTurn,
     onError: (code) => {
       // Hearing nothing for a while isn't a fault — stay on the call so the
