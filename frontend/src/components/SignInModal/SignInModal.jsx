@@ -4,14 +4,15 @@ import { login, authErrorMessage } from '../../utils/auth';
 import { useModalDismiss } from '../../hooks/useModalDismiss';
 
 // A single sign-in form used by every role (help-seeker, volunteer,
-// organization). Authentication is identical for everyone — the only thing
-// that differs is where the user lands afterward, and that is decided by the
-// role the server returns, not chosen here.
+// organization). The `role` is required and identifies which account to sign
+// into, because one email can hold a separate account per role. Where the user
+// lands afterward is still decided by the role the server returns.
 //
+// @param {string} role - which role's account to sign into
 // @param {() => void} onClose - close the modal without signing in
 // @param {(user: object) => void} onSuccess - called with the signed-in user
 //   on success; the parent decides where to route them (see pathForRole).
-const SignInModal = ({ embedded = false, onClose, onSuccess }) => {
+const SignInModal = ({ role, embedded = false, onClose, onSuccess }) => {
   const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -34,8 +35,9 @@ const SignInModal = ({ embedded = false, onClose, onSuccess }) => {
 
     setLoading(true);
     try {
-      // login() authenticates, stores the token, and returns the user.
-      const user = await login({ email: email.trim(), password });
+      // login() authenticates, stores the token, and returns the user. Role
+      // scopes the lookup to the right account for this email.
+      const user = await login({ email: email.trim(), password, role });
       onSuccess?.(user);
     } catch (err) {
       // Prefer the server's message; never surface a raw stack trace.

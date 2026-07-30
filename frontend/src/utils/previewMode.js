@@ -298,6 +298,27 @@ export const handlePreviewWrite = (config) => {
 
   const store = readStore();
 
+  // ----- Profile edits (PATCH /api/auth/me) -----
+  // Echo the submitted fields back so the session user updates locally, matching
+  // the backend's normalization (empty phone/household clears to null). Without
+  // this the write would fall through to the generic success below with
+  // data: null, and the edit would silently not apply.
+  if ((method === 'patch' || method === 'put') && /\/api\/auth\/me(\?|$)/.test(url)) {
+    const data = {};
+    if (body.name !== undefined) data.name = String(body.name).trim();
+    if (body.location !== undefined) data.location = String(body.location).trim();
+    if (body.languagePreference !== undefined) data.languagePreference = body.languagePreference;
+    if (body.phoneNumber !== undefined) {
+      const trimmed = String(body.phoneNumber).trim();
+      data.phoneNumber = trimmed === '' ? null : trimmed;
+    }
+    if (body.householdSize !== undefined) {
+      data.householdSize =
+        body.householdSize === '' || body.householdSize == null ? null : Number(body.householdSize);
+    }
+    return { success: true, message: 'Profile updated (preview)', data, preview: true };
+  }
+
   // ----- Help requests -----
   const isRequestsCollection = /\/api\/requests(\?|$)/.test(url);
   const req = parseRequestUrl(url);

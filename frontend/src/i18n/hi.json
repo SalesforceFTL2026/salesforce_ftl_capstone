@@ -217,7 +217,8 @@
     "darkModeEnabled": "डार्क मोड सक्षम है",
     "lightModeEnabled": "लाइट मोड सक्षम है",
     "notifications": "सूचनाएँ",
-    "signOut": "साइन आउट"
+    "signOut": "साइन आउट",
+    "searchNoResults": "“{{query}}” के लिए कोई परिणाम नहीं"
   },
   "org": {
     "nav": {
@@ -866,6 +867,7 @@
   },
   "chat": {
     "greeting": "नमस्ते {{name}}! मैं Mappie हूँ, आपका MapResponse सहायक। मुझसे अपने अनुरोधों, सुरक्षा युक्तियों या मदद कैसे पाएँ, इस बारे में पूछें।",
+    "orgGreeting": "नमस्ते {{name}}! मैं Mappie हूँ, आपका MapResponse सहायक। मुझसे नए सहायता अनुरोधों, प्रकाशित करने वाले स्वयंसेवी कार्यों, या कौन से संसाधन आवंटित करें, इस बारे में पूछें।",
     "unavailable": "सहायक अभी उपलब्ध नहीं है। कृपया पुनः प्रयास करें।",
     "openAssistant": "चैट सहायक खोलें",
     "closeAssistant": "चैट सहायक बंद करें",
@@ -885,5 +887,18 @@
     "successCreate": "✓ अनुरोध प्रस्तुत किया गया!",
     "successEdit": "✓ परिवर्तन सहेजे गए!",
     "errorRequired": "कृपया सभी आवश्यक फ़ील्ड भरें"
+  },
+  "hsSearch": {
+    "placeholder": "अनुरोध, संगठन खोजें…",
+    "groups": {
+      "requests": "आपके अनुरोध",
+      "organizations": "संगठन",
+      "actions": "त्वरित कार्रवाइयाँ"
+    },
+    "actions": {
+      "newRequest": "नया अनुरोध करें",
+      "viewRequests": "मेरे अनुरोध देखें",
+      "safetyManual": "सुरक्षा नियमावली"
+    }
   }
 }

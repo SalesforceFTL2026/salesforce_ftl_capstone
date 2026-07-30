@@ -26,7 +26,7 @@ const SafetyManual = () => {
     {
       id: 'hurricane',
       title: t('safety.guides.hurricane.title'),
-      icon: '🌀',
+      Icon: HurricaneIcon,
       before: [
         t('safety.guides.hurricane.before.0'),
         t('safety.guides.hurricane.before.1'),
@@ -49,7 +49,7 @@ const SafetyManual = () => {
     {
       id: 'wildfire',
       title: t('safety.guides.wildfire.title'),
-      icon: '🔥',
+      Icon: WildfireIcon,
       before: [
         t('safety.guides.wildfire.before.0'),
         t('safety.guides.wildfire.before.1'),
@@ -72,7 +72,7 @@ const SafetyManual = () => {
     {
       id: 'earthquake',
       title: t('safety.guides.earthquake.title'),
-      icon: '🌎',
+      Icon: EarthquakeIcon,
       before: [
         t('safety.guides.earthquake.before.0'),
         t('safety.guides.earthquake.before.1'),
@@ -95,7 +95,7 @@ const SafetyManual = () => {
     {
       id: 'tornado',
       title: t('safety.guides.tornado.title'),
-      icon: '🌪️',
+      Icon: TornadoIcon,
       before: [
         t('safety.guides.tornado.before.0'),
         t('safety.guides.tornado.before.1'),
@@ -118,7 +118,7 @@ const SafetyManual = () => {
     {
       id: 'winter',
       title: t('safety.guides.winter.title'),
-      icon: '❄️',
+      Icon: WinterIcon,
       before: [
         t('safety.guides.winter.before.0'),
         t('safety.guides.winter.before.1'),
@@ -141,7 +141,7 @@ const SafetyManual = () => {
     {
       id: 'heat',
       title: t('safety.guides.heat.title'),
-      icon: '🌡️',
+      Icon: HeatIcon,
       before: [
         t('safety.guides.heat.before.0'),
         t('safety.guides.heat.before.1'),
@@ -316,7 +316,9 @@ const SafetyManual = () => {
                   className="w-full flex items-center justify-between gap-4 p-5 text-left hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
                 >
                   <span className="flex items-center gap-3">
-                    <span className="text-2xl" aria-hidden="true">{guide.icon}</span>
+                    <span className="w-10 h-10 shrink-0 rounded-xl bg-[#7F9764]/15 text-[#4d5f38] dark:text-[#a9c088] flex items-center justify-center">
+                      <guide.Icon />
+                    </span>
                     <span className="text-lg font-bold text-[#1C2A16] dark:text-white">
                       {guide.title}
                     </span>
@@ -367,5 +369,81 @@ const SafetyManual = () => {
     </div>
   );
 };
+
+// --- Disaster icons ---------------------------------------------------------
+//
+// Line icons in the page's existing stroke style (matching the chevron above),
+// replacing the emoji glyphs so the guide reads as a designed set rather than
+// OS-dependent emoji. Each is decorative — the guide's title carries the label —
+// so they're marked aria-hidden.
+const iconProps = {
+  xmlns: 'http://www.w3.org/2000/svg',
+  className: 'h-6 w-6',
+  fill: 'none',
+  viewBox: '0 0 24 24',
+  stroke: 'currentColor',
+  strokeWidth: 1.8,
+  'aria-hidden': true,
+};
+
+// Hurricane — a spiral of curved bands.
+function HurricaneIcon() {
+  return (
+    <svg {...iconProps}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4 7c3-2 8-2.5 12-1M20 17c-3 2-8 2.5-12 1" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M14 9.5a3 3 0 10-2 5.2" />
+    </svg>
+  );
+}
+
+// Wildfire — a flame.
+function WildfireIcon() {
+  return (
+    <svg {...iconProps}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 3c.7 2.2 2.4 3.3 3.6 5A6 6 0 016 15.5C6 11 9.5 10 9 5c1.2.8 2 1.6 3-2z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a5 5 0 01-3-9c-.2 2 1 3 1.5 3.8A2.5 2.5 0 0015 15c1 1.2 1 1.8 1 2.5a4 4 0 01-4 3.5z" />
+    </svg>
+  );
+}
+
+// Earthquake — a cracked ground line.
+function EarthquakeIcon() {
+  return (
+    <svg {...iconProps}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 9l3.5 2L9 6l3 8 2.5-6L18 11l3-1.5" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4 17h4l1.5 2.5L12 15l2 3 1.5-2H20" />
+    </svg>
+  );
+}
+
+// Tornado — stacked funnel lines narrowing to a point.
+function TornadoIcon() {
+  return (
+    <svg {...iconProps}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4 5h16M6 9h12M9 13h7M12 17h3" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M14 17c-.5 2-1.5 3-3 4" />
+    </svg>
+  );
+}
+
+// Winter — a snowflake.
+function WinterIcon() {
+  return (
+    <svg {...iconProps}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v18M3 12h18M5.5 5.5l13 13M18.5 5.5l-13 13" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6l-2-2m2 2l2-2m-2 14l-2 2m2-2l2 2M6 12l-2-2m2 2l-2 2m14-2l2-2m-2 2l2 2" />
+    </svg>
+  );
+}
+
+// Extreme heat — a thermometer.
+function HeatIcon() {
+  return (
+    <svg {...iconProps}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M10 13.5V5a2 2 0 114 0v8.5a4 4 0 11-4 0z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 17.5a0 0 0 100 0M12 9v6" />
+    </svg>
+  );
+}
 
 export default SafetyManual;

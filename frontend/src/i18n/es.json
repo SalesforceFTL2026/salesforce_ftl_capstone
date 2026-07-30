@@ -217,7 +217,8 @@
     "darkModeEnabled": "Modo oscuro activado",
     "lightModeEnabled": "Modo claro activado",
     "notifications": "Notificaciones",
-    "signOut": "Cerrar sesión"
+    "signOut": "Cerrar sesión",
+    "searchNoResults": "Sin resultados para «{{query}}»"
   },
   "org": {
     "nav": {
@@ -866,6 +867,7 @@
   },
   "chat": {
     "greeting": "¡Hola {{name}}! Soy Mappie, tu asistente de MapResponse. Pregúntame sobre tus solicitudes, consejos de seguridad o cómo obtener ayuda.",
+    "orgGreeting": "¡Hola {{name}}! Soy Mappie, tu asistente de MapResponse. Pregúntame sobre nuevas solicitudes de ayuda, tareas de voluntariado que publicar o qué recursos asignar.",
     "unavailable": "El asistente no está disponible en este momento. Por favor intenta de nuevo.",
     "openAssistant": "Abrir asistente de chat",
     "closeAssistant": "Cerrar asistente de chat",
@@ -885,5 +887,18 @@
     "successCreate": "✓ ¡Solicitud enviada!",
     "successEdit": "✓ ¡Cambios guardados!",
     "errorRequired": "Por favor completa todos los campos obligatorios"
+  },
+  "hsSearch": {
+    "placeholder": "Buscar solicitudes, organizaciones…",
+    "groups": {
+      "requests": "Tus solicitudes",
+      "organizations": "Organizaciones",
+      "actions": "Acciones rápidas"
+    },
+    "actions": {
+      "newRequest": "Crear una nueva solicitud",
+      "viewRequests": "Ver mis solicitudes",
+      "safetyManual": "Manual de seguridad"
+    }
   }
 }

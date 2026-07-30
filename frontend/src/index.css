@@ -3,16 +3,43 @@
 @tailwind utilities;
 
 @layer base {
+  /* Semantic tokens — one source of truth for light and dark. Every surface,
+     text, and hairline color on the landing page reads from these, so dark
+     mode is a single coherent forest-charcoal ramp instead of a grab-bag. */
+  :root {
+    --surface: 255 255 255;      /* page background */
+    --surface-2: 244 246 242;    /* raised cards / muted sections */
+    --surface-3: 232 237 228;    /* deeper inset (logo wells, chips) */
+    --ink: 28 42 22;             /* forest-900, primary text */
+    --ink-muted: 90 104 82;      /* secondary text */
+    --hairline: 210 218 202;     /* borders / dividers */
+  }
+
+  html.dark {
+    --surface: 16 22 14;         /* near-black forest */
+    --surface-2: 26 34 22;       /* raised cards */
+    --surface-3: 38 48 32;       /* deeper inset */
+    --ink: 232 237 228;          /* soft off-white, tinted green */
+    --ink-muted: 158 174 148;    /* sage-gray secondary text */
+    --hairline: 52 64 44;        /* low-contrast borders */
+  }
+
   body {
-    @apply bg-white text-gray-900;
-    font-family: "Alumni Sans SC", ui-sans-serif, system-ui, sans-serif;
+    background-color: rgb(var(--surface));
+    color: rgb(var(--ink));
+    font-family: "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* The condensed small-caps display face reads small; give it more presence
+     on headings and let letter-spacing breathe so it feels intentional. */
+  .font-display {
+    letter-spacing: 0.01em;
   }
 
   html {
     scroll-behavior: smooth;
-    /* Alumni Sans SC is a condensed small-caps display font, so it reads small.
-       Bump the root size up so all rem-based text is larger and easier to read. */
-    font-size: 118.75%; /* ~19px base instead of the default 16px */
   }
 
   /* Full-height chain so the portal shells can use h-full to fill the viewport
@@ -25,13 +52,27 @@
     height: 100%;
   }
 
-  html.dark body {
-    @apply bg-black text-gray-100;
-  }
-
   /* Anchored landing sections sit below the fixed header. Offset their scroll
      target so clicking a nav link doesn't hide the heading behind the header. */
   [id] {
-    scroll-margin-top: 124px;
+    scroll-margin-top: 84px;
+  }
+
+  /* Consistent, visible keyboard focus in the brand accent. */
+  :focus-visible {
+    outline: 2px solid theme('colors.pin.500');
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }

@@ -217,7 +217,8 @@
     "darkModeEnabled": "Đã bật chế độ tối",
     "lightModeEnabled": "Đã bật chế độ sáng",
     "notifications": "Thông báo",
-    "signOut": "Đăng xuất"
+    "signOut": "Đăng xuất",
+    "searchNoResults": "Không có kết quả cho “{{query}}”"
   },
   "org": {
     "nav": {
@@ -866,6 +867,7 @@
   },
   "chat": {
     "greeting": "Chào {{name}}! Tôi là Mappie, trợ lý MapResponse của bạn. Hãy hỏi tôi về các yêu cầu của bạn, mẹo an toàn hoặc cách nhận trợ giúp.",
+    "orgGreeting": "Chào {{name}}! Tôi là Mappie, trợ lý MapResponse của bạn. Hãy hỏi tôi về các yêu cầu trợ giúp mới, công việc tình nguyện cần đăng, hoặc nên phân bổ nguồn lực nào.",
     "unavailable": "Trợ lý hiện không khả dụng. Vui lòng thử lại.",
     "openAssistant": "Mở trợ lý trò chuyện",
     "closeAssistant": "Đóng trợ lý trò chuyện",
@@ -885,5 +887,18 @@
     "successCreate": "✓ Đã gửi yêu cầu!",
     "successEdit": "✓ Đã lưu thay đổi!",
     "errorRequired": "Vui lòng điền tất cả các trường bắt buộc"
+  },
+  "hsSearch": {
+    "placeholder": "Tìm yêu cầu, tổ chức…",
+    "groups": {
+      "requests": "Yêu cầu của bạn",
+      "organizations": "Tổ chức",
+      "actions": "Thao tác nhanh"
+    },
+    "actions": {
+      "newRequest": "Tạo yêu cầu mới",
+      "viewRequests": "Xem yêu cầu của tôi",
+      "safetyManual": "Sổ tay an toàn"
+    }
   }
 }

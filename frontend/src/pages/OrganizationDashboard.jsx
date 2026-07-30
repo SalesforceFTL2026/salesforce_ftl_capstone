@@ -7,6 +7,8 @@ import RequestsView from '../components/organization/RequestsView';
 import ResourcesView from '../components/organization/ResourcesView';
 import TasksView from '../components/organization/TasksView';
 import AvatarUploader from '../components/portal/AvatarUploader';
+import ChatAssistant from '../components/ChatAssistant/ChatAssistant';
+import AccountSettings from '../components/portal/AccountSettings';
 import Toast from '../components/Toast/Toast';
 import { getCurrentUser, logout, updateProfile } from '../utils/auth';
 import { usePolling } from '../hooks/usePolling';
@@ -45,6 +47,9 @@ const OrganizationDashboard = () => {
   const [currentUser, setCurrentUser] = useState(getCurrentUser);
   const navigate = useNavigate();
 
+  // First name, used only for the assistant's friendly opening greeting.
+  const firstName = currentUser?.name?.split(' ')[0] || 'there';
+
   // Sidebar nav, built from translations so the labels switch with the
   // language. Rebuilt each render — cheap, and keeps it always in sync.
   const NAV_GROUPS = [
@@ -61,7 +66,6 @@ const OrganizationDashboard = () => {
     {
       heading: t('nav.tools'),
       items: [
-        { id: 'chat', label: t('org.nav.chat'), icon: 'chat' },
         { id: 'settings', label: t('nav.settings'), icon: 'settings' },
       ],
     },
@@ -73,7 +77,6 @@ const OrganizationDashboard = () => {
     tasks: t('org.nav.tasks'),
     metrics: t('org.nav.metrics'),
     resources: t('org.nav.resources'),
-    chat: t('org.nav.chat'),
     settings: t('nav.settings'),
   };
 
@@ -378,20 +381,18 @@ const OrganizationDashboard = () => {
       )}
 
       {view === 'settings' && (
-        <div className="max-w-2xl">
-          <h2 className="text-2xl sm:text-3xl font-bold text-[#1C2A16] dark:text-white mb-6">
-            {t('nav.settings')}
-          </h2>
-          <AvatarUploader
-            currentUser={currentUser}
-            onUploaded={(url) => setCurrentUser({ ...currentUser, avatarUrl: url })}
-          />
-        </div>
+        <AccountSettings currentUser={currentUser} onUserChange={setCurrentUser} />
       )}
 
       {!['dashboard', 'requests', 'resources', 'tasks', 'settings'].includes(view) && (
         <ComingSoonPanel title={VIEW_TITLES[view]} />
       )}
+
+      {/* AI assistant, available on every view as a floating icon in the
+          bottom-right corner. The backend grounds replies in this org's claimed
+          requests, the open request feed, its resource bank, and its posted
+          tasks — so it can recommend tasks and allocations concretely. */}
+      <ChatAssistant firstName={firstName} greetingKey="chat.orgGreeting" />
 
       {/* Temporary, corner-anchored feedback for actions (e.g. a status change
           the backend rejected). Auto-dismisses; never shifts page content. */}

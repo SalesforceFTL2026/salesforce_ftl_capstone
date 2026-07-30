@@ -48,8 +48,10 @@ model Request {
 // WEEK 2: User authentication and profiles
 model User {
   id                String   @id @default(cuid())
-  email             String   @unique
-  passwordHash      String
+  email             String   // Unique per role — see @@unique([email, role]). One person can hold a
+                             // separate account per role (help-seeker / volunteer / organization).
+  passwordHash      String?  // Optional: users who sign in with Google have no password.
+  googleId          String?  // Google's stable account id (the token "sub"); null for password users.
   name              String
   role              String   // help-seeker, volunteer, organization
   location          String?
@@ -75,6 +77,7 @@ model User {
   votes             Vote[]
   taskSignups       TaskSignup[]
 
+  @@unique([email, role]) // Same email may exist once per role, never twice as the same role.
   @@index([email])
   @@index([role])
   @@index([location])

@@ -1,9 +1,14 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { OAuth2Client } from 'google-auth-library';
 
 /**
  * Auth service: reusable authentication logic lives here.
  */
+
+// A single reusable Google verifier. It checks an ID token's signature against
+// Google's public keys AND that the token was minted for OUR app (audience).
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // How much work bcrypt does when scrambling a password.
 // Higher = more secure but slower. 10 is a common, safe default.
@@ -56,4 +61,25 @@ export function createToken(user) {
  */
 export function verifyToken(token) {
   return jwt.verify(token, process.env.JWT_SECRET_KEY);
+}
+
+/**
+ * Verify a Google ID token from the browser and return the identity it proves.
+ * Throws if the token is forged, expired, or was issued for a different app.
+ *
+ * @param {string} idToken - the credential string from Google Identity Services
+ * @returns {Promise<{ email: string, name: string, googleId: string, emailVerified: boolean }>}
+ */
+export async function verifyGoogleToken(idToken) {
+  const ticket = await googleClient.verifyIdToken({
+    idToken,
+    audience: process.env.GOOGLE_CLIENT_ID, // must match the app the token was made for
+  });
+  const payload = ticket.getPayload(); // { sub, email, name, email_verified, ... }
+  return {
+    email: payload.email,
+    name: payload.name || payload.email,
+    googleId: payload.sub, // Google's stable per-user id
+    emailVerified: payload.email_verified === true,
+  };
 }

@@ -20,16 +20,37 @@
     "name": "Name",
     "phoneNumber": "Phone Number",
     "householdCount": "# in Household",
+    "editProfile": "Edit",
+    "editSave": "Save",
+    "editSaving": "Saving…",
+    "editCancel": "Cancel",
+    "editNameRequired": "Name must not be empty.",
+    "editSaveError": "Could not save your profile. Please try again.",
     "activeRequests": "Active Requests",
+    "activeCount_one": "{{count}} active",
+    "activeCount_other": "{{count}} active",
+    "submitted": "Submitted",
     "expectedFulfillment": "Expected Fulfillment",
     "typeOfRequest": "Type of Request",
     "loadingRequests": "Loading your requests…",
     "noActiveRequests": "You have no active requests right now.",
+    "noActiveRequestsHint": "Make a request and it will show up here for volunteers and organizations to see.",
     "makeNewRequest": "Make New Request",
     "requestByVoice": "Request by Voice",
     "talkToUs": "Talk to Us",
     "chatWithAssistant": "Chat with Assistant",
     "requestSuffix": "Request",
+    "expand": "Expand",
+    "collapse": "Collapse",
+    "expandRequest": "Show request details",
+    "collapseRequest": "Hide request details",
+    "detailDescription": "Description",
+    "detailLocation": "Location",
+    "detailUrgency": "Urgency",
+    "detailStatus": "Status",
+    "detailPriority": "Priority",
+    "whyPrioritized": "Why this is prioritized",
+    "noDescription": "No description provided.",
     "deleteRequest": "Delete request",
     "nonprofitsTitle": "Participating Non-Profits Near You",
     "organizationLogo": "Organization Logo",
@@ -74,7 +95,17 @@
     "profilePicture": "Profile picture",
     "changePhoto": "Change photo",
     "uploading": "Uploading…",
-    "avatarUploadError": "Could not upload your photo."
+    "avatarUploadError": "Could not upload your photo.",
+    "sectionProfile": "Profile",
+    "sectionProfileHelp": "Your photo and display name.",
+    "sectionContact": "Contact & Household",
+    "sectionContactHelp": "How responders reach you and who lives with you.",
+    "sectionPreferences": "Preferences",
+    "sectionPreferencesHelp": "How your dashboard looks and reads.",
+    "appearance": "Appearance",
+    "appearanceHelp": "Switch between light and dark mode. Your choice is saved on this device.",
+    "lightMode": "Light",
+    "darkMode": "Dark"
   },
   "languages": {
     "en": "English",
@@ -97,8 +128,7 @@
         "whatWeDo": "WHAT WE DO",
         "whoWeAre": "WHO WE ARE",
         "howToHelp": "HOW TO HELP",
-        "partnerResources": "PARTNER RESOURCES",
-        "getHelp": "GET HELP"
+        "partnerResources": "PARTNER RESOURCES"
       },
       "greeting": "Hi, {{name}}",
       "signOut": "SIGN OUT",
@@ -145,13 +175,13 @@
     },
     "impact": {
       "title": "OUR 2026 IMPACT",
-      "fact": "Fact"
-    },
-    "statCard": {
-      "graphicLine1": "GRAPHIC",
-      "graphicLine2": "PERTAINING TO",
-      "graphicLine3": "FACT",
-      "statistic": "STATISTIC #{{number}}"
+      "subtitle": "Illustrative figures from our pilot response network.",
+      "stats": {
+        "requests": { "value": "12,480", "label": "Help requests mapped and routed" },
+        "volunteers": { "value": "3,200+", "label": "Volunteers mobilized on the ground" },
+        "response": { "value": "18 min", "label": "Median time to first response" },
+        "counties": { "value": "42", "label": "Counties covered across 6 states" }
+      }
     },
     "getInvolved": {
       "title": "HOW TO HELP",
@@ -170,16 +200,16 @@
       "helpCommunitiesImageAlt": "Volunteers helping clear debris"
     },
     "partners": {
-      "title": "THANK YOU TO OUR PARTNERS FOR YOUR SUPPORT!",
-      "logo": "Logo"
+      "title": "THANK YOU TO OUR PARTNERS FOR YOUR SUPPORT!"
     },
     "oneLiner": {
-      "text": "When disaster scatters help, MapResponse puts it back on the map.",
+      "text": "MapResponse works to keep you connected during times of disaster.",
       "scrollToTopAria": "Scroll to top"
     },
     "footer": {
       "logoAlt": "MapResponse logo",
-      "description": "Description"
+      "phone": "(555) 234-1092",
+      "description": "MapResponse connects people affected by disasters with the volunteers and organizations ready to help — all on one live, prioritized map."
     }
   },
   "auth": {
@@ -197,6 +227,11 @@
     "tabs": {
       "signUp": "Sign Up",
       "logIn": "Log In"
+    },
+    "chooseRolePrompt": "First, choose how you'd like to use MapResponse:",
+    "orDivider": "or",
+    "google": {
+      "error": "Google sign-in failed. Please try again."
     },
     "roles": {
       "helpSeeker": "Help Seeker",
@@ -253,7 +288,8 @@
     "notificationsEmpty": "No notifications yet",
     "notificationsMarkAllRead": "Mark all as read",
     "notificationsError": "Couldn't load notifications",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "searchNoResults": "No results for “{{query}}”"
   },
   "org": {
     "nav": {
@@ -644,7 +680,12 @@
       "location": "Location",
       "requestFallback": "Request",
       "deleteRequest": "Delete request",
-      "soonToBeFulfilled": "Soon to Be Fulfilled"
+      "soonToBeFulfilled": "Soon to Be Fulfilled",
+      "description": "Description",
+      "noDescription": "No description provided.",
+      "mapAlt": "Map showing where {{location}} is located",
+      "mapAltGeneric": "Map showing where this request is located",
+      "noLocation": "Location not set"
     },
     "tabNav": {
       "ariaLabel": "Dashboard views"
@@ -947,13 +988,44 @@
   },
   "chat": {
     "greeting": "Hi {{name}}! I'm Mappie, your MapResponse assistant. Ask me about your requests, safety tips, or how to get help.",
+    "orgGreeting": "Hi {{name}}! I'm Mappie, your MapResponse assistant. Ask me about new help requests, volunteer tasks to post, or which resources to allocate.",
     "unavailable": "The assistant is unavailable right now. Please try again.",
     "openAssistant": "Open chat assistant",
     "closeAssistant": "Close chat assistant",
     "assistantSubtitle": "Your MapResponse assistant",
     "thinking": "Thinking…",
     "inputPlaceholder": "Type your message…",
-    "send": "Send"
+    "send": "Send",
+    "draft": {
+      "title": "Want me to submit this request?",
+      "category": "Type of help",
+      "categories": {
+        "food": "Food",
+        "shelter": "Shelter",
+        "medical": "Medical",
+        "transport": "Transport",
+        "other": "Other"
+      },
+      "urgency": "Urgency",
+      "urgencies": {
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High",
+        "critical": "Critical"
+      },
+      "location": "Location",
+      "locationPlaceholder": "Where do you need help?",
+      "household": "People in your household",
+      "householdPlaceholder": "e.g. 4",
+      "description": "Details",
+      "descriptionPlaceholder": "Describe what you need",
+      "submit": "Submit request",
+      "submitting": "Submitting…",
+      "dismiss": "Not now",
+      "submitted": "✅ Your request has been submitted. You can track it on your dashboard.",
+      "required": "Please add a location, household size, and details.",
+      "failed": "Couldn't submit that request. Please try again."
+    }
   },
   "misc": {
     "comingSoon": "You're signed in! This page is coming soon."
@@ -966,5 +1038,18 @@
     "successCreate": "✓ Request submitted!",
     "successEdit": "✓ Changes saved!",
     "errorRequired": "Please fill in all required fields"
+  },
+  "hsSearch": {
+    "placeholder": "Search requests, organizations…",
+    "groups": {
+      "requests": "Your requests",
+      "organizations": "Organizations",
+      "actions": "Quick actions"
+    },
+    "actions": {
+      "newRequest": "Make a new request",
+      "viewRequests": "View my requests",
+      "safetyManual": "Safety manual"
+    }
   }
 }

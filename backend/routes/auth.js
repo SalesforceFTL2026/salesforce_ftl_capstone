@@ -17,6 +17,10 @@ router.post('/signup', authController.signup);
 // POST /api/auth/login
 router.post('/login', authController.login);
 
+// Sign in / sign up with Google (an additional option to password login)
+// POST /api/auth/google
+router.post('/google', authController.googleAuth);
+
 // Get the currently logged-in user (protected route)
 // GET /api/auth/me
 router.get('/me', requireAuth, authController.me);

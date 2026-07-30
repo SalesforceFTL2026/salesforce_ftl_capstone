@@ -217,7 +217,8 @@
     "darkModeEnabled": "Naka-enable ang dark mode",
     "lightModeEnabled": "Naka-enable ang light mode",
     "notifications": "Mga Abiso",
-    "signOut": "Mag-sign out"
+    "signOut": "Mag-sign out",
+    "searchNoResults": "Walang resulta para sa “{{query}}”"
   },
   "org": {
     "nav": {
@@ -866,6 +867,7 @@
   },
   "chat": {
     "greeting": "Kumusta {{name}}! Ako si Mappie, ang iyong MapResponse assistant. Magtanong sa akin tungkol sa iyong mga kahilingan, mga tip sa kaligtasan, o kung paano humingi ng tulong.",
+    "orgGreeting": "Kumusta {{name}}! Ako si Mappie, ang iyong MapResponse assistant. Magtanong sa akin tungkol sa mga bagong kahilingan ng tulong, mga volunteer task na ipo-post, o kung anong resources ang ilalaan.",
     "unavailable": "Hindi available ang assistant sa ngayon. Pakisubukang muli.",
     "openAssistant": "Buksan ang chat assistant",
     "closeAssistant": "Isara ang chat assistant",
@@ -885,5 +887,18 @@
     "successCreate": "✓ Naisumite na ang kahilingan!",
     "successEdit": "✓ Na-save na ang mga pagbabago!",
     "errorRequired": "Mangyaring punan ang lahat ng kinakailangang field"
+  },
+  "hsSearch": {
+    "placeholder": "Maghanap ng mga kahilingan, organisasyon…",
+    "groups": {
+      "requests": "Iyong mga kahilingan",
+      "organizations": "Mga organisasyon",
+      "actions": "Mabilis na aksyon"
+    },
+    "actions": {
+      "newRequest": "Gumawa ng bagong kahilingan",
+      "viewRequests": "Tingnan ang aking mga kahilingan",
+      "safetyManual": "Manwal sa kaligtasan"
+    }
   }
 }
