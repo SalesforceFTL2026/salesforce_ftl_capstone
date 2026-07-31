@@ -305,16 +305,17 @@ const OrganizationDashboard = () => {
   }, [responses, resources]);
 
   const dashboardTasks = useMemo(() => {
-    // Surface the top open requests as upcoming "tasks" with dated chips.
-    return unfiltered.slice(0, 2).map((r) => {
-      const d = r.createdAt ? new Date(r.createdAt) : null;
+    // Surface the org's own posted volunteer tasks as dated chips, newest first,
+    // using each task's scheduled volunteer day for the chip.
+    return tasks.slice(0, 3).map((task) => {
+      const d = task.volunteerDate ? new Date(task.volunteerDate) : null;
       return {
         date: d ? d.getDate() : '—',
         month: d ? d.toLocaleString(undefined, { month: 'short' }) : '',
-        title: r.category || r.description?.slice(0, 40) || t('org.dashboard.taskFallback'),
+        title: task.title || task.category || t('org.dashboard.taskFallback'),
       };
     });
-  }, [unfiltered, t]);
+  }, [tasks, t]);
 
   return (
     <PortalShell
@@ -327,7 +328,13 @@ const OrganizationDashboard = () => {
       onSignOut={handleLogout}
     >
       {view === 'dashboard' && (
-        <DashboardView currentUser={currentUser} stats={dashboardStats} tasks={dashboardTasks} />
+        <DashboardView
+          currentUser={currentUser}
+          stats={dashboardStats}
+          requests={unfiltered}
+          onViewRequests={() => setView('requests')}
+          tasks={dashboardTasks}
+        />
       )}
 
       {view === 'requests' && (

@@ -273,7 +273,7 @@ const ChatAssistant = ({
           type="button"
           onClick={() => setOpen((o) => !o)}
           aria-label={open ? t('chat.closeAssistant') : t('chat.openAssistant')}
-          className="group fixed bottom-16 right-6 z-50 flex items-center justify-center focus:outline-none"
+          className="group fixed bottom-16 right-6 z-[1200] flex items-center justify-center focus:outline-none"
         >
           {/* Pulse ring — only while closed, to draw the eye. */}
           {!open && (
@@ -300,7 +300,7 @@ const ChatAssistant = ({
           floating over the page content. Clicking the backdrop closes it. */}
       {open && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+          className="fixed inset-0 z-[1200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
           onClick={() => setOpen(false)}
         >
         <div
