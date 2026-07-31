@@ -182,7 +182,7 @@ export async function login(req, res) {
     }
 
     // 3. Look up the ONE account for this email + role.
-    const user = await prisma.user.findUnique({
+    let user = await prisma.user.findUnique({
       where: { email_role: { email, role } },
     });
 
@@ -190,9 +190,28 @@ export async function login(req, res) {
     //    doesn't exist OR the password is wrong — so attackers can't tell which
     //    emails are registered. A Google-only account has no passwordHash, so
     //    guard the compare and let it fall through to the generic 401.
-    const passwordMatches = user?.passwordHash
+    let passwordMatches = user?.passwordHash
       ? await comparePassword(password, user.passwordHash)
       : false;
+
+    // 4b. Admin fallback. The admin is a single seeded account (role "admin")
+    //     used to demo every view. There's no "admin" option in the sign-in
+    //     menu, so admins sign in through ANY role's login form using the admin
+    //     credentials. If the requested-role lookup above didn't authenticate,
+    //     try the admin account for this email; on a match we log them in AS
+    //     admin (their real role), so the frontend routes them to /admin.
+    if (!user || !passwordMatches) {
+      const adminUser = await prisma.user.findUnique({
+        where: { email_role: { email, role: 'admin' } },
+      });
+      const adminMatches = adminUser?.passwordHash
+        ? await comparePassword(password, adminUser.passwordHash)
+        : false;
+      if (adminUser && adminMatches) {
+        user = adminUser;
+        passwordMatches = true;
+      }
+    }
 
     if (!user || !passwordMatches) {
       return res.status(401).json({
