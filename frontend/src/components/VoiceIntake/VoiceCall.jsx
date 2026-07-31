@@ -63,6 +63,8 @@ const VoiceCall = ({ onComplete, onCancel }) => {
   // Guards against a late-arriving turn response resuming the mic after the
   // caller has already closed the screen.
   const cancelledRef = useRef(false);
+  // The scrollable transcript box, so new lines can be kept in view.
+  const transcriptRef = useRef(null);
 
   const { speak, cancel: stopSpeaking, speaking } = useSpeechSynthesis();
 
@@ -180,20 +182,39 @@ const VoiceCall = ({ onComplete, onCancel }) => {
     if (listening && speaking) stopSpeaking();
   }, [listening, speaking, stopSpeaking]);
 
+  // Keep the newest line in view as the conversation grows. Without this the box
+  // stays scrolled to the top and later turns (and the live interim text) fall
+  // below the fold, so it looks like nothing is happening.
+  useEffect(() => {
+    const box = transcriptRef.current;
+    if (box) box.scrollTop = box.scrollHeight;
+  }, [turns, interim]);
+
   // Release the mic and silence playback if the screen closes mid-conversation.
   //
   // The flag is reset on mount, not just set on unmount: React StrictMode mounts,
   // unmounts, and remounts in development, and a ref survives that cycle — so
   // setting it only in the cleanup left it stuck true from the first render, and
   // every turn was dropped by handleTurn's guard before it could be sent.
+  //
+  // This MUST run on mount/unmount only. `stop` changes identity on every render
+  // (useVoiceRecognition returns fresh objects, so its stop() is rebuilt each
+  // time), so depending on it here made the cleanup fire on every render — which
+  // tore down the Deepgram socket the instant it opened, before any audio was
+  // sent (Deepgram then reported a zero-byte, zero-duration stream). Read the
+  // latest stop() through refs and keep the dep list empty.
+  const stopRef = useRef(stop);
+  stopRef.current = stop;
+  const stopSpeakingRef = useRef(stopSpeaking);
+  stopSpeakingRef.current = stopSpeaking;
   useEffect(() => {
     cancelledRef.current = false;
     return () => {
       cancelledRef.current = true;
-      stop();
-      stopSpeaking();
+      stopRef.current?.();
+      stopSpeakingRef.current?.();
     };
-  }, [stop, stopSpeaking]);
+  }, []);
 
   const begin = async () => {
     setError('');
@@ -274,6 +295,7 @@ const VoiceCall = ({ onComplete, onCancel }) => {
           can't hear the synthesized voice can still follow along by reading. */}
       {turns.length > 0 && (
         <div
+          ref={transcriptRef}
           className="mb-5 max-h-56 overflow-y-auto space-y-3 p-3 bg-gray-50 dark:bg-[#1a2f1a] border border-gray-200 dark:border-[#3a4f30] rounded-xl"
           aria-live="polite"
         >

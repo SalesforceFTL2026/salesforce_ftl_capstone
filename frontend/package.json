@@ -16,7 +16,7 @@
     "test:e2e:report": "playwright show-report"
   },
   "dependencies": {
-    "@deepgram/sdk": "^3.13.0",
+    "@deepgram/sdk": "^4.11.3",
     "axios": "^1.7.9",
     "i18next": "^26.3.6",
     "leaflet": "^1.9.4",

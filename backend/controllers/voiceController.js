@@ -95,9 +95,10 @@ export const voiceTurn = async (req, res) => {
   }
 };
 
-// How long a minted Deepgram token stays valid. Kept short: it's handed to the
-// browser to open one streaming connection, which happens within seconds of the
-// request, so a small window limits exposure if the token leaks.
+// How long a minted Deepgram grant token stays valid. Kept short: it's handed to
+// the browser to open one streaming connection, which happens within seconds of
+// the request, so a small window limits exposure if the token leaks. Deepgram's
+// minimum is 30s.
 const DEEPGRAM_TOKEN_TTL_SECONDS = 60;
 
 /**

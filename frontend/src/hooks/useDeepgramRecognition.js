@@ -111,6 +111,13 @@ export function useDeepgramRecognition({ onResult, onError, enabled = true } = {
   const connectionRef = useRef(null);
   const recorderRef = useRef(null);
   const streamRef = useRef(null);
+  // Audio chunks captured before the socket finished its handshake. The recorder
+  // starts the moment the mic is live, but the WebSocket takes ~0.5-1s to open;
+  // chunks recorded in that window would otherwise be dropped (the SDK's own
+  // pre-open sendBuffer isn't drained), clipping the start of what the caller
+  // said. We hold them here and flush once Open fires.
+  const pendingChunksRef = useRef([]);
+  const socketOpenRef = useRef(false);
   // Caller still wants the mic open. Mirrors the Web Speech hook: guards against
   // late socket events resuming a turn the caller already ended.
   const wantListeningRef = useRef(false);
@@ -147,6 +154,9 @@ export function useDeepgramRecognition({ onResult, onError, enabled = true } = {
       streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
+    // Drop any buffered pre-open audio so it can't leak into the next turn.
+    socketOpenRef.current = false;
+    pendingChunksRef.current = [];
   }, []);
 
   const stop = useCallback(() => {
@@ -279,21 +289,40 @@ export function useDeepgramRecognition({ onResult, onError, enabled = true } = {
       return;
     }
     connectionRef.current = connection;
+    socketOpenRef.current = false;
+    pendingChunksRef.current = [];
+
+    // Start capturing immediately, before the socket is open. The WebSocket
+    // handshake takes ~0.5-1s, and the caller often starts talking the instant
+    // they see "your turn" — so waiting for Open to start the recorder clips the
+    // first word or two. Instead we record now and buffer chunks locally until
+    // the socket opens, then flush them in order, so nothing spoken is lost.
+    if (!wantListeningRef.current || !streamRef.current) return;
+    const recorder = new MediaRecorder(streamRef.current);
+    recorderRef.current = recorder;
+    recorder.ondataavailable = (event) => {
+      if (!event.data || event.data.size === 0) return;
+      if (socketOpenRef.current && connectionRef.current) {
+        connectionRef.current.send(event.data);
+      } else {
+        // Socket still handshaking — hold the chunk until Open flushes it.
+        pendingChunksRef.current.push(event.data);
+      }
+    };
+    recorder.start(RECORDER_TIMESLICE_MS);
+    setListening(true);
+    debug('recording (buffering until socket open)', { language });
 
     connection.on(LiveTranscriptionEvents.Open, () => {
-      // Only start capturing once the socket is ready, or early chunks are lost.
-      if (!wantListeningRef.current || !streamRef.current) return;
-
-      const recorder = new MediaRecorder(streamRef.current);
-      recorderRef.current = recorder;
-      recorder.ondataavailable = (event) => {
-        if (event.data && event.data.size > 0 && connectionRef.current) {
-          connectionRef.current.send(event.data);
-        }
-      };
-      recorder.start(RECORDER_TIMESLICE_MS);
-      setListening(true);
-      debug('open + recording', { language });
+      if (!wantListeningRef.current) return;
+      socketOpenRef.current = true;
+      // Flush anything captured during the handshake, oldest first.
+      const buffered = pendingChunksRef.current;
+      pendingChunksRef.current = [];
+      for (const chunk of buffered) {
+        if (connectionRef.current) connectionRef.current.send(chunk);
+      }
+      debug('socket open + flushed buffered chunks', { flushed: buffered.length });
     });
 
     connection.on(LiveTranscriptionEvents.Transcript, (data) => {
