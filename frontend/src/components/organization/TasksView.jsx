@@ -169,7 +169,9 @@ const TasksView = ({
         )}
 
         {!loading && !error && requests.length > 0 && (
-          <ul className="flex flex-col gap-3">
+          // Cap the list to about seven requests and scroll the rest, so a long
+          // list doesn't stretch the column. pr-1 keeps the scrollbar off the rows.
+          <ul className="flex flex-col gap-3 max-h-[34rem] overflow-y-auto pr-1">
             {requests.map((r) => {
               const isSelected = r.id === selectedId;
               return (
@@ -213,8 +215,9 @@ const TasksView = ({
           Create a task for the help request.
         </p>
         {selectedRequest ? (
-          // Scroll the form within the viewport so the column fits the screen.
-          <div className="max-h-[70vh] overflow-y-auto pr-1">
+          // Match the "Your Requests" list height so all three columns end at
+          // the same spot and the page doesn't run past that first rectangle.
+          <div className="max-h-[34rem] overflow-y-auto pr-1">
             <CreateTaskForm
               requestId={selectedRequest.id}
               onCreate={onCreate}
@@ -252,9 +255,9 @@ const TasksView = ({
             </p>
           </div>
         ) : (
-          // One card per row; cap the height to about two cards and scroll the
-          // rest so at most ~2 cards are on screen at once.
-          <ul className="flex flex-col gap-4 max-h-[70vh] overflow-y-auto pr-1">
+          // One card per row; match the "Your Requests" list height so this
+          // column ends at the same spot as the others and scrolls the rest.
+          <ul className="flex flex-col gap-4 max-h-[34rem] overflow-y-auto pr-1">
             {selectedTasks.map((task) => (
               <TaskCard
                 key={task.id}
