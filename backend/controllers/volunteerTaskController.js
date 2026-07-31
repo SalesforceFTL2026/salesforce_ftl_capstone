@@ -183,10 +183,17 @@ export const getDateSuggestions = async (req, res) => {
     const org = await taskModel.getOrCreateOrgProfile(req.user.id, req.user.name);
     const available = await resourceModel.getAvailableResourcesByOrg(org.id);
 
+    // Factor in when the task's signed-up volunteers are actually free, so the
+    // advisor can prefer weekdays with the most volunteer coverage.
+    const volunteers = await taskModel.getTaskVolunteers(task.id);
+    const volunteerWeekdayCoverage = taskModel.summarizeWeekdayCoverage(volunteers);
+
     const suggestions = await suggestTaskDates(task, {
       availableResourceCount: available.length,
       // Skills coverage isn't tracked org-wide yet; pass what we know (none).
       availableSkills: [],
+      volunteerCount: volunteers.length,
+      volunteerWeekdayCoverage,
     });
 
     res.status(200).json({ success: true, data: suggestions });
