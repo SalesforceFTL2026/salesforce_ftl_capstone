@@ -19,8 +19,11 @@ const emailPass = process.env.EMAIL_APP_PASSWORD;
 
 const transporter = emailUser && emailPass
   ? nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,          // 465 = implicit TLS
       auth: { user: emailUser, pass: emailPass },
+      family: 4,             // force IPv4 — Render has no outbound IPv6
     })
   : null;
 
