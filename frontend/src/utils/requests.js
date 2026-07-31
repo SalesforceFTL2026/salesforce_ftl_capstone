@@ -471,6 +471,32 @@ export const updateVolunteerSkills = async (skills) => {
   return data.data.skills || [];
 };
 
+// Fetch the signed-in volunteer's weekly availability.
+// Returns an object mapping each weekday to the time-of-day slots they're free
+// (e.g. { monday: ['morning', 'evening'] }); {} if none set. Throws on failure.
+export const getVolunteerAvailability = async () => {
+  const { data } = await api.get('/api/dashboard/volunteer/profile');
+
+  if (!data?.success) {
+    throw new Error(data?.message || 'Could not load your availability.');
+  }
+
+  return data.data.availability || {};
+};
+
+// Replace the signed-in volunteer's weekly availability. `availability` is an
+// object mapping each weekday to the time-of-day slots they're free.
+// Returns the saved availability object on success; throws on failure.
+export const updateVolunteerAvailability = async (availability) => {
+  const { data } = await api.put('/api/dashboard/volunteer/profile/availability', { availability });
+
+  if (!data?.success) {
+    throw new Error(data?.message || 'Could not save your availability.');
+  }
+
+  return data.data.availability || {};
+};
+
 // Voice intake: upload a recorded audio clip and get back the transcript plus
 // the request fields Claude extracted from it, for the user to review before
 // submitting (issues #152–156). Does NOT create the request — the confirm step

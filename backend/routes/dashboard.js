@@ -23,6 +23,10 @@ router.get('/volunteer/profile', requireAuth, dashboardController.getVolunteerPr
 // PUT /api/dashboard/volunteer/profile/skills
 router.put('/volunteer/profile/skills', requireAuth, dashboardController.updateVolunteerSkills);
 
+// Replace the volunteer's weekly availability (weekday -> time-of-day slots)
+// PUT /api/dashboard/volunteer/profile/availability
+router.put('/volunteer/profile/availability', requireAuth, dashboardController.updateVolunteerAvailability);
+
 // Get organization's active responses
 // GET /api/dashboard/organization
 router.get('/organization', requireAuth, dashboardController.getOrganizationDashboard);

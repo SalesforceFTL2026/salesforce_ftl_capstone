@@ -465,6 +465,7 @@
       "requests": "Requests",
       "tasks": "Tasks",
       "skills": "Skills",
+      "availability": "Availability",
       "groups": "Groups",
       "tools": "Tools",
       "chat": "Chat",
@@ -473,7 +474,8 @@
     },
     "viewTitles": {
       "requests": "Active Help Requests",
-      "skills": "My Skills"
+      "skills": "My Skills",
+      "availability": "My Availability"
     },
     "comingSoon": "This section is coming soon.",
     "common": {
@@ -593,6 +595,28 @@
       "add": "Add",
       "skillsSaved": "Skills saved.",
       "saveSkills": "Save skills"
+    },
+    "availability": {
+      "saveError": "Could not save your availability.",
+      "yourAvailability": "Your Availability",
+      "help": "Select the times you're generally free to help. Organizations use this to know when they can schedule you.",
+      "days": {
+        "monday": "Monday",
+        "tuesday": "Tuesday",
+        "wednesday": "Wednesday",
+        "thursday": "Thursday",
+        "friday": "Friday",
+        "saturday": "Saturday",
+        "sunday": "Sunday"
+      },
+      "slots": {
+        "morning": "Morning",
+        "afternoon": "Afternoon",
+        "evening": "Evening"
+      },
+      "clearAll": "Clear all",
+      "availabilitySaved": "Availability saved.",
+      "saveAvailability": "Save availability"
     },
     "tasks": {
       "noTasksYet": "No tasks yet",

@@ -34,6 +34,36 @@ const parseSkills = (json) => {
   }
 };
 
+// Weekdays and slots in canonical order, matching the volunteer availability
+// editor and the backend. Used to render a signed-up volunteer's availability.
+const AVAILABILITY_DAYS = [
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+  'sunday',
+];
+const DAY_ABBR = {
+  monday: 'Mon',
+  tuesday: 'Tue',
+  wednesday: 'Wed',
+  thursday: 'Thu',
+  friday: 'Fri',
+  saturday: 'Sat',
+  sunday: 'Sun',
+};
+
+// Condense a volunteer's availability object into a short human string like
+// "Mon (morning, evening) · Sat (afternoon)". Empty when nothing is set.
+const formatAvailability = (availability) => {
+  if (!availability || typeof availability !== 'object') return '';
+  return AVAILABILITY_DAYS.filter((day) => (availability[day] || []).length > 0)
+    .map((day) => `${DAY_ABBR[day]} (${availability[day].join(', ')})`)
+    .join(' · ');
+};
+
 // Format an ISO date for display (date only, no time).
 const formatDate = (value) => {
   if (!value) return null;
@@ -616,6 +646,32 @@ const TaskCard = ({ task, onUpdate, onDelete, onSuggestDates }) => {
           </button>
         </div>
       </div>
+
+      {/* Signed-up volunteers + their weekly availability, so the org can pick a
+          volunteer day that works for the people actually coming. */}
+      {Array.isArray(task.volunteers) && task.volunteers.length > 0 && (
+        <div className="rounded-lg bg-gray-50 dark:bg-[#1a2f1a] px-3 py-2 mb-2">
+          <p className="text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1.5">
+            Signed-up volunteers ({task.volunteers.length})
+          </p>
+          <ul className="flex flex-col gap-1.5">
+            {task.volunteers.map((v) => {
+              const avail = formatAvailability(v.availability);
+              return (
+                <li key={v.id} className="text-sm">
+                  <span className="font-semibold text-[#1C2A16] dark:text-white">
+                    {v.name || 'Volunteer'}
+                  </span>
+                  <span className="text-gray-500 dark:text-gray-400">
+                    {' — '}
+                    {avail || 'no availability set'}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
 
       {/* Resources-ready toggle */}
       <div className="flex items-center justify-between gap-3 rounded-lg bg-gray-50 dark:bg-[#1a2f1a] px-3 py-2 mb-2">

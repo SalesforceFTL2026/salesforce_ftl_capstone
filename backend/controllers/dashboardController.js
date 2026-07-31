@@ -85,6 +85,7 @@ export async function getVolunteerProfile(req, res) {
       success: true,
       data: {
         skills: parseSkills(profile?.skills),
+        availability: parseAvailability(profile?.availability),
       },
     });
   } catch (error) {
@@ -163,6 +164,74 @@ export async function updateVolunteerSkills(req, res) {
   }
 }
 
+// The seven weekdays a volunteer can mark availability for, and the time-of-day
+// slots within each. Kept in sync with the frontend's VolunteerAvailabilityView.
+const AVAILABILITY_DAYS = [
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+  'sunday',
+];
+const AVAILABILITY_SLOTS = ['morning', 'afternoon', 'evening'];
+
+/**
+ * PUT /api/dashboard/volunteer/profile/availability
+ * Replace the signed-in volunteer's weekly availability. Body:
+ * { availability: { monday: ["morning", "evening"], ... } } — each key is a
+ * weekday and each value the time-of-day slots the volunteer is free that day.
+ * Volunteers use this so organizations know when they can be scheduled. Unknown
+ * days/slots are dropped and each day's slots are de-duplicated.
+ */
+export async function updateVolunteerAvailability(req, res) {
+  try {
+    if (!hasRole(req.user, 'volunteer')) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. This endpoint is for volunteers only.',
+      });
+    }
+
+    const { availability } = req.body;
+    if (!availability || typeof availability !== 'object' || Array.isArray(availability)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Provide availability as an object of { weekday: [slots] }.',
+      });
+    }
+
+    // Keep only recognised days and slots, in canonical order, dropping empty
+    // days and de-duplicating slots. Anything unrecognised is silently ignored.
+    const cleaned = {};
+    for (const day of AVAILABILITY_DAYS) {
+      const raw = availability[day];
+      if (!Array.isArray(raw)) continue;
+      const slots = AVAILABILITY_SLOTS.filter((slot) => raw.includes(slot));
+      if (slots.length) cleaned[day] = slots;
+    }
+
+    const profile = await prisma.volunteer.upsert({
+      where: { userId: req.user.id },
+      update: { availability: JSON.stringify(cleaned) },
+      create: { userId: req.user.id, availability: JSON.stringify(cleaned) },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Availability updated.',
+      data: { availability: parseAvailability(profile.availability) },
+    });
+  } catch (error) {
+    console.error('Error updating volunteer availability:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to update availability',
+    });
+  }
+}
+
 // Safely turn the stored skills JSON string into an array of { name, level }.
 // Legacy profiles stored a plain array of skill-name strings; those come back
 // with a default mid-range level of 3. Returns [] for missing or malformed
@@ -189,6 +258,28 @@ function parseSkills(skillsJson) {
       .filter(Boolean);
   } catch {
     return [];
+  }
+}
+
+// Safely turn the stored availability JSON string into an object mapping each
+// weekday to the time-of-day slots the volunteer is free. Only recognised days
+// and slots survive, so callers get a clean, normalised shape. Returns {} for
+// missing or malformed data so callers never have to guard against it.
+function parseAvailability(availabilityJson) {
+  if (!availabilityJson) return {};
+  try {
+    const parsed = JSON.parse(availabilityJson);
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
+    const result = {};
+    for (const day of AVAILABILITY_DAYS) {
+      const raw = parsed[day];
+      if (!Array.isArray(raw)) continue;
+      const slots = AVAILABILITY_SLOTS.filter((slot) => raw.includes(slot));
+      if (slots.length) result[day] = slots;
+    }
+    return result;
+  } catch {
+    return {};
   }
 }
 
