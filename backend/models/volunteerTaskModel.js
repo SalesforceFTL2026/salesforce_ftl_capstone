@@ -28,6 +28,41 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 export const isFulfillable = (task) =>
   task.volunteersConfirmed >= task.minVolunteers && task.resourcesReady === true;
 
+// The weekdays and time-of-day slots a volunteer can mark availability for.
+// Kept in sync with the same lists in dashboardController.js.
+const AVAILABILITY_DAYS = [
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+  'sunday',
+];
+const AVAILABILITY_SLOTS = ['morning', 'afternoon', 'evening'];
+
+// Safely turn a stored availability JSON string into an object mapping each
+// weekday to the slots the volunteer is free. Only recognised days/slots
+// survive. Returns {} for missing or malformed data.
+// (Kept in sync with the same helper in dashboardController.js.)
+const parseAvailability = (availabilityJson) => {
+  if (!availabilityJson) return {};
+  try {
+    const parsed = JSON.parse(availabilityJson);
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
+    const result = {};
+    for (const day of AVAILABILITY_DAYS) {
+      const raw = parsed[day];
+      if (!Array.isArray(raw)) continue;
+      const slots = AVAILABILITY_SLOTS.filter((slot) => raw.includes(slot));
+      if (slots.length) result[day] = slots;
+    }
+    return result;
+  } catch {
+    return {};
+  }
+};
+
 // A compact view of the help request a task addresses, embedded in each task
 // so the org's task board can show which need it's tied to without a second
 // round-trip. Kept small on purpose (no PII beyond what the feed already shows).
@@ -42,21 +77,79 @@ const REQUEST_SUMMARY = {
   },
 };
 
+// Include the volunteers signed up for a task, with just enough of each
+// volunteer's profile for the org to schedule around them: their name and their
+// weekly availability. Used on the org-facing task board.
+const SIGNUP_WITH_VOLUNTEER = {
+  select: {
+    createdAt: true,
+    user: {
+      select: {
+        id: true,
+        name: true,
+        volunteerProfile: { select: { availability: true } },
+      },
+    },
+  },
+};
+
+// Shape a raw signup row into the volunteer summary the org's task board uses:
+// the volunteer's name plus their parsed weekly availability.
+const toVolunteerSummary = (signup) => ({
+  id: signup.user.id,
+  name: signup.user.name,
+  signedUpAt: signup.createdAt,
+  availability: parseAvailability(signup.user.volunteerProfile?.availability),
+});
+
 // List all of an organization's tasks (newest first), after running the
 // auto-progression pass so statuses are up to date when they're read. Each task
-// includes a summary of the help request it addresses.
+// includes a summary of the help request it addresses and the volunteers signed
+// up for it (name + availability), so the org can schedule around when its
+// volunteers are actually free.
 export const getTasksByOrg = async (organizationId) => {
   const tasks = await prisma.volunteerTask.findMany({
     where: { organizationId },
     orderBy: { createdAt: 'desc' },
-    include: { request: REQUEST_SUMMARY },
+    include: { request: REQUEST_SUMMARY, signups: SIGNUP_WITH_VOLUNTEER },
   });
-  return await applyAutoProgression(tasks);
+  const progressed = await applyAutoProgression(tasks);
+  // Replace the raw signups array with a compact `volunteers` summary.
+  return progressed.map(({ signups, ...task }) => ({
+    ...task,
+    volunteers: (signups || []).map(toVolunteerSummary),
+  }));
 };
 
 // Load a single task (used to check ownership before update/delete).
 export const getTaskById = async (id) => {
   return await prisma.volunteerTask.findUnique({ where: { id } });
+};
+
+// The volunteers signed up for a task, each as { id, name, availability }.
+// Used to schedule around when the task's volunteers are actually free.
+export const getTaskVolunteers = async (taskId) => {
+  const signups = await prisma.taskSignup.findMany({
+    where: { taskId },
+    ...SIGNUP_WITH_VOLUNTEER,
+    orderBy: { createdAt: 'asc' },
+  });
+  return signups.map(toVolunteerSummary);
+};
+
+// Aggregate a set of volunteers' weekly availability into a count of how many
+// are free on each weekday (across any slot). Weekdays with no coverage are
+// omitted. Feeds the AI date advisor so it can prefer well-covered weekdays.
+export const summarizeWeekdayCoverage = (volunteers = []) => {
+  const counts = {};
+  for (const v of volunteers) {
+    for (const day of AVAILABILITY_DAYS) {
+      if ((v.availability?.[day] || []).length > 0) {
+        counts[day] = (counts[day] || 0) + 1;
+      }
+    }
+  }
+  return counts;
 };
 
 // Create a new volunteer task. `readySince` is stamped up front if the task
@@ -252,6 +345,8 @@ export default {
   isFulfillable,
   getTasksByOrg,
   getTaskById,
+  getTaskVolunteers,
+  summarizeWeekdayCoverage,
   createTask,
   updateTask,
   deleteTask,

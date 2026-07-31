@@ -17,6 +17,18 @@ import api from '../../utils/api';
 // Below this confidence, we nudge the user to double-check the field.
 const LOW_CONFIDENCE = 0.6;
 
+// Break the transcript into readable phrases for display. The conversational
+// agent stitches each spoken answer together with spaces, so we split on
+// sentence-ending punctuation (keeping the punctuation) to recover roughly one
+// answer per line. A transcript with no punctuation (a single dictated blob)
+// just comes back as one phrase, which is fine.
+function splitTranscript(transcript) {
+  return transcript
+    .split(/(?<=[.?!])\s+/)
+    .map((phrase) => phrase.trim())
+    .filter(Boolean);
+}
+
 const VoiceReview = ({ result, onSubmitted, onBack }) => {
   const { t } = useTranslation();
   const { transcript = '', fields = {} } = result || {};
@@ -86,13 +98,26 @@ const VoiceReview = ({ result, onSubmitted, onBack }) => {
         {t('voice.review.subtitle')}
       </p>
 
-      {/* What the caller actually said, so they can sanity-check the extraction. */}
+      {/* What the caller actually said, so they can sanity-check the extraction.
+          Broken into one line per phrase rather than a single run-on quote: the
+          conversational flow joins several separate answers ("Drinking water?"
+          "Four people." "At Salesforce Tower.") into the transcript, and reading
+          them stacked makes it obvious which spoken bit maps to which field. */}
       {transcript && (
         <div className="mb-5 p-3 bg-gray-50 dark:bg-[#1a2f1a] border border-gray-200 dark:border-[#3a4f30] rounded-xl">
-          <p className="text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-1">
+          <p className="text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">
             {t('voice.review.youSaid')}
           </p>
-          <p className="text-sm text-gray-700 dark:text-gray-300 italic">“{transcript}”</p>
+          <ul className="space-y-1">
+            {splitTranscript(transcript).map((phrase, i) => (
+              <li key={i} className="flex gap-2 text-sm text-gray-700 dark:text-gray-300">
+                <span aria-hidden="true" className="select-none text-gray-400 dark:text-gray-500">
+                  “
+                </span>
+                <span className="italic">{phrase}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
 

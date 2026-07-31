@@ -34,6 +34,36 @@ const parseSkills = (json) => {
   }
 };
 
+// Weekdays and slots in canonical order, matching the volunteer availability
+// editor and the backend. Used to render a signed-up volunteer's availability.
+const AVAILABILITY_DAYS = [
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+  'sunday',
+];
+const DAY_ABBR = {
+  monday: 'Mon',
+  tuesday: 'Tue',
+  wednesday: 'Wed',
+  thursday: 'Thu',
+  friday: 'Fri',
+  saturday: 'Sat',
+  sunday: 'Sun',
+};
+
+// Condense a volunteer's availability object into a short human string like
+// "Mon (morning, evening) · Sat (afternoon)". Empty when nothing is set.
+const formatAvailability = (availability) => {
+  if (!availability || typeof availability !== 'object') return '';
+  return AVAILABILITY_DAYS.filter((day) => (availability[day] || []).length > 0)
+    .map((day) => `${DAY_ABBR[day]} (${availability[day].join(', ')})`)
+    .join(' · ');
+};
+
 // Format an ISO date for display (date only, no time).
 const formatDate = (value) => {
   if (!value) return null;
@@ -139,7 +169,9 @@ const TasksView = ({
         )}
 
         {!loading && !error && requests.length > 0 && (
-          <ul className="flex flex-col gap-3">
+          // Cap the list to about seven requests and scroll the rest, so a long
+          // list doesn't stretch the column. pr-1 keeps the scrollbar off the rows.
+          <ul className="flex flex-col gap-3 max-h-[34rem] overflow-y-auto pr-1">
             {requests.map((r) => {
               const isSelected = r.id === selectedId;
               return (
@@ -183,8 +215,9 @@ const TasksView = ({
           Create a task for the help request.
         </p>
         {selectedRequest ? (
-          // Scroll the form within the viewport so the column fits the screen.
-          <div className="max-h-[70vh] overflow-y-auto pr-1">
+          // Match the "Your Requests" list height so all three columns end at
+          // the same spot and the page doesn't run past that first rectangle.
+          <div className="max-h-[34rem] overflow-y-auto pr-1">
             <CreateTaskForm
               requestId={selectedRequest.id}
               onCreate={onCreate}
@@ -222,9 +255,9 @@ const TasksView = ({
             </p>
           </div>
         ) : (
-          // One card per row; cap the height to about two cards and scroll the
-          // rest so at most ~2 cards are on screen at once.
-          <ul className="flex flex-col gap-4 max-h-[70vh] overflow-y-auto pr-1">
+          // One card per row; match the "Your Requests" list height so this
+          // column ends at the same spot as the others and scrolls the rest.
+          <ul className="flex flex-col gap-4 max-h-[34rem] overflow-y-auto pr-1">
             {selectedTasks.map((task) => (
               <TaskCard
                 key={task.id}
@@ -616,6 +649,32 @@ const TaskCard = ({ task, onUpdate, onDelete, onSuggestDates }) => {
           </button>
         </div>
       </div>
+
+      {/* Signed-up volunteers + their weekly availability, so the org can pick a
+          volunteer day that works for the people actually coming. */}
+      {Array.isArray(task.volunteers) && task.volunteers.length > 0 && (
+        <div className="rounded-lg bg-gray-50 dark:bg-[#1a2f1a] px-3 py-2 mb-2">
+          <p className="text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1.5">
+            Signed-up volunteers ({task.volunteers.length})
+          </p>
+          <ul className="flex flex-col gap-1.5">
+            {task.volunteers.map((v) => {
+              const avail = formatAvailability(v.availability);
+              return (
+                <li key={v.id} className="text-sm">
+                  <span className="font-semibold text-[#1C2A16] dark:text-white">
+                    {v.name || 'Volunteer'}
+                  </span>
+                  <span className="text-gray-500 dark:text-gray-400">
+                    {' — '}
+                    {avail || 'no availability set'}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
 
       {/* Resources-ready toggle */}
       <div className="flex items-center justify-between gap-3 rounded-lg bg-gray-50 dark:bg-[#1a2f1a] px-3 py-2 mb-2">

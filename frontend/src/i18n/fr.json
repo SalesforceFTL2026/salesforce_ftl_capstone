@@ -691,45 +691,125 @@
   "safety": {
     "pageTitle": "Manuel de sécurité",
     "pageSubtitle": "Contacts d'urgence et conseils étape par étape pour avant, pendant et après une catastrophe.",
+    "download": "Télécharger le PDF",
     "contactsHeading": "Contacts d'urgence",
+    "contactsIntro": "De vraies lignes d'assistance téléphonique américaines, bien établies, que vous pouvez appeler depuis n'importe où dans le pays. Beaucoup de ces lignes vous mettront en relation avec de l'aide dans votre région.",
     "guidesHeading": "Guides de préparation aux catastrophes",
     "disclaimer": "Conseils adaptés de la FEMA, de Ready.gov et de l'American Red Cross. Suivez toujours les instructions de vos responsables locaux des situations d'urgence.",
     "contacts": {
+      "categories": {
+        "immediate": "Appeler immédiatement",
+        "disaster": "Secours et rétablissement après une catastrophe",
+        "health": "Santé et soins médicaux",
+        "mentalHealth": "Santé mentale et soutien émotionnel",
+        "safety": "Sécurité, abus et violence",
+        "children": "Enfants, jeunes et familles",
+        "seniorsDisability": "Personnes âgées et personnes en situation de handicap",
+        "veterans": "Anciens combattants",
+        "animals": "Animaux et animaux de compagnie"
+      },
       "lifeThreatening": {
         "label": "Urgence vitale",
-        "note": "Police, pompiers ou secours médicaux"
+        "note": "Police, pompiers ou secours médicaux — partout aux États-Unis"
+      },
+      "crisisLifeline": {
+        "label": "Ligne de prévention du suicide et de crise",
+        "note": "Soutien gratuit et confidentiel 24/7 — par appel ou SMS"
+      },
+      "community211": {
+        "label": "Ressources communautaires (211)",
+        "note": "Nourriture, hébergement, aide au loyer et aux services publics — vous met en relation localement"
+      },
+      "fema": {
+        "label": "Ligne d'assistance FEMA (agence fédérale des situations d'urgence)",
+        "note": "Aide en cas de catastrophe et demandes d'indemnisation"
       },
       "distressHelpline": {
-        "label": "Ligne d'assistance en cas de détresse liée aux catastrophes",
-        "note": "Soutien psychologique en cas de crise, 24 h/24 et 7 j/7"
+        "label": "Ligne d'assistance en cas de détresse liée à une catastrophe",
+        "note": "Accompagnement psychologique de crise 24/7 après une catastrophe"
+      },
+      "redCross": {
+        "label": "Croix-Rouge américaine",
+        "note": "Services d'hébergement et de secours"
       },
       "poisonControl": {
         "label": "Centre antipoison",
-        "note": "Empoisonnement ou exposition"
+        "note": "Intoxication ou exposition — 24/7"
       },
-      "fema": {
-        "label": "Ligne d'assistance FEMA",
-        "note": "Aide en cas de catastrophe et demandes d'indemnisation"
+      "samhsa": {
+        "label": "Ligne d'assistance SAMHSA",
+        "note": "Orientation vers des traitements en toxicomanie et santé mentale"
       },
-      "redCross": {
-        "label": "American Red Cross",
-        "note": "Services d'hébergement et de secours"
+      "cdc": {
+        "label": "CDC-INFO",
+        "note": "Informations sur la santé et questions sur les maladies"
       },
-      "localNonEmergency": {
-        "label": "Ligne locale non urgente",
-        "value": "Ajoutez votre ligne locale",
-        "note": "Police/services publics non urgents"
+      "medicare": {
+        "label": "Medicare (assurance maladie fédérale)",
+        "note": "Questions sur la couverture, les demandes et les prestations"
+      },
+      "crisisText": {
+        "label": "Ligne d'assistance par SMS en cas de crise",
+        "note": "Soutien gratuit par SMS 24/7 avec un conseiller qualifié",
+        "value": "Envoyez HOME par SMS au 741741"
+      },
+      "veteransCrisis": {
+        "label": "Ligne de crise pour les anciens combattants",
+        "note": "Soutien confidentiel pour les anciens combattants en crise",
+        "value": "988, puis appuyez sur 1"
+      },
+      "transLifeline": {
+        "label": "Trans Lifeline",
+        "note": "Ligne d'entraide gérée par et pour les personnes trans"
+      },
+      "trevor": {
+        "label": "The Trevor Project",
+        "note": "Soutien en cas de crise pour les jeunes LGBTQ+"
+      },
+      "domesticViolence": {
+        "label": "Ligne nationale contre la violence conjugale",
+        "note": "Soutien confidentiel en cas d'abus et pour la sécurité relationnelle"
+      },
+      "sexualAssault": {
+        "label": "Ligne nationale contre les agressions sexuelles",
+        "note": "RAINN — soutien confidentiel 24/7"
+      },
+      "childAbuse": {
+        "label": "Ligne Childhelp contre la maltraitance des enfants",
+        "note": "Signaler un abus ou obtenir de l'aide — 24/7"
+      },
+      "humanTrafficking": {
+        "label": "Ligne nationale contre la traite des êtres humains",
+        "note": "Signaler la traite ou obtenir de l'aide et des orientations"
+      },
+      "runaway": {
+        "label": "Ligne nationale de sécurité pour les fugueurs",
+        "note": "Aide pour les jeunes fugueurs et sans-abri"
+      },
+      "missingChildren": {
+        "label": "Enfants disparus et exploités",
+        "note": "Signaler un enfant disparu ou exploité — 24/7"
+      },
+      "eldercare": {
+        "label": "Service de localisation d'aide aux aînés",
+        "note": "Met les personnes âgées en relation avec des services locaux et un soutien lié au vieillissement"
+      },
+      "dial": {
+        "label": "Ligne d'information et d'accès pour les personnes en situation de handicap",
+        "note": "Aide pour les personnes en situation de handicap lors des situations d'urgence"
+      },
+      "vaBenefits": {
+        "label": "Ligne des prestations VA (anciens combattants)",
+        "note": "Prestations, soins de santé et demandes d'indemnisation des anciens combattants"
+      },
+      "homelessVeterans": {
+        "label": "Anciens combattants sans-abri",
+        "note": "Soutien pour les anciens combattants sans-abri ou à risque"
+      },
+      "aspca": {
+        "label": "Centre antipoison animal de l'ASPCA",
+        "note": "Aide d'urgence pour les animaux empoisonnés — 24/7"
       }
-    },
-    "zip": {
-      "label": "Trouver de l'aide locale par code postal",
-      "placeholder": "ex. 78701",
-      "search": "Rechercher",
-      "searching": "Recherche…",
-      "clear": "Effacer",
-      "invalid": "Veuillez saisir un code postal américain valide à 5 chiffres.",
-      "lookupError": "Impossible de rechercher ce code postal. Veuillez réessayer.",
-      "showingContacts": "Affichage des contacts pour"
     },
     "phases": {
       "before": "Avant",

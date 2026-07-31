@@ -52,10 +52,21 @@ immediately.`;
 // Build the system prompt for *this* volunteer: their skills and the requests
 // they've already offered to help with. Mirrors the help-seeker prompt but
 // frames the assistant as a coordinator that helps the volunteer contribute.
-const buildVolunteerPrompt = (user, skills, interests) => {
+const buildVolunteerPrompt = (user, skills, availability, interests) => {
   const skillLines = skills.length
     ? skills.map((s) => `- ${s.name} (self-rated ${s.level}/5)`).join('\n')
     : '- (no skills listed yet)';
+
+  // Availability is { weekday: [slots] }; render one line per day the volunteer
+  // marked free so the assistant can speak to when they can be scheduled.
+  const availabilityDays = AVAILABILITY_DAYS.filter(
+    (day) => (availability?.[day] || []).length > 0
+  );
+  const availabilityLines = availabilityDays.length
+    ? availabilityDays
+        .map((day) => `- ${capitalize(day)}: ${availability[day].join(', ')}`)
+        .join('\n')
+    : '- (no availability set yet)';
 
   const interestLines = interests.length
     ? interests
@@ -81,13 +92,19 @@ The volunteer you are helping:
 Their skills (${skills.length}):
 ${skillLines}
 
+Their weekly availability:
+${availabilityLines}
+
 Requests they've offered to help with (${interests.length}):
 ${interestLines}
 
 Use this context to give relevant, personalized guidance. If they ask about the requests
 they're helping with, answer using the list above and do not invent requests that aren't
-listed. If they want to help more, you can suggest they browse the priority feed or available
-tasks from their dashboard. Always remind them to prioritize their own safety, and for any
+listed. If they ask when they can help or about scheduling, use their availability above and
+don't assume times they haven't marked as free; if they haven't set any availability, gently
+suggest they add it on the Availability page so organizations know when to schedule them. If
+they want to help more, you can suggest they browse the priority feed or available tasks from
+their dashboard. Always remind them to prioritize their own safety, and for any
 life-threatening emergency to call local emergency services (911) immediately.`;
 };
 
@@ -296,13 +313,52 @@ const loadVolunteerContext = async (userId) => {
   ]);
 
   const skills = parseSkills(profile?.skills);
+  const availability = parseAvailability(profile?.availability);
   const requests = interests.map((response) => ({
     ...response.request,
     responseStatus: response.status,
   }));
 
-  return { skills, requests };
+  return { skills, availability, requests };
 };
+
+// The weekdays and time-of-day slots a volunteer can mark availability for.
+// Kept in sync with the same lists in dashboardController.js.
+const AVAILABILITY_DAYS = [
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+  'sunday',
+];
+const AVAILABILITY_SLOTS = ['morning', 'afternoon', 'evening'];
+
+// Safely turn the stored availability JSON string into an object mapping each
+// weekday to the time-of-day slots the volunteer is free. Only recognised days
+// and slots survive. Returns {} for missing or malformed data.
+// (Kept in sync with the same helper in dashboardController.js.)
+const parseAvailability = (availabilityJson) => {
+  if (!availabilityJson) return {};
+  try {
+    const parsed = JSON.parse(availabilityJson);
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
+    const result = {};
+    for (const day of AVAILABILITY_DAYS) {
+      const raw = parsed[day];
+      if (!Array.isArray(raw)) continue;
+      const slots = AVAILABILITY_SLOTS.filter((slot) => raw.includes(slot));
+      if (slots.length) result[day] = slots;
+    }
+    return result;
+  } catch {
+    return {};
+  }
+};
+
+// Title-case a lowercase weekday/slot name for display in the prompt.
+const capitalize = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 
 // Safely turn the stored skills JSON string into an array of { name, level }.
 // Legacy profiles stored a plain array of skill-name strings; those come back
@@ -380,8 +436,8 @@ export const chat = async (req, res) => {
     // Build a role-specific system prompt grounded in the caller's own data.
     let systemPrompt;
     if (isVolunteer) {
-      const { skills, requests } = await loadVolunteerContext(req.user.id);
-      systemPrompt = buildVolunteerPrompt(req.user, skills, requests);
+      const { skills, availability, requests } = await loadVolunteerContext(req.user.id);
+      systemPrompt = buildVolunteerPrompt(req.user, skills, availability, requests);
     } else if (isOrganization) {
       // Orgs get their claimed requests, the open feed, their resource bank, and
       // the tasks they've posted, so the assistant can recommend concretely.

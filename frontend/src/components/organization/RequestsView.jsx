@@ -68,8 +68,18 @@ const RequestsView = ({
   assignedIds = new Set(), onToggleAssign, assigningId,
 }) => {
   const { t } = useTranslation();
-  // Which request's details show in the bottom-right panel.
+  // Which request's details show in the bottom-right panel, and whether that
+  // selection is view-only (true when it came from the Completed table — the
+  // detail panel then hides every edit control).
   const [selected, setSelected] = useState(null);
+  const [selectedViewOnly, setSelectedViewOnly] = useState(false);
+
+  // Select a request for the detail panel. `viewOnly` locks the panel to a
+  // read-only view (used by the Completed Requests table).
+  const selectRequest = (request, viewOnly = false) => {
+    setSelected(request);
+    setSelectedViewOnly(viewOnly);
+  };
 
   // Every request the org can see (its own + the open feed), for the map.
   // De-duplicated so a request the org is responding to that also
@@ -135,21 +145,37 @@ const RequestsView = ({
     return () => { cancelled = true; };
   }, [sortBy, orgLocation, t]);
 
+  // A request is "completed" once its work is finished — the org marked its
+  // response completed, or the request itself is fulfilled/closed. Completed
+  // requests move to their own view-only table, so we keep them out of the two
+  // active tables above.
+  const isCompleted = (r) =>
+    r.responseStatus === 'completed' || ['fulfilled', 'closed'].includes(r.status);
+
   const sortedYours = useMemo(
-    () => sortRequests(yourRequests, sortBy, distances),
+    () => sortRequests(yourRequests.filter((r) => !isCompleted(r)), sortBy, distances),
     [yourRequests, sortBy, distances]
   );
   const sortedUnfiltered = useMemo(
-    () => sortRequests(unfiltered, sortBy, distances),
+    () => sortRequests(unfiltered.filter((r) => !isCompleted(r)), sortBy, distances),
     [unfiltered, sortBy, distances]
   );
+  // Completed requests the org can see, de-duplicated across both lists.
+  const sortedCompleted = useMemo(() => {
+    const byId = new Map();
+    for (const r of [...yourRequests, ...unfiltered]) {
+      if (isCompleted(r) && !byId.has(r.id)) byId.set(r.id, r);
+    }
+    return sortRequests([...byId.values()], sortBy, distances);
+  }, [yourRequests, unfiltered, sortBy, distances]);
 
   return (
-    <div className="grid lg:grid-cols-2 gap-6 lg:items-stretch">
-      {/* Left: keyword filters + sort control + two request tables. min-h-0 lets
-          the tables below scroll (rather than overflow) so this column's bottom
-          lines up with the request-detail rectangle in the right column. */}
-      <div className="flex flex-col gap-6 min-h-0">
+    <div className="grid lg:grid-cols-2 gap-6 lg:items-start">
+      {/* Left: keyword filters + sort control + two request tables. The tables
+          are a fixed height (header + a 3-row scroll body), so they're already
+          at full size and don't grow/shrink with the request-detail panel on
+          the right. */}
+      <div className="flex flex-col gap-6">
         {/* Keyword search + category/urgency filters (issues #81, #82, #85).
             Filtering runs on the backend, so changing these re-fetches the feed
             via the dashboard's onFiltersChange handler — narrowing the tables
@@ -235,7 +261,7 @@ const RequestsView = ({
           error={error}
           onRetry={onRetry}
           selectedId={selected?.id}
-          onSelect={setSelected}
+          onSelect={(r) => selectRequest(r)}
           emptyText={t('org.requests.yourRequestsEmpty')}
           distances={distances}
           t={t}
@@ -247,8 +273,22 @@ const RequestsView = ({
           error={error}
           onRetry={onRetry}
           selectedId={selected?.id}
-          onSelect={setSelected}
+          onSelect={(r) => selectRequest(r)}
           emptyText={t('org.requests.unfilteredRequestsEmpty')}
+          distances={distances}
+          t={t}
+        />
+        {/* Completed requests — a view-only archive of finished work. Selecting
+            one opens the detail panel with every edit control hidden. */}
+        <RequestTable
+          title={t('org.requests.completedRequests')}
+          requests={sortedCompleted}
+          loading={loading}
+          error={error}
+          onRetry={onRetry}
+          selectedId={selected?.id}
+          onSelect={(r) => selectRequest(r, true)}
+          emptyText={t('org.requests.completedRequestsEmpty')}
           distances={distances}
           t={t}
         />
@@ -277,11 +317,12 @@ const RequestsView = ({
               county choropleth), so the old block "heat map" and its duplicate
               toggle are gone. Height is capped so the map doesn't dominate the
               screen. */}
-          <RequestMap requests={allRequests} height="min(55vh, 26rem)" />
+          <RequestMap requests={allRequests} height="min(38vh, 17rem)" />
         </div>
 
         <RequestDetail
           request={selected}
+          viewOnly={selectedViewOnly}
           onStatusChange={onStatusChange}
           updating={selected && updatingId === selected.id}
           resources={resources}
@@ -303,20 +344,20 @@ const RequestsView = ({
 const METRICS_GRID = 'grid grid-cols-[1fr_5rem_5rem_6rem] gap-3';
 
 // --- Request table ---
-// The header stays fixed while the rows scroll. `max-h-[24.5rem]` caps the
-// scroll body at ~8 rows (each row is px-5 py-3 ≈ 3rem tall) so long lists don't
-// stretch the page. On large screens the table also flex-grows (flex-1 +
-// min-h-0) so the two stacked tables fill the left column and its bottom lines
-// up with the request-detail rectangle on the right.
+// The header stays fixed while the rows scroll. The scroll body is a fixed
+// `h-[10.5rem]` (~3.5 rows, each px-5 py-3 ≈ 3rem tall — the half-row hints
+// there's more to scroll), so the table is always at its full size — it doesn't
+// grow or shrink to track the request-detail panel on the right; long lists
+// just scroll within that window.
 const RequestTable = ({
   title, requests, loading, error, onRetry, selectedId, onSelect, emptyText,
   distances = {}, t,
 }) => (
-  <div className="flex flex-col min-h-0 lg:flex-1">
+  <div className="flex flex-col">
     <div className="inline-block bg-[#9db29a] dark:bg-[#1f3320] text-[#1C2A16] dark:text-white font-bold rounded-t-2xl px-6 py-2 mb-[-8px] relative z-10 shrink-0">
       {title}
     </div>
-    <div className="flex flex-col min-h-0 flex-1 bg-[#eef4fb] dark:bg-[#16233a] rounded-2xl rounded-tl-none shadow-md overflow-hidden transition-colors duration-300">
+    <div className="flex flex-col bg-[#eef4fb] dark:bg-[#16233a] rounded-2xl rounded-tl-none shadow-md overflow-hidden transition-colors duration-300">
       {/* Header row — fixed above the scrolling body. */}
       <div className={`${METRICS_GRID} bg-[#c5d9ef] dark:bg-[#22304a] px-5 py-3 font-bold text-[#1C2A16] dark:text-white shrink-0`}>
         <span>{t('org.requests.columnName')}</span>
@@ -325,8 +366,8 @@ const RequestTable = ({
         <span className="text-right">{t('org.requests.columnDistance')}</span>
       </div>
 
-      {/* Scrolling body — shows ~8 rows at a time, then scrolls. */}
-      <div className="flex-1 min-h-0 overflow-y-auto max-h-[24.5rem]">
+      {/* Scrolling body — fixed at ~3.5 rows, then scrolls. */}
+      <div className="h-[10.5rem] overflow-y-auto">
         {loading && (
           <p className="px-5 py-4 text-gray-500 dark:text-gray-400 text-sm" role="status">{t('org.requests.loading')}</p>
         )}
@@ -421,7 +462,7 @@ const PriorityLabel = ({ request, t }) => {
 const STATUS_OPTIONS = ['pending', 'in-progress', 'matched', 'fulfilled', 'closed'];
 
 const RequestDetail = ({
-  request, onStatusChange, updating, resources, onAllocationsChanged,
+  request, viewOnly = false, onStatusChange, updating, resources, onAllocationsChanged,
   isAssigned, onToggleAssign, assigning, t,
 }) => {
   if (!request) {
@@ -457,9 +498,17 @@ const RequestDetail = ({
         </p>
       </div>
 
-      {/* Request details */}
-      <div className="flex-1 text-[#1C2A16] dark:text-white">
+      {/* Request details. Capped in height with an internal scroll so that when
+          the allocation section is expanded the panel doesn't run off-screen —
+          the page still ends at the bottom of this rectangle. */}
+      <div className="flex-1 text-[#1C2A16] dark:text-white max-h-[28rem] overflow-y-auto pr-1">
         <h3 className="font-bold uppercase tracking-wide mb-2">{t('org.requests.detailsTitle')}</h3>
+
+        {viewOnly && (
+          <p className="mb-3 text-xs font-semibold text-gray-600 dark:text-gray-300 bg-white/70 dark:bg-black/20 rounded-lg px-2 py-1 inline-block">
+            {t('org.requests.viewOnlyNote')}
+          </p>
+        )}
 
         <p className="text-xs font-semibold uppercase">{t('org.requests.description')}</p>
         <p className="bg-white/70 dark:bg-black/20 rounded-lg p-2 text-sm min-h-[48px] mb-3">
@@ -488,7 +537,7 @@ const RequestDetail = ({
         </div>
 
         {/* Status control — the org's action on this request */}
-        {onStatusChange && (
+        {!viewOnly && onStatusChange && (
           <div className="flex items-center gap-2">
             <label htmlFor="detail-status" className="text-xs font-semibold uppercase">{t('org.requests.status')}</label>
             <select
@@ -509,7 +558,7 @@ const RequestDetail = ({
         {/* Assign / unassign this request to the organization. Assigning is what
             unlocks allocating resources below; other orgs can assign the same
             request independently. */}
-        {onToggleAssign && (
+        {!viewOnly && onToggleAssign && (
           <div className="mt-3 flex items-center gap-3">
             <button
               type="button"
@@ -535,9 +584,12 @@ const RequestDetail = ({
           </div>
         )}
 
-        {/* Assign resources from the org's inventory to this request — only once
-            the request is assigned to this organization. */}
-        {isAssigned ? (
+        {/* Allocation section. For a completed (view-only) request we show what
+            was allocated with no controls. Otherwise the org can allocate — but
+            only once the request is assigned to this organization. */}
+        {viewOnly ? (
+          <AllocationPanel request={request} resources={resources} readOnly />
+        ) : isAssigned ? (
           <AllocationPanel
             request={request}
             resources={resources}

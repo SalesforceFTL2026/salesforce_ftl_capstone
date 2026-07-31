@@ -19,7 +19,9 @@ import {
 // @param {object} request - the selected request ({ id, ... })
 // @param {object[]} resources - the org's inventory (for the picker dropdown)
 // @param {() => void} onChanged - called after allocate/deallocate succeeds
-const AllocationPanel = ({ request, resources, onChanged }) => {
+// @param {boolean} [readOnly] - when true, show what's allocated but hide every
+//   control (AI suggest, allocate form, remove) — used for completed requests.
+const AllocationPanel = ({ request, resources, onChanged, readOnly = false }) => {
   const { t } = useTranslation();
   const [allocations, setAllocations] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -126,23 +128,25 @@ const AllocationPanel = ({ request, resources, onChanged }) => {
     <div className="mt-4 pt-4 border-t border-white/40 dark:border-white/10">
       <div className="flex items-center justify-between mb-2">
         <h4 className="font-bold uppercase tracking-wide text-xs">{t('org.allocation.title')}</h4>
-        <button
-          type="button"
-          onClick={handleSuggest}
-          disabled={suggesting}
-          className="text-xs font-semibold bg-[#7F9764] text-white px-3 py-1 rounded-full hover:opacity-90 disabled:opacity-60"
-        >
-          {suggesting ? t('org.allocation.thinking') : t('org.allocation.suggestWithAi')}
-        </button>
+        {!readOnly && (
+          <button
+            type="button"
+            onClick={handleSuggest}
+            disabled={suggesting}
+            className="text-xs font-semibold bg-[#7F9764] text-white px-3 py-1 rounded-full hover:opacity-90 disabled:opacity-60"
+          >
+            {suggesting ? t('org.allocation.thinking') : t('org.allocation.suggestWithAi')}
+          </button>
+        )}
       </div>
 
       {error && <p className="text-red-700 dark:text-red-300 text-xs mb-2">{error}</p>}
 
       {/* AI suggestions */}
-      {suggestError && (
+      {!readOnly && suggestError && (
         <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">{suggestError}</p>
       )}
-      {suggestions.length > 0 && (
+      {!readOnly && suggestions.length > 0 && (
         <div className="mb-3 space-y-1">
           {suggestions.map((s) => (
             <button
@@ -175,19 +179,22 @@ const AllocationPanel = ({ request, resources, onChanged }) => {
               <span>
                 {a.quantity} {a.resource?.unit} · {a.resource?.name}
               </span>
-              <button
-                type="button"
-                onClick={() => handleRemove(a.id)}
-                className="text-xs font-semibold text-red-600 hover:underline"
-              >
-                {t('org.allocation.remove')}
-              </button>
+              {!readOnly && (
+                <button
+                  type="button"
+                  onClick={() => handleRemove(a.id)}
+                  className="text-xs font-semibold text-red-600 hover:underline"
+                >
+                  {t('org.allocation.remove')}
+                </button>
+              )}
             </li>
           ))}
         </ul>
       )}
 
-      {/* Allocate form */}
+      {/* Allocate form — hidden for completed (view-only) requests. */}
+      {!readOnly && (
       <form onSubmit={handleAllocate} className="flex items-end gap-2">
         <div className="flex-1">
           <label htmlFor="alloc-resource" className="text-xs font-semibold uppercase block mb-1">
@@ -229,6 +236,7 @@ const AllocationPanel = ({ request, resources, onChanged }) => {
           {busy ? t('org.allocation.adding') : t('org.allocation.allocate')}
         </button>
       </form>
+      )}
     </div>
   );
 };

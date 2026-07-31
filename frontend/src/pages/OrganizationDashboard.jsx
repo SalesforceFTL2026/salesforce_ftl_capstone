@@ -59,7 +59,6 @@ const OrganizationDashboard = () => {
         { id: 'dashboard', label: t('nav.dashboard'), icon: 'dashboard' },
         { id: 'requests', label: t('nav.requests'), icon: 'requests' },
         { id: 'tasks', label: t('org.nav.tasks'), icon: 'tasks' },
-        { id: 'metrics', label: t('org.nav.metrics'), icon: 'metrics' },
         { id: 'resources', label: t('org.nav.resources'), icon: 'resources' },
       ],
     },
@@ -75,7 +74,6 @@ const OrganizationDashboard = () => {
     dashboard: t('nav.dashboard'),
     requests: t('nav.requests'),
     tasks: t('org.nav.tasks'),
-    metrics: t('org.nav.metrics'),
     resources: t('org.nav.resources'),
     settings: t('nav.settings'),
   };
@@ -276,38 +274,84 @@ const OrganizationDashboard = () => {
     [feed, respondingIds]
   );
 
-  // Headline dashboard stats, all derived from the org's own data:
-  // - Requests Completed: % of the requests this org is tracking that are done
-  //   (the request is fulfilled/closed, or the org's response is completed).
-  // - People Helped: sum of household sizes across those completed requests,
-  //   falling back to an assumed average where no household size was recorded.
-  // - Resources Available: count of resources the org has marked available.
+  // Headline dashboard stats, framed as progress toward a goal rather than bare
+  // numbers — the org can see "X of Y" and the percentage, so a figure like
+  // "3 people helped" reads as "3 of 40 (8%)" instead of standing alone.
+  // Each metric is { done, total, pct } (pct is a rounded whole number):
+  // - resolved: responses this org has completed, out of all it's handling.
+  // - peopleReached: household members reached (completed responses) out of the
+  //   total across every request this org is handling.
+  // - resources: inventory marked available, out of the org's whole inventory.
   const dashboardStats = useMemo(() => {
     const isCompleted = (r) =>
       r.responseStatus === 'completed' || ['fulfilled', 'closed'].includes(r.status);
+    const people = (r) => (r.householdSize > 0 ? r.householdSize : AVG_HOUSEHOLD_SIZE);
+    const pct = (done, total) => (total ? Math.round((done / total) * 100) : 0);
+
     const completed = responses.filter(isCompleted);
-
-    const total = responses.length;
-    const completedPct = total ? `${Math.round((completed.length / total) * 100)}%` : '0%';
-
-    const peopleHelped = completed.reduce(
-      (sum, r) => sum + (r.householdSize > 0 ? r.householdSize : AVG_HOUSEHOLD_SIZE),
-      0,
-    );
-
+    const peopleReachedTotal = responses.reduce((sum, r) => sum + people(r), 0);
+    const peopleReachedDone = completed.reduce((sum, r) => sum + people(r), 0);
     const resourcesAvailable = resources.filter((r) => r.available).length;
 
     return {
-      completedPct,
-      peopleHelped: String(peopleHelped),
-      resourcesAvailable: String(resourcesAvailable),
+      resolved: {
+        done: completed.length,
+        total: responses.length,
+        pct: pct(completed.length, responses.length),
+      },
+      peopleReached: {
+        done: peopleReachedDone,
+        total: peopleReachedTotal,
+        pct: pct(peopleReachedDone, peopleReachedTotal),
+      },
+      resources: {
+        done: resourcesAvailable,
+        total: resources.length,
+        pct: pct(resourcesAvailable, resources.length),
+      },
     };
   }, [responses, resources]);
 
+  // Coverage across active disaster locations. The org's core question isn't
+  // just "how many requests" but "of all the places with active needs, which
+  // are being handled and which still need attention?" We group every open
+  // request (the whole feed, any status) by its location, and for each place
+  // count the people needing help and how many requests are already being
+  // handled (a status past "pending" means someone is on it). A location is
+  // "covered" once every request there is being handled.
+  const dashboardLocations = useMemo(() => {
+    const isHandled = (r) =>
+      r.responseStatus === 'completed' ||
+      ['in-progress', 'matched', 'fulfilled', 'closed'].includes(r.status);
+    const people = (r) => (r.householdSize > 0 ? r.householdSize : AVG_HOUSEHOLD_SIZE);
+
+    const byLocation = new Map();
+    for (const r of feed) {
+      const name = (r.location || '').trim() || t('org.dashboard.unknownLocation');
+      const group = byLocation.get(name) || { name, requests: 0, handled: 0, people: 0 };
+      group.requests += 1;
+      group.people += people(r);
+      if (isHandled(r)) group.handled += 1;
+      byLocation.set(name, group);
+    }
+
+    // Most people-in-need first, so the biggest gaps sit at the top.
+    const list = [...byLocation.values()].sort((a, b) => b.people - a.people);
+    const covered = list.filter((l) => l.requests > 0 && l.handled === l.requests).length;
+
+    return {
+      list,
+      total: list.length,
+      covered,
+      needAttention: list.length - covered,
+    };
+  }, [feed, t]);
+
   const dashboardTasks = useMemo(() => {
     // Surface the org's own posted volunteer tasks as dated chips, newest first,
-    // using each task's scheduled volunteer day for the chip.
-    return tasks.slice(0, 3).map((task) => {
+    // using each task's scheduled volunteer day for the chip. The view shows
+    // about two at a time and scrolls the rest, so we pass them all through.
+    return tasks.map((task) => {
       const d = task.volunteerDate ? new Date(task.volunteerDate) : null;
       return {
         date: d ? d.getDate() : '—',
@@ -331,6 +375,7 @@ const OrganizationDashboard = () => {
         <DashboardView
           currentUser={currentUser}
           stats={dashboardStats}
+          locations={dashboardLocations}
           requests={unfiltered}
           onViewRequests={() => setView('requests')}
           tasks={dashboardTasks}
