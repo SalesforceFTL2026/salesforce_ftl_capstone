@@ -7,6 +7,7 @@ import VolunteerRequestsView from '../components/volunteer/VolunteerRequestsView
 import VolunteerTasksView from '../components/volunteer/VolunteerTasksView';
 import AvailableTasksSection from '../components/volunteer/AvailableTasksSection';
 import VolunteerSkillsView from '../components/volunteer/VolunteerSkillsView';
+import VolunteerAvailabilityView from '../components/volunteer/VolunteerAvailabilityView';
 import AccountSettings from '../components/portal/AccountSettings';
 import ChatAssistant from '../components/ChatAssistant/ChatAssistant';
 import Toast from '../components/Toast/Toast';
@@ -19,6 +20,8 @@ import {
   getVolunteerSkills,
   getVolunteerSkillsDetailed,
   updateVolunteerSkills,
+  getVolunteerAvailability,
+  updateVolunteerAvailability,
   expressInterest,
   markRequestHelped,
   withdrawInterest,
@@ -87,6 +90,7 @@ const VolunteerDashboard = () => {
         { id: 'requests', label: t('volunteer.nav.requests'), icon: 'requests' },
         { id: 'tasks', label: t('volunteer.nav.tasks'), icon: 'tasks' },
         { id: 'skills', label: t('volunteer.nav.skills'), icon: 'skills' },
+        { id: 'availability', label: t('volunteer.nav.availability'), icon: 'calendar' },
       ],
     },
     {
@@ -102,6 +106,7 @@ const VolunteerDashboard = () => {
     requests: t('volunteer.viewTitles.requests'),
     tasks: t('volunteer.nav.tasks'),
     skills: t('volunteer.viewTitles.skills'),
+    availability: t('volunteer.viewTitles.availability'),
     settings: t('volunteer.nav.settings'),
   };
 
@@ -126,6 +131,10 @@ const VolunteerDashboard = () => {
   const [skills, setSkills] = useState([]);
   const [skillsDetailed, setSkillsDetailed] = useState([]);
   const [savingSkills, setSavingSkills] = useState(false);
+  // Weekly availability the volunteer lists (weekday -> time-of-day slots),
+  // edited in the Availability view.
+  const [availability, setAvailability] = useState({});
+  const [savingAvailability, setSavingAvailability] = useState(false);
 
   const [loading, setLoading] = useState(false);
   // `error` is only for load failures — it renders inline in the view (with a
@@ -176,6 +185,11 @@ const VolunteerDashboard = () => {
         setSkillsDetailed(await getVolunteerSkillsDetailed());
       } catch {
         setSkillsDetailed([]);
+      }
+      try {
+        setAvailability(await getVolunteerAvailability());
+      } catch {
+        setAvailability({});
       }
       try {
         setAvailableTasks(await getAvailableTasks());
@@ -297,6 +311,17 @@ const VolunteerDashboard = () => {
       setSkills(saved.map((s) => s.name));
     } finally {
       setSavingSkills(false);
+    }
+  };
+
+  // Save the volunteer's edited weekly availability (weekday -> slots).
+  const handleSaveAvailability = async (nextAvailability) => {
+    setSavingAvailability(true);
+    try {
+      const saved = await updateVolunteerAvailability(nextAvailability);
+      setAvailability(saved);
+    } finally {
+      setSavingAvailability(false);
     }
   };
 
@@ -463,11 +488,22 @@ const VolunteerDashboard = () => {
         />
       )}
 
+      {view === 'availability' && (
+        <VolunteerAvailabilityView
+          availability={availability}
+          loading={loading}
+          error={error}
+          onRetry={loadData}
+          onSave={handleSaveAvailability}
+          saving={savingAvailability}
+        />
+      )}
+
       {view === 'settings' && (
         <AccountSettings currentUser={currentUser} onUserChange={setCurrentUser} />
       )}
 
-      {!['dashboard', 'requests', 'tasks', 'skills', 'settings'].includes(view) && (
+      {!['dashboard', 'requests', 'tasks', 'skills', 'availability', 'settings'].includes(view) && (
         <ComingSoonPanel title={VIEW_TITLES[view]} />
       )}
 

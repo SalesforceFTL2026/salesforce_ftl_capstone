@@ -354,7 +354,7 @@
       "removeError": "无法移除分配。",
       "title": "已调配的资源",
       "thinking": "思考中…",
-      "suggestWithAi": "✨ 使用 AI 建议",
+      "suggestWithAi": "使用 AI 建议",
       "loading": "加载中…",
       "nothingAllocated": "尚未调配任何资源。",
       "remove": "移除",
@@ -442,7 +442,7 @@
       "selectRequestFrom": "选择来自 {{name}} 的请求",
       "helpSeekerLower": "求助者",
       "helpSeeker": "求助者",
-      "whyPrioritized": "🤖 AI 为何将此优先处理",
+      "whyPrioritized": "AI 为何将此优先处理",
       "notScoredYet": "此请求尚未由 AI 优先级排序器评分。",
       "requestLabel": "请求：",
       "whyTooltip": "显示 AI 为何将此请求优先处理",
@@ -650,7 +650,7 @@
       "title": "确认我们听到的内容",
       "subtitle": "我们已将你的录音转换为请求。请审核详情，并在提交前修正任何有误之处。",
       "youSaid": "你说的是",
-      "doubleCheck": "⚠ 请仔细核对",
+      "doubleCheck": "请仔细核对",
       "reRecord": "重新录制",
       "submitting": "提交中…",
       "submit": "提交请求",
@@ -691,45 +691,125 @@
   "safety": {
     "pageTitle": "安全手册",
     "pageSubtitle": "灾害发生前、中、后的紧急联系方式和分步指导。",
+    "download": "下载 PDF",
     "contactsHeading": "紧急联系方式",
+    "contactsIntro": "美国境内真实、成熟的求助热线，您可以在全国任何地方拨打。其中许多热线会将您转接到当地的援助资源。",
     "guidesHeading": "灾害防备指南",
     "disclaimer": "指导内容改编自 FEMA、Ready.gov 和 American Red Cross。请始终遵循当地应急官员的指示。",
     "contacts": {
+      "categories": {
+        "immediate": "立即拨打",
+        "disaster": "灾难救援与恢复",
+        "health": "健康与医疗",
+        "mentalHealth": "心理健康与情感支持",
+        "safety": "安全、虐待与暴力",
+        "children": "儿童、青少年与家庭",
+        "seniorsDisability": "老年人与残障人士",
+        "veterans": "退伍军人",
+        "animals": "动物与宠物"
+      },
       "lifeThreatening": {
         "label": "危及生命的紧急情况",
-        "note": "警察、消防或医疗"
+        "note": "警察、消防或医疗救援 — 美国境内任何地方"
+      },
+      "crisisLifeline": {
+        "label": "自杀与危机生命热线",
+        "note": "免费、保密的支持，24/7 全天候 — 可致电或发短信"
+      },
+      "community211": {
+        "label": "社区资源 (211)",
+        "note": "食物、住所、房租与水电费援助 — 为您就近对接"
+      },
+      "fema": {
+        "label": "FEMA（联邦紧急事务管理局）帮助热线",
+        "note": "灾难援助与理赔"
       },
       "distressHelpline": {
-        "label": "灾害危机援助热线",
-        "note": "全天候危机咨询"
+        "label": "灾难困境帮助热线",
+        "note": "灾难后 24/7 全天候危机心理咨询"
+      },
+      "redCross": {
+        "label": "美国红十字会",
+        "note": "庇护所与救援服务"
       },
       "poisonControl": {
         "label": "中毒控制中心",
-        "note": "中毒或接触有害物质"
+        "note": "中毒或接触有害物质 — 24/7 全天候"
       },
-      "fema": {
-        "label": "FEMA 援助热线",
-        "note": "灾害援助与理赔"
+      "samhsa": {
+        "label": "SAMHSA（药物滥用与心理健康服务管理局）帮助热线",
+        "note": "药物滥用与心理健康治疗转介"
       },
-      "redCross": {
-        "label": "American Red Cross",
-        "note": "庇护所与救济服务"
+      "cdc": {
+        "label": "CDC-INFO（疾控中心信息热线）",
+        "note": "健康信息与疾病咨询"
       },
-      "localNonEmergency": {
-        "label": "当地非紧急热线",
-        "value": "添加你当地的热线",
-        "note": "警察/公共设施非紧急事务"
+      "medicare": {
+        "label": "Medicare（联邦医疗保险）",
+        "note": "保障范围、理赔与福利咨询"
+      },
+      "crisisText": {
+        "label": "危机短信热线",
+        "note": "由受过培训的咨询师提供免费 24/7 全天候短信支持",
+        "value": "发送短信 HOME 至 741741"
+      },
+      "veteransCrisis": {
+        "label": "退伍军人危机热线",
+        "note": "为处于危机中的退伍军人提供保密支持",
+        "value": "988，然后按 1"
+      },
+      "transLifeline": {
+        "label": "跨性别生命热线",
+        "note": "由跨性别者为跨性别者运营的同伴支持热线"
+      },
+      "trevor": {
+        "label": "The Trevor Project（特雷弗项目）",
+        "note": "为 LGBTQ+ 青少年提供危机支持"
+      },
+      "domesticViolence": {
+        "label": "全国家庭暴力热线",
+        "note": "为虐待与恋爱关系安全提供保密支持"
+      },
+      "sexualAssault": {
+        "label": "全国性侵害热线",
+        "note": "RAINN — 24/7 全天候保密支持"
+      },
+      "childAbuse": {
+        "label": "Childhelp 儿童虐待热线",
+        "note": "举报虐待或寻求帮助 — 24/7 全天候"
+      },
+      "humanTrafficking": {
+        "label": "全国人口贩运热线",
+        "note": "举报人口贩运或获取帮助与转介"
+      },
+      "runaway": {
+        "label": "全国离家出走安全热线",
+        "note": "为离家出走与无家可归的青少年提供帮助"
+      },
+      "missingChildren": {
+        "label": "失踪与受剥削儿童",
+        "note": "举报失踪或受剥削的儿童 — 24/7 全天候"
+      },
+      "eldercare": {
+        "label": "老年护理定位服务",
+        "note": "将老年人对接到当地服务与养老支持"
+      },
+      "dial": {
+        "label": "残障信息与服务热线",
+        "note": "为残障人士在紧急情况下提供帮助"
+      },
+      "vaBenefits": {
+        "label": "VA（退伍军人事务部）福利热线",
+        "note": "退伍军人福利、医疗保健与理赔"
+      },
+      "homelessVeterans": {
+        "label": "无家可归退伍军人",
+        "note": "为无家可归或面临风险的退伍军人提供支持"
+      },
+      "aspca": {
+        "label": "ASPCA 动物中毒控制中心",
+        "note": "为中毒宠物提供紧急帮助 — 24/7 全天候"
       }
-    },
-    "zip": {
-      "label": "按邮政编码查找当地帮助",
-      "placeholder": "例如 78701",
-      "search": "搜索",
-      "searching": "搜索中…",
-      "clear": "清除",
-      "invalid": "请输入有效的 5 位美国邮政编码。",
-      "lookupError": "无法查找该邮政编码。请重试。",
-      "showingContacts": "正在显示以下地区的联系方式："
     },
     "phases": {
       "before": "之前",

@@ -165,7 +165,7 @@ Manually stopped and restarted the server
 - [ ] Build priority feed endpoint
 - [ ] Implement AI prioritization logic
 
-### ⚠ Current Blocker
+### Current Blocker
 **Only 1 blocker:** Need AI API keys
 - Anthropic Claude API - for generating explanations
 - OpenAI API - for creating embeddings
@@ -418,18 +418,18 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
 
 ## 11. BLOCKERS & SUPPORT NEEDED (3 min)
 
-### 🚧 Current Blockers
+### Current Blockers
 1. **AI API Keys** (critical for Week 1)
    - Need Anthropic + OpenAI accounts
    - Can we use company accounts?
 
-### 🙏 Nice to Have
+### Nice to Have
 - UI/UX design mockups or guidelines
 - Sample crisis data for realistic testing
 - Code review from mentors
 - Architecture feedback (is our approach sound?)
 
-### ❓ Questions for Managers
+### Questions for Managers
 1. Do we have access to paid AI API keys?
 2. Any design guidelines we should follow?
 3. What's the expected demo format at the end?

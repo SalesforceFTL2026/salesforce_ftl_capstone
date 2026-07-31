@@ -1,5 +1,11 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { calculatePriorityScore, getScoreBreakdown, hasLifeSafetySignal } from './scoring.js';
+import {
+  calculatePriorityScore,
+  getScoreBreakdown,
+  hasLifeSafetySignal,
+  coverageBoost,
+  coverageAdjustedScore,
+} from './scoring.js';
 
 // The score includes a time-decay component based on Date.now(), so we freeze
 // the clock. "NOW" is our fixed reference; helpers build createdAt timestamps
@@ -125,6 +131,48 @@ describe('life-safety override (LLM classifier verdict)', () => {
   it('reports the override verdict in getScoreBreakdown.lifeSafety', () => {
     expect(getScoreBreakdown(paraphrase, [], true).lifeSafety).toBe(true);
     expect(getScoreBreakdown(paraphrase, [], false).lifeSafety).toBe(false);
+  });
+});
+
+describe('coverage lift (issue #92)', () => {
+  it('gives the full boost when no one has responded', () => {
+    // 0 responders -> COVERAGE_LIFT_MAX (15).
+    expect(coverageBoost({ volunteerInterestCount: 0, organizationRespondingCount: 0 })).toBeCloseTo(15);
+  });
+
+  it('treats missing counts as zero responders (full boost)', () => {
+    expect(coverageBoost({})).toBeCloseTo(15);
+    expect(coverageBoost()).toBeCloseTo(15);
+  });
+
+  it('shrinks the boost as responders accumulate, with diminishing returns', () => {
+    const none = coverageBoost({ volunteerInterestCount: 0, organizationRespondingCount: 0 });
+    const one = coverageBoost({ volunteerInterestCount: 1, organizationRespondingCount: 0 });
+    const two = coverageBoost({ volunteerInterestCount: 1, organizationRespondingCount: 1 });
+    expect(one).toBeLessThan(none);
+    expect(two).toBeLessThan(one);
+    // Diminishing: the first responder drops the boost more than the second.
+    expect(none - one).toBeGreaterThan(one - two);
+  });
+
+  it('sums volunteer and org responders together', () => {
+    expect(coverageBoost({ volunteerInterestCount: 2, organizationRespondingCount: 0 }))
+      .toBeCloseTo(coverageBoost({ volunteerInterestCount: 0, organizationRespondingCount: 2 }));
+  });
+
+  it('lifts an uncovered request above an equally-scored covered one', () => {
+    const uncovered = coverageAdjustedScore(60, { volunteerInterestCount: 0, organizationRespondingCount: 0 });
+    const covered = coverageAdjustedScore(60, { volunteerInterestCount: 3, organizationRespondingCount: 1 });
+    expect(uncovered).toBeGreaterThan(covered);
+  });
+
+  it('never pushes the adjusted score above 100', () => {
+    expect(coverageAdjustedScore(95, { volunteerInterestCount: 0, organizationRespondingCount: 0 })).toBeLessThanOrEqual(100);
+  });
+
+  it('treats a non-numeric stored score as zero', () => {
+    expect(coverageAdjustedScore(undefined, { volunteerInterestCount: 5, organizationRespondingCount: 5 }))
+      .toBeCloseTo(coverageBoost({ volunteerInterestCount: 5, organizationRespondingCount: 5 }));
   });
 });
 

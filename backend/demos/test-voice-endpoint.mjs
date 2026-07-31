@@ -76,9 +76,9 @@ async function main() {
   log(`VOICE RESPONSE (HTTP ${voiceRes.status}, ${ms}ms)`, voiceBody);
 
   if (voiceRes.ok && voiceBody?.success) {
-    console.log('\n✅ SUCCESS — transcript + fields returned. The endpoint works.');
+    console.log('\nSUCCESS — transcript + fields returned. The endpoint works.');
   } else {
-    console.log('\n❌ FAILED — see the message above.');
+    console.log('\nFAILED — see the message above.');
     console.log('   • 502 "Could not understand..." => extraction (OpenRouter) failed in prod.');
     console.log('   • 502 "Could not transcribe..."  => Whisper (OPENAI_API_KEY) failed in prod.');
     console.log('   • 403                            => account is not a help-seeker.');

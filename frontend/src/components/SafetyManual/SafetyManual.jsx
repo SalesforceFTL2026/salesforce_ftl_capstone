@@ -1,6 +1,6 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
-import api from '../../utils/api';
 
 // A reference "manual" for help-seekers: who to call in an emergency, and
 // what to do before / during / after common disasters. Content is static
@@ -9,15 +9,84 @@ import api from '../../utils/api';
 const SafetyManual = () => {
   const { t } = useTranslation();
 
-  // National emergency contacts. Numbers are US-wide; local lines vary, so we
-  // leave a clearly-labeled placeholder for those.
-  const EMERGENCY_CONTACTS = [
-    { label: t('safety.contacts.lifeThreatening.label'), value: '911', note: t('safety.contacts.lifeThreatening.note') },
-    { label: t('safety.contacts.distressHelpline.label'), value: '1-800-985-5990', note: t('safety.contacts.distressHelpline.note') },
-    { label: t('safety.contacts.poisonControl.label'), value: '1-800-222-1222', note: t('safety.contacts.poisonControl.note') },
-    { label: t('safety.contacts.fema.label'), value: '1-800-621-3362', note: t('safety.contacts.fema.note') },
-    { label: t('safety.contacts.redCross.label'), value: '1-800-733-2767', note: t('safety.contacts.redCross.note') },
-    { label: t('safety.contacts.localNonEmergency.label'), value: t('safety.contacts.localNonEmergency.value'), note: t('safety.contacts.localNonEmergency.note'), placeholder: true },
+  // National emergency contacts, grouped by need. Every number here is a real,
+  // established US-wide hotline that works from anywhere in the country — no
+  // area/zip lookup, because these lines route callers to local help themselves
+  // (e.g. 211, 988). Labels and notes are translated; the numbers live in code.
+  //
+  //   `tel`  — digits to dial (used for the clickable tel: link).
+  //   items without `tel` are text-only actions (e.g. "Text HOME to 741741").
+  const CONTACT_CATEGORIES = [
+    {
+      id: 'immediate',
+      items: [
+        { key: 'lifeThreatening', value: '911', tel: '911' },
+        { key: 'crisisLifeline', value: '988', tel: '988' },
+        { key: 'community211', value: '211', tel: '211' },
+      ],
+    },
+    {
+      id: 'disaster',
+      items: [
+        { key: 'fema', value: '1-800-621-3362', tel: '18006213362' },
+        { key: 'distressHelpline', value: '1-800-985-5990', tel: '18009855990' },
+        { key: 'redCross', value: '1-800-733-2767', tel: '18007332767' },
+      ],
+    },
+    {
+      id: 'health',
+      items: [
+        { key: 'poisonControl', value: '1-800-222-1222', tel: '18002221222' },
+        { key: 'samhsa', value: '1-800-662-4357', tel: '18006624357' },
+        { key: 'cdc', value: '1-800-232-4636', tel: '18002324636' },
+        { key: 'medicare', value: '1-800-633-4227', tel: '18006334227' },
+      ],
+    },
+    {
+      id: 'mentalHealth',
+      items: [
+        { key: 'crisisText', value: t('safety.contacts.crisisText.value') },
+        { key: 'veteransCrisis', value: t('safety.contacts.veteransCrisis.value'), tel: '988' },
+        { key: 'transLifeline', value: '1-877-565-8860', tel: '18775658860' },
+        { key: 'trevor', value: '1-866-488-7386', tel: '18664887386' },
+      ],
+    },
+    {
+      id: 'safety',
+      items: [
+        { key: 'domesticViolence', value: '1-800-799-7233', tel: '18007997233' },
+        { key: 'sexualAssault', value: '1-800-656-4673', tel: '18006564673' },
+        { key: 'childAbuse', value: '1-800-422-4453', tel: '18004224453' },
+        { key: 'humanTrafficking', value: '1-888-373-7888', tel: '18883737888' },
+      ],
+    },
+    {
+      id: 'children',
+      items: [
+        { key: 'runaway', value: '1-800-786-2929', tel: '18007862929' },
+        { key: 'missingChildren', value: '1-800-843-5678', tel: '18008435678' },
+      ],
+    },
+    {
+      id: 'seniorsDisability',
+      items: [
+        { key: 'eldercare', value: '1-800-677-1116', tel: '18006771116' },
+        { key: 'dial', value: '1-888-677-1199', tel: '18886771199' },
+      ],
+    },
+    {
+      id: 'veterans',
+      items: [
+        { key: 'vaBenefits', value: '1-800-827-1000', tel: '18008271000' },
+        { key: 'homelessVeterans', value: '1-877-424-3838', tel: '18774243838' },
+      ],
+    },
+    {
+      id: 'animals',
+      items: [
+        { key: 'aspca', value: '1-888-426-4435', tel: '18884264435' },
+      ],
+    },
   ];
 
   // Before / during / after steps for each disaster type. Kept concise and
@@ -173,124 +242,75 @@ const SafetyManual = () => {
   // first so the section doesn't look empty on load.
   const [openId, setOpenId] = useState(DISASTER_GUIDES[0].id);
 
-  // Zipcode lookup: resolves a US zip to its city/state and area-tailored
-  // contacts. Until a search succeeds, we show the national defaults.
-  const [zip, setZip] = useState('');
-  const [zipLoading, setZipLoading] = useState(false);
-  const [zipError, setZipError] = useState('');
-  const [localResult, setLocalResult] = useState(null); // { location, contacts }
-
-  const handleZipSearch = async (e) => {
-    e.preventDefault();
-    const trimmed = zip.trim();
-    setZipError('');
-
-    if (!/^\d{5}$/.test(trimmed)) {
-      setZipError(t('safety.zip.invalid'));
-      return;
-    }
-
-    setZipLoading(true);
-    try {
-      const { data } = await api.get(`/api/emergency/${trimmed}`);
-      setLocalResult(data.data);
-    } catch (err) {
-      setLocalResult(null);
-      setZipError(err.response?.data?.message || t('safety.zip.lookupError'));
-    } finally {
-      setZipLoading(false);
-    }
-  };
-
-  // Show area-tailored contacts once a lookup succeeds, else national defaults.
-  const contacts = localResult?.contacts || EMERGENCY_CONTACTS;
-
   return (
-    <div>
-      <h1 className="text-3xl font-bold text-[#1C2A16] dark:text-white mb-1">
-        {t('safety.pageTitle')}
-      </h1>
-      <p className="text-gray-500 dark:text-gray-400 mb-8">
-        {t('safety.pageSubtitle')}
-      </p>
+    <div className="safety-screen">
+      <div className="flex flex-wrap items-start justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-[#1C2A16] dark:text-white mb-1">
+            {t('safety.pageTitle')}
+          </h1>
+          <p className="text-gray-500 dark:text-gray-400">
+            {t('safety.pageSubtitle')}
+          </p>
+        </div>
+        {/* Print → "Save as PDF". A print stylesheet renders the full manual
+            (all contacts + every guide expanded) so people can keep an offline
+            copy. window.print() lets the browser use its own fonts, so every
+            language / script prints correctly. */}
+        <button
+          type="button"
+          onClick={() => window.print()}
+          className="shrink-0 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#1e3a5f] text-white font-semibold hover:bg-[#182f4d] focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/40 transition-colors"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M12 4v6" />
+          </svg>
+          {t('safety.download')}
+        </button>
+      </div>
 
       {/* ── Emergency contacts ───────────────────────────────────────── */}
       <section className="mb-10">
-        <h2 className="text-sm font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-4">
+        <h2 className="text-sm font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">
           {t('safety.contactsHeading')}
         </h2>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+          {t('safety.contactsIntro')}
+        </p>
 
-        {/* Zipcode search — find local (211) help for a specific area. */}
-        <form onSubmit={handleZipSearch} className="flex flex-wrap items-end gap-3 mb-4">
-          <div>
-            <label htmlFor="zip" className="block text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-1">
-              {t('safety.zip.label')}
-            </label>
-            <input
-              id="zip"
-              type="text"
-              inputMode="numeric"
-              value={zip}
-              onChange={(e) => { setZip(e.target.value); setZipError(''); }}
-              placeholder={t('safety.zip.placeholder')}
-              maxLength={5}
-              className="w-40 px-4 py-2.5 rounded-xl border-2 border-gray-300 dark:border-[#3a4f30] bg-white dark:bg-[#1a2f1a] text-gray-900 dark:text-white focus:outline-none focus:border-[#6ba3d3] focus:ring-2 focus:ring-[#6ba3d3]/30 transition-all"
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={zipLoading}
-            className="px-6 py-2.5 rounded-xl bg-[#1e3a5f] text-white font-semibold hover:bg-[#182f4d] focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/40 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            {zipLoading ? t('safety.zip.searching') : t('safety.zip.search')}
-          </button>
-          {localResult && (
-            <button
-              type="button"
-              onClick={() => { setLocalResult(null); setZip(''); setZipError(''); }}
-              className="px-4 py-2.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
-            >
-              {t('safety.zip.clear')}
-            </button>
-          )}
-        </form>
-
-        {zipError && (
-          <p className="text-sm text-red-600 dark:text-red-400 mb-4">{zipError}</p>
-        )}
-        {localResult && (
-          <p className="text-sm text-gray-700 dark:text-gray-300 mb-4">
-            {t('safety.zip.showingContacts')}{' '}
-            <span className="font-bold">
-              {localResult.location.city}, {localResult.location.stateAbbreviation} {localResult.location.zipcode}
-            </span>
-          </p>
-        )}
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {contacts.map((c) => (
-            <div
-              key={c.label}
-              className={`bg-white dark:bg-[#273A20] rounded-2xl shadow-md p-5 transition-colors duration-300 ${
-                c.local ? 'ring-2 ring-[#6ba3d3]' : ''
-              }`}
-            >
-              <p className="text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                {c.label}
-              </p>
-              {c.placeholder ? (
-                <p className="text-lg font-bold text-gray-500 dark:text-gray-500 italic mt-1">
-                  {c.value}
-                </p>
-              ) : (
-                <a
-                  href={`tel:${c.value.replace(/[^0-9]/g, '')}`}
-                  className="text-2xl font-bold text-[#1e3a5f] dark:text-[#6ba3d3] hover:underline mt-1 inline-block"
-                >
-                  {c.value}
-                </a>
-              )}
-              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{c.note}</p>
+        <div className="space-y-8">
+          {CONTACT_CATEGORIES.map((category) => (
+            <div key={category.id}>
+              <h3 className="text-base font-bold text-[#1C2A16] dark:text-white mb-3">
+                {t(`safety.contacts.categories.${category.id}`)}
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {category.items.map((item) => (
+                  <div
+                    key={item.key}
+                    className="bg-white dark:bg-[#273A20] rounded-2xl shadow-md p-5 transition-colors duration-300"
+                  >
+                    <p className="text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                      {t(`safety.contacts.${item.key}.label`)}
+                    </p>
+                    {item.tel ? (
+                      <a
+                        href={`tel:${item.tel}`}
+                        className="text-2xl font-bold text-[#1e3a5f] dark:text-[#6ba3d3] hover:underline mt-1 inline-block"
+                      >
+                        {item.value}
+                      </a>
+                    ) : (
+                      <p className="text-2xl font-bold text-[#1e3a5f] dark:text-[#6ba3d3] mt-1">
+                        {item.value}
+                      </p>
+                    )}
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                      {t(`safety.contacts.${item.key}.note`)}
+                    </p>
+                  </div>
+                ))}
+              </div>
             </div>
           ))}
         </div>
@@ -366,6 +386,65 @@ const SafetyManual = () => {
       <p className="text-xs text-gray-500 dark:text-gray-500 mt-8 italic">
         {t('safety.disclaimer')}
       </p>
+
+      {/* Print-only document. Rendered into <body> so a print stylesheet can
+          hide the entire app and show only this. It ignores the on-screen
+          accordion state — every guide is fully expanded here. */}
+      {createPortal(
+        <div className="safety-print" aria-hidden="true">
+          <h1 className="safety-print__title">{t('safety.pageTitle')}</h1>
+          <p className="safety-print__subtitle">{t('safety.pageSubtitle')}</p>
+
+          <h2 className="safety-print__section">{t('safety.contactsHeading')}</h2>
+          <p className="safety-print__intro">{t('safety.contactsIntro')}</p>
+          {CONTACT_CATEGORIES.map((category) => (
+            <div key={category.id} className="safety-print__group">
+              <h3 className="safety-print__category">
+                {t(`safety.contacts.categories.${category.id}`)}
+              </h3>
+              <table className="safety-print__contacts">
+                <tbody>
+                  {category.items.map((item) => (
+                    <tr key={item.key}>
+                      <td className="safety-print__c-label">
+                        {t(`safety.contacts.${item.key}.label`)}
+                      </td>
+                      <td className="safety-print__c-value">{item.value}</td>
+                      <td className="safety-print__c-note">
+                        {t(`safety.contacts.${item.key}.note`)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ))}
+
+          <h2 className="safety-print__section safety-print__section--break">
+            {t('safety.guidesHeading')}
+          </h2>
+          {DISASTER_GUIDES.map((guide) => (
+            <div key={guide.id} className="safety-print__guide">
+              <h3 className="safety-print__guide-title">{guide.title}</h3>
+              <div className="safety-print__phases">
+                {PHASES.map((phase) => (
+                  <div key={phase.key} className="safety-print__phase">
+                    <h4 className="safety-print__phase-label">{phase.label}</h4>
+                    <ul className="safety-print__steps">
+                      {guide[phase.key].map((step, i) => (
+                        <li key={i}>{step}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+
+          <p className="safety-print__disclaimer">{t('safety.disclaimer')}</p>
+        </div>,
+        document.body,
+      )}
     </div>
   );
 };

@@ -29,7 +29,7 @@ export async function generateEmbedding(request) {
   ].join('\n');
 
   if (!cohere) {
-    console.log('⚠️  No embedding API configured (Cohere key missing)');
+    console.log('No embedding API configured (Cohere key missing)');
     return null;
   }
 

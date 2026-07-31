@@ -354,7 +354,7 @@
       "removeError": "Nou pa t kapab retire atribisyon an.",
       "title": "Resous Atribye",
       "thinking": "Ap reflechi…",
-      "suggestWithAi": "✨ Sijere ak AI",
+      "suggestWithAi": "Sijere ak AI",
       "loading": "Ap chaje…",
       "nothingAllocated": "Anyen poko atribye.",
       "remove": "Retire",
@@ -442,7 +442,7 @@
       "selectRequestFrom": "Chwazi demand ki soti nan {{name}}",
       "helpSeekerLower": "moun k ap chèche èd",
       "helpSeeker": "Moun K ap Chèche Èd",
-      "whyPrioritized": "🤖 Poukisa AI a bay sa a priyorite",
+      "whyPrioritized": "Poukisa AI a bay sa a priyorite",
       "notScoredYet": "Demand sa a poko note pa priyorizatè AI a.",
       "requestLabel": "Demand:",
       "whyTooltip": "Montre poukisa AI a bay demand sa a priyorite",
@@ -650,7 +650,7 @@
       "title": "Konfime Sa Nou Tande",
       "subtitle": "Nou transfòme anrejistreman ou an yon demand. Revize detay yo epi korije sa ki pa kòrèk anvan ou soumèt.",
       "youSaid": "Ou te di",
-      "doubleCheck": "⚠ Tanpri verifye ankò",
+      "doubleCheck": "Tanpri verifye ankò",
       "reRecord": "Re-anrejistre",
       "submitting": "Ap soumèt…",
       "submit": "Soumèt Demand",
@@ -691,45 +691,125 @@
   "safety": {
     "pageTitle": "Manyèl Sekirite",
     "pageSubtitle": "Kontak ijans ak konsèy etap pa etap pou anvan, pandan, ak apre yon dezas.",
+    "download": "Telechaje PDF",
     "contactsHeading": "Kontak Ijans",
+    "contactsIntro": "Vrè liy dijans etabli Ozetazini ke ou ka rele depi nenpòt kote nan peyi a. Anpil nan liy sa yo ap konekte ou ak èd nan zòn lokal ou.",
     "guidesHeading": "Gid Preparasyon pou Dezas",
     "disclaimer": "Konsèy adapte soti nan FEMA, Ready.gov, ak American Red Cross. Toujou swiv enstriksyon otorite ijans lokal ou yo.",
     "contacts": {
+      "categories": {
+        "immediate": "Rele kounye a",
+        "disaster": "Sekou ak rekiperasyon apre katastwòf",
+        "health": "Sante ak medikal",
+        "mentalHealth": "Sante mantal ak sipò emosyonèl",
+        "safety": "Sekirite, abi ak vyolans",
+        "children": "Timoun, jèn ak fanmi",
+        "seniorsDisability": "Granmoun aje ak moun ki gen andikap",
+        "veterans": "Veteran",
+        "animals": "Bèt ak zannimo domestik"
+      },
       "lifeThreatening": {
-        "label": "Ijans ki menase lavi",
-        "note": "Lapolis, ponpye, oswa medikal"
+        "label": "Ijans ki mete lavi an danje",
+        "note": "Lapolis, ponpye, oswa medikal — nenpòt kote Ozetazini"
       },
-      "distressHelpline": {
-        "label": "Liy Èd pou Detrès Dezas",
-        "note": "Konsèy kriz 24/7"
+      "crisisLifeline": {
+        "label": "Liy Sekou pou Sitou ak Kriz",
+        "note": "Sipò gratis e konfidansyèl 24/7 — rele oswa voye tèks"
       },
-      "poisonControl": {
-        "label": "Kontwòl Anpwazònman",
-        "note": "Anpwazònman oswa ekspozisyon"
+      "community211": {
+        "label": "Resous kominotè (211)",
+        "note": "Manje, abri, èd pou lwaye ak sèvis piblik — konekte ou lokalman"
       },
       "fema": {
-        "label": "Liy Èd FEMA",
-        "note": "Asistans dezas ak reklamasyon"
+        "label": "Liy Asistans FEMA",
+        "note": "Asistans ak reklamasyon apre katastwòf"
+      },
+      "distressHelpline": {
+        "label": "Liy Asistans pou Detrès apre Katastwòf",
+        "note": "Konseye pou kriz 24/7 apre yon katastwòf"
       },
       "redCross": {
-        "label": "American Red Cross",
+        "label": "Kwa Wouj Ameriken",
         "note": "Sèvis abri ak sekou"
       },
-      "localNonEmergency": {
-        "label": "Non-ijans lokal",
-        "value": "Ajoute liy lokal ou",
-        "note": "Non-ijans lapolis/sèvis piblik"
+      "poisonControl": {
+        "label": "Kontwòl Pwazon",
+        "note": "Anpwazònman oswa ekspozisyon — 24/7"
+      },
+      "samhsa": {
+        "label": "Liy Asistans SAMHSA",
+        "note": "Referans pou tretman itilizasyon sibstans ak sante mantal"
+      },
+      "cdc": {
+        "label": "CDC-INFO",
+        "note": "Enfòmasyon sou sante ak kesyon sou maladi"
+      },
+      "medicare": {
+        "label": "Medicare (asirans sante)",
+        "note": "Kesyon sou kouvèti, reklamasyon ak benefis"
+      },
+      "crisisText": {
+        "label": "Liy Tèks pou Kriz",
+        "note": "Sipò pa tèks gratis 24/7 ak yon konseye ki fòme",
+        "value": "Voye tèks HOME nan 741741"
+      },
+      "veteransCrisis": {
+        "label": "Liy Kriz pou Veteran",
+        "note": "Sipò konfidansyèl pou veteran nan kriz",
+        "value": "988, apre sa peze 1"
+      },
+      "transLifeline": {
+        "label": "Trans Lifeline",
+        "note": "Liy sipò kanmarad ki dirije pa e pou moun trans"
+      },
+      "trevor": {
+        "label": "The Trevor Project",
+        "note": "Sipò pou kriz pou jèn LGBTQ+"
+      },
+      "domesticViolence": {
+        "label": "Liy Nasyonal sou Vyolans Domestik",
+        "note": "Sipò konfidansyèl pou abi ak sekirite nan relasyon"
+      },
+      "sexualAssault": {
+        "label": "Liy Nasyonal sou Agresyon Seksyèl",
+        "note": "RAINN — sipò konfidansyèl 24/7"
+      },
+      "childAbuse": {
+        "label": "Liy Childhelp sou Abi Timoun",
+        "note": "Rapòte abi oswa jwenn èd — 24/7"
+      },
+      "humanTrafficking": {
+        "label": "Liy Nasyonal sou Trafik Moun",
+        "note": "Rapòte trafik oswa jwenn èd ak referans"
+      },
+      "runaway": {
+        "label": "Liy Sekirite Nasyonal pou Timoun ki Sove",
+        "note": "Èd pou jèn ki sove lakay ak jèn ki san kay"
+      },
+      "missingChildren": {
+        "label": "Timoun ki Disparèt ak ki Eksplwate",
+        "note": "Rapòte yon timoun ki disparèt oswa ki eksplwate — 24/7"
+      },
+      "eldercare": {
+        "label": "Lokalizatè Swen pou Granmoun Aje",
+        "note": "Konekte granmoun aje ak sèvis lokal ak sipò pou aje"
+      },
+      "dial": {
+        "label": "Liy Enfòmasyon ak Aksè pou Andikap",
+        "note": "Èd pou moun ki gen andikap pandan ijans"
+      },
+      "vaBenefits": {
+        "label": "Liy Benefis VA",
+        "note": "Benefis veteran, swen sante ak reklamasyon"
+      },
+      "homelessVeterans": {
+        "label": "Veteran San Kay",
+        "note": "Sipò pou veteran ki san kay oswa ki an risk"
+      },
+      "aspca": {
+        "label": "Kontwòl Pwazon Bèt ASPCA",
+        "note": "Èd dijans pou bèt domestik ki anpwazònen — 24/7"
       }
-    },
-    "zip": {
-      "label": "Jwenn èd lokal pa kòd postal",
-      "placeholder": "egz. 78701",
-      "search": "Chèche",
-      "searching": "Ap chèche…",
-      "clear": "Efase",
-      "invalid": "Tanpri antre yon kòd postal ameriken valab ak 5 chif.",
-      "lookupError": "Nou pa t kapab chèche kòd postal sa a. Tanpri eseye ankò.",
-      "showingContacts": "Ap montre kontak pou"
     },
     "phases": {
       "before": "Anvan",

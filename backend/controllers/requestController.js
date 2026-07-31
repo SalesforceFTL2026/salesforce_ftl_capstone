@@ -8,6 +8,7 @@ import { parseRadiusFilter, filterWithinRadius } from '../services/geocoding/dis
 import { filterRequestsFromQuery } from '../services/filters/requestFilters.js';
 import { transcribeAudio, extractRequestFields } from '../services/ai/index.js';
 import { hasRole } from '../utils/roles.js';
+import { sendEmail } from '../services/email.js';
 
 /**
  * Request Controller
@@ -725,8 +726,29 @@ export const interactWithRequest = async (req, res) => {
           relatedRequestId: request.id,
           relatedUserId: req.user.id
         });
+
+        // Also email the help-seeker so they hear about it even when they're
+        // not currently in the app. sendEmail never throws and no-ops when
+        // email isn't configured, so this stays inside the same try/catch and
+        // can never fail the volunteer's "I can help" action.
+        const seeker = await prisma.user.findUnique({ where: { id: request.userId } });
+        if (seeker?.email) {
+          await sendEmail({
+            to: seeker.email,
+            subject: 'Someone offered to help with your request',
+            text:
+              `Hi ${seeker.name},\n\n` +
+              `${req.user.name} offered to help with your ${request.category} ` +
+              `request on MapResponse. Log in to see the details and coordinate.\n`,
+            html:
+              `<p>Hi ${seeker.name},</p>` +
+              `<p><strong>${req.user.name}</strong> offered to help with your ` +
+              `<strong>${request.category}</strong> request on MapResponse.</p>` +
+              `<p>Log in to see the details and coordinate.</p>`,
+          });
+        }
       } catch (notifyErr) {
-        console.error('Could not create help-seeker notification:', notifyErr);
+        console.error('Could not notify help-seeker:', notifyErr);
       }
     }
 

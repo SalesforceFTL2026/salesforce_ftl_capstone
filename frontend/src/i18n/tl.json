@@ -354,7 +354,7 @@
       "removeError": "Hindi natanggal ang alokasyon.",
       "title": "Mga Nailaang Mapagkukunan",
       "thinking": "Nag-iisip…",
-      "suggestWithAi": "✨ Magmungkahi gamit ang AI",
+      "suggestWithAi": "Magmungkahi gamit ang AI",
       "loading": "Naglo-load…",
       "nothingAllocated": "Wala pang nailaan.",
       "remove": "Alisin",
@@ -425,6 +425,10 @@
         "map": "Mapa"
       },
       "noOpenRequests": "Walang bukas na kahilingan sa ngayon. Bumalik ka mamaya.",
+      "uncoveredSummary_one": "{{count}} kahilingan ang wala pang tumutulong",
+      "uncoveredSummary_other": "{{count}} kahilingan ang wala pang tumutulong",
+      "showUncoveredOnly": "Ipakita lang ang mga ito",
+      "showAllCoverage": "Ipakita lahat ng kahilingan",
       "whereHelpNeeded": "Kung saan kailangan ang tulong",
       "selectedCount": "{{count}} napiling kahilingan",
       "helpWithSelected": "Maaari akong tumulong sa napili",
@@ -442,7 +446,7 @@
       "selectRequestFrom": "Piliin ang kahilingan mula kay {{name}}",
       "helpSeekerLower": "humihingi ng tulong",
       "helpSeeker": "Humihingi ng Tulong",
-      "whyPrioritized": "🤖 Bakit ito inuna ng AI",
+      "whyPrioritized": "Bakit ito inuna ng AI",
       "notScoredYet": "Ang kahilingang ito ay hindi pa na-iskor ng AI prioritizer.",
       "requestLabel": "Kahilingan:",
       "whyTooltip": "Ipakita kung bakit inuna ng AI ang kahilingang ito",
@@ -506,6 +510,7 @@
       "volunteersInterested_other": "{{count}} volunteer ang interesado",
       "orgsResponding_one": "{{count}} org ang tumutugon",
       "orgsResponding_other": "{{count}} org ang tumutugon",
+      "noCoverage": "Wala pang tumutulong",
       "status": "Status",
       "saving": "Nagse-save…",
       "statusLabel": "Status:",
@@ -529,6 +534,12 @@
       "allCategories": "Lahat ng kategorya",
       "urgencyAriaLabel": "I-filter ayon sa pagkaapurahan",
       "allUrgencies": "Lahat ng pagkaapurahan",
+      "coverageAriaLabel": "I-filter ayon sa saklaw",
+      "allCoverage": "Lahat ng saklaw",
+      "coverage": {
+        "uncovered": "Wala pang tumutulong",
+        "covered": "Tinutulungan na"
+      },
       "matching": "{{count}} tumutugma",
       "clear": "I-clear"
     },
@@ -650,7 +661,7 @@
       "title": "Kumpirmahin ang Aming Narinig",
       "subtitle": "Ginawa naming kahilingan ang iyong recording. Suriin ang mga detalye at ayusin ang anumang mali bago isumite.",
       "youSaid": "Sinabi mo",
-      "doubleCheck": "⚠ Mangyaring suriing mabuti",
+      "doubleCheck": "Mangyaring suriing mabuti",
       "reRecord": "Mag-record muli",
       "submitting": "Isinusumite…",
       "submit": "Isumite ang Kahilingan",
@@ -691,45 +702,125 @@
   "safety": {
     "pageTitle": "Manwal ng Kaligtasan",
     "pageSubtitle": "Mga contact sa emergency at hakbang-hakbang na gabay para sa bago, habang, at pagkatapos ng sakuna.",
+    "download": "I-download ang PDF",
     "contactsHeading": "Mga Contact sa Emergency",
+    "contactsIntro": "Totoo at itinatag na mga US hotline na matatawagan mo mula saanman sa bansa. Marami sa mga linyang ito ang magkokonekta sa iyo sa tulong sa iyong lokal na lugar.",
     "guidesHeading": "Mga Gabay sa Paghahanda sa Sakuna",
     "disclaimer": "Gabay na hinango mula sa FEMA, Ready.gov, at American Red Cross. Palaging sundin ang mga tagubilin mula sa iyong mga lokal na opisyal ng emergency.",
     "contacts": {
+      "categories": {
+        "immediate": "Tumawag ngayon din",
+        "disaster": "Tulong at pagbangon sa sakuna",
+        "health": "Kalusugan at medikal",
+        "mentalHealth": "Kalusugan ng isip at suportang emosyonal",
+        "safety": "Kaligtasan, pang-aabuso at karahasan",
+        "children": "Mga bata, kabataan at pamilya",
+        "seniorsDisability": "Mga nakatatanda at taong may kapansanan",
+        "veterans": "Mga beterano",
+        "animals": "Mga hayop at alagang hayop"
+      },
       "lifeThreatening": {
-        "label": "Emergency na nagbabanta sa buhay",
-        "note": "Pulis, bumbero, o medikal"
+        "label": "Emerhensyang nakamamatay",
+        "note": "Pulis, bumbero, o medikal — saanman sa US"
       },
-      "distressHelpline": {
-        "label": "Disaster Distress Helpline",
-        "note": "24/7 na payo sa krisis"
+      "crisisLifeline": {
+        "label": "Suicide & Crisis Lifeline (Linya para sa Pagpapakamatay at Krisis)",
+        "note": "Libre at kompidensyal na suporta 24/7 — tumawag o mag-text"
       },
-      "poisonControl": {
-        "label": "Poison Control",
-        "note": "Pagkalason o pagkalantad"
+      "community211": {
+        "label": "Mga mapagkukunan ng komunidad (211)",
+        "note": "Tulong sa pagkain, tirahan, upa at utilidad — kokonekta sa iyo nang lokal"
       },
       "fema": {
         "label": "FEMA Helpline",
-        "note": "Tulong at claims sa sakuna"
+        "note": "Tulong at claims para sa sakuna"
+      },
+      "distressHelpline": {
+        "label": "Disaster Distress Helpline (Linya ng Tulong sa Pagkabalisa sa Sakuna)",
+        "note": "24/7 na pagpapayo sa krisis pagkatapos ng sakuna"
       },
       "redCross": {
-        "label": "American Red Cross",
-        "note": "Serbisyo ng silungan at relief"
+        "label": "American Red Cross (Pulang Krus ng Amerika)",
+        "note": "Mga serbisyo sa tirahan at tulong"
       },
-      "localNonEmergency": {
-        "label": "Lokal na hindi emergency",
-        "value": "Idagdag ang iyong lokal na linya",
-        "note": "Pulis/utilities na hindi emergency"
+      "poisonControl": {
+        "label": "Poison Control (Kontrol sa Lason)",
+        "note": "Pagkalason o pagkakalantad — 24/7"
+      },
+      "samhsa": {
+        "label": "SAMHSA Helpline",
+        "note": "Mga referral para sa paggamit ng sangkap at paggamot sa kalusugan ng isip"
+      },
+      "cdc": {
+        "label": "CDC-INFO",
+        "note": "Impormasyon sa kalusugan at mga tanong tungkol sa sakit"
+      },
+      "medicare": {
+        "label": "Medicare",
+        "note": "Mga tanong tungkol sa coverage, claims at benepisyo"
+      },
+      "crisisText": {
+        "label": "Crisis Text Line (Linya ng Text para sa Krisis)",
+        "note": "Libreng 24/7 na suporta sa text kasama ang isang sanay na tagapayo",
+        "value": "I-text ang HOME sa 741741"
+      },
+      "veteransCrisis": {
+        "label": "Veterans Crisis Line (Linya ng Krisis para sa mga Beterano)",
+        "note": "Kompidensyal na suporta para sa mga beteranong nasa krisis",
+        "value": "988, pagkatapos ay Pindutin ang 1"
+      },
+      "transLifeline": {
+        "label": "Trans Lifeline",
+        "note": "Hotline ng suportang pantulong na pinapatakbo ng at para sa mga taong trans"
+      },
+      "trevor": {
+        "label": "The Trevor Project",
+        "note": "Suporta sa krisis para sa mga kabataang LGBTQ+"
+      },
+      "domesticViolence": {
+        "label": "National Domestic Violence Hotline (Pambansang Hotline para sa Karahasan sa Tahanan)",
+        "note": "Kompidensyal na suporta para sa pang-aabuso at kaligtasan sa relasyon"
+      },
+      "sexualAssault": {
+        "label": "National Sexual Assault Hotline (Pambansang Hotline para sa Panggagahasa)",
+        "note": "RAINN — kompidensyal na suporta 24/7"
+      },
+      "childAbuse": {
+        "label": "Childhelp Child Abuse Hotline (Hotline para sa Pang-aabuso sa Bata)",
+        "note": "Iulat ang pang-aabuso o humingi ng tulong — 24/7"
+      },
+      "humanTrafficking": {
+        "label": "National Human Trafficking Hotline (Pambansang Hotline para sa Pagbebenta ng Tao)",
+        "note": "Iulat ang pagbebenta ng tao o humingi ng tulong at referral"
+      },
+      "runaway": {
+        "label": "National Runaway Safeline (Pambansang Safeline para sa mga Tumakas)",
+        "note": "Tulong para sa mga kabataang tumakas at walang tirahan"
+      },
+      "missingChildren": {
+        "label": "Missing & Exploited Children (Mga Nawawala at Pinagsamantalahang Bata)",
+        "note": "Iulat ang isang nawawala o pinagsamantalahang bata — 24/7"
+      },
+      "eldercare": {
+        "label": "Eldercare Locator (Tagahanap ng Pangangalaga sa Nakatatanda)",
+        "note": "Kokonekta sa mga nakatatanda sa mga lokal na serbisyo at suporta sa pagtanda"
+      },
+      "dial": {
+        "label": "Disability Information & Access Line (Linya ng Impormasyon at Access sa Kapansanan)",
+        "note": "Tulong para sa mga taong may kapansanan sa panahon ng emerhensya"
+      },
+      "vaBenefits": {
+        "label": "VA Benefits Hotline (Hotline para sa mga Benepisyo ng VA)",
+        "note": "Mga benepisyo, pangangalagang pangkalusugan at claims ng beterano"
+      },
+      "homelessVeterans": {
+        "label": "Homeless Veterans (Mga Beteranong Walang Tirahan)",
+        "note": "Suporta para sa mga beteranong walang tirahan o nasa panganib"
+      },
+      "aspca": {
+        "label": "ASPCA Animal Poison Control (Kontrol sa Lason ng Hayop ng ASPCA)",
+        "note": "Tulong sa emerhensya para sa mga nalasong alagang hayop — 24/7"
       }
-    },
-    "zip": {
-      "label": "Maghanap ng lokal na tulong ayon sa zipcode",
-      "placeholder": "hal. 78701",
-      "search": "Maghanap",
-      "searching": "Naghahanap…",
-      "clear": "I-clear",
-      "invalid": "Mangyaring maglagay ng balidong 5-digit na US zipcode.",
-      "lookupError": "Hindi mahanap ang zipcode na iyon. Pakisubukang muli.",
-      "showingContacts": "Ipinapakita ang mga contact para sa"
     },
     "phases": {
       "before": "Bago",
