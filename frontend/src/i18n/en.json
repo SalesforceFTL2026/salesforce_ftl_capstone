@@ -106,7 +106,6 @@
     "sectionContactHelp": "How responders reach you and who lives with you.",
     "sectionPreferences": "Preferences",
     "sectionPreferencesHelp": "How your dashboard looks and reads.",
-    "appearance": "Appearance",
     "appearanceHelp": "Switch between light and dark mode. Your choice is saved on this device.",
     "lightMode": "Light",
     "darkMode": "Dark"
@@ -181,10 +180,22 @@
       "title": "OUR 2026 IMPACT",
       "subtitle": "Illustrative figures from our pilot response network.",
       "stats": {
-        "requests": { "value": "12,480", "label": "Help requests mapped and routed" },
-        "volunteers": { "value": "3,200+", "label": "Volunteers mobilized on the ground" },
-        "response": { "value": "18 min", "label": "Median time to first response" },
-        "counties": { "value": "42", "label": "Counties covered across 6 states" }
+        "requests": {
+          "value": "12,480",
+          "label": "Help requests mapped and routed"
+        },
+        "volunteers": {
+          "value": "3,200+",
+          "label": "Volunteers mobilized on the ground"
+        },
+        "response": {
+          "value": "18 min",
+          "label": "Median time to first response"
+        },
+        "counties": {
+          "value": "42",
+          "label": "Counties covered across 6 states"
+        }
       }
     },
     "getInvolved": {
@@ -828,45 +839,125 @@
   "safety": {
     "pageTitle": "Safety Manual",
     "pageSubtitle": "Emergency contacts and step-by-step guidance for before, during, and after a disaster.",
+    "download": "Download PDF",
     "contactsHeading": "Emergency Contacts",
+    "contactsIntro": "Real, established US hotlines you can call from anywhere in the country. Many of these lines will connect you to help in your local area.",
     "guidesHeading": "Disaster Preparedness Guides",
     "disclaimer": "Guidance adapted from FEMA, Ready.gov, and the American Red Cross. Always follow instructions from your local emergency officials.",
     "contacts": {
+      "categories": {
+        "immediate": "Call right now",
+        "disaster": "Disaster relief & recovery",
+        "health": "Health & medical",
+        "mentalHealth": "Mental health & emotional support",
+        "safety": "Safety, abuse & violence",
+        "children": "Children, youth & families",
+        "seniorsDisability": "Seniors & people with disabilities",
+        "veterans": "Veterans",
+        "animals": "Animals & pets"
+      },
       "lifeThreatening": {
         "label": "Life-threatening emergency",
-        "note": "Police, fire, or medical"
+        "note": "Police, fire, or medical — anywhere in the US"
       },
-      "distressHelpline": {
-        "label": "Disaster Distress Helpline",
-        "note": "24/7 crisis counseling"
+      "crisisLifeline": {
+        "label": "Suicide & Crisis Lifeline",
+        "note": "Free, confidential support 24/7 — call or text"
       },
-      "poisonControl": {
-        "label": "Poison Control",
-        "note": "Poisoning or exposure"
+      "community211": {
+        "label": "Community resources (211)",
+        "note": "Food, shelter, rent & utility help — connects you locally"
       },
       "fema": {
         "label": "FEMA Helpline",
         "note": "Disaster assistance & claims"
       },
+      "distressHelpline": {
+        "label": "Disaster Distress Helpline",
+        "note": "24/7 crisis counseling after a disaster"
+      },
       "redCross": {
         "label": "American Red Cross",
         "note": "Shelter & relief services"
       },
-      "localNonEmergency": {
-        "label": "Local non-emergency",
-        "value": "Add your local line",
-        "note": "Police/utilities non-emergency"
+      "poisonControl": {
+        "label": "Poison Control",
+        "note": "Poisoning or exposure — 24/7"
+      },
+      "samhsa": {
+        "label": "SAMHSA Helpline",
+        "note": "Substance use & mental health treatment referrals"
+      },
+      "cdc": {
+        "label": "CDC-INFO",
+        "note": "Health information & disease questions"
+      },
+      "medicare": {
+        "label": "Medicare",
+        "note": "Coverage, claims & benefits questions"
+      },
+      "crisisText": {
+        "label": "Crisis Text Line",
+        "note": "Free 24/7 text support with a trained counselor",
+        "value": "Text HOME to 741741"
+      },
+      "veteransCrisis": {
+        "label": "Veterans Crisis Line",
+        "note": "Confidential support for veterans in crisis",
+        "value": "988, then Press 1"
+      },
+      "transLifeline": {
+        "label": "Trans Lifeline",
+        "note": "Peer support hotline run by and for trans people"
+      },
+      "trevor": {
+        "label": "The Trevor Project",
+        "note": "Crisis support for LGBTQ+ young people"
+      },
+      "domesticViolence": {
+        "label": "National Domestic Violence Hotline",
+        "note": "Confidential support for abuse & relationship safety"
+      },
+      "sexualAssault": {
+        "label": "National Sexual Assault Hotline",
+        "note": "RAINN — confidential support 24/7"
+      },
+      "childAbuse": {
+        "label": "Childhelp Child Abuse Hotline",
+        "note": "Report abuse or get help — 24/7"
+      },
+      "humanTrafficking": {
+        "label": "National Human Trafficking Hotline",
+        "note": "Report trafficking or get help & referrals"
+      },
+      "runaway": {
+        "label": "National Runaway Safeline",
+        "note": "Help for runaway & homeless youth"
+      },
+      "missingChildren": {
+        "label": "Missing & Exploited Children",
+        "note": "Report a missing or exploited child — 24/7"
+      },
+      "eldercare": {
+        "label": "Eldercare Locator",
+        "note": "Connects older adults to local services & aging support"
+      },
+      "dial": {
+        "label": "Disability Information & Access Line",
+        "note": "Help for people with disabilities during emergencies"
+      },
+      "vaBenefits": {
+        "label": "VA Benefits Hotline",
+        "note": "Veterans benefits, healthcare & claims"
+      },
+      "homelessVeterans": {
+        "label": "Homeless Veterans",
+        "note": "Support for veterans who are homeless or at risk"
+      },
+      "aspca": {
+        "label": "ASPCA Animal Poison Control",
+        "note": "Emergency help for poisoned pets — 24/7"
       }
-    },
-    "zip": {
-      "label": "Find local help by zipcode",
-      "placeholder": "e.g. 78701",
-      "search": "Search",
-      "searching": "Searching…",
-      "clear": "Clear",
-      "invalid": "Please enter a valid 5-digit US zipcode.",
-      "lookupError": "Could not look up that zipcode. Please try again.",
-      "showingContacts": "Showing contacts for"
     },
     "phases": {
       "before": "Before",
