@@ -187,7 +187,9 @@ const ResourcesView = ({
         )}
 
         {!loading && !error && resources.length > 0 && (
-          <ul className="flex flex-col gap-3">
+          // Cap the inventory to about five resources and scroll the rest, so a
+          // long list doesn't stretch the panel. pr-1 keeps the scrollbar off the rows.
+          <ul className="flex flex-col gap-3 max-h-[27rem] overflow-y-auto pr-1">
             {resources.map((r) => (
               <li
                 key={r.id}

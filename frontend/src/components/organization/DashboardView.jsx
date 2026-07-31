@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import RequestMap from '../map/RequestMap';
 
@@ -8,50 +7,63 @@ import RequestMap from '../map/RequestMap';
 // shadows, and the coral map-pin accent reserved for urgency and the primary CTA.
 //
 // The org's core jobs (PRODUCT.md): monitor incoming requests, prioritize
-// crises, and allocate resources. So the left column previews the AI-ranked
-// priority feed — the requests that need a response most — over the old filler
-// line chart, and the right column pairs the real request map (where to deploy)
-// with the org's own posted volunteer tasks.
+// crises, and allocate resources efficiently. So the metrics are framed the way
+// an org actually reasons about progress — not bare tallies but "X of Y, we're
+// P% there" — and a coverage panel answers the org's real question: of all the
+// places with active needs, how many are being handled and how many still need
+// attention? The right column pairs the request map (where to deploy) with the
+// org's own posted volunteer tasks.
 //
 // @param {object} [currentUser] - to greet the org by name
-// @param {object} stats - { completedPct, peopleHelped, resourcesAvailable }
-// @param {object[]} requests - open requests the org can browse (any status)
+// @param {object} stats - progress metrics, each { done, total, pct }:
+//   { resolved, peopleReached, resources }
+// @param {object} locations - { list: {name, requests, handled, people}[],
+//   total, covered, needAttention } — coverage across disaster locations
+// @param {object[]} requests - open requests the org can browse (for the map)
 // @param {() => void} [onViewRequests] - jump to the full Requests view
 // @param {{date: string, month: string, title: string}[]} tasks - posted tasks
-const DashboardView = ({ currentUser, stats, requests = [], onViewRequests, tasks = [] }) => {
+const DashboardView = ({
+  currentUser, stats, locations = { list: [], total: 0, covered: 0, needAttention: 0 },
+  requests = [], onViewRequests, tasks = [],
+}) => {
   const { t } = useTranslation();
   const orgName = currentUser?.name?.split(' ')[0] || 'org';
 
-  // The few highest-priority open requests, so the org sees where a response is
-  // needed most the moment they land. Sort by the AI priority score (desc); the
-  // full, filterable feed lives one click away in the Requests view.
-  const topRequests = useMemo(() => {
-    return [...requests]
-      .sort((a, b) => (b.priorityScore || 0) - (a.priorityScore || 0))
-      .slice(0, 4);
-  }, [requests]);
-
   return (
     <div className="grid lg:grid-cols-[1fr_minmax(320px,420px)] gap-6">
-      {/* ---- Left column: greeting, impact stats, top priority requests ---- */}
-      <div className="bg-surface-2 dark:bg-surface-2 rounded-3xl p-6 sm:p-8 ring-1 ring-hairline shadow-card transition-colors duration-300">
+      {/* ---- Left column: greeting, progress metrics, location coverage ---- */}
+      <div className="bg-surface-2 dark:bg-surface-2 rounded-3xl p-5 sm:p-6 ring-1 ring-hairline shadow-card transition-colors duration-300">
         <h2 className="font-display text-4xl sm:text-5xl text-ink tracking-wide leading-none">
           {t('org.dashboard.greeting', { name: orgName })}
         </h2>
 
-        {/* Impact stat pills — the org's own activity. */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8">
-          <StatPill value={stats.completedPct} label={t('org.dashboard.requestsCompleted')} />
-          <StatPill value={stats.peopleHelped} label={t('org.dashboard.peopleHelped')} />
-          <StatPill value={stats.resourcesAvailable} label={t('org.dashboard.resourcesAvailable')} />
+        {/* Progress metrics — each shows how far along we are toward the goal,
+            not just a bare count, so the number reads with context. */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-5">
+          <ProgressStat
+            metric={stats.resolved}
+            label={t('org.dashboard.requestsResolved')}
+            caption={t('org.dashboard.resolvedCaption', { pct: stats.resolved.pct })}
+          />
+          <ProgressStat
+            metric={stats.peopleReached}
+            label={t('org.dashboard.peopleReached')}
+            caption={t('org.dashboard.peopleReachedCaption', { pct: stats.peopleReached.pct })}
+          />
+          <ProgressStat
+            metric={stats.resources}
+            label={t('org.dashboard.resourcesReady')}
+            caption={t('org.dashboard.resourcesCaption', { pct: stats.resources.pct })}
+          />
         </div>
 
-        {/* Top priority requests — the AI priority feed, previewed. */}
-        <div className="flex items-center justify-between mt-8 mb-3">
+        {/* Location coverage — the org's "where are we staffed / where do we
+            still need to respond?" view across every active disaster location. */}
+        <div className="flex items-center justify-between mt-5 mb-1">
           <h3 className="font-display text-2xl text-ink tracking-wide">
-            {t('org.dashboard.topPriority')}
+            {t('org.dashboard.coverageTitle')}
           </h3>
-          {topRequests.length > 0 && onViewRequests && (
+          {locations.list.length > 0 && onViewRequests && (
             <button
               type="button"
               onClick={onViewRequests}
@@ -62,28 +74,36 @@ const DashboardView = ({ currentUser, stats, requests = [], onViewRequests, task
           )}
         </div>
         <p className="text-ink-muted text-sm mb-4">
-          {t('org.dashboard.topPrioritySubtitle')}
+          {t('org.dashboard.coverageSummary', {
+            total: locations.total,
+            covered: locations.covered,
+            needAttention: locations.needAttention,
+          })}
         </p>
 
-        {topRequests.length === 0 ? (
+        {locations.list.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-hairline p-6 text-center">
             <p className="text-ink font-semibold">{t('org.dashboard.noOpenRequests')}</p>
           </div>
         ) : (
-          <ul className="flex flex-col gap-3">
-            {topRequests.map((request) => (
-              <PriorityRequestRow key={request.id} request={request} onView={onViewRequests} t={t} />
+          /* Show every active disaster location, sized to reveal about one at a
+             time so the rest scroll into view — the org can scan the full list
+             without the panel growing unbounded. pr-1 keeps the scrollbar off
+             the cards. */
+          <ul className="flex flex-col gap-3 max-h-[9.5rem] overflow-y-auto pr-1">
+            {locations.list.map((loc) => (
+              <LocationCoverageRow key={loc.name} location={loc} onView={onViewRequests} t={t} />
             ))}
           </ul>
         )}
 
         {/* Primary CTA — browse the full priority feed (the org's flow). */}
         {onViewRequests && (
-          <div className="flex justify-center mt-8">
+          <div className="flex justify-center mt-5">
             <button
               type="button"
               onClick={onViewRequests}
-              className="px-8 py-4 bg-pin-500 text-white font-bold rounded-full text-lg hover:bg-pin-600 focus:outline-none focus:ring-2 focus:ring-pin-500/40 transition-colors shadow-card"
+              className="px-7 py-3 bg-pin-500 text-white font-bold rounded-full text-base hover:bg-pin-600 focus:outline-none focus:ring-2 focus:ring-pin-500/40 transition-colors shadow-card"
             >
               {t('org.dashboard.browseAllRequests')}
             </button>
@@ -92,8 +112,8 @@ const DashboardView = ({ currentUser, stats, requests = [], onViewRequests, task
       </div>
 
       {/* ---- Right column: data-driven request map + posted tasks ---- */}
-      <div className="bg-forest-800 dark:bg-surface-2 rounded-3xl p-6 ring-1 ring-hairline shadow-card transition-colors duration-300">
-        <h2 className="font-display text-2xl sm:text-3xl text-white dark:text-forest-300 text-center mb-4 tracking-wide">
+      <div className="bg-forest-800 dark:bg-surface-2 rounded-3xl p-5 ring-1 ring-hairline shadow-card transition-colors duration-300">
+        <h2 className="font-display text-2xl sm:text-3xl text-white dark:text-forest-300 text-center mb-3 tracking-wide">
           {t('org.dashboard.whereHelpNeeded')}
         </h2>
         {/* The real interactive request map — geocoded requests drop urgency
@@ -105,13 +125,15 @@ const DashboardView = ({ currentUser, stats, requests = [], onViewRequests, task
             forest green, so we seat the map in a light inset — otherwise those
             dark controls would be dark-on-dark and fail contrast. */}
         <div className="bg-white dark:bg-surface-3 rounded-2xl p-3">
-          <RequestMap requests={requests} height="20rem" />
+          <RequestMap requests={requests} height="15rem" />
         </div>
 
-        <div className="flex items-center justify-between mt-6 mb-2">
+        <div className="flex items-center justify-between mt-4 mb-2">
           <h3 className="font-display text-white tracking-wide text-lg">{t('org.dashboard.openTasks')}</h3>
         </div>
-        <ul className="flex flex-col gap-3">
+        {/* Show about two tasks at a time and scroll the rest, so a long list
+            doesn't stretch the panel. pr-1 keeps the scrollbar off the cards. */}
+        <ul className="flex flex-col gap-3 max-h-[11rem] overflow-y-auto pr-1">
           {tasks.length === 0 && (
             <li className="text-white/90 text-sm">{t('org.dashboard.noOpenTasks')}</li>
           )}
@@ -133,25 +155,41 @@ const DashboardView = ({ currentUser, stats, requests = [], onViewRequests, task
   );
 };
 
-// One impact stat, styled as a quiet forest card with the number in the coral
-// accent so the figure is what the eye lands on.
-const StatPill = ({ value, label }) => (
-  <div className="bg-forest-800 dark:bg-surface-3 rounded-2xl px-5 py-5 text-center text-white shadow-card">
-    <p className="text-3xl font-bold text-pin-400">{value}</p>
-    <p className="text-xs font-bold uppercase tracking-wide text-forest-100 dark:text-ink-muted mt-1">
-      {label}
-    </p>
-  </div>
-);
+// One progress metric, styled as a quiet forest card. Instead of a lone number
+// it shows "done / total", the big coral percentage the eye lands on, a slim
+// progress bar, and a one-line caption — so the figure reads as "how far toward
+// the goal are we?" rather than a bare tally. total = 0 shows a friendly "—".
+const ProgressStat = ({ metric, label, caption }) => {
+  const { done, total, pct } = metric;
+  const hasData = total > 0;
+  return (
+    <div className="bg-forest-800 dark:bg-surface-3 rounded-2xl px-5 py-5 text-white shadow-card">
+      <p className="text-xs font-bold uppercase tracking-wide text-forest-100 dark:text-ink-muted">
+        {label}
+      </p>
+      <p className="mt-2 flex items-baseline gap-2">
+        <span className="text-3xl font-bold text-pin-400">{hasData ? `${pct}%` : '—'}</span>
+        <span className="text-sm font-semibold text-forest-100">{done} / {total}</span>
+      </p>
+      {/* Progress bar toward the goal (100% = every item handled). */}
+      <div className="mt-3 h-1.5 rounded-full bg-forest-900/60 dark:bg-black/30 overflow-hidden">
+        <div
+          className="h-full rounded-full bg-pin-500 transition-all duration-500"
+          style={{ width: `${hasData ? pct : 0}%` }}
+        />
+      </div>
+      <p className="text-[11px] text-forest-100 mt-2 leading-snug">{caption}</p>
+    </div>
+  );
+};
 
-// One preview row for a top-priority request. Shows the category, an urgency
-// badge, the AI priority score, and a one-line reasoning snippet — the core
-// prioritization signals — and links into the full Requests view on click.
-const PriorityRequestRow = ({ request, onView, t }) => {
-  const typeLabel = request.category
-    ? t(`requests.categories.${request.category}`, { defaultValue: request.category })
-    : t('org.dashboard.requestFallback');
-  const hasScore = typeof request.priorityScore === 'number' && request.priorityScore > 0;
+// One disaster location's coverage. Shows how many people need help there and
+// how much of the location is being handled (staffed) — a slim bar plus a
+// status chip: fully covered vs. still needs attention. Links into Requests.
+const LocationCoverageRow = ({ location, onView, t }) => {
+  const { name, requests, handled, people } = location;
+  const pct = requests ? Math.round((handled / requests) * 100) : 0;
+  const covered = requests > 0 && handled === requests;
 
   return (
     <li>
@@ -161,38 +199,30 @@ const PriorityRequestRow = ({ request, onView, t }) => {
         className="w-full text-left bg-forest-800 dark:bg-surface-3 rounded-2xl px-4 py-3 text-white hover:bg-forest-700 dark:hover:bg-surface-2 focus:outline-none focus:ring-2 focus:ring-forest-400/50 transition-colors"
       >
         <div className="flex items-center justify-between gap-3">
-          <span className="font-display text-lg tracking-wide truncate">{typeLabel}</span>
-          {hasScore && (
-            <span className="shrink-0 px-2.5 py-0.5 rounded-full bg-forest-100 text-forest-900 text-xs font-bold uppercase tracking-wide">
-              {t('org.dashboard.priorityLabel')} {Math.round(request.priorityScore)}
-            </span>
-          )}
+          <span className="font-display text-lg tracking-wide truncate">{name}</span>
+          <span
+            className={`shrink-0 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wide ${
+              covered ? 'bg-forest-100 text-forest-900' : 'bg-pin-500 text-white'
+            }`}
+          >
+            {covered ? t('org.dashboard.covered') : t('org.dashboard.needsAttention')}
+          </span>
         </div>
-        <div className="flex items-center flex-wrap gap-2 mt-1">
-          <UrgencyBadge urgency={request.urgency} t={t} />
-          {request.location && (
-            <span className="text-forest-100 text-xs truncate">{request.location}</span>
-          )}
+        <p className="text-forest-100 text-sm mt-1">
+          {t('org.dashboard.locationNeed', { people })}
+        </p>
+        {/* Coverage bar — how many of this location's requests are being handled. */}
+        <div className="mt-2 h-1.5 rounded-full bg-forest-900/60 dark:bg-black/30 overflow-hidden">
+          <div
+            className="h-full rounded-full bg-pin-500 transition-all duration-500"
+            style={{ width: `${pct}%` }}
+          />
         </div>
-        {request.reasoning && (
-          <p className="text-forest-100 text-sm mt-2 line-clamp-2">{request.reasoning}</p>
-        )}
+        <p className="text-[11px] text-forest-100 mt-1">
+          {t('org.dashboard.locationHandled', { handled, requests })}
+        </p>
       </button>
     </li>
-  );
-};
-
-// Urgency badge — coral for the two urgent levels (the brand's one accent),
-// quiet neutral for the rest. Renders nothing when urgency is unknown.
-const UrgencyBadge = ({ urgency, t }) => {
-  if (!urgency) return null;
-  const urgent = urgency === 'Critical' || urgency === 'High';
-  const cls = urgent ? 'bg-pin-500 text-white' : 'bg-white/15 text-forest-100';
-  const label = t(`requests.urgencies.${urgency}`, { defaultValue: urgency });
-  return (
-    <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide ${cls}`}>
-      {label}
-    </span>
   );
 };
 
