@@ -691,45 +691,125 @@
   "safety": {
     "pageTitle": "Manual de seguridad",
     "pageSubtitle": "Contactos de emergencia y guía paso a paso para antes, durante y después de un desastre.",
+    "download": "Descargar PDF",
     "contactsHeading": "Contactos de emergencia",
+    "contactsIntro": "Líneas directas reales y establecidas de EE. UU. a las que puede llamar desde cualquier lugar del país. Muchas de estas líneas lo conectarán con ayuda en su área local.",
     "guidesHeading": "Guías de preparación ante desastres",
     "disclaimer": "Guía adaptada de FEMA, Ready.gov y la American Red Cross. Sigue siempre las instrucciones de tus autoridades locales de emergencia.",
     "contacts": {
+      "categories": {
+        "immediate": "Llame ahora mismo",
+        "disaster": "Ayuda y recuperación ante desastres",
+        "health": "Salud y atención médica",
+        "mentalHealth": "Salud mental y apoyo emocional",
+        "safety": "Seguridad, abuso y violencia",
+        "children": "Niños, jóvenes y familias",
+        "seniorsDisability": "Personas mayores y personas con discapacidad",
+        "veterans": "Veteranos",
+        "animals": "Animales y mascotas"
+      },
       "lifeThreatening": {
-        "label": "Emergencia que pone en peligro la vida",
-        "note": "Policía, bomberos o servicio médico"
+        "label": "Emergencia potencialmente mortal",
+        "note": "Policía, bomberos o servicios médicos — en cualquier lugar de EE. UU."
       },
-      "distressHelpline": {
-        "label": "Línea de Ayuda en Situaciones de Angustia por Desastres",
-        "note": "Consejería en crisis 24/7"
+      "crisisLifeline": {
+        "label": "Línea de Prevención del Suicidio y Crisis",
+        "note": "Apoyo gratuito y confidencial 24/7 — llame o envíe un mensaje de texto"
       },
-      "poisonControl": {
-        "label": "Control de Intoxicaciones",
-        "note": "Intoxicación o exposición"
+      "community211": {
+        "label": "Recursos comunitarios (211)",
+        "note": "Ayuda con alimentos, alojamiento, alquiler y servicios públicos — lo conecta localmente"
       },
       "fema": {
-        "label": "Línea de Ayuda de FEMA",
-        "note": "Asistencia por desastres y reclamos"
+        "label": "Línea de ayuda de FEMA",
+        "note": "Asistencia por desastres y reclamaciones"
+      },
+      "distressHelpline": {
+        "label": "Línea de Ayuda para Angustia por Desastres",
+        "note": "Asesoramiento en crisis 24/7 después de un desastre"
       },
       "redCross": {
-        "label": "American Red Cross",
-        "note": "Servicios de refugio y ayuda"
+        "label": "Cruz Roja Americana",
+        "note": "Servicios de alojamiento y ayuda"
       },
-      "localNonEmergency": {
-        "label": "Línea local para casos que no son de emergencia",
-        "value": "Agrega tu línea local",
-        "note": "Policía/servicios públicos para casos que no son de emergencia"
+      "poisonControl": {
+        "label": "Control de Envenenamiento",
+        "note": "Envenenamiento o exposición — 24/7"
+      },
+      "samhsa": {
+        "label": "Línea de ayuda de SAMHSA",
+        "note": "Referencias para tratamiento de consumo de sustancias y salud mental"
+      },
+      "cdc": {
+        "label": "CDC-INFO",
+        "note": "Información de salud y preguntas sobre enfermedades"
+      },
+      "medicare": {
+        "label": "Medicare",
+        "note": "Preguntas sobre cobertura, reclamaciones y beneficios"
+      },
+      "crisisText": {
+        "label": "Línea de Texto de Crisis",
+        "note": "Apoyo gratuito por mensaje de texto 24/7 con un consejero capacitado",
+        "value": "Envíe HOME por mensaje de texto al 741741"
+      },
+      "veteransCrisis": {
+        "label": "Línea de Crisis para Veteranos",
+        "note": "Apoyo confidencial para veteranos en crisis",
+        "value": "988, luego presione 1"
+      },
+      "transLifeline": {
+        "label": "Trans Lifeline",
+        "note": "Línea directa de apoyo entre pares dirigida por y para personas trans"
+      },
+      "trevor": {
+        "label": "The Trevor Project",
+        "note": "Apoyo en crisis para jóvenes LGBTQ+"
+      },
+      "domesticViolence": {
+        "label": "Línea Nacional contra la Violencia Doméstica",
+        "note": "Apoyo confidencial para abuso y seguridad en las relaciones"
+      },
+      "sexualAssault": {
+        "label": "Línea Nacional contra la Agresión Sexual",
+        "note": "RAINN — apoyo confidencial 24/7"
+      },
+      "childAbuse": {
+        "label": "Línea de Childhelp contra el Abuso Infantil",
+        "note": "Denuncie el abuso u obtenga ayuda — 24/7"
+      },
+      "humanTrafficking": {
+        "label": "Línea Nacional contra la Trata de Personas",
+        "note": "Denuncie la trata u obtenga ayuda y referencias"
+      },
+      "runaway": {
+        "label": "Línea Nacional de Seguridad para Fugitivos",
+        "note": "Ayuda para jóvenes fugitivos y sin hogar"
+      },
+      "missingChildren": {
+        "label": "Niños Desaparecidos y Explotados",
+        "note": "Denuncie a un niño desaparecido o explotado — 24/7"
+      },
+      "eldercare": {
+        "label": "Localizador de Cuidado de Ancianos",
+        "note": "Conecta a los adultos mayores con servicios locales y apoyo para el envejecimiento"
+      },
+      "dial": {
+        "label": "Línea de Información y Acceso para Personas con Discapacidad",
+        "note": "Ayuda para personas con discapacidad durante emergencias"
+      },
+      "vaBenefits": {
+        "label": "Línea de Beneficios del VA",
+        "note": "Beneficios, atención médica y reclamaciones para veteranos"
+      },
+      "homelessVeterans": {
+        "label": "Veteranos sin Hogar",
+        "note": "Apoyo para veteranos sin hogar o en riesgo"
+      },
+      "aspca": {
+        "label": "Control de Envenenamiento Animal de la ASPCA",
+        "note": "Ayuda de emergencia para mascotas envenenadas — 24/7"
       }
-    },
-    "zip": {
-      "label": "Encuentra ayuda local por código postal",
-      "placeholder": "p. ej. 78701",
-      "search": "Buscar",
-      "searching": "Buscando…",
-      "clear": "Borrar",
-      "invalid": "Por favor ingresa un código postal de EE. UU. válido de 5 dígitos.",
-      "lookupError": "No se pudo buscar ese código postal. Por favor intenta de nuevo.",
-      "showingContacts": "Mostrando contactos para"
     },
     "phases": {
       "before": "Antes",

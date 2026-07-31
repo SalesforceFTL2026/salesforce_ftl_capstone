@@ -691,45 +691,125 @@
   "safety": {
     "pageTitle": "Sổ tay an toàn",
     "pageSubtitle": "Danh bạ khẩn cấp và hướng dẫn từng bước cho trước, trong và sau thảm họa.",
+    "download": "Tải xuống PDF",
     "contactsHeading": "Danh bạ khẩn cấp",
+    "contactsIntro": "Các đường dây nóng thực sự, đã được thành lập tại Hoa Kỳ mà bạn có thể gọi từ bất kỳ đâu trên toàn quốc. Nhiều đường dây trong số này sẽ kết nối bạn với sự trợ giúp tại khu vực địa phương của bạn.",
     "guidesHeading": "Hướng dẫn chuẩn bị ứng phó thảm họa",
     "disclaimer": "Hướng dẫn được điều chỉnh từ FEMA, Ready.gov và American Red Cross. Luôn tuân theo chỉ dẫn của cơ quan ứng phó khẩn cấp tại địa phương của bạn.",
     "contacts": {
+      "categories": {
+        "immediate": "Gọi ngay bây giờ",
+        "disaster": "Cứu trợ & phục hồi sau thảm họa",
+        "health": "Sức khỏe & y tế",
+        "mentalHealth": "Sức khỏe tâm thần & hỗ trợ tinh thần",
+        "safety": "An toàn, lạm dụng & bạo lực",
+        "children": "Trẻ em, thanh thiếu niên & gia đình",
+        "seniorsDisability": "Người cao tuổi & người khuyết tật",
+        "veterans": "Cựu chiến binh",
+        "animals": "Động vật & thú cưng"
+      },
       "lifeThreatening": {
         "label": "Trường hợp khẩn cấp đe dọa tính mạng",
-        "note": "Cảnh sát, cứu hỏa hoặc y tế"
+        "note": "Cảnh sát, cứu hỏa hoặc y tế — ở bất kỳ đâu tại Hoa Kỳ"
       },
-      "distressHelpline": {
-        "label": "Đường dây trợ giúp khủng hoảng do thảm họa",
-        "note": "Tư vấn khủng hoảng 24/7"
+      "crisisLifeline": {
+        "label": "Đường dây cứu trợ Tự tử & Khủng hoảng",
+        "note": "Hỗ trợ miễn phí, bảo mật 24/7 — gọi điện hoặc nhắn tin"
       },
-      "poisonControl": {
-        "label": "Trung tâm kiểm soát chất độc",
-        "note": "Ngộ độc hoặc phơi nhiễm"
+      "community211": {
+        "label": "Nguồn lực cộng đồng (211)",
+        "note": "Trợ giúp về thực phẩm, chỗ ở, tiền thuê nhà & tiện ích — kết nối bạn tại địa phương"
       },
       "fema": {
         "label": "Đường dây trợ giúp FEMA",
         "note": "Hỗ trợ thảm họa & yêu cầu bồi thường"
       },
-      "redCross": {
-        "label": "American Red Cross",
-        "note": "Dịch vụ nơi trú ẩn & cứu trợ"
+      "distressHelpline": {
+        "label": "Đường dây trợ giúp Khủng hoảng do Thảm họa",
+        "note": "Tư vấn khủng hoảng 24/7 sau thảm họa"
       },
-      "localNonEmergency": {
-        "label": "Đường dây không khẩn cấp tại địa phương",
-        "value": "Thêm đường dây địa phương của bạn",
-        "note": "Cảnh sát/dịch vụ công ích không khẩn cấp"
+      "redCross": {
+        "label": "Hội Chữ thập đỏ Hoa Kỳ",
+        "note": "Dịch vụ chỗ ở & cứu trợ"
+      },
+      "poisonControl": {
+        "label": "Kiểm soát Ngộ độc",
+        "note": "Ngộ độc hoặc phơi nhiễm — 24/7"
+      },
+      "samhsa": {
+        "label": "Đường dây trợ giúp SAMHSA",
+        "note": "Giới thiệu điều trị về lạm dụng chất gây nghiện & sức khỏe tâm thần"
+      },
+      "cdc": {
+        "label": "CDC-INFO",
+        "note": "Thông tin sức khỏe & câu hỏi về bệnh tật"
+      },
+      "medicare": {
+        "label": "Medicare (bảo hiểm y tế)",
+        "note": "Câu hỏi về phạm vi bảo hiểm, yêu cầu bồi thường & quyền lợi"
+      },
+      "crisisText": {
+        "label": "Đường dây Nhắn tin Khủng hoảng",
+        "note": "Hỗ trợ nhắn tin miễn phí 24/7 với chuyên viên tư vấn được đào tạo",
+        "value": "Nhắn HOME đến 741741"
+      },
+      "veteransCrisis": {
+        "label": "Đường dây Khủng hoảng Cựu chiến binh",
+        "note": "Hỗ trợ bảo mật cho cựu chiến binh đang gặp khủng hoảng",
+        "value": "988, sau đó Nhấn 1"
+      },
+      "transLifeline": {
+        "label": "Trans Lifeline",
+        "note": "Đường dây hỗ trợ đồng cảnh do và dành cho người chuyển giới điều hành"
+      },
+      "trevor": {
+        "label": "The Trevor Project",
+        "note": "Hỗ trợ khủng hoảng cho người trẻ LGBTQ+"
+      },
+      "domesticViolence": {
+        "label": "Đường dây nóng Quốc gia về Bạo lực Gia đình",
+        "note": "Hỗ trợ bảo mật về lạm dụng & an toàn trong mối quan hệ"
+      },
+      "sexualAssault": {
+        "label": "Đường dây nóng Quốc gia về Tấn công Tình dục",
+        "note": "RAINN — hỗ trợ bảo mật 24/7"
+      },
+      "childAbuse": {
+        "label": "Đường dây nóng Childhelp về Lạm dụng Trẻ em",
+        "note": "Báo cáo lạm dụng hoặc nhận trợ giúp — 24/7"
+      },
+      "humanTrafficking": {
+        "label": "Đường dây nóng Quốc gia về Buôn người",
+        "note": "Báo cáo buôn người hoặc nhận trợ giúp & giới thiệu"
+      },
+      "runaway": {
+        "label": "Đường dây An toàn Quốc gia cho Trẻ bỏ nhà",
+        "note": "Trợ giúp cho thanh thiếu niên bỏ nhà & vô gia cư"
+      },
+      "missingChildren": {
+        "label": "Trẻ em Mất tích & Bị bóc lột",
+        "note": "Báo cáo trẻ em mất tích hoặc bị bóc lột — 24/7"
+      },
+      "eldercare": {
+        "label": "Công cụ Tìm kiếm Chăm sóc Người cao tuổi",
+        "note": "Kết nối người lớn tuổi với dịch vụ địa phương & hỗ trợ tuổi già"
+      },
+      "dial": {
+        "label": "Đường dây Thông tin & Tiếp cận cho Người khuyết tật",
+        "note": "Trợ giúp cho người khuyết tật trong trường hợp khẩn cấp"
+      },
+      "vaBenefits": {
+        "label": "Đường dây nóng Quyền lợi VA",
+        "note": "Quyền lợi, chăm sóc sức khỏe & yêu cầu bồi thường cho cựu chiến binh"
+      },
+      "homelessVeterans": {
+        "label": "Cựu chiến binh Vô gia cư",
+        "note": "Hỗ trợ cho cựu chiến binh vô gia cư hoặc có nguy cơ"
+      },
+      "aspca": {
+        "label": "Kiểm soát Ngộ độc Động vật ASPCA",
+        "note": "Trợ giúp khẩn cấp cho thú cưng bị ngộ độc — 24/7"
       }
-    },
-    "zip": {
-      "label": "Tìm trợ giúp tại địa phương theo mã bưu điện",
-      "placeholder": "ví dụ: 78701",
-      "search": "Tìm kiếm",
-      "searching": "Đang tìm kiếm…",
-      "clear": "Xóa",
-      "invalid": "Vui lòng nhập mã bưu điện Hoa Kỳ hợp lệ gồm 5 chữ số.",
-      "lookupError": "Không thể tra cứu mã bưu điện đó. Vui lòng thử lại.",
-      "showingContacts": "Đang hiển thị danh bạ cho"
     },
     "phases": {
       "before": "Trước",

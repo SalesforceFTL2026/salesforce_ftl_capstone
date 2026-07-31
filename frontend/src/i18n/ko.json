@@ -691,45 +691,125 @@
   "safety": {
     "pageTitle": "안전 매뉴얼",
     "pageSubtitle": "재난 전, 중, 후를 위한 비상 연락처와 단계별 안내입니다.",
+    "download": "PDF 다운로드",
     "contactsHeading": "비상 연락처",
+    "contactsIntro": "미국 전역 어디서나 전화할 수 있는 실제로 운영 중인 미국 핫라인입니다. 이 회선 중 다수는 여러분을 지역 내 지원 서비스와 연결해 줍니다.",
     "guidesHeading": "재난 대비 안내서",
     "disclaimer": "FEMA, Ready.gov, American Red Cross의 지침을 참고했습니다. 항상 지역 비상 담당자의 지시를 따르세요.",
     "contacts": {
+      "categories": {
+        "immediate": "지금 바로 전화하기",
+        "disaster": "재난 구호 및 복구",
+        "health": "건강 및 의료",
+        "mentalHealth": "정신 건강 및 정서적 지원",
+        "safety": "안전, 학대 및 폭력",
+        "children": "아동, 청소년 및 가족",
+        "seniorsDisability": "노인 및 장애인",
+        "veterans": "재향군인",
+        "animals": "동물 및 반려동물"
+      },
       "lifeThreatening": {
-        "label": "생명이 위급한 응급 상황",
-        "note": "경찰, 소방, 의료"
+        "label": "생명을 위협하는 응급 상황",
+        "note": "경찰, 소방 또는 의료 — 미국 전역"
+      },
+      "crisisLifeline": {
+        "label": "자살 및 위기 상담 전화",
+        "note": "무료 비밀 상담 24/7 — 전화 또는 문자"
+      },
+      "community211": {
+        "label": "지역사회 자원 (211)",
+        "note": "식량, 주거, 임대료 및 공공요금 지원 — 지역 서비스와 연결"
+      },
+      "fema": {
+        "label": "FEMA(연방재난관리청) 상담 전화",
+        "note": "재난 지원 및 청구"
       },
       "distressHelpline": {
         "label": "재난 위기 상담 전화",
-        "note": "연중무휴 24시간 위기 상담"
+        "note": "재난 이후 24/7 위기 상담"
+      },
+      "redCross": {
+        "label": "미국 적십자",
+        "note": "대피소 및 구호 서비스"
       },
       "poisonControl": {
         "label": "중독 관리 센터",
-        "note": "중독 또는 노출"
+        "note": "중독 또는 노출 — 24/7"
       },
-      "fema": {
-        "label": "FEMA 상담 전화",
-        "note": "재난 지원 및 청구"
+      "samhsa": {
+        "label": "SAMHSA(약물남용·정신건강청) 상담 전화",
+        "note": "약물 사용 및 정신 건강 치료 안내"
       },
-      "redCross": {
-        "label": "American Red Cross",
-        "note": "대피소 및 구호 서비스"
+      "cdc": {
+        "label": "CDC-INFO(질병통제예방센터)",
+        "note": "건강 정보 및 질병 관련 문의"
       },
-      "localNonEmergency": {
-        "label": "지역 비응급 전화",
-        "value": "지역 전화번호를 추가하세요",
-        "note": "경찰/공공시설 비응급"
+      "medicare": {
+        "label": "Medicare(메디케어)",
+        "note": "보장 범위, 청구 및 혜택 문의"
+      },
+      "crisisText": {
+        "label": "위기 문자 상담 라인",
+        "note": "훈련된 상담사와 함께하는 무료 24/7 문자 지원",
+        "value": "741741로 HOME을 문자로 보내세요"
+      },
+      "veteransCrisis": {
+        "label": "재향군인 위기 상담 전화",
+        "note": "위기에 처한 재향군인을 위한 비밀 지원",
+        "value": "988, 그런 다음 1번을 누르세요"
+      },
+      "transLifeline": {
+        "label": "트랜스 라이프라인",
+        "note": "트랜스젠더가 트랜스젠더를 위해 운영하는 동료 지원 핫라인"
+      },
+      "trevor": {
+        "label": "The Trevor Project(트레버 프로젝트)",
+        "note": "LGBTQ+ 청소년을 위한 위기 지원"
+      },
+      "domesticViolence": {
+        "label": "전국 가정폭력 상담 전화",
+        "note": "학대 및 관계 안전을 위한 비밀 지원"
+      },
+      "sexualAssault": {
+        "label": "전국 성폭력 상담 전화",
+        "note": "RAINN — 비밀 지원 24/7"
+      },
+      "childAbuse": {
+        "label": "Childhelp 아동 학대 상담 전화",
+        "note": "학대 신고 또는 도움 요청 — 24/7"
+      },
+      "humanTrafficking": {
+        "label": "전국 인신매매 상담 전화",
+        "note": "인신매매 신고 또는 도움 및 안내 요청"
+      },
+      "runaway": {
+        "label": "전국 가출 청소년 안전 상담 전화",
+        "note": "가출 및 노숙 청소년을 위한 지원"
+      },
+      "missingChildren": {
+        "label": "실종 및 착취 아동",
+        "note": "실종 또는 착취 아동 신고 — 24/7"
+      },
+      "eldercare": {
+        "label": "노인 돌봄 서비스 찾기",
+        "note": "노인을 지역 서비스 및 노화 지원과 연결"
+      },
+      "dial": {
+        "label": "장애인 정보 및 접근 상담 전화",
+        "note": "응급 상황에서 장애인을 위한 지원"
+      },
+      "vaBenefits": {
+        "label": "VA(재향군인부) 혜택 상담 전화",
+        "note": "재향군인 혜택, 의료 및 청구"
+      },
+      "homelessVeterans": {
+        "label": "노숙 재향군인",
+        "note": "노숙 중이거나 노숙 위험에 처한 재향군인을 위한 지원"
+      },
+      "aspca": {
+        "label": "ASPCA 동물 중독 관리 센터",
+        "note": "중독된 반려동물을 위한 응급 지원 — 24/7"
       }
-    },
-    "zip": {
-      "label": "우편번호로 지역 도움 찾기",
-      "placeholder": "예: 78701",
-      "search": "검색",
-      "searching": "검색 중…",
-      "clear": "지우기",
-      "invalid": "유효한 5자리 미국 우편번호를 입력하세요.",
-      "lookupError": "해당 우편번호를 조회할 수 없습니다. 다시 시도해 주세요.",
-      "showingContacts": "연락처를 표시 중인 지역"
     },
     "phases": {
       "before": "전",
