@@ -20,7 +20,6 @@ import { SUPPORTED_LANGUAGES } from '../i18n';
 import { usePolling } from '../hooks/usePolling';
 import { useModalDismiss } from '../hooks/useModalDismiss';
 import { useDebounce } from '../hooks/useDebounce';
-import { useTheme } from '../context/ThemeContext';
 
 // Shared form field styling — one source of truth so every Settings input,
 // label, help line, and Save button matches the dashboard's token-based look.
@@ -64,7 +63,6 @@ const HelpSeekerDashboard = () => {
   // t() looks up UI text in the active language; changing the language
   // re-renders this component with the translated strings.
   const { t } = useTranslation();
-  const { isDark, toggleTheme } = useTheme();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   // `error` is only for load failures — it renders inline in the view. Feedback
@@ -686,40 +684,11 @@ const HelpSeekerDashboard = () => {
             </form>
           </SettingsSection>
 
-          {/* --- Preferences: appearance + language --- */}
+          {/* --- Preferences: language --- */}
           <SettingsSection
             title={t('settings.sectionPreferences')}
             help={t('settings.sectionPreferencesHelp')}
           >
-            {/* Appearance: light / dark mode. Reads and writes the global theme
-                (persisted to localStorage by ThemeProvider), so this segmented
-                control stays in sync with the top-bar toggle. */}
-            <div className={FIELD_CARD}>
-              <p className={FIELD_LABEL}>{t('settings.appearance')}</p>
-              <p className={FIELD_HELP}>{t('settings.appearanceHelp')}</p>
-              <div
-                role="radiogroup"
-                aria-label={t('settings.appearance')}
-                className="inline-flex rounded-full bg-surface-3 ring-1 ring-hairline p-1"
-              >
-                <AppearanceOption
-                  active={!isDark}
-                  onClick={() => { if (isDark) toggleTheme(); }}
-                  label={t('settings.lightMode')}
-                >
-                  <circle cx="12" cy="12" r="4" />
-                  <path strokeLinecap="round" d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19" />
-                </AppearanceOption>
-                <AppearanceOption
-                  active={isDark}
-                  onClick={() => { if (!isDark) toggleTheme(); }}
-                  label={t('settings.darkMode')}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z" />
-                </AppearanceOption>
-              </div>
-            </div>
-
             {/* Language preference: switching this instantly re-renders the UI in
                 the chosen language and saves the choice to the user's profile so
                 it follows them across devices. Serves accessibility for
@@ -896,26 +865,6 @@ const SettingsSection = ({ title, help, children }) => (
     </div>
     <div className="space-y-6">{children}</div>
   </section>
-);
-
-// One segment of the light/dark appearance control. Children are the <path>/
-// <circle> elements for the leading icon. The active segment gets the coral
-// accent so the current mode reads at a glance.
-const AppearanceOption = ({ active, onClick, label, children }) => (
-  <button
-    type="button"
-    role="radio"
-    aria-checked={active}
-    onClick={onClick}
-    className={`inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-bold transition-colors focus:outline-none focus:ring-2 focus:ring-pin-500/40 ${
-      active ? 'bg-pin-500 text-white shadow-card' : 'text-ink-muted hover:text-ink'
-    }`}
-  >
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      {children}
-    </svg>
-    {label}
-  </button>
 );
 
 export default HelpSeekerDashboard;
