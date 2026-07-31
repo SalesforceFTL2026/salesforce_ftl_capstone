@@ -23,7 +23,10 @@ services:
     rootDir: backend
     # migrate deploy applies committed migrations to Render's Postgres on every
     # deploy (safe/no-op when already applied); generate builds the client.
-    buildCommand: npm install && npx prisma generate && npx prisma migrate deploy
+    # seed:admin upserts the demo admin/admin account so the /admin dashboard is
+    # reachable on the deployed site (it's not created by migrations). It's an
+    # idempotent upsert, so it's safe to run on every deploy.
+    buildCommand: npm install && npx prisma generate && npx prisma migrate deploy && npm run seed:admin
     startCommand: npm start
     # Render pings this to know the service is up; must match the route the app
     # actually exposes (server.js GET /health), else Render hits / and gets a 404.
