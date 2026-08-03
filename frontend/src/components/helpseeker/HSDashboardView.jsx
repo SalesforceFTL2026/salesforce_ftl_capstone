@@ -145,16 +145,18 @@ const HSDashboardView = ({
       </div>
 
       {/* ---- Right column: participating non-profits ---- */}
-      <div className="bg-forest-800 dark:bg-surface-2 rounded-3xl p-6 ring-1 ring-hairline shadow-card transition-colors duration-300">
+      {/* Flex column so the org list fills the whole card. The grid stretches
+          this card to match the left column's height, and the list below flexes
+          to fill whatever space is left under the title. */}
+      <div className="bg-forest-800 dark:bg-surface-2 rounded-3xl p-6 ring-1 ring-hairline shadow-card transition-colors duration-300 flex flex-col">
         <h2 className="font-display text-2xl sm:text-3xl text-white dark:text-forest-300 text-center mb-6 leading-tight tracking-wide">
           {t('dashboardView.nonprofitsTitle')}
         </h2>
-        {/* Fixed-height area sized to an exact whole number of rows (3 × 6rem +
-            2 gaps = 20rem) so a row is never sliced at the bottom edge. Each row
-            is a fixed 6rem tall (h-24) so 2- and 3-line cards tile uniformly.
-            The column card is stretched to match the requests column by the
-            parent grid, so any spare space sits below as plain card background. */}
-        <div className="space-y-4 h-[20rem] overflow-y-auto pr-1">
+        {/* Scroll area fills the remaining card height (flex-1 + min-h-0 so it
+            can shrink and scroll). Each row is a fixed 6rem (h-24) so 2- and
+            3-line cards tile uniformly. Scroll-snap keeps rows aligned to the
+            top as you scroll so a row is never left half-cut at the edge. */}
+        <div className="space-y-4 flex-1 min-h-0 overflow-y-auto pr-1 snap-y snap-mandatory">
           {nonprofits.length === 0 ? (
             <div className="h-full flex items-center justify-center text-center">
               <p className="text-white/70 dark:text-ink-muted">{t('dashboardView.noOrgs')}</p>
@@ -167,7 +169,7 @@ const HSDashboardView = ({
                 org.type || (org.resourceTypes?.length ? org.resourceTypes.join(', ') : t('dashboardView.orgNoTypes'));
               const secondaryLine = org.distance || org.location;
               return (
-                <div key={org.id} className="flex items-stretch gap-3 h-24">
+                <div key={org.id} className="flex items-stretch gap-3 h-24 snap-start">
                   <OrgLogo org={org} t={t} />
                   <div className="flex-1 flex flex-col justify-center bg-white/95 dark:bg-surface-3 rounded-xl p-3 text-forest-900 dark:text-ink text-base min-w-0">
                     <p className="font-bold truncate">{org.organizationName || org.name}</p>
