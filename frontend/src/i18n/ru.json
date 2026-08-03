@@ -33,7 +33,15 @@
     "nonprofitsTitle": "Участвующие некоммерческие организации рядом с вами",
     "organizationLogo": "Логотип организации",
     "sampleOrgsNote": "Примеры организаций — актуальные списки скоро появятся.",
-    "orgNoTypes": "Community support"
+    "orgNoTypes": "Community support",
+    "sortAriaLabel": "Сортировать запросы",
+    "noMatchingRequests": "Нет запросов, соответствующих фильтрам.",
+    "sort": {
+      "newest": "Сначала новые",
+      "oldest": "Сначала старые",
+      "priority": "Оценка приоритета",
+      "urgency": "Срочность"
+    }
   },
   "household": {
     "title": "Домохозяйство",

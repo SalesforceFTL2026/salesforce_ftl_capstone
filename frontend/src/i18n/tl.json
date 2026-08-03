@@ -33,7 +33,15 @@
     "nonprofitsTitle": "Mga Kalahok na Non-Profit Malapit sa Iyo",
     "organizationLogo": "Logo ng Organisasyon",
     "sampleOrgsNote": "Mga halimbawang organisasyon — malapit nang dumating ang live na listahan.",
-    "orgNoTypes": "Community support"
+    "orgNoTypes": "Community support",
+    "sortAriaLabel": "Ayusin ang mga kahilingan",
+    "noMatchingRequests": "Walang kahilingang tumutugma sa iyong mga filter.",
+    "sort": {
+      "newest": "Pinakabago muna",
+      "oldest": "Pinakaluma muna",
+      "priority": "Priority score",
+      "urgency": "Pagkaapurahan"
+    }
   },
   "household": {
     "title": "Sambahayan",

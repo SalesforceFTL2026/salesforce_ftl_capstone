@@ -33,7 +33,15 @@
     "nonprofitsTitle": "तपाईं नजिकका सहभागी गैरनाफामुखी संस्थाहरू",
     "organizationLogo": "संस्थाको लोगो",
     "sampleOrgsNote": "नमुना संस्थाहरू — प्रत्यक्ष सूची चाँडै आउँदैछ।",
-    "orgNoTypes": "Community support"
+    "orgNoTypes": "Community support",
+    "sortAriaLabel": "अनुरोध क्रमबद्ध गर्नुहोस्",
+    "noMatchingRequests": "तपाईंको फिल्टरसँग कुनै अनुरोध मेल खाँदैन।",
+    "sort": {
+      "newest": "नयाँ पहिले",
+      "oldest": "पुरानो पहिले",
+      "priority": "प्राथमिकता स्कोर",
+      "urgency": "अत्यावश्यकता"
+    }
   },
   "household": {
     "title": "घरपरिवार",

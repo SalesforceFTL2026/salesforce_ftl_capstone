@@ -55,7 +55,15 @@
     "nonprofitsTitle": "Participating Non-Profits Near You",
     "organizationLogo": "Organization Logo",
     "orgNoTypes": "Community support",
-    "sampleOrgsNote": "Sample organizations — live listings coming soon."
+    "sampleOrgsNote": "Sample organizations — live listings coming soon.",
+    "sortAriaLabel": "Sort requests",
+    "noMatchingRequests": "No requests match your filters.",
+    "sort": {
+      "newest": "Newest first",
+      "oldest": "Oldest first",
+      "priority": "Priority score",
+      "urgency": "Urgency"
+    }
   },
   "household": {
     "title": "User Profile",

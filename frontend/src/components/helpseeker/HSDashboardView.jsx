@@ -14,20 +14,40 @@
 // @param {() => void} onNewRequest
 // @param {() => void} [onVoiceRequest] - open the voice intake flow
 // @param {() => void} [onVoiceCall] - open the conversational voice agent
-// @param {() => void} onChat - open the AI chat assistant
 // @param {(fields) => Promise<void>} [onSaveProfile] - persist inline profile edits
 // @param {object[]} nonprofits - nearby orgs (real or sample)
 // @param {boolean} nonprofitsAreSample
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
+// Urgency ordering for the "Urgency" sort — most urgent first.
+const URGENCY_RANK = { Critical: 0, High: 1, Medium: 2, Low: 3 };
 
 const HSDashboardView = ({
   // onVoiceRequest — Request by Voice temporarily disabled for demo (do not remove)
   currentUser, requests, loading, error, deletingId, onDelete, onNewRequest,
-  /* onVoiceRequest, */ onVoiceCall, onChat, onSaveProfile, nonprofits, nonprofitsAreSample,
+  /* onVoiceRequest, */ onVoiceCall, onSaveProfile, nonprofits, nonprofitsAreSample,
 }) => {
   const { t } = useTranslation();
   const firstName = currentUser?.name?.split(' ')[0] || 'Name';
+
+  // Filter + sort controls for the Active Requests list. Default sort is by
+  // request date (newest first) so the most recent submission is on top.
+  const [reqFilters, setReqFilters] = useState({ category: '', urgency: '', sort: 'newest' });
+  const visibleRequests = useMemo(() => {
+    const list = requests.filter((r) => {
+      if (reqFilters.category && r.category !== reqFilters.category) return false;
+      if (reqFilters.urgency && r.urgency !== reqFilters.urgency) return false;
+      return true;
+    });
+    // Copy before sorting so we never mutate the prop array in place.
+    return [...list].sort((a, b) => {
+      if (reqFilters.sort === 'priority') return (b.priorityScore || 0) - (a.priorityScore || 0);
+      if (reqFilters.sort === 'urgency') return (URGENCY_RANK[a.urgency] ?? 9) - (URGENCY_RANK[b.urgency] ?? 9);
+      if (reqFilters.sort === 'oldest') return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
+      return new Date(b.createdAt || 0) - new Date(a.createdAt || 0); // newest (default)
+    });
+  }, [requests, reqFilters]);
 
   return (
     <div className="grid lg:grid-cols-[1fr_minmax(300px,380px)] gap-6">
@@ -40,15 +60,21 @@ const HSDashboardView = ({
         {/* Profile card — deep forest, one accent (the coral Edit action). */}
         <ProfileCard currentUser={currentUser} onSaveProfile={onSaveProfile} t={t} />
 
-        {/* Active requests header + count pill */}
-        <div className="flex items-center justify-between mt-8 mb-3">
-          <h3 className="font-display text-2xl text-ink tracking-wide">
-            {t('dashboardView.activeRequests')}
-          </h3>
+        {/* Active requests header + count pill. The pill reflects the filtered
+            count; the controls beside it filter by category/urgency and sort. */}
+        <div className="flex flex-wrap items-center justify-between gap-3 mt-8 mb-3">
+          <div className="flex items-center gap-3">
+            <h3 className="font-display text-2xl text-ink tracking-wide">
+              {t('dashboardView.activeRequests')}
+            </h3>
+            {!loading && !error && requests.length > 0 && (
+              <span className="px-3 py-1 rounded-full bg-forest-100 dark:bg-surface-3 text-forest-700 dark:text-forest-300 text-sm font-bold uppercase tracking-wide">
+                {t('dashboardView.activeCount', { count: visibleRequests.length })}
+              </span>
+            )}
+          </div>
           {!loading && !error && requests.length > 0 && (
-            <span className="px-3 py-1 rounded-full bg-forest-100 dark:bg-surface-3 text-forest-700 dark:text-forest-300 text-sm font-bold uppercase tracking-wide">
-              {t('dashboardView.activeCount', { count: requests.length })}
-            </span>
+            <RequestControls filters={reqFilters} onChange={setReqFilters} t={t} />
           )}
         </div>
 
@@ -62,12 +88,18 @@ const HSDashboardView = ({
             <p className="text-ink-muted text-base mt-1">{t('dashboardView.noActiveRequestsHint')}</p>
           </div>
         )}
+        {/* Has requests, but the active filters hide them all. */}
+        {!loading && !error && requests.length > 0 && visibleRequests.length === 0 && (
+          <div className="rounded-2xl border border-dashed border-hairline p-6 text-center">
+            <p className="text-ink-muted">{t('dashboardView.noMatchingRequests')}</p>
+          </div>
+        )}
 
-        {!loading && !error && requests.length > 0 && (
+        {!loading && !error && visibleRequests.length > 0 && (
           // Scroll area caps the list so the actions below stay in view; pr-1
           // keeps the scrollbar off the delete buttons.
           <ul className="flex flex-col gap-3 max-h-[22rem] overflow-y-auto pr-1">
-            {requests.map((r) => (
+            {visibleRequests.map((r) => (
               <RequestRow
                 key={r.id}
                 request={r}
@@ -105,11 +137,6 @@ const HSDashboardView = ({
             </SecondaryAction>
           )}
           */}
-          {onChat && (
-            <SecondaryAction onClick={onChat} label={t('dashboardView.chatWithAssistant')}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12a8 8 0 01-8 8 8.5 8.5 0 01-3.5-.75L3 21l1.5-4A8 8 0 1121 12z" />
-            </SecondaryAction>
-          )}
         </div>
       </div>
 
@@ -118,7 +145,9 @@ const HSDashboardView = ({
         <h2 className="font-display text-2xl sm:text-3xl text-white dark:text-forest-300 text-center mb-6 leading-tight tracking-wide">
           {t('dashboardView.nonprofitsTitle')}
         </h2>
-        <div className="space-y-4">
+        {/* Scroll area caps the list so a long roster doesn't stretch the
+            column; matches the Active Requests behavior. */}
+        <div className="space-y-4 max-h-[22rem] overflow-y-auto pr-1">
           {nonprofits.map((org) => {
             // Real orgs carry resourceTypes[]/location; sample orgs carry
             // type/distance. Show whichever the record has.
@@ -217,6 +246,54 @@ const StatusBadge = ({ status, t }) => {
     <span className="px-2 py-0.5 rounded-full text-xs font-bold uppercase tracking-wide bg-white/15 text-forest-100 capitalize">
       {label}
     </span>
+  );
+};
+
+// Compact filter + sort controls for the Active Requests list. Category and
+// urgency reuse the shared filterBar/category/urgency i18n keys; the sort keys
+// live under dashboardView. Styled with app tokens and the coral focus ring so
+// it matches the rest of the dashboard.
+const REQ_CATEGORIES = ['Food', 'Shelter', 'Medical', 'Transport', 'Other'];
+const REQ_URGENCIES = ['Critical', 'High', 'Medium', 'Low'];
+const REQ_SORTS = ['newest', 'oldest', 'priority', 'urgency'];
+const RequestControls = ({ filters, onChange, t }) => {
+  const selectClass =
+    'px-3 py-1.5 rounded-full bg-surface-3 text-ink text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-pin-500/40 transition-colors';
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <select
+        className={selectClass}
+        value={filters.category}
+        aria-label={t('requests.filterBar.categoryAriaLabel')}
+        onChange={(e) => onChange({ ...filters, category: e.target.value })}
+      >
+        <option value="">{t('requests.filterBar.allCategories')}</option>
+        {REQ_CATEGORIES.map((c) => (
+          <option key={c} value={c}>{t(`requests.categories.${c}`)}</option>
+        ))}
+      </select>
+      <select
+        className={selectClass}
+        value={filters.urgency}
+        aria-label={t('requests.filterBar.urgencyAriaLabel')}
+        onChange={(e) => onChange({ ...filters, urgency: e.target.value })}
+      >
+        <option value="">{t('requests.filterBar.allUrgencies')}</option>
+        {REQ_URGENCIES.map((u) => (
+          <option key={u} value={u}>{t(`requests.urgencies.${u}`)}</option>
+        ))}
+      </select>
+      <select
+        className={selectClass}
+        value={filters.sort}
+        aria-label={t('dashboardView.sortAriaLabel')}
+        onChange={(e) => onChange({ ...filters, sort: e.target.value })}
+      >
+        {REQ_SORTS.map((s) => (
+          <option key={s} value={s}>{t(`dashboardView.sort.${s}`)}</option>
+        ))}
+      </select>
+    </div>
   );
 };
 

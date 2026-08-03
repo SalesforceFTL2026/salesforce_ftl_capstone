@@ -31,15 +31,18 @@ import { useModalDismiss } from '../../hooks/useModalDismiss';
 const CATEGORIES = ['Food', 'Shelter', 'Medical', 'Transport', 'Other'];
 const URGENCIES = ['Low', 'Medium', 'High', 'Critical'];
 
-// The assistant often formats replies with markdown (**bold**, ### headings),
-// but the chat renders plain text — so those markers would show literally.
-// Strip the common ones for a clean read.
+// The assistant often formats replies with markdown (**bold**, ### headings,
+// * bullet lists, *italics*), but the chat renders plain text — so those
+// markers would show literally. Strip the common ones for a clean read.
 const stripMarkdown = (text = '') =>
   text
-    .replace(/^\s{0,3}#{1,6}\s+/gm, '') // "### Title" -> "Title"
-    .replace(/\*\*/g, '')               // **bold** markers
-    .replace(/__/g, '')                 // __bold__ markers
-    .replace(/`/g, '');                 // `code` ticks
+    .replace(/^\s{0,3}#{1,6}\s+/gm, '')        // "### Title" -> "Title"
+    .replace(/^\s{0,3}[-*+]\s+/gm, '• ')       // "* item" / "- item" -> "• item"
+    .replace(/\*\*/g, '')                      // **bold** markers
+    .replace(/__/g, '')                        // __bold__ markers
+    .replace(/(\*|_)(?=\S)(.+?)\1/g, '$2')     // *italic* / _italic_ -> italic
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')   // [text](url) -> text
+    .replace(/`/g, '');                        // `code` ticks
 
 // An editable draft the assistant proposed after detecting a new need. The user
 // can adjust every field — chips for category/urgency, free text for the rest —
@@ -81,15 +84,15 @@ const RequestDraftCard = ({ draft, onSubmitted, onDismiss }) => {
   const chip = (active) =>
     `px-3 py-1 rounded-full text-xs font-semibold border transition-colors ${
       active
-        ? 'bg-[#1e3a5f] text-white border-[#1e3a5f]'
-        : 'bg-white dark:bg-[#1a2f1a] text-gray-700 dark:text-gray-200 border-gray-300 dark:border-[#3a4f30] hover:border-[#1e3a5f]'
+        ? 'bg-pin-500 text-white border-pin-500'
+        : 'bg-white dark:bg-[#1a2f1a] text-gray-700 dark:text-gray-200 border-gray-300 dark:border-[#3a4f30] hover:border-pin-500'
     }`;
   const textField =
-    'w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-[#3a4f30] bg-white dark:bg-[#273A20] text-gray-900 dark:text-white text-sm focus:outline-none focus:border-[#1e3a5f]';
+    'w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-[#3a4f30] bg-white dark:bg-[#273A20] text-gray-900 dark:text-white text-sm focus:outline-none focus:border-pin-500';
   const groupLabel = 'text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1';
 
   return (
-    <div className="w-full rounded-2xl border border-[#1e3a5f]/30 bg-white dark:bg-[#1a2f1a] p-3 space-y-3 text-sm">
+    <div className="w-full rounded-2xl border border-pin-500/30 bg-white dark:bg-[#1a2f1a] p-3 space-y-3 text-sm">
       <p className="font-bold text-gray-800 dark:text-gray-100">{t('chat.draft.title')}</p>
 
       <div>
@@ -156,7 +159,7 @@ const RequestDraftCard = ({ draft, onSubmitted, onDismiss }) => {
           type="button"
           onClick={submit}
           disabled={loading}
-          className="flex-1 px-3 py-2 rounded-lg bg-[#1e3a5f] text-white font-semibold hover:bg-[#182f4d] disabled:opacity-50 transition-colors"
+          className="flex-1 px-3 py-2 rounded-lg bg-pin-500 text-white font-semibold hover:bg-pin-600 disabled:opacity-50 transition-colors"
         >
           {loading ? t('chat.draft.submitting') : t('chat.draft.submit')}
         </button>
@@ -277,13 +280,13 @@ const ChatAssistant = ({
         >
           {/* Pulse ring — only while closed, to draw the eye. */}
           {!open && (
-            <span className="absolute inline-flex h-16 w-16 rounded-full bg-[#1e3a5f]/30 animate-ping" aria-hidden="true" />
+            <span className="absolute inline-flex h-16 w-16 rounded-full bg-pin-500/30 animate-ping" aria-hidden="true" />
           )}
           <span
-            className={`relative w-16 h-16 rounded-full flex items-center justify-center shadow-xl ring-2 ring-white/70 transition-transform duration-200 group-hover:scale-105 group-focus:ring-4 group-focus:ring-[#6ba3d3]/50 ${
+            className={`relative w-16 h-16 rounded-full flex items-center justify-center shadow-xl ring-2 ring-white/70 transition-transform duration-200 group-hover:scale-105 group-focus:ring-4 group-focus:ring-pin-400/50 ${
               open
-                ? 'bg-[#1e3a5f] text-white'
-                : 'bg-gradient-to-br from-[#2f5c8f] to-[#1e3a5f]'
+                ? 'bg-pin-600 text-white'
+                : 'bg-gradient-to-br from-pin-400 to-pin-600'
             }`}
           >
             {open ? (
@@ -308,7 +311,7 @@ const ChatAssistant = ({
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="px-4 py-3 bg-[#1e3a5f] text-white shrink-0 flex items-center justify-between gap-2">
+          <div className="px-4 py-3 bg-pin-500 text-white shrink-0 flex items-center justify-between gap-2">
             <div className="flex items-center gap-3">
               <div className="w-11 h-11 rounded-full bg-white flex items-center justify-center shrink-0 shadow-sm">
                 <MappieMascot className="w-9 h-9" />
@@ -353,7 +356,7 @@ const ChatAssistant = ({
                   <div
                     className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm whitespace-pre-wrap ${
                       m.role === 'user'
-                        ? 'bg-[#1e3a5f] text-white rounded-br-sm'
+                        ? 'bg-pin-500 text-white rounded-br-sm'
                         : 'bg-gray-100 dark:bg-[#1a2f1a] text-gray-800 dark:text-gray-100 rounded-bl-sm'
                     }`}
                   >
@@ -382,12 +385,12 @@ const ChatAssistant = ({
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder={t('chat.inputPlaceholder')}
-              className="flex-1 px-3 py-2 rounded-xl border-2 border-gray-300 dark:border-[#3a4f30] bg-white dark:bg-[#1a2f1a] text-gray-900 dark:text-white text-sm focus:outline-none focus:border-[#1e3a5f] focus:ring-2 focus:ring-[#1e3a5f]/20 transition-all"
+              className="flex-1 px-3 py-2 rounded-xl border-2 border-gray-300 dark:border-[#3a4f30] bg-white dark:bg-[#1a2f1a] text-gray-900 dark:text-white text-sm focus:outline-none focus:border-pin-500 focus:ring-2 focus:ring-pin-500/20 transition-all"
             />
             <button
               type="submit"
               disabled={loading || !input.trim()}
-              className="px-4 py-2 rounded-xl bg-[#1e3a5f] text-white font-semibold text-sm hover:bg-[#182f4d] focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/40 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-4 py-2 rounded-xl bg-pin-500 text-white font-semibold text-sm hover:bg-pin-600 focus:outline-none focus:ring-2 focus:ring-pin-500/40 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {t('chat.send')}
             </button>

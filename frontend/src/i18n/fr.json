@@ -33,7 +33,15 @@
     "nonprofitsTitle": "Organismes à but non lucratif participants près de chez vous",
     "organizationLogo": "Logo de l'organisation",
     "sampleOrgsNote": "Organisations d'exemple — les listes réelles arrivent bientôt.",
-    "orgNoTypes": "Community support"
+    "orgNoTypes": "Community support",
+    "sortAriaLabel": "Trier les demandes",
+    "noMatchingRequests": "Aucune demande ne correspond à vos filtres.",
+    "sort": {
+      "newest": "Plus récentes",
+      "oldest": "Plus anciennes",
+      "priority": "Score de priorité",
+      "urgency": "Urgence"
+    }
   },
   "household": {
     "title": "Foyer",

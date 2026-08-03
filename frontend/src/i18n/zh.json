@@ -33,7 +33,15 @@
     "nonprofitsTitle": "你附近参与的非营利组织",
     "organizationLogo": "组织徽标",
     "sampleOrgsNote": "示例组织——实时列表即将推出。",
-    "orgNoTypes": "Community support"
+    "orgNoTypes": "Community support",
+    "sortAriaLabel": "排序请求",
+    "noMatchingRequests": "没有符合筛选条件的请求。",
+    "sort": {
+      "newest": "最新优先",
+      "oldest": "最早优先",
+      "priority": "优先级评分",
+      "urgency": "紧急程度"
+    }
   },
   "household": {
     "title": "家庭",
