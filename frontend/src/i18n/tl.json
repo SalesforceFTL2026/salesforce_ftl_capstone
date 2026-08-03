@@ -41,7 +41,8 @@
       "oldest": "Pinakaluma muna",
       "priority": "Priority score",
       "urgency": "Pagkaapurahan"
-    }
+    },
+    "noOrgs": "Wala pang kalapit na organisasyong lumalahok."
   },
   "household": {
     "title": "Sambahayan",

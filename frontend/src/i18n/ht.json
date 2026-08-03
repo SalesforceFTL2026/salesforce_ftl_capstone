@@ -41,7 +41,8 @@
       "oldest": "Pi ansyen an premye",
       "priority": "Nòt priyorite",
       "urgency": "Ijans"
-    }
+    },
+    "noOrgs": "Poko gen okenn òganizasyon k ap patisipe toupre."
   },
   "household": {
     "title": "Kay",

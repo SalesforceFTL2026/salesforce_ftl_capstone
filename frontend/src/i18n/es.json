@@ -41,7 +41,8 @@
       "oldest": "Más antiguas",
       "priority": "Puntuación de prioridad",
       "urgency": "Urgencia"
-    }
+    },
+    "noOrgs": "Aún no hay organizaciones participantes cerca."
   },
   "household": {
     "title": "Hogar",

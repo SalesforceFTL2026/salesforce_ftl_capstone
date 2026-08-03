@@ -41,7 +41,8 @@
       "oldest": "Plus anciennes",
       "priority": "Score de priorité",
       "urgency": "Urgence"
-    }
+    },
+    "noOrgs": "Aucune organisation participante à proximité pour le moment."
   },
   "household": {
     "title": "Foyer",
