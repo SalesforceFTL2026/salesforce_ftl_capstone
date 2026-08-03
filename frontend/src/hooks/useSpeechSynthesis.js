@@ -175,6 +175,41 @@ if (typeof window !== 'undefined' && import.meta.env?.DEV) {
 
 export const isSpeechSynthesisSupported = () => Boolean(synth);
 
+// Whether we've already spoken inside a user gesture this session. iOS Safari
+// only lets speechSynthesis make sound if the FIRST speak() happens
+// synchronously inside a tap/click; anything reached through an await is treated
+// as programmatic and silently dropped (no onstart, no error). Our real greeting
+// is two awaits deep (mic permission, then voicesReady), so it never qualifies.
+// Priming once, synchronously, on the opening tap unlocks audio for every
+// subsequent utterance in the session.
+let audioUnlocked = false;
+
+/**
+ * Unlock speech playback from within a user gesture.
+ *
+ * MUST be called synchronously inside the tap/click handler — before any await —
+ * or iOS will not honor it. Speaks a silent, empty utterance purely to satisfy
+ * the gesture requirement; it produces no audible output itself.
+ *
+ * Safe to call repeatedly; only the first call per session does anything.
+ */
+export function primeSpeechSynthesis() {
+  if (!synth || audioUnlocked) return;
+  audioUnlocked = true;
+  try {
+    // Cancel first: an utterance queued while iOS considers the queue "paused"
+    // (its state after a page load) won't start. Then speak an empty utterance
+    // synchronously to claim the gesture.
+    synth.cancel();
+    const unlock = new SpeechSynthesisUtterance('');
+    unlock.volume = 0;
+    synth.speak(unlock);
+  } catch {
+    // If priming throws we've lost nothing — the worst case is the old silent
+    // behavior, and we don't want to break the tap handler over it.
+  }
+}
+
 export function useSpeechSynthesis() {
   const [speaking, setSpeaking] = useState(false);
   const { i18n } = useTranslation();
@@ -270,7 +305,7 @@ export function useSpeechSynthesis() {
   // window-level singleton and survives React teardown on its own.
   useEffect(() => cancel, [cancel]);
 
-  return { speak, cancel, speaking, supported: Boolean(synth) };
+  return { speak, cancel, speaking, prime: primeSpeechSynthesis, supported: Boolean(synth) };
 }
 
 export default useSpeechSynthesis;
