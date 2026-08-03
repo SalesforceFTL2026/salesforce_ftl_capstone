@@ -9,13 +9,25 @@ vi.mock('nodemailer', () => ({
   default: { createTransport },
 }));
 
-// email.js reads EMAIL_USER / EMAIL_APP_PASSWORD and builds its transporter at
-// IMPORT time, so each test must set env first, then import the module fresh.
-// resetModules + dynamic import gives every test its own evaluation of the file.
+// Mock DNS too: email.js resolves smtp.gmail.com to an IPv4 address (Render has
+// no outbound IPv6) and passes the IP as host, so we keep this offline and
+// deterministic by returning a fixed IP.
+const RESOLVED_IPV4 = '142.250.1.1';
+const resolve4 = vi.fn(async () => [RESOLVED_IPV4]);
+vi.mock('node:dns/promises', () => ({
+  resolve4: (...args) => resolve4(...args),
+}));
+
+// email.js reads EMAIL_USER / EMAIL_APP_PASSWORD at IMPORT time but now builds
+// its transporter lazily on the first send (the IPv4 lookup is async). Each test
+// sets env first, then imports the module fresh. resetModules + dynamic import
+// gives every test its own evaluation of the file.
 async function loadEmail(env) {
   vi.resetModules();
   createTransport.mockClear();
   sendMail.mockReset();
+  resolve4.mockClear();
+  resolve4.mockResolvedValue([RESOLVED_IPV4]);
   delete process.env.EMAIL_USER;
   delete process.env.EMAIL_APP_PASSWORD;
   if (env.user !== undefined) process.env.EMAIL_USER = env.user;
@@ -62,6 +74,7 @@ describe('sendEmail when email is not configured', () => {
 
     expect(await sendEmail(message)).toBe(false);
     expect(createTransport).not.toHaveBeenCalled();
+    expect(resolve4).not.toHaveBeenCalled();
   });
 
   it('stays disabled when only the password is set', async () => {
@@ -70,6 +83,7 @@ describe('sendEmail when email is not configured', () => {
 
     expect(await sendEmail(message)).toBe(false);
     expect(createTransport).not.toHaveBeenCalled();
+    expect(resolve4).not.toHaveBeenCalled();
   });
 });
 
@@ -91,19 +105,46 @@ describe('sendEmail when configured', () => {
     });
   });
 
-  it('builds the Gmail SMTP transporter from the env credentials', async () => {
+  it('builds the Gmail SMTP transporter pinned to the resolved IPv4 address', async () => {
     sendMail.mockResolvedValue({});
-    await loadEmail(CONFIGURED);
+    const { sendEmail } = await loadEmail(CONFIGURED);
 
+    // Transporter is built lazily on first send, not at import.
+    expect(createTransport).not.toHaveBeenCalled();
+    await sendEmail(message);
+
+    expect(resolve4).toHaveBeenCalledWith('smtp.gmail.com');
     expect(createTransport).toHaveBeenCalledTimes(1);
     expect(createTransport).toHaveBeenCalledWith(
       expect.objectContaining({
-        host: 'smtp.gmail.com',
+        host: RESOLVED_IPV4, // IPv4 literal — Render has no outbound IPv6
         port: 465,
         secure: true,
-        family: 4, // forces IPv4 — Render has no outbound IPv6
+        tls: { servername: 'smtp.gmail.com' }, // cert validates against the hostname
         auth: { user: CONFIGURED.user, pass: CONFIGURED.pass },
       })
+    );
+  });
+
+  it('reuses one transporter across sends (built once, cached)', async () => {
+    sendMail.mockResolvedValue({});
+    const { sendEmail } = await loadEmail(CONFIGURED);
+
+    await sendEmail(message);
+    await sendEmail(message);
+
+    expect(createTransport).toHaveBeenCalledTimes(1);
+    expect(resolve4).toHaveBeenCalledTimes(1);
+  });
+
+  it('falls back to the hostname when IPv4 resolution fails', async () => {
+    sendMail.mockResolvedValue({});
+    const { sendEmail } = await loadEmail(CONFIGURED);
+    resolve4.mockRejectedValueOnce(new Error('ENOTFOUND'));
+
+    expect(await sendEmail(message)).toBe(true);
+    expect(createTransport).toHaveBeenCalledWith(
+      expect.objectContaining({ host: 'smtp.gmail.com' })
     );
   });
 
