@@ -344,7 +344,7 @@ const CalendarView = ({ rows, onInteract, interactingId, confirmations, onWithdr
         </div>
 
         {/* Weekday header */}
-        <div className="grid grid-cols-7 gap-2 mb-2">
+        <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2">
           {WEEKDAYS.map((w) => (
             <div key={w} className="text-center text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">
               {t(`volunteer.calendar.weekdays.${w}`)}
@@ -353,7 +353,7 @@ const CalendarView = ({ rows, onInteract, interactingId, confirmations, onWithdr
         </div>
 
         {/* Day cells */}
-        <div className="grid grid-cols-7 gap-2">
+        <div className="grid grid-cols-7 gap-1 sm:gap-2">
           {cells.map((d, i) => {
             if (d === null) return <div key={`blank-${i}`} />;
             const key = `${year}-${month}-${d}`;
@@ -366,7 +366,7 @@ const CalendarView = ({ rows, onInteract, interactingId, confirmations, onWithdr
                 type="button"
                 onClick={() => setSelectedKey(key)}
                 aria-pressed={isSelected}
-                className={`min-h-[64px] rounded-xl p-2 flex flex-col items-start gap-1 text-left transition-colors focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/40 ${
+                className={`min-h-[56px] sm:min-h-[64px] rounded-xl p-1 sm:p-2 flex flex-col items-start gap-1 text-left transition-colors focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/40 ${
                   isSelected
                     ? 'bg-[#6ba3d3] text-white'
                     : hasRequests
@@ -436,7 +436,10 @@ const CalendarView = ({ rows, onInteract, interactingId, confirmations, onWithdr
 // select · Name · Category · Urgency · AI Priority · Time · Actions.
 // Fixed-ish tracks keep the headers aligned with the content and avoid the
 // wide gap the earlier `auto` tracks produced between Urgency and AI Priority.
-const COLS = 'grid-cols-[2.5rem_minmax(8rem,1.5fr)_1fr_1fr_7rem_1.3fr_12rem]';
+// The seven fixed/min tracks add up to well past a phone's width, so the table
+// can't collapse gracefully — instead its wrapper scrolls horizontally on small
+// screens (see ListView) and this min-width keeps every row aligned while it does.
+const COLS = 'min-w-[46rem] grid-cols-[2.5rem_minmax(8rem,1.5fr)_1fr_1fr_7rem_1.3fr_12rem]';
 
 const ListView = ({
   rows, allChecked, selectedIds, onToggleAll, onToggleOne, sortByUrgency, onToggleSort,
@@ -473,7 +476,9 @@ const ListView = ({
         </div>
       )}
 
-      <div className="bg-[#eef4fb] dark:bg-[#16233a] rounded-3xl shadow-md overflow-hidden transition-colors duration-300">
+      {/* The 7-column table is wider than a phone; scroll it horizontally rather
+          than crushing the columns or overflowing the whole page. */}
+      <div className="bg-[#eef4fb] dark:bg-[#16233a] rounded-3xl shadow-md overflow-x-auto transition-colors duration-300">
         {/* Header row */}
         <div className={`grid ${COLS} items-center gap-4 bg-[#bcd4f1] dark:bg-[#22304a] px-5 py-4 font-bold text-lg text-[#1C2A16] dark:text-white`}>
           <input

@@ -110,7 +110,7 @@ const AvailableTaskCard = ({ task, onSignUp, onWithdraw, busy }) => {
       : null;
 
   return (
-    <li className="bg-white dark:bg-[#16233a] rounded-2xl shadow-md p-5 flex flex-col shrink-0 w-[320px] snap-start">
+    <li className="bg-white dark:bg-[#16233a] rounded-2xl shadow-md p-5 flex flex-col shrink-0 w-[85vw] max-w-[320px] snap-start">
       <div className="flex items-start justify-between gap-3 mb-2">
         <div className="min-w-0">
           <p className="font-bold text-[#1C2A16] dark:text-white">{task.title}</p>

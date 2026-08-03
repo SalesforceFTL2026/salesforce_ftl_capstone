@@ -95,10 +95,10 @@ const VolunteerSkillsView = ({ skills, loading, error, onRetry, onSave, saving }
             {draft.map((skill) => (
               <li key={skill.name} className="flex flex-col gap-2">
                 <div className="flex items-center justify-between gap-3">
-                  <span className="font-semibold text-[#1C2A16] dark:text-white">
+                  <span className="font-semibold text-[#1C2A16] dark:text-white min-w-0 truncate">
                     {skill.name}
                   </span>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 shrink-0">
                     <span className="text-sm font-medium text-[#6ba3d3] w-24 text-right">
                       {skill.level} · {t(`volunteer.skills.levels.${LEVEL_KEYS[skill.level - 1]}`)}
                     </span>

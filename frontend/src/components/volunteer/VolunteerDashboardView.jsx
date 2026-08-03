@@ -34,7 +34,7 @@ const VolunteerDashboardView = ({ currentUser, stats, requests = [], onViewReque
     <div className="grid lg:grid-cols-[1fr_minmax(320px,420px)] gap-6">
       {/* ---- Left column: greeting, impact stats, top priority requests ---- */}
       <div className="bg-surface-2 dark:bg-surface-2 rounded-3xl p-6 sm:p-8 ring-1 ring-hairline shadow-card transition-colors duration-300">
-        <h2 className="font-display text-4xl sm:text-5xl text-ink tracking-wide leading-none">
+        <h2 className="font-display text-3xl sm:text-5xl text-ink tracking-wide leading-none break-words">
           {t('volunteer.dashboard.greeting', { name })}
         </h2>
 

@@ -60,7 +60,7 @@ const AdminDashboard = () => {
           dashboard below gets the remaining height and scrolls internally, so
           the bar always stays in view. */}
       <div className="shrink-0 z-[1500] bg-[#1C2A16] text-white shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-center sm:justify-between gap-3 sm:gap-4">
           <div className="flex items-center gap-3">
             <span className="text-sm font-bold uppercase tracking-wide bg-white/15 px-3 py-1 rounded-lg">
               Admin
@@ -80,7 +80,7 @@ const AdminDashboard = () => {
                   type="button"
                   onClick={() => setPersona(p.id)}
                   aria-pressed={active}
-                  className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-white/40 ${
+                  className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold whitespace-nowrap transition-colors focus:outline-none focus:ring-2 focus:ring-white/40 ${
                     active ? 'bg-white text-[#1C2A16]' : 'text-white hover:bg-white/10'
                   }`}
                 >

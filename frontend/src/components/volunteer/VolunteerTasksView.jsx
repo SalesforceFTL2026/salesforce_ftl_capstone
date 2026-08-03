@@ -49,7 +49,7 @@ const VolunteerTasksView = ({ interests, loading, error, onRetry, onWithdraw, wi
         return (
           <div
             key={request.id}
-            className="flex flex-col gap-2 shrink-0 w-[340px] snap-start"
+            className="flex flex-col gap-2 shrink-0 w-[85vw] max-w-[340px] snap-start"
           >
             <RequestCard request={request} />
             <div className="flex justify-end gap-2">
