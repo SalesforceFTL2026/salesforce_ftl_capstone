@@ -33,7 +33,7 @@ const HSDashboardView = ({
     <div className="grid lg:grid-cols-[1fr_minmax(300px,380px)] gap-6">
       {/* ---- Left column: greeting, profile, requests, actions ---- */}
       <div className="bg-surface-2 dark:bg-surface-2 rounded-3xl p-6 sm:p-8 ring-1 ring-hairline shadow-card transition-colors duration-300">
-        <h2 className="font-display text-4xl sm:text-5xl text-ink tracking-wide leading-none">
+        <h2 className="font-display text-3xl sm:text-5xl text-ink tracking-wide leading-none break-words">
           {t('dashboardView.greeting', { name: firstName })}
         </h2>
 
@@ -365,7 +365,7 @@ const ProfileCard = ({ currentUser, onSaveProfile, t }) => {
 
   return (
     <div className="bg-forest-800 dark:bg-surface-3 rounded-2xl p-5 text-white mt-6">
-      <form onSubmit={handleSubmit} className="flex items-start gap-5">
+      <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-5">
         <div className="flex flex-col items-center gap-2 shrink-0">
           <span className="font-display text-sm tracking-wider uppercase text-forest-100">
             {t('dashboardView.profile')}
@@ -383,7 +383,7 @@ const ProfileCard = ({ currentUser, onSaveProfile, t }) => {
           )}
         </div>
 
-        <div className="flex-1 space-y-2 text-sm min-w-0">
+        <div className="w-full sm:flex-1 space-y-2 text-sm min-w-0">
           <ProfileField
             label={t('dashboardView.name')}
             value={currentUser?.name}
@@ -429,7 +429,7 @@ const ProfileCard = ({ currentUser, onSaveProfile, t }) => {
         </div>
 
         {onSaveProfile && (
-          <div className="shrink-0 self-start flex flex-col gap-2">
+          <div className="shrink-0 w-full sm:w-auto self-stretch sm:self-start flex flex-col gap-2">
             {editing ? (
               <>
                 <button

@@ -71,7 +71,7 @@ const HSRequestsView = ({
       )}
 
       {/* Tab switcher pill */}
-      <div className="bg-surface-2 ring-1 ring-hairline rounded-3xl px-4 py-3 flex gap-2 sm:gap-4 mb-6 transition-colors duration-300">
+      <div className="bg-surface-2 ring-1 ring-hairline rounded-3xl px-4 py-3 flex flex-wrap gap-2 sm:gap-4 mb-6 transition-colors duration-300">
         {SUB_TABS.map(({ id, labelKey, icon: renderIcon }) => {
           const isActive = id === tab;
           return (
