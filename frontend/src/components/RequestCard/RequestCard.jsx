@@ -197,7 +197,7 @@ const RequestCard = ({ request, onInteract, interacting, confirmation, onWithdra
         <div className="mt-auto flex items-center gap-2">
           <label
             htmlFor={`status-${request.id}`}
-            className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400"
+            className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400"
           >
             {t('requests.card.status')}
           </label>
@@ -206,7 +206,7 @@ const RequestCard = ({ request, onInteract, interacting, confirmation, onWithdra
             value={status || 'pending'}
             disabled={updating}
             onChange={(e) => onStatusChange(request, e.target.value)}
-            className="text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#1f2d18] text-gray-800 dark:text-gray-100 px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/40 disabled:opacity-60 capitalize"
+            className="text-base rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#1f2d18] text-gray-800 dark:text-gray-100 px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/40 disabled:opacity-60 capitalize"
           >
             {STATUS_OPTIONS.map((s) => (
               <option key={s} value={s}>
@@ -215,7 +215,7 @@ const RequestCard = ({ request, onInteract, interacting, confirmation, onWithdra
             ))}
           </select>
           {updating && (
-            <span className="text-xs text-gray-500 dark:text-gray-400" role="status">
+            <span className="text-sm text-gray-500 dark:text-gray-400" role="status">
               {t('requests.card.saving')}
             </span>
           )}

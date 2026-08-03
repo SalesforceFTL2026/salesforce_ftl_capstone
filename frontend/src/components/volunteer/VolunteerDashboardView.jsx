@@ -54,13 +54,13 @@ const VolunteerDashboardView = ({ currentUser, stats, requests = [], onViewReque
             <button
               type="button"
               onClick={onViewRequests}
-              className="text-forest-700 dark:text-forest-300 text-xs font-bold uppercase tracking-wide hover:underline focus:outline-none focus:ring-2 focus:ring-forest-400/50 rounded"
+              className="text-forest-700 dark:text-forest-300 text-sm font-bold uppercase tracking-wide hover:underline focus:outline-none focus:ring-2 focus:ring-forest-400/50 rounded"
             >
               {t('volunteer.dashboard.viewAll')}
             </button>
           )}
         </div>
-        <p className="text-ink-muted text-sm mb-4">
+        <p className="text-ink-muted text-base mb-4">
           {t('volunteer.dashboard.topPrioritySubtitle')}
         </p>
 
@@ -112,7 +112,7 @@ const VolunteerDashboardView = ({ currentUser, stats, requests = [], onViewReque
         </div>
         <ul className="flex flex-col gap-3">
           {tasks.length === 0 && (
-            <li className="text-white/90 text-sm">{t('volunteer.dashboard.noUpcomingTasks')}</li>
+            <li className="text-white/90 text-base">{t('volunteer.dashboard.noUpcomingTasks')}</li>
           )}
           {tasks.map((task, i) => (
             <li
@@ -121,7 +121,7 @@ const VolunteerDashboardView = ({ currentUser, stats, requests = [], onViewReque
             >
               <div className="w-14 h-14 rounded-xl bg-forest-100 text-forest-900 flex flex-col items-center justify-center leading-none shrink-0">
                 <span className="text-xl font-bold">{task.date}</span>
-                <span className="text-xs font-semibold uppercase">{task.month}</span>
+                <span className="text-sm font-semibold uppercase">{task.month}</span>
               </div>
               <span className="font-semibold text-lg">{task.title}</span>
             </li>
@@ -137,7 +137,7 @@ const VolunteerDashboardView = ({ currentUser, stats, requests = [], onViewReque
 const StatPill = ({ value, label }) => (
   <div className="bg-forest-800 dark:bg-surface-3 rounded-2xl px-5 py-5 text-center text-white shadow-card">
     <p className="text-3xl font-bold text-pin-400">{value}</p>
-    <p className="text-xs font-bold uppercase tracking-wide text-forest-100 dark:text-ink-muted mt-1">
+    <p className="text-sm font-bold uppercase tracking-wide text-forest-100 dark:text-ink-muted mt-1">
       {label}
     </p>
   </div>
@@ -162,7 +162,7 @@ const PriorityRequestRow = ({ request, onView, t }) => {
         <div className="flex items-center justify-between gap-3">
           <span className="font-display text-lg tracking-wide truncate">{typeLabel}</span>
           {hasScore && (
-            <span className="shrink-0 px-2.5 py-0.5 rounded-full bg-forest-100 text-forest-900 text-xs font-bold uppercase tracking-wide">
+            <span className="shrink-0 px-2.5 py-0.5 rounded-full bg-forest-100 text-forest-900 text-sm font-bold uppercase tracking-wide">
               {t('volunteer.dashboard.priorityLabel')} {Math.round(request.priorityScore)}
             </span>
           )}
@@ -170,11 +170,11 @@ const PriorityRequestRow = ({ request, onView, t }) => {
         <div className="flex items-center flex-wrap gap-2 mt-1">
           <UrgencyBadge urgency={request.urgency} t={t} />
           {request.location && (
-            <span className="text-forest-100 text-xs truncate">{request.location}</span>
+            <span className="text-forest-100 text-sm truncate">{request.location}</span>
           )}
         </div>
         {request.reasoning && (
-          <p className="text-forest-100 text-sm mt-2 line-clamp-2">{request.reasoning}</p>
+          <p className="text-forest-100 text-base mt-2 line-clamp-2">{request.reasoning}</p>
         )}
       </button>
     </li>
@@ -189,7 +189,7 @@ const UrgencyBadge = ({ urgency, t }) => {
   const cls = urgent ? 'bg-pin-500 text-white' : 'bg-white/15 text-forest-100';
   const label = t(`requests.urgencies.${urgency}`, { defaultValue: urgency });
   return (
-    <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide ${cls}`}>
+    <span className={`px-2 py-0.5 rounded-full text-xs font-bold uppercase tracking-wide ${cls}`}>
       {label}
     </span>
   );

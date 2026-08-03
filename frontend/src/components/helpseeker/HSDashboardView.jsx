@@ -46,7 +46,7 @@ const HSDashboardView = ({
             {t('dashboardView.activeRequests')}
           </h3>
           {!loading && !error && requests.length > 0 && (
-            <span className="px-3 py-1 rounded-full bg-forest-100 dark:bg-surface-3 text-forest-700 dark:text-forest-300 text-xs font-bold uppercase tracking-wide">
+            <span className="px-3 py-1 rounded-full bg-forest-100 dark:bg-surface-3 text-forest-700 dark:text-forest-300 text-sm font-bold uppercase tracking-wide">
               {t('dashboardView.activeCount', { count: requests.length })}
             </span>
           )}
@@ -59,7 +59,7 @@ const HSDashboardView = ({
         {!loading && !error && requests.length === 0 && (
           <div className="rounded-2xl border border-dashed border-hairline p-6 text-center">
             <p className="text-ink font-semibold">{t('dashboardView.noActiveRequests')}</p>
-            <p className="text-ink-muted text-sm mt-1">{t('dashboardView.noActiveRequestsHint')}</p>
+            <p className="text-ink-muted text-base mt-1">{t('dashboardView.noActiveRequestsHint')}</p>
           </div>
         )}
 
@@ -128,7 +128,7 @@ const HSDashboardView = ({
             return (
               <div key={org.id} className="flex items-stretch gap-3">
                 <OrgLogo org={org} t={t} />
-                <div className="flex-1 bg-white/95 dark:bg-surface-3 rounded-xl p-3 text-forest-900 dark:text-ink text-sm min-w-0">
+                <div className="flex-1 bg-white/95 dark:bg-surface-3 rounded-xl p-3 text-forest-900 dark:text-ink text-base min-w-0">
                   <p className="font-bold truncate">{org.organizationName || org.name}</p>
                   <p className="truncate">{primaryLine}</p>
                   {secondaryLine && (
@@ -140,7 +140,7 @@ const HSDashboardView = ({
           })}
         </div>
         {nonprofitsAreSample && (
-          <p className="text-white/70 dark:text-ink-muted text-xs text-center mt-4 italic">
+          <p className="text-white/70 dark:text-ink-muted text-sm text-center mt-4 italic">
             {t('dashboardView.sampleOrgsNote')}
           </p>
         )}
@@ -201,7 +201,7 @@ const UrgencyBadge = ({ urgency, t }) => {
     : 'bg-forest-100 text-forest-700 dark:bg-surface-3 dark:text-forest-300';
   const label = t(`requests.urgencies.${urgency}`, { defaultValue: urgency });
   return (
-    <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide ${cls}`}>
+    <span className={`px-2 py-0.5 rounded-full text-xs font-bold uppercase tracking-wide ${cls}`}>
       {label}
     </span>
   );
@@ -214,7 +214,7 @@ const StatusBadge = ({ status, t }) => {
   const value = status || 'pending';
   const label = t(`requests.statusOptions.${value}`, { defaultValue: value });
   return (
-    <span className="px-2 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide bg-white/15 text-forest-100 capitalize">
+    <span className="px-2 py-0.5 rounded-full text-xs font-bold uppercase tracking-wide bg-white/15 text-forest-100 capitalize">
       {label}
     </span>
   );
@@ -239,7 +239,7 @@ const RequestRow = ({ request, deleting, onDelete, t }) => {
         <div className="flex-1 flex items-center gap-4 bg-forest-800 dark:bg-surface-3 rounded-2xl px-4 py-3 text-white min-w-0">
           <div className="w-14 h-14 rounded-xl bg-forest-100 text-forest-900 flex flex-col items-center justify-center leading-none shrink-0">
             <span className="text-lg font-bold">{day}</span>
-            <span className="text-[10px] font-semibold uppercase">{month}</span>
+            <span className="text-xs font-semibold uppercase">{month}</span>
           </div>
           <div className="flex-1 min-w-0">
             <span className="font-display text-lg tracking-wide truncate block">{typeLabel}</span>
@@ -247,7 +247,7 @@ const RequestRow = ({ request, deleting, onDelete, t }) => {
               <UrgencyBadge urgency={request.urgency} t={t} />
               <StatusBadge status={request.status} t={t} />
               {hasScore && (
-                <span className="text-forest-100 text-xs font-semibold">
+                <span className="text-forest-100 text-sm font-semibold">
                   {t('dashboardView.detailPriority')} {Math.round(request.priorityScore)}
                 </span>
               )}
@@ -258,7 +258,7 @@ const RequestRow = ({ request, deleting, onDelete, t }) => {
             onClick={() => setExpanded((v) => !v)}
             aria-expanded={expanded}
             aria-label={expanded ? t('dashboardView.collapseRequest') : t('dashboardView.expandRequest')}
-            className="shrink-0 px-3 py-1.5 rounded-full bg-white/15 hover:bg-white/25 text-white text-sm font-bold uppercase tracking-wide transition-colors focus:outline-none focus:ring-2 focus:ring-white/50"
+            className="shrink-0 px-3 py-1.5 rounded-full bg-white/15 hover:bg-white/25 text-white text-base font-bold uppercase tracking-wide transition-colors focus:outline-none focus:ring-2 focus:ring-white/50"
           >
             {expanded ? t('dashboardView.collapse') : t('dashboardView.expand')}
           </button>
@@ -271,7 +271,7 @@ const RequestRow = ({ request, deleting, onDelete, t }) => {
           className="w-10 h-10 shrink-0 flex items-center justify-center text-ink-muted hover:text-pin-600 disabled:opacity-50 transition-colors"
         >
           {deleting ? (
-            <span className="text-xs">…</span>
+            <span className="text-sm">…</span>
           ) : (
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.9 12a2 2 0 01-2 1.9H7.9a2 2 0 01-2-1.9L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3M4 7h16" />
@@ -282,7 +282,7 @@ const RequestRow = ({ request, deleting, onDelete, t }) => {
 
       {/* Expanded details — real fields only; never invents data. */}
       {expanded && (
-        <div className="mt-2 mr-12 rounded-2xl bg-surface ring-1 ring-hairline p-4 text-sm">
+        <div className="mt-2 mr-12 rounded-2xl bg-surface ring-1 ring-hairline p-4 text-base">
           <dl className="grid sm:grid-cols-2 gap-x-6 gap-y-3">
             <Detail label={t('dashboardView.detailStatus')} value={request.status && t(`requests.statusOptions.${request.status}`, { defaultValue: request.status })} />
             <Detail label={t('dashboardView.detailUrgency')} value={request.urgency && t(`requests.urgencies.${request.urgency}`, { defaultValue: request.urgency })} />
@@ -292,14 +292,14 @@ const RequestRow = ({ request, deleting, onDelete, t }) => {
             )}
           </dl>
           <div className="mt-3">
-            <p className="font-bold uppercase text-[11px] tracking-wide text-ink-muted mb-1">
+            <p className="font-bold uppercase text-xs tracking-wide text-ink-muted mb-1">
               {t('dashboardView.detailDescription')}
             </p>
             <p className="text-ink">{request.description || t('dashboardView.noDescription')}</p>
           </div>
           {request.reasoning && (
             <div className="mt-3 rounded-xl bg-surface-3 p-3">
-              <p className="font-bold uppercase text-[11px] tracking-wide text-forest-700 dark:text-forest-300 mb-1">
+              <p className="font-bold uppercase text-xs tracking-wide text-forest-700 dark:text-forest-300 mb-1">
                 {t('dashboardView.whyPrioritized')}
               </p>
               <p className="text-ink">{request.reasoning}</p>
@@ -317,7 +317,7 @@ const Detail = ({ label, value }) => {
   if (!value) return null;
   return (
     <div className="min-w-0">
-      <dt className="font-bold uppercase text-[11px] tracking-wide text-ink-muted">{label}</dt>
+      <dt className="font-bold uppercase text-xs tracking-wide text-ink-muted">{label}</dt>
       <dd className="text-ink capitalize truncate">{value}</dd>
     </div>
   );
@@ -383,7 +383,7 @@ const ProfileCard = ({ currentUser, onSaveProfile, t }) => {
           )}
         </div>
 
-        <div className="w-full sm:flex-1 space-y-2 text-sm min-w-0">
+        <div className="w-full sm:flex-1 space-y-2 text-base min-w-0">
           <ProfileField
             label={t('dashboardView.name')}
             value={currentUser?.name}
@@ -425,7 +425,7 @@ const ProfileCard = ({ currentUser, onSaveProfile, t }) => {
               'aria-label': t('dashboardView.householdCount'),
             }}
           />
-          {error && <p className="text-pin-200 text-xs pt-1">{error}</p>}
+          {error && <p className="text-pin-200 text-sm pt-1">{error}</p>}
         </div>
 
         {onSaveProfile && (
@@ -435,7 +435,7 @@ const ProfileCard = ({ currentUser, onSaveProfile, t }) => {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-4 py-1.5 rounded-full bg-pin-500 text-white text-sm font-bold hover:bg-pin-600 focus:outline-none focus:ring-2 focus:ring-white/60 disabled:opacity-50 transition-colors"
+                  className="px-4 py-1.5 rounded-full bg-pin-500 text-white text-base font-bold hover:bg-pin-600 focus:outline-none focus:ring-2 focus:ring-white/60 disabled:opacity-50 transition-colors"
                 >
                   {saving ? t('dashboardView.editSaving') : t('dashboardView.editSave')}
                 </button>
@@ -443,7 +443,7 @@ const ProfileCard = ({ currentUser, onSaveProfile, t }) => {
                   type="button"
                   onClick={cancelEditing}
                   disabled={saving}
-                  className="px-4 py-1.5 rounded-full bg-white/15 text-white text-sm font-bold hover:bg-white/25 focus:outline-none focus:ring-2 focus:ring-white/60 disabled:opacity-50 transition-colors"
+                  className="px-4 py-1.5 rounded-full bg-white/15 text-white text-base font-bold hover:bg-white/25 focus:outline-none focus:ring-2 focus:ring-white/60 disabled:opacity-50 transition-colors"
                 >
                   {t('dashboardView.editCancel')}
                 </button>
@@ -452,7 +452,7 @@ const ProfileCard = ({ currentUser, onSaveProfile, t }) => {
               <button
                 type="button"
                 onClick={startEditing}
-                className="px-4 py-1.5 rounded-full bg-forest-100 text-forest-900 text-sm font-bold hover:bg-white focus:outline-none focus:ring-2 focus:ring-white/60 transition-colors"
+                className="px-4 py-1.5 rounded-full bg-forest-100 text-forest-900 text-base font-bold hover:bg-white focus:outline-none focus:ring-2 focus:ring-white/60 transition-colors"
               >
                 {t('dashboardView.editProfile')}
               </button>
@@ -469,7 +469,7 @@ const ProfileCard = ({ currentUser, onSaveProfile, t }) => {
 // card. `inputProps` are spread onto the <input> so each field sets its own type.
 const ProfileField = ({ label, value, placeholder, editing, inputProps }) => (
   <div className="flex items-center gap-3">
-    <span className="font-bold uppercase text-xs w-28 shrink-0 text-forest-100">{label}</span>
+    <span className="font-bold uppercase text-sm w-28 shrink-0 text-forest-100">{label}</span>
     {editing ? (
       <input
         {...inputProps}

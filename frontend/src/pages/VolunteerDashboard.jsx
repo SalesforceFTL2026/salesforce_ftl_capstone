@@ -450,7 +450,7 @@ const VolunteerDashboard = () => {
             <h2 className="text-xl font-bold text-[#1C2A16] dark:text-white text-center mb-1">
               Your requests
             </h2>
-            <p className="text-gray-500 dark:text-gray-400 text-sm text-center mb-4">
+            <p className="text-gray-500 dark:text-gray-400 text-base text-center mb-4">
               Help requests you offered to help with.
             </p>
             <VolunteerTasksView

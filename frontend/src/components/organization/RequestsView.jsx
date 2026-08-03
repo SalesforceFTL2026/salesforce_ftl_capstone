@@ -189,21 +189,21 @@ const RequestsView = ({
         )}
 
         <div className="bg-white dark:bg-[#16233a] rounded-2xl px-5 py-3 shadow-md flex flex-wrap items-center gap-2 transition-colors duration-300">
-          <label htmlFor="sort-requests" className="text-sm font-semibold text-[#1C2A16] dark:text-white">
+          <label htmlFor="sort-requests" className="text-base font-semibold text-[#1C2A16] dark:text-white">
             {t('org.requests.sortBy')}
           </label>
           <select
             id="sort-requests"
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#1f2d18] text-gray-800 dark:text-gray-100 px-3 py-1.5"
+            className="text-base rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#1f2d18] text-gray-800 dark:text-gray-100 px-3 py-1.5"
           >
             {SORT_OPTIONS.map((o) => (
               <option key={o.id} value={o.id}>{t(o.labelKey)}</option>
             ))}
           </select>
           {sortBy === 'nearest' && distanceLoading && (
-            <span className="text-xs text-gray-500 dark:text-gray-400" role="status">{t('org.requests.measuringDistances')}</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400" role="status">{t('org.requests.measuringDistances')}</span>
           )}
 
           {/* Your location — the origin "nearest" measures from. Editable inline. */}
@@ -217,20 +217,20 @@ const RequestsView = ({
                   onKeyDown={(e) => { if (e.key === 'Enter') saveLocation(); }}
                   placeholder={t('org.requests.locationPlaceholder')}
                   autoFocus
-                  className="text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#1f2d18] text-gray-800 dark:text-gray-100 px-2 py-1.5 w-40"
+                  className="text-base rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#1f2d18] text-gray-800 dark:text-gray-100 px-2 py-1.5 w-40"
                 />
                 <button
                   type="button"
                   onClick={saveLocation}
                   disabled={savingLocation}
-                  className="text-xs font-semibold bg-[#1C2A16] dark:bg-[#7F9764] text-white px-3 py-1.5 rounded-lg hover:opacity-90 disabled:opacity-60"
+                  className="text-sm font-semibold bg-[#1C2A16] dark:bg-[#7F9764] text-white px-3 py-1.5 rounded-lg hover:opacity-90 disabled:opacity-60"
                 >
                   {savingLocation ? t('org.requests.saving') : t('org.requests.save')}
                 </button>
                 <button
                   type="button"
                   onClick={() => { setEditingLocation(false); setLocationError(''); }}
-                  className="text-xs font-semibold text-gray-600 dark:text-gray-300 hover:underline"
+                  className="text-sm font-semibold text-gray-600 dark:text-gray-300 hover:underline"
                 >
                   {t('org.requests.cancel')}
                 </button>
@@ -239,7 +239,7 @@ const RequestsView = ({
               <button
                 type="button"
                 onClick={() => { setLocationInput(orgLocation || ''); setEditingLocation(true); }}
-                className="text-xs font-semibold text-[#1C2A16] dark:text-gray-200 hover:underline"
+                className="text-sm font-semibold text-[#1C2A16] dark:text-gray-200 hover:underline"
                 title={t('org.requests.locationTitle')}
               >
                 {orgLocation ? t('org.requests.yourLocation', { location: orgLocation }) : t('org.requests.setYourLocation')}
@@ -249,7 +249,7 @@ const RequestsView = ({
         </div>
 
         {(locationError || (sortBy === 'nearest' && distanceError)) && (
-          <p className="text-xs text-amber-700 dark:text-amber-400 -mt-4">
+          <p className="text-sm text-amber-700 dark:text-amber-400 -mt-4">
             {locationError || distanceError}
           </p>
         )}
@@ -372,16 +372,16 @@ const RequestTable = ({
       {/* Scrolling body — fixed at ~3.5 rows, then scrolls. */}
       <div className="h-[10.5rem] overflow-y-auto">
         {loading && (
-          <p className="px-5 py-4 text-gray-500 dark:text-gray-400 text-sm" role="status">{t('org.requests.loading')}</p>
+          <p className="px-5 py-4 text-gray-500 dark:text-gray-400 text-base" role="status">{t('org.requests.loading')}</p>
         )}
         {!loading && error && (
           <div className="px-5 py-4">
-            <p className="text-red-700 dark:text-red-300 text-sm">{error}</p>
-            <button onClick={onRetry} className="text-sm font-semibold underline mt-1">{t('org.requests.tryAgain')}</button>
+            <p className="text-red-700 dark:text-red-300 text-base">{error}</p>
+            <button onClick={onRetry} className="text-base font-semibold underline mt-1">{t('org.requests.tryAgain')}</button>
           </div>
         )}
         {!loading && !error && requests.length === 0 && (
-          <p className="px-5 py-4 text-gray-500 dark:text-gray-400 text-sm">{emptyText}</p>
+          <p className="px-5 py-4 text-gray-500 dark:text-gray-400 text-base">{emptyText}</p>
         )}
         {!loading && !error && requests.map((r) => {
           const isSelected = r.id === selectedId;
@@ -414,7 +414,7 @@ const RequestTable = ({
 const DateValue = ({ request }) => {
   const d = request.createdAt ? new Date(request.createdAt) : null;
   return (
-    <span className="text-right text-sm text-gray-700 dark:text-gray-300 whitespace-nowrap">
+    <span className="text-right text-base text-gray-700 dark:text-gray-300 whitespace-nowrap">
       {d ? d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '—'}
     </span>
   );
@@ -425,7 +425,7 @@ const DateValue = ({ request }) => {
 const DistanceValue = ({ request, distances, t }) => {
   const miles = distances[request.id];
   return (
-    <span className="text-right text-sm text-gray-700 dark:text-gray-300 whitespace-nowrap">
+    <span className="text-right text-base text-gray-700 dark:text-gray-300 whitespace-nowrap">
       {typeof miles === 'number' ? t('org.requests.milesAway', { miles }) : '—'}
     </span>
   );
@@ -485,18 +485,18 @@ const RequestDetail = ({
     <div className="bg-[#bcd4f1] dark:bg-[#16233a] rounded-3xl p-5 shadow-md flex flex-col sm:flex-row gap-4 transition-colors duration-300">
       {/* Requester card */}
       <div className="bg-[#9db29a] dark:bg-[#1f3320] rounded-2xl p-4 text-center text-[#1C2A16] dark:text-white sm:w-44 shrink-0">
-        <p className="font-bold text-sm mb-2">{submitterName || requesterName || name || t('org.requests.helpSeeker')}</p>
+        <p className="font-bold text-base mb-2">{submitterName || requesterName || name || t('org.requests.helpSeeker')}</p>
         <div className="w-16 h-16 mx-auto rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center mb-2">
           <svg className="w-8 h-8 text-gray-600 dark:text-gray-300" fill="currentColor" viewBox="0 0 24 24">
             <path d="M12 12a5 5 0 100-10 5 5 0 000 10zm0 2c-4 0-8 2-8 6v2h16v-2c0-4-4-6-8-6z" />
           </svg>
         </div>
-        <p className="text-xs font-semibold uppercase">{t('org.requests.phoneNumber')}</p>
-        <p className="text-sm bg-white/70 dark:bg-black/20 rounded-full px-2 py-1 mt-1">
+        <p className="text-sm font-semibold uppercase">{t('org.requests.phoneNumber')}</p>
+        <p className="text-base bg-white/70 dark:bg-black/20 rounded-full px-2 py-1 mt-1">
           {phone || '(555) 123-4567'}
         </p>
-        <p className="text-xs font-semibold uppercase mt-2">{t('org.requests.inHousehold')}</p>
-        <p className="text-sm bg-white/70 dark:bg-black/20 rounded-full px-2 py-1 mt-1">
+        <p className="text-sm font-semibold uppercase mt-2">{t('org.requests.inHousehold')}</p>
+        <p className="text-base bg-white/70 dark:bg-black/20 rounded-full px-2 py-1 mt-1">
           {householdSize ?? '—'}
         </p>
       </div>
@@ -508,32 +508,32 @@ const RequestDetail = ({
         <h3 className="font-bold uppercase tracking-wide mb-2">{t('org.requests.detailsTitle')}</h3>
 
         {viewOnly && (
-          <p className="mb-3 text-xs font-semibold text-gray-600 dark:text-gray-300 bg-white/70 dark:bg-black/20 rounded-lg px-2 py-1 inline-block">
+          <p className="mb-3 text-sm font-semibold text-gray-600 dark:text-gray-300 bg-white/70 dark:bg-black/20 rounded-lg px-2 py-1 inline-block">
             {t('org.requests.viewOnlyNote')}
           </p>
         )}
 
-        <p className="text-xs font-semibold uppercase">{t('org.requests.description')}</p>
-        <p className="bg-white/70 dark:bg-black/20 rounded-lg p-2 text-sm min-h-[48px] mb-3">
+        <p className="text-sm font-semibold uppercase">{t('org.requests.description')}</p>
+        <p className="bg-white/70 dark:bg-black/20 rounded-lg p-2 text-base min-h-[48px] mb-3">
           {description || t('org.requests.noDescription')}
         </p>
 
         <div className="grid grid-cols-2 gap-3 mb-3">
           <div>
-            <p className="text-xs font-semibold uppercase">{t('org.requests.categoryOfHelp')}</p>
-            <p className="bg-white/70 dark:bg-black/20 rounded-lg px-2 py-1 text-sm mt-1">{category || '—'}</p>
+            <p className="text-sm font-semibold uppercase">{t('org.requests.categoryOfHelp')}</p>
+            <p className="bg-white/70 dark:bg-black/20 rounded-lg px-2 py-1 text-base mt-1">{category || '—'}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase">{t('org.requests.userUrgency')}</p>
-            <p className="bg-white/70 dark:bg-black/20 rounded-lg px-2 py-1 text-sm mt-1">{urgency || '—'}</p>
+            <p className="text-sm font-semibold uppercase">{t('org.requests.userUrgency')}</p>
+            <p className="bg-white/70 dark:bg-black/20 rounded-lg px-2 py-1 text-base mt-1">{urgency || '—'}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase">{t('org.requests.location')}</p>
-            <p className="bg-white/70 dark:bg-black/20 rounded-lg px-2 py-1 text-sm mt-1">{location || '—'}</p>
+            <p className="text-sm font-semibold uppercase">{t('org.requests.location')}</p>
+            <p className="bg-white/70 dark:bg-black/20 rounded-lg px-2 py-1 text-base mt-1">{location || '—'}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase">{t('org.requests.aiPriorityRating')}</p>
-            <p className="bg-white/70 dark:bg-black/20 rounded-lg px-2 py-1 text-sm mt-1">
+            <p className="text-sm font-semibold uppercase">{t('org.requests.aiPriorityRating')}</p>
+            <p className="bg-white/70 dark:bg-black/20 rounded-lg px-2 py-1 text-base mt-1">
               {typeof priorityScore === 'number' && priorityScore > 0 ? Math.round(priorityScore) : t('org.requests.notScored')}
             </p>
           </div>
@@ -542,19 +542,19 @@ const RequestDetail = ({
         {/* Status control — the org's action on this request */}
         {!viewOnly && onStatusChange && (
           <div className="flex items-center gap-2">
-            <label htmlFor="detail-status" className="text-xs font-semibold uppercase">{t('org.requests.status')}</label>
+            <label htmlFor="detail-status" className="text-sm font-semibold uppercase">{t('org.requests.status')}</label>
             <select
               id="detail-status"
               value={status || 'pending'}
               disabled={updating}
               onChange={(e) => onStatusChange(request, e.target.value)}
-              className="text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#1f2d18] text-gray-800 dark:text-gray-100 px-3 py-1.5 capitalize disabled:opacity-60"
+              className="text-base rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#1f2d18] text-gray-800 dark:text-gray-100 px-3 py-1.5 capitalize disabled:opacity-60"
             >
               {STATUS_OPTIONS.map((s) => (
                 <option key={s} value={s}>{t(`org.requests.statusOptions.${s}`)}</option>
               ))}
             </select>
-            {updating && <span className="text-xs" role="status">{t('org.requests.saving')}</span>}
+            {updating && <span className="text-sm" role="status">{t('org.requests.saving')}</span>}
           </div>
         )}
 
@@ -567,7 +567,7 @@ const RequestDetail = ({
               type="button"
               onClick={() => onToggleAssign(request, !isAssigned)}
               disabled={assigning}
-              className={`text-sm font-semibold px-4 py-1.5 rounded-lg hover:opacity-90 disabled:opacity-60 ${
+              className={`text-base font-semibold px-4 py-1.5 rounded-lg hover:opacity-90 disabled:opacity-60 ${
                 isAssigned
                   ? 'bg-white/70 dark:bg-black/20 text-[#1C2A16] dark:text-white border border-[#1C2A16]/30 dark:border-white/20'
                   : 'bg-[#1C2A16] dark:bg-[#7F9764] text-white'
@@ -580,7 +580,7 @@ const RequestDetail = ({
                   : t('org.requests.assign')}
             </button>
             {isAssigned && (
-              <span className="text-xs font-semibold text-green-700 dark:text-green-400">
+              <span className="text-sm font-semibold text-green-700 dark:text-green-400">
                 {t('org.requests.assignedToYou')}
               </span>
             )}
@@ -599,7 +599,7 @@ const RequestDetail = ({
             onChanged={onAllocationsChanged}
           />
         ) : (
-          <p className="mt-4 pt-4 border-t border-white/40 dark:border-white/10 text-xs text-gray-600 dark:text-gray-300">
+          <p className="mt-4 pt-4 border-t border-white/40 dark:border-white/10 text-sm text-gray-600 dark:text-gray-300">
             {t('org.requests.assignToAllocate')}
           </p>
         )}

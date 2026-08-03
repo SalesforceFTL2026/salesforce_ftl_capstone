@@ -17,7 +17,7 @@ const field =
   'w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-[#3a4f30] ' +
   'bg-white dark:bg-[#1a2f1a] text-gray-900 dark:text-white ' +
   'focus:outline-none focus:border-[#7F9764] focus:ring-2 focus:ring-[#7F9764]/30 transition-all';
-const labelCls = 'block text-sm font-bold text-gray-800 dark:text-gray-200 mb-2';
+const labelCls = 'block text-base font-bold text-gray-800 dark:text-gray-200 mb-2';
 
 // A task is fulfillable (can move to in-progress) once its minimum volunteers
 // are confirmed and its resources are marked ready. Mirrors the backend gate.
@@ -141,7 +141,7 @@ const TasksView = ({
         <h2 className="text-xl font-bold text-[#1C2A16] dark:text-white mb-1">
           Your Requests
         </h2>
-        <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">
+        <p className="text-gray-500 dark:text-gray-400 text-base mb-4">
           Select a request to add volunteer tasks for it.
         </p>
 
@@ -154,7 +154,7 @@ const TasksView = ({
             <p className="font-semibold">{error}</p>
             <button
               onClick={onRetry}
-              className="mt-2 text-sm font-semibold underline hover:no-underline"
+              className="mt-2 text-base font-semibold underline hover:no-underline"
             >
               Try again
             </button>
@@ -191,11 +191,11 @@ const TasksView = ({
                         {r.category || 'Request'}
                         {r.location ? ` · ${r.location}` : ''}
                       </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                      <p className="text-base text-gray-500 dark:text-gray-400 truncate">
                         {r.description || 'No description provided.'}
                       </p>
                     </div>
-                    <span className="shrink-0 text-xs font-semibold px-3 py-1 rounded-full bg-[#e3ecd9] text-[#3a4a30] dark:bg-[#2b3b22] dark:text-[#c3d4b0]">
+                    <span className="shrink-0 text-sm font-semibold px-3 py-1 rounded-full bg-[#e3ecd9] text-[#3a4a30] dark:bg-[#2b3b22] dark:text-[#c3d4b0]">
                       {taskCounts[r.id] || 0} task{(taskCounts[r.id] || 0) === 1 ? '' : 's'}
                     </span>
                   </button>
@@ -211,7 +211,7 @@ const TasksView = ({
         <h2 className="text-xl font-bold text-[#1C2A16] dark:text-white mb-1">
           Add a Task
         </h2>
-        <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">
+        <p className="text-gray-500 dark:text-gray-400 text-base mb-4">
           Create a task for the help request.
         </p>
         {selectedRequest ? (
@@ -226,7 +226,7 @@ const TasksView = ({
           </div>
         ) : (
           <div className="rounded-xl border-2 border-dashed border-gray-300 dark:border-[#3a4f30] p-8 text-center">
-            <p className="text-gray-500 dark:text-gray-400 text-sm">
+            <p className="text-gray-500 dark:text-gray-400 text-base">
               Select a request on the left to add a task for it.
             </p>
           </div>
@@ -238,18 +238,18 @@ const TasksView = ({
         <h2 className="text-xl font-bold text-[#1C2A16] dark:text-white mb-1">
           Tasks for the Request
         </h2>
-        <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">
+        <p className="text-gray-500 dark:text-gray-400 text-base mb-4">
           Tasks for the request to be completed by volunteers.
         </p>
         {!selectedRequest ? (
           <div className="rounded-xl border-2 border-dashed border-gray-300 dark:border-[#3a4f30] p-8 text-center">
-            <p className="text-gray-500 dark:text-gray-400 text-sm">
+            <p className="text-gray-500 dark:text-gray-400 text-base">
               Select a request on the left to see its tasks here.
             </p>
           </div>
         ) : selectedTasks.length === 0 ? (
           <div className="rounded-xl border-2 border-dashed border-gray-300 dark:border-[#3a4f30] p-8 text-center">
-            <p className="text-gray-500 dark:text-gray-400 text-sm">
+            <p className="text-gray-500 dark:text-gray-400 text-base">
               No tasks yet. Add one using the form on the left and it will show
               up here.
             </p>
@@ -375,7 +375,7 @@ const CreateTaskForm = ({ requestId, onCreate, onSuggestTasks }) => {
           type="button"
           onClick={loadSuggestions}
           disabled={loadingSuggestions}
-          className="text-xs font-semibold text-[#1C2A16] dark:text-[#a9c48c] underline hover:no-underline disabled:opacity-50 disabled:no-underline"
+          className="text-sm font-semibold text-[#1C2A16] dark:text-[#a9c48c] underline hover:no-underline disabled:opacity-50 disabled:no-underline"
         >
           {loadingSuggestions ? 'Thinking…' : 'Suggest tasks (AI)'}
         </button>
@@ -383,7 +383,7 @@ const CreateTaskForm = ({ requestId, onCreate, onSuggestTasks }) => {
 
       {formError && (
         <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-xl">
-          <p className="text-red-800 dark:text-red-300 text-sm">{formError}</p>
+          <p className="text-red-800 dark:text-red-300 text-base">{formError}</p>
         </div>
       )}
 
@@ -395,12 +395,12 @@ const CreateTaskForm = ({ requestId, onCreate, onSuggestTasks }) => {
               key={`${s.title}-${i}`}
               className="rounded-lg border border-gray-200 dark:border-[#3a4f30] p-2.5 bg-white dark:bg-[#1a2f1a]"
             >
-              <p className="text-sm font-semibold text-[#1C2A16] dark:text-white">{s.title}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">{s.description}</p>
+              <p className="text-base font-semibold text-[#1C2A16] dark:text-white">{s.title}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">{s.description}</p>
               <button
                 type="button"
                 onClick={() => applyDraft(s)}
-                className="text-xs font-semibold text-white bg-[#1C2A16] dark:bg-[#7F9764] rounded-full px-3 py-1"
+                className="text-sm font-semibold text-white bg-[#1C2A16] dark:bg-[#7F9764] rounded-full px-3 py-1"
               >
                 Use this draft
               </button>
@@ -409,7 +409,7 @@ const CreateTaskForm = ({ requestId, onCreate, onSuggestTasks }) => {
         </ul>
       )}
       {suggestions && suggestions.length === 0 && (
-        <p className="mb-4 text-xs text-gray-500 dark:text-gray-400">
+        <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
           No task suggestions available right now.
         </p>
       )}
@@ -515,7 +515,7 @@ const CreateTaskForm = ({ requestId, onCreate, onSuggestTasks }) => {
         <button
           type="submit"
           disabled={submitting}
-          className="w-full bg-[#1C2A16] dark:bg-[#7F9764] text-white py-3 px-6 rounded-xl font-semibold uppercase text-sm tracking-wide hover:opacity-90 transition-opacity disabled:bg-gray-400 disabled:cursor-not-allowed"
+          className="w-full bg-[#1C2A16] dark:bg-[#7F9764] text-white py-3 px-6 rounded-xl font-semibold uppercase text-base tracking-wide hover:opacity-90 transition-opacity disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
           {submitting ? 'Posting…' : 'Post Task'}
         </button>
@@ -588,23 +588,23 @@ const TaskCard = ({ task, onUpdate, onDelete, onSuggestDates }) => {
       <div className="flex items-start justify-between gap-3 mb-2">
         <div>
           <p className="font-bold text-[#1C2A16] dark:text-white">{task.title}</p>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             {task.category || 'Uncategorized'} · {task.urgency} urgency
           </p>
         </div>
-        <span className={`text-xs font-semibold uppercase px-3 py-1.5 rounded-full shrink-0 ${statusPillCls}`}>
+        <span className={`text-sm font-semibold uppercase px-3 py-1.5 rounded-full shrink-0 ${statusPillCls}`}>
           {STATUS_LABELS[task.status] || task.status}
         </span>
       </div>
 
-      <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">{task.description}</p>
+      <p className="text-base text-gray-700 dark:text-gray-300 mb-3">{task.description}</p>
 
       {skills.length > 0 && (
         <div className="flex flex-wrap gap-1.5 mb-3">
           {skills.map((s) => (
             <span
               key={s}
-              className="text-xs font-medium px-2 py-0.5 rounded-full bg-[#e3ecd9] text-[#3a4a30] dark:bg-[#2b3b22] dark:text-[#c3d4b0]"
+              className="text-sm font-medium px-2 py-0.5 rounded-full bg-[#e3ecd9] text-[#3a4a30] dark:bg-[#2b3b22] dark:text-[#c3d4b0]"
             >
               {s}
             </span>
@@ -614,7 +614,7 @@ const TaskCard = ({ task, onUpdate, onDelete, onSuggestDates }) => {
 
       {/* Volunteer count with manual +/- (stand-in for volunteer sign-up) */}
       <div className="flex items-center justify-between gap-3 rounded-lg bg-gray-50 dark:bg-[#1a2f1a] px-3 py-2 mb-2">
-        <div className="text-sm">
+        <div className="text-base">
           <span className="font-semibold text-[#1C2A16] dark:text-white">
             {task.volunteersConfirmed}
           </span>
@@ -654,14 +654,14 @@ const TaskCard = ({ task, onUpdate, onDelete, onSuggestDates }) => {
           volunteer day that works for the people actually coming. */}
       {Array.isArray(task.volunteers) && task.volunteers.length > 0 && (
         <div className="rounded-lg bg-gray-50 dark:bg-[#1a2f1a] px-3 py-2 mb-2">
-          <p className="text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1.5">
+          <p className="text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1.5">
             Signed-up volunteers ({task.volunteers.length})
           </p>
           <ul className="flex flex-col gap-1.5">
             {task.volunteers.map((v) => {
               const avail = formatAvailability(v.availability);
               return (
-                <li key={v.id} className="text-sm">
+                <li key={v.id} className="text-base">
                   <span className="font-semibold text-[#1C2A16] dark:text-white">
                     {v.name || 'Volunteer'}
                   </span>
@@ -678,13 +678,13 @@ const TaskCard = ({ task, onUpdate, onDelete, onSuggestDates }) => {
 
       {/* Resources-ready toggle */}
       <div className="flex items-center justify-between gap-3 rounded-lg bg-gray-50 dark:bg-[#1a2f1a] px-3 py-2 mb-2">
-        <span className="text-sm text-gray-700 dark:text-gray-300">Necessary resources ready</span>
+        <span className="text-base text-gray-700 dark:text-gray-300">Necessary resources ready</span>
         <button
           type="button"
           onClick={() => run(() => onUpdate(task.id, { resourcesReady: !task.resourcesReady }))}
           disabled={busy}
           aria-pressed={task.resourcesReady}
-          className={`text-xs font-semibold uppercase px-3 py-1.5 rounded-full disabled:opacity-50 ${
+          className={`text-sm font-semibold uppercase px-3 py-1.5 rounded-full disabled:opacity-50 ${
             task.resourcesReady
               ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300'
               : 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
@@ -697,7 +697,7 @@ const TaskCard = ({ task, onUpdate, onDelete, onSuggestDates }) => {
       {/* Volunteer day: scheduled date + AI suggestions */}
       <div className="rounded-lg bg-gray-50 dark:bg-[#1a2f1a] px-3 py-2 mb-3">
         <div className="flex items-center justify-between gap-3">
-          <span className="text-sm text-gray-700 dark:text-gray-300">
+          <span className="text-base text-gray-700 dark:text-gray-300">
             Volunteer day:{' '}
             <span className="font-semibold text-[#1C2A16] dark:text-white">
               {scheduledDate || 'not set'}
@@ -707,7 +707,7 @@ const TaskCard = ({ task, onUpdate, onDelete, onSuggestDates }) => {
             type="button"
             onClick={loadSuggestions}
             disabled={busy || loadingSuggestions}
-            className="text-xs font-semibold text-[#1C2A16] dark:text-[#a9c48c] underline hover:no-underline disabled:opacity-50"
+            className="text-sm font-semibold text-[#1C2A16] dark:text-[#a9c48c] underline hover:no-underline disabled:opacity-50"
           >
             {loadingSuggestions ? 'Thinking…' : 'Suggest dates (AI)'}
           </button>
@@ -716,20 +716,20 @@ const TaskCard = ({ task, onUpdate, onDelete, onSuggestDates }) => {
         {suggestions && suggestions.length > 0 && (
           <ul className="mt-2 flex flex-col gap-1.5">
             {suggestions.map((s) => (
-              <li key={s.date} className="flex items-start justify-between gap-3 text-sm">
+              <li key={s.date} className="flex items-start justify-between gap-3 text-base">
                 <div>
                   <span className="font-semibold text-[#1C2A16] dark:text-white">
                     {formatDate(s.date)}
                   </span>
                   {s.reason && (
-                    <span className="block text-xs text-gray-500 dark:text-gray-400">{s.reason}</span>
+                    <span className="block text-sm text-gray-500 dark:text-gray-400">{s.reason}</span>
                   )}
                 </div>
                 <button
                   type="button"
                   onClick={() => pickDate(s.date)}
                   disabled={busy}
-                  className="shrink-0 text-xs font-semibold text-white bg-[#1C2A16] dark:bg-[#7F9764] rounded-full px-3 py-1 disabled:opacity-50"
+                  className="shrink-0 text-sm font-semibold text-white bg-[#1C2A16] dark:bg-[#7F9764] rounded-full px-3 py-1 disabled:opacity-50"
                 >
                   Use
                 </button>
@@ -738,14 +738,14 @@ const TaskCard = ({ task, onUpdate, onDelete, onSuggestDates }) => {
           </ul>
         )}
         {suggestions && suggestions.length === 0 && (
-          <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
             No date suggestions available right now.
           </p>
         )}
       </div>
 
       {cardError && (
-        <p className="text-sm text-red-600 dark:text-red-400 mb-2">{cardError}</p>
+        <p className="text-base text-red-600 dark:text-red-400 mb-2">{cardError}</p>
       )}
 
       {/* Status actions */}
@@ -760,7 +760,7 @@ const TaskCard = ({ task, onUpdate, onDelete, onSuggestDates }) => {
                 ? 'Mark this task in progress'
                 : 'Confirm the minimum volunteers and mark resources ready first'
             }
-            className="text-sm font-semibold text-white bg-[#1C2A16] dark:bg-[#7F9764] rounded-full px-4 py-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="text-base font-semibold text-white bg-[#1C2A16] dark:bg-[#7F9764] rounded-full px-4 py-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Set in progress
           </button>
@@ -770,13 +770,13 @@ const TaskCard = ({ task, onUpdate, onDelete, onSuggestDates }) => {
             type="button"
             onClick={() => run(() => onUpdate(task.id, { status: 'completed' }))}
             disabled={busy}
-            className="text-sm font-semibold text-white bg-green-700 rounded-full px-4 py-1.5 disabled:opacity-50"
+            className="text-base font-semibold text-white bg-green-700 rounded-full px-4 py-1.5 disabled:opacity-50"
           >
             Mark completed
           </button>
         )}
         {!fulfillable && task.status === 'open' && (
-          <span className="text-xs text-gray-500 dark:text-gray-400">
+          <span className="text-sm text-gray-500 dark:text-gray-400">
             Auto-starts 2 days after the minimum volunteers and resources are ready.
           </span>
         )}
@@ -784,7 +784,7 @@ const TaskCard = ({ task, onUpdate, onDelete, onSuggestDates }) => {
           type="button"
           onClick={() => run(() => onDelete(task.id))}
           disabled={busy}
-          className="ml-auto text-sm font-semibold text-red-600 hover:underline disabled:opacity-50"
+          className="ml-auto text-base font-semibold text-red-600 hover:underline disabled:opacity-50"
         >
           Remove
         </button>

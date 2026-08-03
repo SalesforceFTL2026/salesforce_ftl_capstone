@@ -128,7 +128,7 @@ const VolunteerRequestsView = ({
               })
             }
             aria-pressed={showingUncoveredOnly}
-            className="px-3 py-2 rounded-xl text-sm font-semibold text-amber-900 dark:text-amber-100 bg-amber-100 dark:bg-amber-800/50 hover:bg-amber-200 dark:hover:bg-amber-800 focus:outline-none focus:ring-2 focus:ring-amber-500/40 transition-colors"
+            className="px-3 py-2 rounded-xl text-base font-semibold text-amber-900 dark:text-amber-100 bg-amber-100 dark:bg-amber-800/50 hover:bg-amber-200 dark:hover:bg-amber-800 focus:outline-none focus:ring-2 focus:ring-amber-500/40 transition-colors"
           >
             {t(showingUncoveredOnly
               ? 'volunteer.requests.showAllCoverage'
@@ -176,7 +176,7 @@ const VolunteerRequestsView = ({
       {!loading && error && (
         <div className="bg-red-50 border border-red-200 text-red-800 rounded-2xl p-4">
           <p className="font-semibold">{error}</p>
-          <button onClick={onRetry} className="mt-2 text-sm font-semibold underline hover:no-underline">
+          <button onClick={onRetry} className="mt-2 text-base font-semibold underline hover:no-underline">
             {t('volunteer.common.tryAgain')}
           </button>
         </div>
@@ -346,7 +346,7 @@ const CalendarView = ({ rows, onInteract, interactingId, confirmations, onWithdr
         {/* Weekday header */}
         <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2">
           {WEEKDAYS.map((w) => (
-            <div key={w} className="text-center text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+            <div key={w} className="text-center text-sm font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">
               {t(`volunteer.calendar.weekdays.${w}`)}
             </div>
           ))}
@@ -374,7 +374,7 @@ const CalendarView = ({ rows, onInteract, interactingId, confirmations, onWithdr
                       : 'bg-white/40 dark:bg-[#0f1a2e]/40 text-gray-500 dark:text-gray-500'
                 }`}
               >
-                <span className="text-sm font-semibold">{d}</span>
+                <span className="text-base font-semibold">{d}</span>
                 {hasRequests && (
                   <div className="flex flex-wrap gap-1">
                     {dayRows.slice(0, 4).map((r) => (
@@ -385,7 +385,7 @@ const CalendarView = ({ rows, onInteract, interactingId, confirmations, onWithdr
                       />
                     ))}
                     {dayRows.length > 4 && (
-                      <span className={`text-[10px] font-bold ${isSelected ? 'text-white' : 'text-gray-500 dark:text-gray-400'}`}>
+                      <span className={`text-xs font-bold ${isSelected ? 'text-white' : 'text-gray-500 dark:text-gray-400'}`}>
                         +{dayRows.length - 4}
                       </span>
                     )}
@@ -600,7 +600,7 @@ const RowActions = ({ request, expanded, onToggleExpanded, onInteract, interacti
         onClick={onToggleExpanded}
         aria-expanded={expanded}
         title={t('volunteer.requests.whyTooltip')}
-        className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/40 ${
+        className={`px-3 py-2 rounded-lg text-base font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/40 ${
           expanded
             ? 'bg-[#6ba3d3] text-white'
             : 'text-[#6ba3d3] hover:bg-[#6ba3d3]/10 dark:hover:bg-[#6ba3d3]/20'
@@ -613,7 +613,7 @@ const RowActions = ({ request, expanded, onToggleExpanded, onInteract, interacti
         one-way "I can help". */}
     {request.signedUp ? (
       <>
-        <span className="text-sm font-semibold text-green-700 dark:text-green-400 whitespace-nowrap" role="status">
+        <span className="text-base font-semibold text-green-700 dark:text-green-400 whitespace-nowrap" role="status">
           {t('volunteer.requests.signedUp')}
         </span>
         {onWithdraw && (
@@ -621,14 +621,14 @@ const RowActions = ({ request, expanded, onToggleExpanded, onInteract, interacti
             type="button"
             onClick={() => onWithdraw(request)}
             disabled={withdrawing}
-            className="px-4 py-2 rounded-lg border-2 border-[#c84444] text-[#c84444] text-sm font-semibold hover:bg-red-50 dark:hover:bg-red-900/20 focus:outline-none focus:ring-2 focus:ring-[#c84444]/40 disabled:opacity-60 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+            className="px-4 py-2 rounded-lg border-2 border-[#c84444] text-[#c84444] text-base font-semibold hover:bg-red-50 dark:hover:bg-red-900/20 focus:outline-none focus:ring-2 focus:ring-[#c84444]/40 disabled:opacity-60 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
           >
             {withdrawing ? t('volunteer.requests.withdrawing') : t('volunteer.requests.withdraw')}
           </button>
         )}
       </>
     ) : confirmation ? (
-      <span className="text-sm font-semibold text-green-700 dark:text-green-400 whitespace-nowrap" role="status">
+      <span className="text-base font-semibold text-green-700 dark:text-green-400 whitespace-nowrap" role="status">
         {t('volunteer.requests.helping')}
       </span>
     ) : (
@@ -637,7 +637,7 @@ const RowActions = ({ request, expanded, onToggleExpanded, onInteract, interacti
           type="button"
           onClick={() => onInteract(request)}
           disabled={interacting}
-          className="px-4 py-2 rounded-lg bg-[#6ba3d3] text-white text-sm font-semibold hover:bg-[#5a92c2] focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/40 disabled:opacity-60 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+          className="px-4 py-2 rounded-lg bg-[#6ba3d3] text-white text-base font-semibold hover:bg-[#5a92c2] focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/40 disabled:opacity-60 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
         >
           {interacting ? t('volunteer.common.saving') : t('volunteer.requests.iCanHelp')}
         </button>

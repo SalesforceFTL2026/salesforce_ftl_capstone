@@ -119,7 +119,7 @@ const RequestFilterBar = ({ value = {}, onChange, resultCount }) => {
         <button
           type="button"
           onClick={clearAll}
-          className="px-3 py-2.5 rounded-xl text-sm font-semibold text-[#1C2A16] dark:text-gray-200 hover:bg-black/5 dark:hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/40 transition-colors"
+          className="px-3 py-2.5 rounded-xl text-base font-semibold text-[#1C2A16] dark:text-gray-200 hover:bg-black/5 dark:hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/40 transition-colors"
         >
           {t('requests.filterBar.clear')}
         </button>

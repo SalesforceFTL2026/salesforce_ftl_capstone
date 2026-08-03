@@ -137,7 +137,7 @@ const AdminDashboard = () => {
 
         {/* Mode reminder banner — makes it obvious whether edits will stick. */}
         <div
-          className={`text-center text-xs font-semibold py-1 ${
+          className={`text-center text-sm font-semibold py-1 ${
             preview ? 'bg-[#6ba3d3] text-white' : 'bg-[#c84444] text-white'
           }`}
         >

@@ -257,7 +257,7 @@ const PortalTopBar = ({
             className="absolute left-0 right-0 mt-2 bg-white dark:bg-[#1f2d18] rounded-2xl shadow-lg ring-1 ring-black/5 z-50 overflow-hidden max-h-[70vh] overflow-y-auto"
           >
             {resultCount === 0 ? (
-              <p className="px-4 py-6 text-sm text-center text-gray-500 dark:text-gray-400">
+              <p className="px-4 py-6 text-base text-center text-gray-500 dark:text-gray-400">
                 {t('portal.searchNoResults', { query: searchValue.trim() })}
               </p>
             ) : (
@@ -265,7 +265,7 @@ const PortalTopBar = ({
                 .filter((group) => group.items.length > 0)
                 .map((group) => (
                   <div key={group.key} className="py-1">
-                    <p className="px-4 pt-2 pb-1 text-[11px] font-bold uppercase tracking-wide text-gray-500 dark:text-gray-500">
+                    <p className="px-4 pt-2 pb-1 text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-500">
                       {group.heading}
                     </p>
                     {group.items.map((item) => (
@@ -277,11 +277,11 @@ const PortalTopBar = ({
                         onClick={() => handleSelectResult(item)}
                         className="w-full text-left px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
                       >
-                        <p className="text-sm font-semibold text-[#1C2A16] dark:text-white truncate">
+                        <p className="text-base font-semibold text-[#1C2A16] dark:text-white truncate">
                           {item.title}
                         </p>
                         {item.subtitle && (
-                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                          <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
                             {item.subtitle}
                           </p>
                         )}
@@ -359,7 +359,7 @@ const PortalTopBar = ({
                         /* next poll resyncs */
                       }
                     }}
-                    className="text-xs text-[#3a4a30] dark:text-gray-300 hover:underline"
+                    className="text-sm text-[#3a4a30] dark:text-gray-300 hover:underline"
                   >
                     {t('portal.notificationsMarkAllRead')}
                   </button>
@@ -368,11 +368,11 @@ const PortalTopBar = ({
 
               <div className="max-h-80 overflow-y-auto">
                 {error ? (
-                  <p className="px-4 py-6 text-sm text-center text-gray-500 dark:text-gray-400">
+                  <p className="px-4 py-6 text-base text-center text-gray-500 dark:text-gray-400">
                     {t('portal.notificationsError')}
                   </p>
                 ) : notifications.length === 0 ? (
-                  <p className="px-4 py-6 text-sm text-center text-gray-500 dark:text-gray-400">
+                  <p className="px-4 py-6 text-base text-center text-gray-500 dark:text-gray-400">
                     {t('portal.notificationsEmpty')}
                   </p>
                 ) : (
@@ -390,13 +390,13 @@ const PortalTopBar = ({
                           <span className="mt-1.5 w-2 h-2 rounded-full bg-[#6ba3d3] flex-shrink-0" />
                         )}
                         <div className="min-w-0 flex-1">
-                          <p className="text-sm font-semibold text-[#1C2A16] dark:text-white">
+                          <p className="text-base font-semibold text-[#1C2A16] dark:text-white">
                             {n.title}
                           </p>
-                          <p className="text-sm text-gray-600 dark:text-gray-300 break-words">
+                          <p className="text-base text-gray-600 dark:text-gray-300 break-words">
                             {n.message}
                           </p>
-                          <p className="mt-0.5 text-[11px] text-gray-500 dark:text-gray-500">
+                          <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-500">
                             {formatRelativeTime(n.createdAt)}
                           </p>
                         </div>
@@ -431,7 +431,7 @@ const PortalTopBar = ({
           {showSignOut && (
             <button
               onClick={onSignOut}
-              className="text-xs text-[#3a4a30] dark:text-gray-300 hover:underline whitespace-nowrap"
+              className="text-sm text-[#3a4a30] dark:text-gray-300 hover:underline whitespace-nowrap"
             >
               {t('portal.signOut')}
             </button>
