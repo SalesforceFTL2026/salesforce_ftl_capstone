@@ -64,17 +64,40 @@ const formatAvailability = (availability) => {
     .join(' · ');
 };
 
-// Format an ISO date for display (date only, no time).
+// Format an ISO date for display. Includes the time of day only when one was
+// actually set — AI suggestions and older tasks are date-only (local midnight),
+// so those stay clean without a misleading "12:00 AM".
 const formatDate = (value) => {
   if (!value) return null;
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return null;
-  return d.toLocaleDateString(undefined, {
+  const datePart = d.toLocaleDateString(undefined, {
     weekday: 'short',
     month: 'short',
     day: 'numeric',
     year: 'numeric',
   });
+  const hasTime = d.getHours() !== 0 || d.getMinutes() !== 0;
+  if (!hasTime) return datePart;
+  const timePart = d.toLocaleTimeString(undefined, {
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+  return `${datePart} · ${timePart}`;
+};
+
+// Turn an ISO date into the value a <input type="datetime-local"> expects
+// ('YYYY-MM-DDTHH:mm') in the viewer's local time. Returns '' for empty/invalid
+// input so the picker renders blank.
+const toDateTimeInputValue = (value) => {
+  if (!value) return '';
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return '';
+  const pad = (n) => String(n).padStart(2, '0');
+  return (
+    `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}` +
+    `T${pad(d.getHours())}:${pad(d.getMinutes())}`
+  );
 };
 
 // Organization "Tasks" tab. Two columns: on the left, the org's requests
@@ -574,6 +597,17 @@ const TaskCard = ({ task, onUpdate, onDelete, onSuggestDates }) => {
       setSuggestions(null);
     });
 
+  // Save a date/time the org picked by hand. The <input type="datetime-local">
+  // gives a local 'YYYY-MM-DDTHH:mm' with no zone; convert to a full ISO string
+  // so the backend stores the exact instant the org intended. An empty value
+  // clears the scheduled day.
+  const setManualDate = (localValue) =>
+    run(async () => {
+      const isoDate = localValue ? new Date(localValue).toISOString() : null;
+      await onUpdate(task.id, { volunteerDate: isoDate });
+      setSuggestions(null);
+    });
+
   const statusPillCls =
     {
       open: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300',
@@ -711,6 +745,32 @@ const TaskCard = ({ task, onUpdate, onDelete, onSuggestDates }) => {
           >
             {loadingSuggestions ? 'Thinking…' : 'Suggest dates (AI)'}
           </button>
+        </div>
+
+        {/* Manual date + time picker — the org can set any volunteer day,
+            independent of the AI suggestions. */}
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <label htmlFor={`volunteerDate-${task.id}`} className="text-sm text-gray-600 dark:text-gray-400">
+            Set date &amp; time
+          </label>
+          <input
+            id={`volunteerDate-${task.id}`}
+            type="datetime-local"
+            value={toDateTimeInputValue(task.volunteerDate)}
+            onChange={(e) => setManualDate(e.target.value)}
+            disabled={busy}
+            className="text-base rounded-lg border border-gray-300 dark:border-[#2b3b55] bg-white dark:bg-[#0f1f0f] px-2 py-1 text-[#1C2A16] dark:text-white disabled:opacity-50"
+          />
+          {task.volunteerDate && (
+            <button
+              type="button"
+              onClick={() => setManualDate('')}
+              disabled={busy}
+              className="text-sm font-semibold text-red-600 hover:underline disabled:opacity-50"
+            >
+              Clear
+            </button>
+          )}
         </div>
 
         {suggestions && suggestions.length > 0 && (
