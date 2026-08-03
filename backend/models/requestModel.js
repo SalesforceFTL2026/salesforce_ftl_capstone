@@ -143,6 +143,9 @@ export const updateRequestStatus = async (id, status) => {
 //   - volunteerDatePassed: the latest scheduled volunteer day across the linked
 //     tasks is set and now in the past — i.e. the work day has come and gone, so
 //     the request can legitimately be marked done.
+//   - allTasksCompleted: the request has at least one non-cancelled task and
+//     every such task is marked completed — the work is verifiably finished, so
+//     the request can be marked done even before the scheduled day arrives.
 // Returns null when the request doesn't exist.
 export const getRequestReadiness = async (id) => {
   const request = await prisma.request.findUnique({
@@ -153,7 +156,8 @@ export const getRequestReadiness = async (id) => {
           minVolunteers: true,
           volunteersConfirmed: true,
           resourcesReady: true,
-          volunteerDate: true
+          volunteerDate: true,
+          status: true
         }
       },
       allocations: { select: { id: true } }
@@ -187,11 +191,22 @@ export const getRequestReadiness = async (id) => {
   const volunteerDatePassed =
     latestVolunteerDate !== null && latestVolunteerDate.getTime() <= Date.now();
 
+  // "All tasks completed" — the request has at least one linked task and every
+  // one of them is marked completed. This lets an org close out a request as
+  // soon as the work is actually done, without waiting for the scheduled day to
+  // pass. Cancelled tasks don't block completion; a request with no tasks is
+  // not considered complete by this signal (it relies on volunteerDatePassed).
+  const relevantTasks = tasks.filter((task) => task.status !== 'cancelled');
+  const allTasksCompleted =
+    relevantTasks.length > 0 &&
+    relevantTasks.every((task) => task.status === 'completed');
+
   return {
     volunteersAssigned,
     resourcesAllocated,
     latestVolunteerDate,
-    volunteerDatePassed
+    volunteerDatePassed,
+    allTasksCompleted
   };
 };
 

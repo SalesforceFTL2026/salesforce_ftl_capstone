@@ -395,8 +395,9 @@ export const getRequestDistances = async (req, res) => {
 // falsely. Everything else (pending, assigned, closed) can be set freely.
 //   - ACTIVE: work is underway. Requires volunteers assigned AND resources
 //     allocated, mirroring the task-level gate in volunteerTaskController.
-//   - DONE: the need has been met. Requires the scheduled volunteer day to have
-//     passed, i.e. the volunteers have had the chance to complete the work.
+//   - DONE: the need has been met. Requires that all of the request's volunteer
+//     tasks are completed, OR that the scheduled volunteer day has passed — so
+//     the work has either been finished or at least had its chance to happen.
 const ACTIVE_STATUSES = ['in-progress', 'matched'];
 const DONE_STATUSES = ['fulfilled', 'completed'];
 
@@ -459,11 +460,18 @@ export const updateRequestStatus = async (req, res) => {
         }
       }
 
-      if (DONE_STATUSES.includes(status) && !readiness.volunteerDatePassed) {
+      // A request can be marked done in either of two ways: the scheduled
+      // volunteer day has passed, OR the org has already completed all of the
+      // request's tasks (so the work is verifiably finished ahead of the date).
+      if (
+        DONE_STATUSES.includes(status) &&
+        !readiness.volunteerDatePassed &&
+        !readiness.allTasksCompleted
+      ) {
         return res.status(400).json({
           success: false,
           message:
-            'This request can only be marked fulfilled after the scheduled volunteer date has passed, confirming the work was completed.'
+            'This request can only be marked fulfilled once all of its volunteer tasks are completed, or after the scheduled volunteer date has passed.'
         });
       }
     }
