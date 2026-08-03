@@ -145,18 +145,15 @@ const HSDashboardView = ({
       </div>
 
       {/* ---- Right column: participating non-profits ---- */}
-      {/* Flex column so the org list fills the whole card. The grid stretches
-          this card to match the left column's height, and the list below flexes
-          to fill whatever space is left under the title. */}
-      <div className="bg-forest-800 dark:bg-surface-2 rounded-3xl p-6 ring-1 ring-hairline shadow-card transition-colors duration-300 flex flex-col">
+      <div className="bg-forest-800 dark:bg-surface-2 rounded-3xl p-6 ring-1 ring-hairline shadow-card transition-colors duration-300">
         <h2 className="font-display text-2xl sm:text-3xl text-white dark:text-forest-300 text-center mb-6 leading-tight tracking-wide">
           {t('dashboardView.nonprofitsTitle')}
         </h2>
-        {/* Scroll area fills the remaining card height (flex-1 + min-h-0 so it
-            can shrink and scroll). Each row is a fixed 6rem (h-24) so 2- and
-            3-line cards tile uniformly. Scroll-snap keeps rows aligned to the
-            top as you scroll so a row is never left half-cut at the edge. */}
-        <div className="space-y-4 flex-1 min-h-0 overflow-y-auto pr-1 snap-y snap-mandatory">
+        {/* Fixed height of 6 rows (6 × 6rem + 5 × 1rem gaps = 41rem) so the box
+            never grows or shrinks with the org count, then scrolls past 6. Each
+            row is a fixed 6rem (h-24) so cards tile uniformly; scroll-snap keeps
+            rows aligned so none is left half-cut at the edge. */}
+        <div className="space-y-4 h-[41rem] overflow-y-auto pr-1 snap-y snap-mandatory">
           {nonprofits.length === 0 ? (
             <div className="h-full flex items-center justify-center text-center">
               <p className="text-white/70 dark:text-ink-muted">{t('dashboardView.noOrgs')}</p>
