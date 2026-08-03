@@ -66,7 +66,7 @@ const VoiceCall = ({ onComplete, onCancel }) => {
   // The scrollable transcript box, so new lines can be kept in view.
   const transcriptRef = useRef(null);
 
-  const { speak, cancel: stopSpeaking, speaking } = useSpeechSynthesis();
+  const { speak, cancel: stopSpeaking, speaking, prime } = useSpeechSynthesis();
 
   // Send what the caller said, speak the reply, then hand the mic back.
   const handleTurn = useCallback(
@@ -218,6 +218,12 @@ const VoiceCall = ({ onComplete, onCancel }) => {
 
   const begin = async () => {
     setError('');
+    // Unlock speech playback synchronously, while we still hold the tap gesture.
+    // iOS Safari drops the first utterance if it isn't spoken inside the gesture,
+    // and the greeting below is two awaits deep (mic permission, voicesReady) —
+    // so without this the caller sees the transcript but hears nothing. MUST stay
+    // before the first await.
+    prime();
     // Tapping the mic is an explicit "I want to talk", so clear any stale
     // cancellation — e.g. after coming back from the review step.
     cancelledRef.current = false;
