@@ -78,38 +78,42 @@ const HSDashboardView = ({
           )}
         </div>
 
-        {loading && (
-          <p className="text-ink-muted" role="status">{t('dashboardView.loadingRequests')}</p>
-        )}
-        {!loading && error && <p className="text-pin-600 dark:text-pin-400">{error}</p>}
-        {!loading && !error && requests.length === 0 && (
-          <div className="rounded-2xl border border-dashed border-hairline p-6 text-center">
-            <p className="text-ink font-semibold">{t('dashboardView.noActiveRequests')}</p>
-            <p className="text-ink-muted text-base mt-1">{t('dashboardView.noActiveRequestsHint')}</p>
-          </div>
-        )}
-        {/* Has requests, but the active filters hide them all. */}
-        {!loading && !error && requests.length > 0 && visibleRequests.length === 0 && (
-          <div className="rounded-2xl border border-dashed border-hairline p-6 text-center">
-            <p className="text-ink-muted">{t('dashboardView.noMatchingRequests')}</p>
-          </div>
-        )}
+        {/* Fixed-height area (~4 rows tall) so the section never grows or
+            shrinks with the request count — every state lives inside the same
+            22rem box and scrolls internally; pr-1 keeps the scrollbar off the
+            delete buttons. */}
+        <div className="h-[22rem] overflow-y-auto pr-1">
+          {loading && (
+            <p className="text-ink-muted" role="status">{t('dashboardView.loadingRequests')}</p>
+          )}
+          {!loading && error && <p className="text-pin-600 dark:text-pin-400">{error}</p>}
+          {!loading && !error && requests.length === 0 && (
+            <div className="h-full flex flex-col items-center justify-center rounded-2xl border border-dashed border-hairline p-6 text-center">
+              <p className="text-ink font-semibold">{t('dashboardView.noActiveRequests')}</p>
+              <p className="text-ink-muted text-base mt-1">{t('dashboardView.noActiveRequestsHint')}</p>
+            </div>
+          )}
+          {/* Has requests, but the active filters hide them all. */}
+          {!loading && !error && requests.length > 0 && visibleRequests.length === 0 && (
+            <div className="h-full flex items-center justify-center rounded-2xl border border-dashed border-hairline p-6 text-center">
+              <p className="text-ink-muted">{t('dashboardView.noMatchingRequests')}</p>
+            </div>
+          )}
 
-        {!loading && !error && visibleRequests.length > 0 && (
-          // Scroll area caps the list so the actions below stay in view; pr-1
-          // keeps the scrollbar off the delete buttons.
-          <ul className="flex flex-col gap-3 max-h-[22rem] overflow-y-auto pr-1">
-            {visibleRequests.map((r) => (
-              <RequestRow
-                key={r.id}
-                request={r}
-                deleting={deletingId === r.id}
-                onDelete={onDelete}
-                t={t}
-              />
-            ))}
-          </ul>
-        )}
+          {!loading && !error && visibleRequests.length > 0 && (
+            <ul className="flex flex-col gap-3">
+              {visibleRequests.map((r) => (
+                <RequestRow
+                  key={r.id}
+                  request={r}
+                  deleting={deletingId === r.id}
+                  onDelete={onDelete}
+                  t={t}
+                />
+              ))}
+            </ul>
+          )}
+        </div>
 
         {/* Primary actions. The coral CTA is the one bold accent; the secondary
             actions are quiet outlined buttons so the hierarchy is clear. */}
@@ -145,28 +149,37 @@ const HSDashboardView = ({
         <h2 className="font-display text-2xl sm:text-3xl text-white dark:text-forest-300 text-center mb-6 leading-tight tracking-wide">
           {t('dashboardView.nonprofitsTitle')}
         </h2>
-        {/* Scroll area caps the list so a long roster doesn't stretch the
-            column; matches the Active Requests behavior. */}
-        <div className="space-y-4 max-h-[22rem] overflow-y-auto pr-1">
-          {nonprofits.map((org) => {
-            // Real orgs carry resourceTypes[]/location; sample orgs carry
-            // type/distance. Show whichever the record has.
-            const primaryLine =
-              org.type || (org.resourceTypes?.length ? org.resourceTypes.join(', ') : t('dashboardView.orgNoTypes'));
-            const secondaryLine = org.distance || org.location;
-            return (
-              <div key={org.id} className="flex items-stretch gap-3">
-                <OrgLogo org={org} t={t} />
-                <div className="flex-1 bg-white/95 dark:bg-surface-3 rounded-xl p-3 text-forest-900 dark:text-ink text-base min-w-0">
-                  <p className="font-bold truncate">{org.organizationName || org.name}</p>
-                  <p className="truncate">{primaryLine}</p>
-                  {secondaryLine && (
-                    <p className="text-forest-600 dark:text-ink-muted truncate">{secondaryLine}</p>
-                  )}
+        {/* Fixed-height area sized to an exact whole number of rows (3 × 6rem +
+            2 gaps = 20rem) so a row is never sliced at the bottom edge. Each row
+            is a fixed 6rem tall (h-24) so 2- and 3-line cards tile uniformly.
+            The column card is stretched to match the requests column by the
+            parent grid, so any spare space sits below as plain card background. */}
+        <div className="space-y-4 h-[20rem] overflow-y-auto pr-1">
+          {nonprofits.length === 0 ? (
+            <div className="h-full flex items-center justify-center text-center">
+              <p className="text-white/70 dark:text-ink-muted">{t('dashboardView.noOrgs')}</p>
+            </div>
+          ) : (
+            nonprofits.map((org) => {
+              // Real orgs carry resourceTypes[]/location; sample orgs carry
+              // type/distance. Show whichever the record has.
+              const primaryLine =
+                org.type || (org.resourceTypes?.length ? org.resourceTypes.join(', ') : t('dashboardView.orgNoTypes'));
+              const secondaryLine = org.distance || org.location;
+              return (
+                <div key={org.id} className="flex items-stretch gap-3 h-24">
+                  <OrgLogo org={org} t={t} />
+                  <div className="flex-1 flex flex-col justify-center bg-white/95 dark:bg-surface-3 rounded-xl p-3 text-forest-900 dark:text-ink text-base min-w-0">
+                    <p className="font-bold truncate">{org.organizationName || org.name}</p>
+                    <p className="truncate">{primaryLine}</p>
+                    {secondaryLine && (
+                      <p className="text-forest-600 dark:text-ink-muted truncate">{secondaryLine}</p>
+                    )}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })
+          )}
         </div>
         {nonprofitsAreSample && (
           <p className="text-white/70 dark:text-ink-muted text-sm text-center mt-4 italic">

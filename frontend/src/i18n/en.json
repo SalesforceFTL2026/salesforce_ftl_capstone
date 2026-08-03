@@ -63,7 +63,8 @@
       "oldest": "Oldest first",
       "priority": "Priority score",
       "urgency": "Urgency"
-    }
+    },
+    "noOrgs": "No participating organizations nearby yet."
   },
   "household": {
     "title": "User Profile",

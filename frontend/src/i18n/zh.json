@@ -41,7 +41,8 @@
       "oldest": "最早优先",
       "priority": "优先级评分",
       "urgency": "紧急程度"
-    }
+    },
+    "noOrgs": "附近暂无参与的组织。"
   },
   "household": {
     "title": "家庭",

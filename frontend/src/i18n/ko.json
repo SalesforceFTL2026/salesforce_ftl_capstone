@@ -41,7 +41,8 @@
       "oldest": "오래된순",
       "priority": "우선순위 점수",
       "urgency": "긴급도"
-    }
+    },
+    "noOrgs": "아직 근처에 참여 기관이 없습니다."
   },
   "household": {
     "title": "가구",

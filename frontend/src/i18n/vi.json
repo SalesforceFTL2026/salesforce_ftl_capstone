@@ -41,7 +41,8 @@
       "oldest": "Cũ nhất trước",
       "priority": "Điểm ưu tiên",
       "urgency": "Mức khẩn cấp"
-    }
+    },
+    "noOrgs": "Chưa có tổ chức tham gia nào ở gần."
   },
   "household": {
     "title": "Hộ gia đình",
