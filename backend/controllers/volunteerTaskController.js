@@ -297,6 +297,13 @@ export const signUpForTask = async (req, res) => {
         message: 'This task is no longer open for sign-ups.',
       });
     }
+    if (error.message === 'REQUEST_NOT_JOINED') {
+      return res.status(403).json({
+        success: false,
+        message:
+          'Sign up to help with this request before joining its volunteer tasks.',
+      });
+    }
     if (error.message === 'TASK_FULL') {
       return res.status(409).json({
         success: false,

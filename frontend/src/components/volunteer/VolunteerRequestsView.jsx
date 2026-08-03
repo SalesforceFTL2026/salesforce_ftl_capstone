@@ -1,10 +1,11 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import RequestCard from '../RequestCard/RequestCard';
 import RequestDetailsModal from '../RequestCard/RequestDetailsModal';
 import RequestMap from '../map/RequestMap';
 import NearMeToggle from '../map/NearMeToggle';
 import RequestFilterBar from '../RequestFilterBar/RequestFilterBar';
+import { getCurrentPosition, distanceMiles } from '../../utils/geolocation';
 
 // Active Help Requests view for a volunteer, built from the product wireframe.
 // A view switcher (Calendar / List / Cards / Map) sits above the requests. The
@@ -34,6 +35,42 @@ const VIEWS = [
 
 const URGENCY_ORDER = { Critical: 0, High: 1, Medium: 2, Low: 3 };
 
+// How a volunteer can order the requests feed. "priority" keeps the AI feed
+// order the backend already returns; the others re-sort client-side.
+const SORT_OPTIONS = [
+  { id: 'priority', labelKey: 'volunteer.requests.sort.priority' },
+  { id: 'urgency', labelKey: 'volunteer.requests.sort.urgency' },
+  { id: 'newest', labelKey: 'volunteer.requests.sort.newest' },
+  { id: 'nearest', labelKey: 'volunteer.requests.sort.nearest' },
+];
+
+// Return a copy of `requests` in the chosen order. "priority" is the feed's
+// default (already highest-first from the backend), so it's a no-op copy. For
+// "nearest" we use the distances map ({ id: miles | null }); requests with an
+// unknown distance sort to the end so real distances come first.
+const sortRequests = (requests, sortBy, distances) => {
+  if (sortBy === 'urgency') {
+    return [...requests].sort(
+      (a, b) => (URGENCY_ORDER[a.urgency] ?? 9) - (URGENCY_ORDER[b.urgency] ?? 9)
+    );
+  }
+  if (sortBy === 'newest') {
+    return [...requests].sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    );
+  }
+  if (sortBy === 'nearest') {
+    const far = Number.POSITIVE_INFINITY;
+    const miles = (r) => {
+      const d = distances[r.id];
+      return typeof d === 'number' ? d : far;
+    };
+    return [...requests].sort((a, b) => miles(a) - miles(b));
+  }
+  // "priority": keep the backend's AI-priority order as-is.
+  return requests;
+};
+
 const VolunteerRequestsView = ({
   requests, loading, error, onRetry, onInteract, interactingId, confirmations,
   onWithdraw, withdrawingId,
@@ -43,17 +80,48 @@ const VolunteerRequestsView = ({
   const [activeView, setActiveView] = useState('list');
   // Which rows the volunteer has checked in the List view.
   const [selectedIds, setSelectedIds] = useState(() => new Set());
-  // Sort toggle behind the filter icon: default (priority) vs. by urgency.
-  const [sortByUrgency, setSortByUrgency] = useState(false);
+  // How the feed is ordered: priority (default) / urgency / newest / nearest.
+  const [sortBy, setSortBy] = useState('priority');
+  // For "nearest": the volunteer's browser coordinates and any error getting
+  // them. Fetched lazily the first time they choose "Closest to you".
+  const [origin, setOrigin] = useState(null);
+  const [locating, setLocating] = useState(false);
+  const [locationError, setLocationError] = useState('');
   // The request whose full-details modal is open (List view), or null.
   const [detailRequest, setDetailRequest] = useState(null);
 
-  const rows = useMemo(() => {
-    if (!sortByUrgency) return requests;
-    return [...requests].sort(
-      (a, b) => (URGENCY_ORDER[a.urgency] ?? 9) - (URGENCY_ORDER[b.urgency] ?? 9)
-    );
-  }, [requests, sortByUrgency]);
+  // When the volunteer sorts by "nearest", ask the browser for their location
+  // once and reuse it. We never sort by a stale location — until we have it the
+  // feed stays in its current order and we show a small locating/error hint.
+  useEffect(() => {
+    if (sortBy !== 'nearest' || origin || locating) return;
+
+    let cancelled = false;
+    setLocating(true);
+    setLocationError('');
+    getCurrentPosition()
+      .then((coords) => { if (!cancelled) setOrigin(coords); })
+      .catch((err) => { if (!cancelled) setLocationError(err.message); })
+      .finally(() => { if (!cancelled) setLocating(false); });
+
+    return () => { cancelled = true; };
+  }, [sortBy, origin, locating]);
+
+  // Distance (miles) from the volunteer to each request, computed client-side
+  // from each request's stored coordinates. Empty until we have their location.
+  const distances = useMemo(() => {
+    if (!origin) return {};
+    const map = {};
+    for (const r of requests) {
+      map[r.id] = distanceMiles(origin, { lat: r.latitude, lng: r.longitude });
+    }
+    return map;
+  }, [origin, requests]);
+
+  const rows = useMemo(
+    () => sortRequests(requests, sortBy, distances),
+    [requests, sortBy, distances]
+  );
 
   // How many of the current feed's requests still have no coverage (issue #92).
   // Prefer the backend flag, falling back to the counts. Drives the summary
@@ -160,14 +228,44 @@ const VolunteerRequestsView = ({
             );
           })}
         </div>
-        {onNearChange && (
-          <NearMeToggle
-            onChange={onNearChange}
-            active={Boolean(near)}
-            count={near ? requests.length : null}
-          />
-        )}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Sort control — reorders every view (List / Cards / Map / Calendar).
+              "Closest to you" needs the volunteer's location, requested on demand. */}
+          <label htmlFor="volunteer-sort" className="text-base font-semibold text-[#1C2A16] dark:text-white">
+            {t('volunteer.requests.sortBy')}
+          </label>
+          <select
+            id="volunteer-sort"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="text-base rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#0f1a0f] text-gray-800 dark:text-gray-100 px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/40"
+          >
+            {SORT_OPTIONS.map((o) => (
+              <option key={o.id} value={o.id}>{t(o.labelKey)}</option>
+            ))}
+          </select>
+          {sortBy === 'nearest' && locating && (
+            <span className="text-sm text-gray-600 dark:text-gray-300" role="status">
+              {t('volunteer.requests.locating')}
+            </span>
+          )}
+          {onNearChange && (
+            <NearMeToggle
+              onChange={onNearChange}
+              active={Boolean(near)}
+              count={near ? requests.length : null}
+            />
+          )}
+        </div>
       </div>
+
+      {/* Location error when the volunteer chose "Closest to you" but we couldn't
+          get their position (permission denied, unavailable, etc.). */}
+      {sortBy === 'nearest' && locationError && (
+        <p className="text-sm text-amber-700 dark:text-amber-400 -mt-2" role="alert">
+          {locationError}
+        </p>
+      )}
 
       {loading && (
         <p className="text-[#1C2A16] dark:text-gray-300" role="status">{t('volunteer.common.loading')}</p>
@@ -189,8 +287,6 @@ const VolunteerRequestsView = ({
           selectedIds={selectedIds}
           onToggleAll={toggleAll}
           onToggleOne={toggleOne}
-          sortByUrgency={sortByUrgency}
-          onToggleSort={() => setSortByUrgency((s) => !s)}
           onInteract={onInteract}
           interactingId={interactingId}
           confirmations={confirmations}
@@ -442,7 +538,7 @@ const CalendarView = ({ rows, onInteract, interactingId, confirmations, onWithdr
 const COLS = 'min-w-[46rem] grid-cols-[2.5rem_minmax(8rem,1.5fr)_1fr_1fr_7rem_1.3fr_12rem]';
 
 const ListView = ({
-  rows, allChecked, selectedIds, onToggleAll, onToggleOne, sortByUrgency, onToggleSort,
+  rows, allChecked, selectedIds, onToggleAll, onToggleOne,
   onInteract, interactingId, confirmations, onWithdraw, withdrawingId, onHelpWithSelected,
   onRowClick,
 }) => {
@@ -493,19 +589,7 @@ const ListView = ({
           <span>{t('volunteer.requests.columns.urgencyLevel')}</span>
           <span title={t('volunteer.requests.priorityTooltip')}>{t('volunteer.requests.columns.aiPriority')}</span>
           <span>{t('volunteer.requests.columns.timeSubmitted')}</span>
-          <button
-            type="button"
-            onClick={onToggleSort}
-            aria-pressed={sortByUrgency}
-            title={sortByUrgency ? t('volunteer.requests.sortingByUrgency') : t('volunteer.requests.sortByUrgency')}
-            className={`p-1.5 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/40 ${
-              sortByUrgency ? 'bg-[#6ba3d3] text-white' : 'text-[#1C2A16] dark:text-white hover:bg-black/5 dark:hover:bg-white/10'
-            }`}
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h18l-7 8v6l-4 2v-8L3 4z" />
-            </svg>
-          </button>
+          <span className="text-right">{t('volunteer.requests.columns.actions')}</span>
         </div>
 
         {rows.length === 0 && (

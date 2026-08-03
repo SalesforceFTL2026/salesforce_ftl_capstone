@@ -190,9 +190,21 @@ const ORGANIZATION_SUMMARY = {
 // (no max, or fewer confirmed than the max). Each task carries its request +
 // organization summary and a `signedUp` flag for the given volunteer, so the UI
 // can show a "Sign up" or "Withdraw" button without a second call.
+//
+// A volunteer only sees tasks for help requests they've signed up for (i.e.
+// expressed interest in — a volunteer Response on the request). This keeps the
+// task board scoped to the requests they've actually committed to helping with,
+// rather than every open task in the system.
 export const getAvailableTasks = async (userId) => {
   const tasks = await prisma.volunteerTask.findMany({
-    where: { status: 'open' },
+    where: {
+      status: 'open',
+      request: {
+        responses: {
+          some: { responderId: userId, responderType: 'volunteer' },
+        },
+      },
+    },
     orderBy: { createdAt: 'desc' },
     include: {
       request: REQUEST_SUMMARY,
@@ -218,13 +230,28 @@ export const getAvailableTasks = async (userId) => {
 
 // Sign a volunteer up for a task. Runs in a transaction so the signup row and
 // the task's confirmed count stay consistent. Idempotent: signing up twice is a
-// no-op. Throws 'TASK_NOT_OPEN' if the task isn't open, or 'TASK_FULL' if it's
-// already at its max (and the volunteer isn't already on it).
+// no-op. Throws 'TASK_NOT_OPEN' if the task isn't open, 'TASK_FULL' if it's
+// already at its max (and the volunteer isn't already on it), or
+// 'REQUEST_NOT_JOINED' if the volunteer hasn't expressed interest in the task's
+// underlying help request.
 export const signUpForTask = async (taskId, userId) => {
   return await prisma.$transaction(async (tx) => {
     const task = await tx.volunteerTask.findUnique({ where: { id: taskId } });
     if (!task) throw new Error('TASK_NOT_FOUND');
     if (task.status !== 'open') throw new Error('TASK_NOT_OPEN');
+
+    // A volunteer may only join tasks for requests they've signed up to help
+    // with (a volunteer Response on the request). Mirrors getAvailableTasks so
+    // the direct endpoint can't be used to bypass the scoped list.
+    const interest = await tx.response.findFirst({
+      where: {
+        requestId: task.requestId,
+        responderId: userId,
+        responderType: 'volunteer',
+      },
+      select: { id: true },
+    });
+    if (!interest) throw new Error('REQUEST_NOT_JOINED');
 
     const existing = await tx.taskSignup.findUnique({
       where: { taskId_userId: { taskId, userId } },

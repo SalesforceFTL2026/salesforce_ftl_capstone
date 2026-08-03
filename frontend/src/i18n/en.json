@@ -549,9 +549,18 @@
         "category": "Category",
         "urgencyLevel": "Urgency Level",
         "aiPriority": "AI Priority",
-        "timeSubmitted": "Time Submitted"
+        "timeSubmitted": "Time Submitted",
+        "actions": "Actions"
       },
       "priorityTooltip": "AI-calculated priority score (0–100)",
+      "sortBy": "Sort by",
+      "sort": {
+        "priority": "Highest priority",
+        "urgency": "Most urgent",
+        "newest": "Most recent",
+        "nearest": "Closest to you"
+      },
+      "locating": "Finding your location…",
       "sortingByUrgency": "Sorting by urgency",
       "sortByUrgency": "Sort by urgency",
       "selectRequestFrom": "Select request from {{name}}",
