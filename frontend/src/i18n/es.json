@@ -33,7 +33,15 @@
     "nonprofitsTitle": "Organizaciones sin fines de lucro participantes cerca de ti",
     "organizationLogo": "Logotipo de la organización",
     "sampleOrgsNote": "Organizaciones de muestra — listados en vivo próximamente.",
-    "orgNoTypes": "Community support"
+    "orgNoTypes": "Community support",
+    "sortAriaLabel": "Ordenar solicitudes",
+    "noMatchingRequests": "Ninguna solicitud coincide con tus filtros.",
+    "sort": {
+      "newest": "Más recientes",
+      "oldest": "Más antiguas",
+      "priority": "Puntuación de prioridad",
+      "urgency": "Urgencia"
+    }
   },
   "household": {
     "title": "Hogar",

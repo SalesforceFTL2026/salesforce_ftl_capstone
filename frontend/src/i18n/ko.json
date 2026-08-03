@@ -33,7 +33,15 @@
     "nonprofitsTitle": "내 주변의 참여 비영리 단체",
     "organizationLogo": "단체 로고",
     "sampleOrgsNote": "예시 단체입니다 — 실시간 목록은 곧 제공될 예정입니다.",
-    "orgNoTypes": "Community support"
+    "orgNoTypes": "Community support",
+    "sortAriaLabel": "요청 정렬",
+    "noMatchingRequests": "필터와 일치하는 요청이 없습니다.",
+    "sort": {
+      "newest": "최신순",
+      "oldest": "오래된순",
+      "priority": "우선순위 점수",
+      "urgency": "긴급도"
+    }
   },
   "household": {
     "title": "가구",

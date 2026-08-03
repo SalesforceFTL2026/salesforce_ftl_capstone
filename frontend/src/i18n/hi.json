@@ -33,7 +33,15 @@
     "nonprofitsTitle": "आपके निकट भाग लेने वाले गैर-लाभकारी संगठन",
     "organizationLogo": "संगठन का लोगो",
     "sampleOrgsNote": "नमूना संगठन — लाइव सूचियाँ जल्द ही आ रही हैं।",
-    "orgNoTypes": "Community support"
+    "orgNoTypes": "Community support",
+    "sortAriaLabel": "अनुरोध क्रमबद्ध करें",
+    "noMatchingRequests": "आपके फ़िल्टर से कोई अनुरोध मेल नहीं खाता।",
+    "sort": {
+      "newest": "सबसे नए पहले",
+      "oldest": "सबसे पुराने पहले",
+      "priority": "प्राथमिकता स्कोर",
+      "urgency": "तात्कालिकता"
+    }
   },
   "household": {
     "title": "परिवार",

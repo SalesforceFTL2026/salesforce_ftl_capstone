@@ -85,8 +85,6 @@ const HelpSeekerDashboard = () => {
   const debouncedTopSearch = useDebounce(topSearch, 200);
   // When set, the modal shows the form in edit mode for this request.
   const [editingRequest, setEditingRequest] = useState(null);
-  // Controls the AI chat assistant panel (opened from the inline button).
-  const [chatOpen, setChatOpen] = useState(false);
   // Which sidebar view is selected.
   const [view, setView] = useState('dashboard');
   // Who is signed in, so we can greet them and show their profile. Stateful so
@@ -476,7 +474,6 @@ const HelpSeekerDashboard = () => {
           onDelete={handleDelete}
           onNewRequest={() => setShowForm(true)}
           onVoiceCall={() => setShowVoiceCall(true)}
-          onChat={() => setChatOpen(true)}
           onSaveProfile={handleSaveProfile}
           nonprofits={displayOrganizations}
           nonprofitsAreSample={orgsAreSample}
@@ -733,13 +730,11 @@ const HelpSeekerDashboard = () => {
         </div>
       )}
 
-      {/* AI chat assistant (context-aware), opened from the inline
-          "Chat with Assistant" button in the dashboard view. */}
+      {/* AI chat assistant (context-aware). Uses the self-managed floating
+          launcher so the entry point matches the Volunteer/Org dashboards;
+          onRequestCreated refreshes the list after an in-chat draft submits. */}
       <ChatAssistant
         firstName={firstName}
-        open={chatOpen}
-        onOpenChange={setChatOpen}
-        hideLauncher
         onRequestCreated={loadRequests}
       />
 

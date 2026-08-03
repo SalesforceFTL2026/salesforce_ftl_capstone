@@ -33,7 +33,15 @@
     "nonprofitsTitle": "Các tổ chức phi lợi nhuận tham gia gần bạn",
     "organizationLogo": "Logo tổ chức",
     "sampleOrgsNote": "Tổ chức mẫu — danh sách trực tiếp sẽ sớm ra mắt.",
-    "orgNoTypes": "Community support"
+    "orgNoTypes": "Community support",
+    "sortAriaLabel": "Sắp xếp yêu cầu",
+    "noMatchingRequests": "Không có yêu cầu nào khớp với bộ lọc của bạn.",
+    "sort": {
+      "newest": "Mới nhất trước",
+      "oldest": "Cũ nhất trước",
+      "priority": "Điểm ưu tiên",
+      "urgency": "Mức khẩn cấp"
+    }
   },
   "household": {
     "title": "Hộ gia đình",

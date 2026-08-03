@@ -64,6 +64,14 @@ services:
       # services/ai/clients.js), so this is safe to leave blank.
       - key: DEEPGRAM_API_KEY
         sync: false
+      # Email (Gmail SMTP) — optional. When both are unset, sendEmail() no-ops
+      # and the app falls back to in-app notifications only (see
+      # services/email.js). EMAIL_APP_PASSWORD is a 16-char Google App Password,
+      # NOT the account password. Leave blank to disable email on Render.
+      - key: EMAIL_USER
+        sync: false
+      - key: EMAIL_APP_PASSWORD
+        sync: false
       # Secret used to sign login tokens (JWTs). Name MUST match the code, which
       # reads process.env.JWT_SECRET_KEY (services/auth/authService.js).
       - key: JWT_SECRET_KEY

@@ -33,7 +33,15 @@
     "nonprofitsTitle": "Òganizasyon San Bi Likratif Toupre Ou",
     "organizationLogo": "Logo Òganizasyon",
     "sampleOrgsNote": "Egzanp òganizasyon — lis reyèl ap vini talè.",
-    "orgNoTypes": "Community support"
+    "orgNoTypes": "Community support",
+    "sortAriaLabel": "Klase demann yo",
+    "noMatchingRequests": "Pa gen demann ki koresponn ak filtè ou yo.",
+    "sort": {
+      "newest": "Pi resan an premye",
+      "oldest": "Pi ansyen an premye",
+      "priority": "Nòt priyorite",
+      "urgency": "Ijans"
+    }
   },
   "household": {
     "title": "Kay",
