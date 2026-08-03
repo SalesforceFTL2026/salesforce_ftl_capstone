@@ -120,7 +120,7 @@ const RequestDetailsModal = ({ request, onClose }) => {
             </div>
           )}
 
-          <dl className="grid grid-cols-2 gap-4">
+          <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Field label={t('volunteer.requests.columns.category')} value={category} />
             <Field label={t('volunteer.requests.detail.location')} value={location} />
             <Field label={t('volunteer.requests.detail.submitted')} value={when} />

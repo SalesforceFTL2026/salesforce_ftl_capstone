@@ -105,12 +105,12 @@ const RequestCard = ({ request, onInteract, interacting, confirmation, onWithdra
 
   return (
     <article className="bg-white dark:bg-[#273A20] rounded-2xl shadow-md p-5 flex flex-col gap-4 transition-colors duration-300">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex items-center gap-2">
-          <span className={`w-3 h-3 rounded-full ${dotClass}`} aria-hidden="true" />
-          <h3 className="font-bold text-xl text-black dark:text-white">{category}</h3>
+      <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className={`w-3 h-3 rounded-full shrink-0 ${dotClass}`} aria-hidden="true" />
+          <h3 className="font-bold text-xl text-black dark:text-white truncate">{category}</h3>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {/* Uncovered need (issue #92): no one has picked this up yet. Amber,
               distinct from the score/status pills, so it draws the eye. */}
           {isUncovered && (
@@ -169,9 +169,9 @@ const RequestCard = ({ request, onInteract, interacting, confirmation, onWithdra
         </p>
       )}
 
-      <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-        <span>{location}</span>
-        {when && <span>{urgency} · {when}</span>}
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-sm text-gray-500 dark:text-gray-400">
+        <span className="min-w-0 truncate">{location}</span>
+        {when && <span className="shrink-0">{urgency} · {when}</span>}
       </div>
 
       {/* Interaction counts — how much attention a request has already drawn.
