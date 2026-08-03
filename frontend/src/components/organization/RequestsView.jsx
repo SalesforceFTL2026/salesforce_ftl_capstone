@@ -341,7 +341,10 @@ const RequestsView = ({
 // the org — so the data doesn't shift around when the sort changes. The active
 // sort only reorders the rows; it no longer decides which value is displayed.
 // Three fixed-width metric columns keep the header and rows aligned.
-const METRICS_GRID = 'grid grid-cols-[1fr_5rem_5rem_6rem] gap-3';
+// On phones the fixed metric columns are narrower (and the gap tighter) so the
+// name column keeps usable width; they widen back at sm.
+const METRICS_GRID =
+  'grid grid-cols-[1fr_3rem_3rem_4rem] gap-2 sm:grid-cols-[1fr_5rem_5rem_6rem] sm:gap-3';
 
 // --- Request table ---
 // The header stays fixed while the rows scroll. The scroll body is a fixed

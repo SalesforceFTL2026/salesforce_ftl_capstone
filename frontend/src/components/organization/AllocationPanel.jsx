@@ -195,8 +195,8 @@ const AllocationPanel = ({ request, resources, onChanged, readOnly = false }) =>
 
       {/* Allocate form — hidden for completed (view-only) requests. */}
       {!readOnly && (
-      <form onSubmit={handleAllocate} className="flex items-end gap-2">
-        <div className="flex-1">
+      <form onSubmit={handleAllocate} className="flex flex-wrap items-end gap-2">
+        <div className="w-full sm:flex-1 sm:w-auto">
           <label htmlFor="alloc-resource" className="text-xs font-semibold uppercase block mb-1">
             {t('org.allocation.resource')}
           </label>
@@ -214,7 +214,7 @@ const AllocationPanel = ({ request, resources, onChanged, readOnly = false }) =>
             ))}
           </select>
         </div>
-        <div className="w-20">
+        <div className="w-20 shrink-0">
           <label htmlFor="alloc-qty" className="text-xs font-semibold uppercase block mb-1">
             {t('org.allocation.qty')}
           </label>
@@ -231,7 +231,7 @@ const AllocationPanel = ({ request, resources, onChanged, readOnly = false }) =>
         <button
           type="submit"
           disabled={busy}
-          className="text-sm font-semibold bg-[#1C2A16] dark:bg-[#7F9764] text-white px-4 py-1.5 rounded-lg hover:opacity-90 disabled:opacity-60"
+          className="flex-1 sm:flex-none text-sm font-semibold bg-[#1C2A16] dark:bg-[#7F9764] text-white px-4 py-1.5 rounded-lg hover:opacity-90 disabled:opacity-60"
         >
           {busy ? t('org.allocation.adding') : t('org.allocation.allocate')}
         </button>

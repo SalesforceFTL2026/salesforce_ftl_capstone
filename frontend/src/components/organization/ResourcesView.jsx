@@ -193,10 +193,10 @@ const ResourcesView = ({
             {resources.map((r) => (
               <li
                 key={r.id}
-                className="flex items-center justify-between gap-4 rounded-xl border border-gray-200 dark:border-[#2b3b55] p-4"
+                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gray-200 dark:border-[#2b3b55] p-4"
               >
-                <div>
-                  <p className="font-semibold text-[#1C2A16] dark:text-white">{r.name}</p>
+                <div className="min-w-0">
+                  <p className="font-semibold text-[#1C2A16] dark:text-white break-words">{r.name}</p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
                     {typeLabel(r.resourceType, t)} · {r.quantity} {r.unit}
                   </p>
