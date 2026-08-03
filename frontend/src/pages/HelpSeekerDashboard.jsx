@@ -24,14 +24,14 @@ import { useDebounce } from '../hooks/useDebounce';
 // Shared form field styling — one source of truth so every Settings input,
 // label, help line, and Save button matches the dashboard's token-based look.
 const FIELD_LABEL = 'block font-display text-lg tracking-wide text-ink mb-1';
-const FIELD_HELP = 'text-sm text-ink-muted mb-3';
+const FIELD_HELP = 'text-base text-ink-muted mb-3';
 const FIELD_INPUT =
   'w-full px-4 py-3 rounded-xl bg-surface ring-1 ring-hairline text-ink placeholder:text-ink-muted/70 focus:outline-none focus:ring-2 focus:ring-pin-500/40 transition-shadow';
 const FIELD_CARD = 'bg-surface-2 rounded-2xl ring-1 ring-hairline shadow-card p-6';
 const SAVE_BUTTON =
   'mt-5 px-8 py-3 bg-pin-500 text-white font-bold rounded-full hover:bg-pin-600 focus:outline-none focus:ring-2 focus:ring-pin-500/40 disabled:opacity-50 disabled:cursor-not-allowed transition-colors';
-const FIELD_ERROR = 'mt-3 text-sm text-pin-600 dark:text-pin-400';
-const FIELD_SUCCESS = 'mt-3 text-sm text-forest-700 dark:text-forest-300';
+const FIELD_ERROR = 'mt-3 text-base text-pin-600 dark:text-pin-400';
+const FIELD_SUCCESS = 'mt-3 text-base text-forest-700 dark:text-forest-300';
 
 // Views that are actually built. Anything else shows the "coming soon" panel.
 const BUILT_VIEWS = new Set(['dashboard', 'requests', 'household', 'documents', 'settings']);
@@ -523,7 +523,7 @@ const HelpSeekerDashboard = () => {
                 <p className="font-display text-2xl tracking-wide text-ink truncate">
                   {currentUser?.name || t('household.yourAccount')}
                 </p>
-                <p className="text-sm text-ink-muted capitalize">
+                <p className="text-base text-ink-muted capitalize">
                   {currentUser?.role || 'help-seeker'}
                 </p>
               </div>
@@ -541,7 +541,7 @@ const HelpSeekerDashboard = () => {
                   <dt className="text-sm font-bold uppercase tracking-wide text-ink-muted">
                     {row.label}
                   </dt>
-                  <dd className="text-sm text-right min-w-0 truncate text-ink">
+                  <dd className="text-base text-right min-w-0 truncate text-ink">
                     {row.value || (
                       <span className="text-ink-muted/70 italic">{t('common.notSetYet')}</span>
                     )}
@@ -551,7 +551,7 @@ const HelpSeekerDashboard = () => {
             </dl>
           </div>
 
-          <p className="text-xs text-ink-muted italic">
+          <p className="text-sm text-ink-muted italic">
             {t('household.editNote')}
           </p>
         </div>
@@ -861,7 +861,7 @@ const SettingsSection = ({ title, help, children }) => (
   <section className="mb-10">
     <div className="mb-4 pb-2 border-b border-hairline text-center">
       <h3 className="font-display text-2xl tracking-wide text-ink">{title}</h3>
-      {help && <p className="text-sm text-ink-muted mt-0.5">{help}</p>}
+      {help && <p className="text-base text-ink-muted mt-0.5">{help}</p>}
     </div>
     <div className="space-y-6">{children}</div>
   </section>

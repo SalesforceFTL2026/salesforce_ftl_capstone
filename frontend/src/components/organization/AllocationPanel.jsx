@@ -127,24 +127,24 @@ const AllocationPanel = ({ request, resources, onChanged, readOnly = false }) =>
   return (
     <div className="mt-4 pt-4 border-t border-white/40 dark:border-white/10">
       <div className="flex items-center justify-between mb-2">
-        <h4 className="font-bold uppercase tracking-wide text-xs">{t('org.allocation.title')}</h4>
+        <h4 className="font-bold uppercase tracking-wide text-sm">{t('org.allocation.title')}</h4>
         {!readOnly && (
           <button
             type="button"
             onClick={handleSuggest}
             disabled={suggesting}
-            className="text-xs font-semibold bg-[#7F9764] text-white px-3 py-1 rounded-full hover:opacity-90 disabled:opacity-60"
+            className="text-sm font-semibold bg-[#7F9764] text-white px-3 py-1 rounded-full hover:opacity-90 disabled:opacity-60"
           >
             {suggesting ? t('org.allocation.thinking') : t('org.allocation.suggestWithAi')}
           </button>
         )}
       </div>
 
-      {error && <p className="text-red-700 dark:text-red-300 text-xs mb-2">{error}</p>}
+      {error && <p className="text-red-700 dark:text-red-300 text-sm mb-2">{error}</p>}
 
       {/* AI suggestions */}
       {!readOnly && suggestError && (
-        <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">{suggestError}</p>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{suggestError}</p>
       )}
       {!readOnly && suggestions.length > 0 && (
         <div className="mb-3 space-y-1">
@@ -153,7 +153,7 @@ const AllocationPanel = ({ request, resources, onChanged, readOnly = false }) =>
               key={s.resourceId}
               type="button"
               onClick={() => applySuggestion(s)}
-              className="w-full text-left text-xs bg-white/70 dark:bg-black/20 rounded-lg px-2 py-1.5 hover:bg-white"
+              className="w-full text-left text-sm bg-white/70 dark:bg-black/20 rounded-lg px-2 py-1.5 hover:bg-white"
             >
               <span className="font-semibold">
                 {s.quantity} × {nameFor(s.resourceId)}
@@ -165,16 +165,16 @@ const AllocationPanel = ({ request, resources, onChanged, readOnly = false }) =>
       )}
 
       {/* Current allocations */}
-      {loading && <p className="text-xs" role="status">{t('org.allocation.loading')}</p>}
+      {loading && <p className="text-sm" role="status">{t('org.allocation.loading')}</p>}
       {!loading && allocations.length === 0 && (
-        <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">{t('org.allocation.nothingAllocated')}</p>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{t('org.allocation.nothingAllocated')}</p>
       )}
       {!loading && allocations.length > 0 && (
         <ul className="space-y-1 mb-3">
           {allocations.map((a) => (
             <li
               key={a.id}
-              className="flex items-center justify-between text-sm bg-white/70 dark:bg-black/20 rounded-lg px-2 py-1"
+              className="flex items-center justify-between text-base bg-white/70 dark:bg-black/20 rounded-lg px-2 py-1"
             >
               <span>
                 {a.quantity} {a.resource?.unit} · {a.resource?.name}
@@ -183,7 +183,7 @@ const AllocationPanel = ({ request, resources, onChanged, readOnly = false }) =>
                 <button
                   type="button"
                   onClick={() => handleRemove(a.id)}
-                  className="text-xs font-semibold text-red-600 hover:underline"
+                  className="text-sm font-semibold text-red-600 hover:underline"
                 >
                   {t('org.allocation.remove')}
                 </button>
@@ -195,16 +195,16 @@ const AllocationPanel = ({ request, resources, onChanged, readOnly = false }) =>
 
       {/* Allocate form — hidden for completed (view-only) requests. */}
       {!readOnly && (
-      <form onSubmit={handleAllocate} className="flex items-end gap-2">
-        <div className="flex-1">
-          <label htmlFor="alloc-resource" className="text-xs font-semibold uppercase block mb-1">
+      <form onSubmit={handleAllocate} className="flex flex-wrap items-end gap-2">
+        <div className="w-full sm:flex-1 sm:w-auto">
+          <label htmlFor="alloc-resource" className="text-sm font-semibold uppercase block mb-1">
             {t('org.allocation.resource')}
           </label>
           <select
             id="alloc-resource"
             value={resourceId}
             onChange={(e) => setResourceId(e.target.value)}
-            className="w-full text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#1f2d18] text-gray-800 dark:text-gray-100 px-2 py-1.5"
+            className="w-full text-base rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#1f2d18] text-gray-800 dark:text-gray-100 px-2 py-1.5"
           >
             <option value="">{t('org.allocation.select')}</option>
             {availableResources.map((r) => (
@@ -214,8 +214,8 @@ const AllocationPanel = ({ request, resources, onChanged, readOnly = false }) =>
             ))}
           </select>
         </div>
-        <div className="w-20">
-          <label htmlFor="alloc-qty" className="text-xs font-semibold uppercase block mb-1">
+        <div className="w-20 shrink-0">
+          <label htmlFor="alloc-qty" className="text-sm font-semibold uppercase block mb-1">
             {t('org.allocation.qty')}
           </label>
           <input
@@ -225,13 +225,13 @@ const AllocationPanel = ({ request, resources, onChanged, readOnly = false }) =>
             step="1"
             value={quantity}
             onChange={(e) => setQuantity(e.target.value)}
-            className="w-full text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#1f2d18] text-gray-800 dark:text-gray-100 px-2 py-1.5"
+            className="w-full text-base rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#1f2d18] text-gray-800 dark:text-gray-100 px-2 py-1.5"
           />
         </div>
         <button
           type="submit"
           disabled={busy}
-          className="text-sm font-semibold bg-[#1C2A16] dark:bg-[#7F9764] text-white px-4 py-1.5 rounded-lg hover:opacity-90 disabled:opacity-60"
+          className="flex-1 sm:flex-none text-base font-semibold bg-[#1C2A16] dark:bg-[#7F9764] text-white px-4 py-1.5 rounded-lg hover:opacity-90 disabled:opacity-60"
         >
           {busy ? t('org.allocation.adding') : t('org.allocation.allocate')}
         </button>

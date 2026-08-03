@@ -46,7 +46,7 @@ const RequestDetailsModal = ({ request, onClose }) => {
   const Field = ({ label, value }) =>
     value === null || value === undefined || value === '' ? null : (
       <div>
-        <dt className="text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">{label}</dt>
+        <dt className="text-sm font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">{label}</dt>
         <dd className="mt-0.5 text-base text-[#1C2A16] dark:text-gray-100">{value}</dd>
       </div>
     );
@@ -103,7 +103,7 @@ const RequestDetailsModal = ({ request, onClose }) => {
 
           {description && (
             <div>
-              <dt className="text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+              <dt className="text-sm font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                 {t('volunteer.requests.detail.description')}
               </dt>
               <dd className="mt-0.5 text-base text-[#1C2A16] dark:text-gray-100 whitespace-pre-wrap">{description}</dd>
@@ -113,14 +113,14 @@ const RequestDetailsModal = ({ request, onClose }) => {
           {/* AI reasoning */}
           {reasoning && (
             <div className="rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-4">
-              <p className="text-sm font-semibold text-[#1C2A16] dark:text-white mb-1">
+              <p className="text-base font-semibold text-[#1C2A16] dark:text-white mb-1">
                 {t('volunteer.requests.whyPrioritized')}
               </p>
               <p className="text-base text-gray-700 dark:text-gray-200">{reasoning}</p>
             </div>
           )}
 
-          <dl className="grid grid-cols-2 gap-4">
+          <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Field label={t('volunteer.requests.columns.category')} value={category} />
             <Field label={t('volunteer.requests.detail.location')} value={location} />
             <Field label={t('volunteer.requests.detail.submitted')} value={when} />

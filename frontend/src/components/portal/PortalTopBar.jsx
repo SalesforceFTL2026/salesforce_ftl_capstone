@@ -45,6 +45,7 @@ const PortalTopBar = ({
   title,
   currentUser,
   onSignOut,
+  onOpenNav,
   searchValue = '',
   onSearchChange,
   searchPlaceholder,
@@ -68,22 +69,41 @@ const PortalTopBar = ({
   // that doesn't pass onSearchChange keeps the plain, decorative input.
   const searchable = typeof onSearchChange === 'function';
   const [searchOpen, setSearchOpen] = useState(false);
+  // On phones the field is collapsed to an icon to save room; tapping expands it
+  // to a full-width bar. From sm up it's always inline, so this is a no-op there.
+  const [searchExpanded, setSearchExpanded] = useState(false);
   const searchRef = useRef(null);
+  const searchInputRef = useRef(null);
   const hasQuery = searchable && searchValue.trim().length > 0;
   const showResults = searchOpen && hasQuery;
   const resultCount = searchResults.reduce((sum, g) => sum + g.items.length, 0);
 
-  // Close the results dropdown when clicking outside the search box.
+  const openSearch = () => {
+    setSearchExpanded(true);
+    if (searchable) setSearchOpen(true);
+  };
+  const closeSearch = () => {
+    setSearchExpanded(false);
+    setSearchOpen(false);
+  };
+
+  // When the mobile field expands, move focus into it so the user can type.
   useEffect(() => {
-    if (!searchOpen) return undefined;
+    if (searchExpanded) searchInputRef.current?.focus();
+  }, [searchExpanded]);
+
+  // Close the results dropdown (and collapse the mobile field) on outside click.
+  useEffect(() => {
+    if (!searchOpen && !searchExpanded) return undefined;
     const handleClick = (e) => {
       if (searchRef.current && !searchRef.current.contains(e.target)) {
         setSearchOpen(false);
+        setSearchExpanded(false);
       }
     };
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
-  }, [searchOpen]);
+  }, [searchOpen, searchExpanded]);
 
   // Run a result's action, then clear the query and close — so the box resets
   // and the user lands on the view/item they picked.
@@ -156,9 +176,50 @@ const PortalTopBar = ({
   };
 
   return (
-    <header className="bg-[#7f9976] dark:bg-[#141d11] px-4 sm:px-6 py-4 flex items-center gap-4 transition-colors duration-300">
-      {/* Search */}
-      <div className="relative flex-1 max-w-md" ref={searchRef}>
+    <header className="relative bg-[#7f9976] dark:bg-[#141d11] px-4 sm:px-6 py-4 flex items-center gap-3 sm:gap-4 transition-colors duration-300">
+      {/* Hamburger — opens the nav drawer. Only below lg, where the sidebar rail
+          is hidden. Hidden while the mobile search field is expanded over the bar. */}
+      {onOpenNav && !searchExpanded && (
+        <button
+          type="button"
+          onClick={onOpenNav}
+          aria-label={t('portal.openMenu', { defaultValue: 'Open menu' })}
+          className="lg:hidden shrink-0 w-10 h-10 rounded-full bg-white/90 dark:bg-[#1f2d18] flex items-center justify-center shadow-sm focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/50"
+        >
+          <svg className="w-5 h-5 text-[#1a2332] dark:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      )}
+
+      {/* Collapsed search button — phones only, and only while not expanded. It
+          saves room in the cramped top bar; tapping expands the field to fill
+          the bar. From sm up the inline field below is always shown instead. */}
+      {!searchExpanded && (
+        <button
+          type="button"
+          onClick={openSearch}
+          aria-label={t('portal.searchPlaceholder')}
+          className="sm:hidden shrink-0 w-10 h-10 rounded-full bg-white/90 dark:bg-[#1f2d18] flex items-center justify-center shadow-sm focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/50"
+        >
+          <svg className="w-5 h-5 text-[#6ba3d3]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </button>
+      )}
+
+      {/* Search field. Inline (flex-1) from sm up. On phones it's hidden until
+          the button above expands it, at which point it's positioned to fill
+          the whole bar (over the other controls) so it isn't squeezed. */}
+      <div
+        className={`sm:relative sm:flex-1 sm:block sm:max-w-md sm:inset-auto sm:px-0 sm:bg-transparent ${
+          searchExpanded
+            ? 'absolute inset-x-0 inset-y-2 px-4 z-40 flex items-center bg-[#7f9976] dark:bg-[#141d11]'
+            : 'hidden'
+        }`}
+        ref={searchRef}
+      >
+        <div className="relative flex-1">
         <svg
           className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6ba3d3]"
           fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
@@ -166,6 +227,7 @@ const PortalTopBar = ({
           <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
         <input
+          ref={searchInputRef}
           type="search"
           role={searchable ? 'combobox' : undefined}
           aria-label={t('portal.searchPlaceholder')}
@@ -180,7 +242,7 @@ const PortalTopBar = ({
               ? (e) => {
                   if (e.key === 'Escape') {
                     if (searchValue) onSearchChange('');
-                    setSearchOpen(false);
+                    closeSearch();
                   }
                 }
               : undefined
@@ -195,7 +257,7 @@ const PortalTopBar = ({
             className="absolute left-0 right-0 mt-2 bg-white dark:bg-[#1f2d18] rounded-2xl shadow-lg ring-1 ring-black/5 z-50 overflow-hidden max-h-[70vh] overflow-y-auto"
           >
             {resultCount === 0 ? (
-              <p className="px-4 py-6 text-sm text-center text-gray-500 dark:text-gray-400">
+              <p className="px-4 py-6 text-base text-center text-gray-500 dark:text-gray-400">
                 {t('portal.searchNoResults', { query: searchValue.trim() })}
               </p>
             ) : (
@@ -203,7 +265,7 @@ const PortalTopBar = ({
                 .filter((group) => group.items.length > 0)
                 .map((group) => (
                   <div key={group.key} className="py-1">
-                    <p className="px-4 pt-2 pb-1 text-[11px] font-bold uppercase tracking-wide text-gray-500 dark:text-gray-500">
+                    <p className="px-4 pt-2 pb-1 text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-500">
                       {group.heading}
                     </p>
                     {group.items.map((item) => (
@@ -215,11 +277,11 @@ const PortalTopBar = ({
                         onClick={() => handleSelectResult(item)}
                         className="w-full text-left px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
                       >
-                        <p className="text-sm font-semibold text-[#1C2A16] dark:text-white truncate">
+                        <p className="text-base font-semibold text-[#1C2A16] dark:text-white truncate">
                           {item.title}
                         </p>
                         {item.subtitle && (
-                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                          <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
                             {item.subtitle}
                           </p>
                         )}
@@ -229,6 +291,21 @@ const PortalTopBar = ({
                 ))
             )}
           </div>
+        )}
+        </div>
+
+        {/* Close the expanded mobile field. Hidden from sm up (field is inline). */}
+        {searchExpanded && (
+          <button
+            type="button"
+            onClick={closeSearch}
+            aria-label={t('common.close', { defaultValue: 'Close' })}
+            className="sm:hidden shrink-0 ml-2 w-10 h-10 rounded-full bg-white/90 dark:bg-[#1f2d18] flex items-center justify-center shadow-sm focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/50"
+          >
+            <svg className="w-5 h-5 text-[#1a2332] dark:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         )}
       </div>
 
@@ -282,7 +359,7 @@ const PortalTopBar = ({
                         /* next poll resyncs */
                       }
                     }}
-                    className="text-xs text-[#3a4a30] dark:text-gray-300 hover:underline"
+                    className="text-sm text-[#3a4a30] dark:text-gray-300 hover:underline"
                   >
                     {t('portal.notificationsMarkAllRead')}
                   </button>
@@ -291,11 +368,11 @@ const PortalTopBar = ({
 
               <div className="max-h-80 overflow-y-auto">
                 {error ? (
-                  <p className="px-4 py-6 text-sm text-center text-gray-500 dark:text-gray-400">
+                  <p className="px-4 py-6 text-base text-center text-gray-500 dark:text-gray-400">
                     {t('portal.notificationsError')}
                   </p>
                 ) : notifications.length === 0 ? (
-                  <p className="px-4 py-6 text-sm text-center text-gray-500 dark:text-gray-400">
+                  <p className="px-4 py-6 text-base text-center text-gray-500 dark:text-gray-400">
                     {t('portal.notificationsEmpty')}
                   </p>
                 ) : (
@@ -313,13 +390,13 @@ const PortalTopBar = ({
                           <span className="mt-1.5 w-2 h-2 rounded-full bg-[#6ba3d3] flex-shrink-0" />
                         )}
                         <div className="min-w-0 flex-1">
-                          <p className="text-sm font-semibold text-[#1C2A16] dark:text-white">
+                          <p className="text-base font-semibold text-[#1C2A16] dark:text-white">
                             {n.title}
                           </p>
-                          <p className="text-sm text-gray-600 dark:text-gray-300 break-words">
+                          <p className="text-base text-gray-600 dark:text-gray-300 break-words">
                             {n.message}
                           </p>
-                          <p className="mt-0.5 text-[11px] text-gray-500 dark:text-gray-500">
+                          <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-500">
                             {formatRelativeTime(n.createdAt)}
                           </p>
                         </div>
@@ -354,7 +431,7 @@ const PortalTopBar = ({
           {showSignOut && (
             <button
               onClick={onSignOut}
-              className="text-xs text-[#3a4a30] dark:text-gray-300 hover:underline whitespace-nowrap"
+              className="text-sm text-[#3a4a30] dark:text-gray-300 hover:underline whitespace-nowrap"
             >
               {t('portal.signOut')}
             </button>

@@ -71,7 +71,7 @@ const HSRequestsView = ({
       )}
 
       {/* Tab switcher pill */}
-      <div className="bg-surface-2 ring-1 ring-hairline rounded-3xl px-4 py-3 flex gap-2 sm:gap-4 mb-6 transition-colors duration-300">
+      <div className="bg-surface-2 ring-1 ring-hairline rounded-3xl px-4 py-3 flex flex-wrap gap-2 sm:gap-4 mb-6 transition-colors duration-300">
         {SUB_TABS.map(({ id, labelKey, icon: renderIcon }) => {
           const isActive = id === tab;
           return (
@@ -206,7 +206,7 @@ const RequestsCalendar = ({ requests }) => {
       {/* Weekday labels */}
       <div className="grid grid-cols-7 gap-1 mb-1">
         {WEEKDAY_KEYS.map((w) => (
-          <div key={w} className="text-center text-[11px] font-bold uppercase tracking-wide text-ink-muted py-1">
+          <div key={w} className="text-center text-xs font-bold uppercase tracking-wide text-ink-muted py-1">
             {t(`requests.calendar.weekdays.${w}`)}
           </div>
         ))}
@@ -226,14 +226,14 @@ const RequestsCalendar = ({ requests }) => {
                   : 'border-hairline'
               }`}
             >
-              <span className={`text-xs font-semibold ${isToday(d) ? 'text-pin-600 dark:text-pin-400' : 'text-ink-muted'}`}>
+              <span className={`text-sm font-semibold ${isToday(d) ? 'text-pin-600 dark:text-pin-400' : 'text-ink-muted'}`}>
                 {d}
               </span>
               {items.map(({ request }) => (
                 <div
                   key={request.id}
                   title={t('requests.calendar.itemTitle', { category: request.category, urgency: request.urgency })}
-                  className="flex items-center gap-1 text-[10px] leading-tight text-ink bg-surface-3 rounded px-1 py-0.5 truncate"
+                  className="flex items-center gap-1 text-xs leading-tight text-ink bg-surface-3 rounded px-1 py-0.5 truncate"
                 >
                   <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${URGENCY_DOT[request.urgency] || 'bg-gray-400'}`} />
                   <span className="truncate">{request.category}</span>
@@ -245,7 +245,7 @@ const RequestsCalendar = ({ requests }) => {
       </div>
 
       {/* Legend + note */}
-      <div className="flex flex-wrap items-center gap-4 mt-4 text-xs text-ink-muted">
+      <div className="flex flex-wrap items-center gap-4 mt-4 text-sm text-ink-muted">
         {Object.entries(URGENCY_DOT).map(([label, dot]) => (
           <span key={label} className="flex items-center gap-1.5">
             <span className={`w-2 h-2 rounded-full ${dot}`} />
@@ -253,7 +253,7 @@ const RequestsCalendar = ({ requests }) => {
           </span>
         ))}
       </div>
-      <p className="text-[11px] text-ink-muted mt-2 italic">
+      <p className="text-xs text-ink-muted mt-2 italic">
         {t('requests.calendar.estimateNote')}
       </p>
     </div>
@@ -305,10 +305,10 @@ const RequestTable = ({ requests, deletingId, onDelete }) => {
           {/* Description in an inset panel beneath the row, so it reads as a
               distinct detail block rather than loose text under the columns. */}
           <div className="mt-3 rounded-xl bg-surface-3 px-4 py-3 text-left">
-            <p className="font-bold uppercase text-[11px] tracking-wide text-ink-muted mb-1">
+            <p className="font-bold uppercase text-xs tracking-wide text-ink-muted mb-1">
               {t('requests.table.description')}
             </p>
-            <p className={r.description ? 'text-ink text-sm leading-relaxed' : 'text-ink-muted text-sm italic'}>
+            <p className={r.description ? 'text-ink text-base leading-relaxed' : 'text-ink-muted text-base italic'}>
               {r.description || t('requests.table.noDescription')}
             </p>
           </div>
@@ -357,7 +357,7 @@ const LocationCell = ({ request }) => {
             <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
           </svg>
         </div>
-        <span className="text-[10px] font-semibold uppercase text-ink-muted">
+        <span className="text-xs font-semibold uppercase text-ink-muted">
           {request.location || t('requests.table.noLocation')}
         </span>
       </div>
@@ -392,7 +392,7 @@ const LocationCell = ({ request }) => {
           </svg>
         </span>
       </div>
-      <span className="text-[10px] font-semibold uppercase text-ink-muted truncate max-w-[6rem]">
+      <span className="text-xs font-semibold uppercase text-ink-muted truncate max-w-[6rem]">
         {label}
       </span>
     </div>

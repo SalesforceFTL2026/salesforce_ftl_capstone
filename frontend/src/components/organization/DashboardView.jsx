@@ -67,13 +67,13 @@ const DashboardView = ({
             <button
               type="button"
               onClick={onViewRequests}
-              className="text-forest-700 dark:text-forest-300 text-xs font-bold uppercase tracking-wide hover:underline focus:outline-none focus:ring-2 focus:ring-forest-400/50 rounded"
+              className="text-forest-700 dark:text-forest-300 text-sm font-bold uppercase tracking-wide hover:underline focus:outline-none focus:ring-2 focus:ring-forest-400/50 rounded"
             >
               {t('org.dashboard.viewAll')}
             </button>
           )}
         </div>
-        <p className="text-ink-muted text-sm mb-4">
+        <p className="text-ink-muted text-base mb-4">
           {t('org.dashboard.coverageSummary', {
             total: locations.total,
             covered: locations.covered,
@@ -135,7 +135,7 @@ const DashboardView = ({
             doesn't stretch the panel. pr-1 keeps the scrollbar off the cards. */}
         <ul className="flex flex-col gap-3 max-h-[11rem] overflow-y-auto pr-1">
           {tasks.length === 0 && (
-            <li className="text-white/90 text-sm">{t('org.dashboard.noOpenTasks')}</li>
+            <li className="text-white/90 text-base">{t('org.dashboard.noOpenTasks')}</li>
           )}
           {tasks.map((task, i) => (
             <li
@@ -144,7 +144,7 @@ const DashboardView = ({
             >
               <div className="w-14 h-14 rounded-xl bg-forest-100 text-forest-900 flex flex-col items-center justify-center leading-none shrink-0">
                 <span className="text-xl font-bold">{task.date}</span>
-                <span className="text-xs font-semibold uppercase">{task.month}</span>
+                <span className="text-sm font-semibold uppercase">{task.month}</span>
               </div>
               <span className="font-semibold text-lg">{task.title}</span>
             </li>
@@ -164,12 +164,12 @@ const ProgressStat = ({ metric, label, caption }) => {
   const hasData = total > 0;
   return (
     <div className="bg-forest-800 dark:bg-surface-3 rounded-2xl px-5 py-5 text-white shadow-card">
-      <p className="text-xs font-bold uppercase tracking-wide text-forest-100 dark:text-ink-muted">
+      <p className="text-sm font-bold uppercase tracking-wide text-forest-100 dark:text-ink-muted">
         {label}
       </p>
       <p className="mt-2 flex items-baseline gap-2">
         <span className="text-3xl font-bold text-pin-400">{hasData ? `${pct}%` : '—'}</span>
-        <span className="text-sm font-semibold text-forest-100">{done} / {total}</span>
+        <span className="text-base font-semibold text-forest-100">{done} / {total}</span>
       </p>
       {/* Progress bar toward the goal (100% = every item handled). */}
       <div className="mt-3 h-1.5 rounded-full bg-forest-900/60 dark:bg-black/30 overflow-hidden">
@@ -178,7 +178,7 @@ const ProgressStat = ({ metric, label, caption }) => {
           style={{ width: `${hasData ? pct : 0}%` }}
         />
       </div>
-      <p className="text-[11px] text-forest-100 mt-2 leading-snug">{caption}</p>
+      <p className="text-xs text-forest-100 mt-2 leading-snug">{caption}</p>
     </div>
   );
 };
@@ -201,14 +201,14 @@ const LocationCoverageRow = ({ location, onView, t }) => {
         <div className="flex items-center justify-between gap-3">
           <span className="font-display text-lg tracking-wide truncate">{name}</span>
           <span
-            className={`shrink-0 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wide ${
+            className={`shrink-0 px-2.5 py-0.5 rounded-full text-sm font-bold uppercase tracking-wide ${
               covered ? 'bg-forest-100 text-forest-900' : 'bg-pin-500 text-white'
             }`}
           >
             {covered ? t('org.dashboard.covered') : t('org.dashboard.needsAttention')}
           </span>
         </div>
-        <p className="text-forest-100 text-sm mt-1">
+        <p className="text-forest-100 text-base mt-1">
           {t('org.dashboard.locationNeed', { people })}
         </p>
         {/* Coverage bar — how many of this location's requests are being handled. */}
@@ -218,7 +218,7 @@ const LocationCoverageRow = ({ location, onView, t }) => {
             style={{ width: `${pct}%` }}
           />
         </div>
-        <p className="text-[11px] text-forest-100 mt-1">
+        <p className="text-xs text-forest-100 mt-1">
           {t('org.dashboard.locationHandled', { handled, requests })}
         </p>
       </button>

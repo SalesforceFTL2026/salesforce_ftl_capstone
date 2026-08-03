@@ -82,20 +82,20 @@ const ResourcesView = ({
     'w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-[#3a4f30] ' +
     'bg-white dark:bg-[#1a2f1a] text-gray-900 dark:text-white ' +
     'focus:outline-none focus:border-[#7F9764] focus:ring-2 focus:ring-[#7F9764]/30 transition-all';
-  const label = 'block text-sm font-bold text-gray-800 dark:text-gray-200 mb-2';
+  const label = 'block text-base font-bold text-gray-800 dark:text-gray-200 mb-2';
 
   return (
     <div className="grid lg:grid-cols-[minmax(300px,380px)_1fr] gap-6">
       {/* Add-resource form */}
       <div className="bg-white dark:bg-[#273A20] rounded-2xl shadow-md p-6 h-fit">
         <h2 className="text-xl font-bold text-black dark:text-white mb-1">{t('org.resources.addTitle')}</h2>
-        <p className="text-gray-600 dark:text-gray-400 text-sm mb-5">
+        <p className="text-gray-600 dark:text-gray-400 text-base mb-5">
           {t('org.resources.addSubtitle')}
         </p>
 
         {formError && (
           <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-xl">
-            <p className="text-red-800 dark:text-red-300 text-sm">{formError}</p>
+            <p className="text-red-800 dark:text-red-300 text-base">{formError}</p>
           </div>
         )}
 
@@ -156,7 +156,7 @@ const ResourcesView = ({
           <button
             type="submit"
             disabled={submitting}
-            className="w-full bg-[#1C2A16] dark:bg-[#7F9764] text-white py-3 px-6 rounded-xl font-semibold uppercase text-sm tracking-wide hover:opacity-90 transition-opacity disabled:bg-gray-400 disabled:cursor-not-allowed"
+            className="w-full bg-[#1C2A16] dark:bg-[#7F9764] text-white py-3 px-6 rounded-xl font-semibold uppercase text-base tracking-wide hover:opacity-90 transition-opacity disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
             {submitting ? t('org.resources.adding') : t('org.resources.addButton')}
           </button>
@@ -174,7 +174,7 @@ const ResourcesView = ({
         {error && !loading && (
           <div className="bg-red-50 border border-red-200 text-red-800 rounded-xl p-4">
             <p className="font-semibold">{error}</p>
-            <button onClick={onRetry} className="mt-2 text-sm font-semibold underline hover:no-underline">
+            <button onClick={onRetry} className="mt-2 text-base font-semibold underline hover:no-underline">
               {t('org.resources.tryAgain')}
             </button>
           </div>
@@ -193,11 +193,11 @@ const ResourcesView = ({
             {resources.map((r) => (
               <li
                 key={r.id}
-                className="flex items-center justify-between gap-4 rounded-xl border border-gray-200 dark:border-[#2b3b55] p-4"
+                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gray-200 dark:border-[#2b3b55] p-4"
               >
-                <div>
-                  <p className="font-semibold text-[#1C2A16] dark:text-white">{r.name}</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                <div className="min-w-0">
+                  <p className="font-semibold text-[#1C2A16] dark:text-white break-words">{r.name}</p>
+                  <p className="text-base text-gray-500 dark:text-gray-400">
                     {typeLabel(r.resourceType, t)} · {r.quantity} {r.unit}
                   </p>
                 </div>
@@ -205,7 +205,7 @@ const ResourcesView = ({
                   <button
                     type="button"
                     onClick={() => onToggle(r.id, !r.available)}
-                    className={`text-xs font-semibold uppercase px-3 py-1.5 rounded-full ${
+                    className={`text-sm font-semibold uppercase px-3 py-1.5 rounded-full ${
                       r.available
                         ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300'
                         : 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
@@ -216,7 +216,7 @@ const ResourcesView = ({
                   <button
                     type="button"
                     onClick={() => onDelete(r.id)}
-                    className="text-sm font-semibold text-red-600 hover:underline"
+                    className="text-base font-semibold text-red-600 hover:underline"
                   >
                     {t('org.resources.remove')}
                   </button>

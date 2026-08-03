@@ -53,8 +53,8 @@ const RequestFilterBar = ({ value = {}, onChange, resultCount }) => {
 
   return (
     <div className="bg-[#c3d3ae] dark:bg-[#1f3320] rounded-3xl px-4 sm:px-6 py-3 flex flex-wrap items-center gap-3 transition-colors duration-300">
-      {/* Keyword search */}
-      <div className="relative flex-1 min-w-[12rem]">
+      {/* Keyword search — full width on phones, flexes inline once there's room. */}
+      <div className="relative w-full sm:w-auto sm:flex-1 sm:min-w-[12rem]">
         <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-gray-500 dark:text-gray-400">
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" />
@@ -119,7 +119,7 @@ const RequestFilterBar = ({ value = {}, onChange, resultCount }) => {
         <button
           type="button"
           onClick={clearAll}
-          className="px-3 py-2.5 rounded-xl text-sm font-semibold text-[#1C2A16] dark:text-gray-200 hover:bg-black/5 dark:hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/40 transition-colors"
+          className="px-3 py-2.5 rounded-xl text-base font-semibold text-[#1C2A16] dark:text-gray-200 hover:bg-black/5 dark:hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/40 transition-colors"
         >
           {t('requests.filterBar.clear')}
         </button>

@@ -50,7 +50,7 @@ const AvailableTasksSection = ({
       <h2 className="text-xl font-bold text-[#1C2A16] dark:text-white text-center mb-1">
         Available volunteer tasks
       </h2>
-      <p className="text-gray-500 dark:text-gray-400 text-sm text-center mb-4">
+      <p className="text-gray-500 dark:text-gray-400 text-base text-center mb-4">
         Tasks assigned to the help requests you registered for. Sign up for the
         ones best suited for your skillset.
       </p>
@@ -66,7 +66,7 @@ const AvailableTasksSection = ({
           <p className="font-semibold">{error}</p>
           <button
             onClick={onRetry}
-            className="mt-2 text-sm font-semibold underline hover:no-underline"
+            className="mt-2 text-base font-semibold underline hover:no-underline"
           >
             Try again
           </button>
@@ -110,27 +110,27 @@ const AvailableTaskCard = ({ task, onSignUp, onWithdraw, busy }) => {
       : null;
 
   return (
-    <li className="bg-white dark:bg-[#16233a] rounded-2xl shadow-md p-5 flex flex-col shrink-0 w-[320px] snap-start">
+    <li className="bg-white dark:bg-[#16233a] rounded-2xl shadow-md p-5 flex flex-col shrink-0 w-[85vw] max-w-[320px] snap-start">
       <div className="flex items-start justify-between gap-3 mb-2">
         <div className="min-w-0">
           <p className="font-bold text-[#1C2A16] dark:text-white">{task.title}</p>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             {task.category || 'Uncategorized'} · {task.urgency} urgency
           </p>
         </div>
         {task.signedUp && (
-          <span className="shrink-0 text-xs font-semibold uppercase px-3 py-1.5 rounded-full bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300">
+          <span className="shrink-0 text-sm font-semibold uppercase px-3 py-1.5 rounded-full bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300">
             Signed up
           </span>
         )}
       </div>
 
-      <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">
+      <p className="text-base text-gray-700 dark:text-gray-300 mb-3">
         {task.description}
       </p>
 
       {/* Which help request + organization this task serves */}
-      <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
         Posted by <span className="font-semibold">{orgName}</span>
         {task.request?.location ? ` · ${task.request.location}` : ''}
       </p>
@@ -140,7 +140,7 @@ const AvailableTaskCard = ({ task, onSignUp, onWithdraw, busy }) => {
           {skills.map((s) => (
             <span
               key={s}
-              className="text-xs font-medium px-2 py-0.5 rounded-full bg-[#e3ecd9] text-[#3a4a30] dark:bg-[#2b3b22] dark:text-[#c3d4b0]"
+              className="text-sm font-medium px-2 py-0.5 rounded-full bg-[#e3ecd9] text-[#3a4a30] dark:bg-[#2b3b22] dark:text-[#c3d4b0]"
             >
               {s}
             </span>
@@ -148,7 +148,7 @@ const AvailableTaskCard = ({ task, onSignUp, onWithdraw, busy }) => {
         </div>
       )}
 
-      <div className="text-sm text-gray-600 dark:text-gray-300 mb-4 space-y-0.5">
+      <div className="text-base text-gray-600 dark:text-gray-300 mb-4 space-y-0.5">
         <p>
           <span className="font-semibold text-[#1C2A16] dark:text-white">
             {task.volunteersConfirmed}
@@ -180,7 +180,7 @@ const AvailableTaskCard = ({ task, onSignUp, onWithdraw, busy }) => {
             type="button"
             onClick={() => onWithdraw(task)}
             disabled={busy}
-            className="w-full px-4 py-2 rounded-xl border-2 border-[#c84444] text-[#c84444] font-semibold text-sm hover:bg-red-50 dark:hover:bg-red-900/20 focus:outline-none focus:ring-2 focus:ring-[#c84444]/40 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+            className="w-full px-4 py-2 rounded-xl border-2 border-[#c84444] text-[#c84444] font-semibold text-base hover:bg-red-50 dark:hover:bg-red-900/20 focus:outline-none focus:ring-2 focus:ring-[#c84444]/40 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
           >
             {busy ? 'Removing…' : 'Withdraw'}
           </button>
@@ -189,7 +189,7 @@ const AvailableTaskCard = ({ task, onSignUp, onWithdraw, busy }) => {
             type="button"
             onClick={() => onSignUp(task)}
             disabled={busy}
-            className="w-full px-4 py-2 rounded-xl bg-[#1C2A16] dark:bg-[#7F9764] text-white font-semibold text-sm hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[#7F9764]/40 disabled:opacity-60 disabled:cursor-not-allowed transition-opacity"
+            className="w-full px-4 py-2 rounded-xl bg-[#1C2A16] dark:bg-[#7F9764] text-white font-semibold text-base hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[#7F9764]/40 disabled:opacity-60 disabled:cursor-not-allowed transition-opacity"
           >
             {busy ? 'Signing up…' : 'Sign up'}
           </button>

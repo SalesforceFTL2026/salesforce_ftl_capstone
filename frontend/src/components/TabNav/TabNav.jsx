@@ -14,7 +14,7 @@ const TabNav = ({ tabs, activeTab, onTabChange }) => {
     <div
       role="tablist"
       aria-label={t('requests.tabNav.ariaLabel')}
-      className="flex gap-2 border-b border-gray-200"
+      className="flex gap-2 border-b border-gray-200 overflow-x-auto"
     >
       {tabs.map((tab) => {
         const isActive = tab.id === activeTab;
@@ -27,7 +27,7 @@ const TabNav = ({ tabs, activeTab, onTabChange }) => {
             aria-selected={isActive}
             aria-controls={`panel-${tab.id}`}
             onClick={() => onTabChange(tab.id)}
-            className={`px-4 py-3 text-sm sm:text-base font-semibold -mb-px border-b-2 transition-colors focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/40 rounded-t-lg ${
+            className={`shrink-0 whitespace-nowrap px-4 py-3 text-sm sm:text-base font-semibold -mb-px border-b-2 transition-colors focus:outline-none focus:ring-2 focus:ring-[#6ba3d3]/40 rounded-t-lg ${
               isActive
                 ? 'border-[#6ba3d3] text-[#6ba3d3]'
                 : 'border-transparent text-gray-500 hover:text-gray-800'

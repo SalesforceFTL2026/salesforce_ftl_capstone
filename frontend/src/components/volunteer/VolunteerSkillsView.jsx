@@ -64,7 +64,7 @@ const VolunteerSkillsView = ({ skills, loading, error, onRetry, onSave, saving }
     return (
       <div className="bg-red-50 border border-red-200 text-red-800 rounded-2xl p-4">
         <p className="font-semibold">{error}</p>
-        <button onClick={onRetry} className="mt-2 text-sm font-semibold underline hover:no-underline">
+        <button onClick={onRetry} className="mt-2 text-base font-semibold underline hover:no-underline">
           {t('volunteer.common.tryAgain')}
         </button>
       </div>
@@ -81,7 +81,7 @@ const VolunteerSkillsView = ({ skills, loading, error, onRetry, onSave, saving }
       <div className="bg-white dark:bg-[#16233a] rounded-3xl p-6 sm:p-8 shadow-md flex flex-col gap-5">
         <div>
           <h2 className="text-2xl font-bold text-[#1C2A16] dark:text-white">{t('volunteer.skills.yourSkills')}</h2>
-          <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
+          <p className="text-gray-500 dark:text-gray-400 text-base mt-1">
             {t('volunteer.skills.rateHelp')}
           </p>
         </div>
@@ -95,11 +95,11 @@ const VolunteerSkillsView = ({ skills, loading, error, onRetry, onSave, saving }
             {draft.map((skill) => (
               <li key={skill.name} className="flex flex-col gap-2">
                 <div className="flex items-center justify-between gap-3">
-                  <span className="font-semibold text-[#1C2A16] dark:text-white">
+                  <span className="font-semibold text-[#1C2A16] dark:text-white min-w-0 truncate">
                     {skill.name}
                   </span>
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm font-medium text-[#6ba3d3] w-24 text-right">
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span className="text-base font-medium text-[#6ba3d3] w-24 text-right">
                       {skill.level} · {t(`volunteer.skills.levels.${LEVEL_KEYS[skill.level - 1]}`)}
                     </span>
                     <button
@@ -139,7 +139,7 @@ const VolunteerSkillsView = ({ skills, loading, error, onRetry, onSave, saving }
                 key={skill}
                 type="button"
                 onClick={() => addSkill(skill)}
-                className="px-3 py-2 rounded-full border-2 border-gray-300 text-gray-700 dark:text-gray-200 text-sm font-medium hover:border-[#6ba3d3] transition-colors"
+                className="px-3 py-2 rounded-full border-2 border-gray-300 text-gray-700 dark:text-gray-200 text-base font-medium hover:border-[#6ba3d3] transition-colors"
               >
                 + {skill}
               </button>
@@ -168,10 +168,10 @@ const VolunteerSkillsView = ({ skills, loading, error, onRetry, onSave, saving }
       </div>
 
       {saveError && (
-        <p role="alert" className="text-sm font-medium text-red-600">{saveError}</p>
+        <p role="alert" className="text-base font-medium text-red-600">{saveError}</p>
       )}
       {saved && (
-        <p role="status" className="text-sm font-medium text-green-700">{t('volunteer.skills.skillsSaved')}</p>
+        <p role="status" className="text-base font-medium text-green-700">{t('volunteer.skills.skillsSaved')}</p>
       )}
 
       <div>
