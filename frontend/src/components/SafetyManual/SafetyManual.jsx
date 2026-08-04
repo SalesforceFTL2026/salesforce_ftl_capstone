@@ -6,8 +6,24 @@ import { useTranslation } from 'react-i18next';
 // what to do before / during / after common disasters. Content is static
 // (no backend) and sourced from standard FEMA / Ready.gov / Red Cross guidance.
 
+// Languages whose numerals differ from Western digits. Only these need the
+// displayed phone numbers transliterated; every other supported language
+// already writes numbers 0-9. The `tel:` link is NEVER transliterated — a
+// keypad dials Western digits, so localized digits there would break calling.
+const DEVANAGARI_DIGITS = '०१२३४५६७८९';
+const DIGIT_SCRIPTS = { hi: DEVANAGARI_DIGITS, ne: DEVANAGARI_DIGITS };
+
+// Transliterate the digit characters in a display string (e.g. "1-800-222-1222"
+// or "988") to the active language's numerals, leaving separators and letters
+// untouched. A no-op for languages that use Western digits.
+const localizeDigits = (text, lng) => {
+  const digits = DIGIT_SCRIPTS[lng];
+  if (!digits || typeof text !== 'string') return text;
+  return text.replace(/[0-9]/g, (d) => digits[Number(d)]);
+};
+
 const SafetyManual = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   // National emergency contacts, grouped by need. Every number here is a real,
   // established US-wide hotline that works from anywhere in the country — no
@@ -298,11 +314,11 @@ const SafetyManual = () => {
                         href={`tel:${item.tel}`}
                         className="text-2xl font-bold text-[#1e3a5f] dark:text-[#6ba3d3] hover:underline mt-1 inline-block"
                       >
-                        {item.value}
+                        {localizeDigits(item.value, i18n.language)}
                       </a>
                     ) : (
                       <p className="text-2xl font-bold text-[#1e3a5f] dark:text-[#6ba3d3] mt-1">
-                        {item.value}
+                        {localizeDigits(item.value, i18n.language)}
                       </p>
                     )}
                     <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">

@@ -51,6 +51,43 @@ export const setLanguage = (lang) => {
   return i18n.changeLanguage(next);
 };
 
+// Maps our app language codes to the BCP-47 locale we hand Intl.NumberFormat so
+// numbers render the way each language writes them. Two things vary: the digits
+// themselves (Hindi & Nepali use Devanagari — ०१२…९ — which requires the explicit
+// `-u-nu-deva` numbering-system extension; the locale alone still yields Latin
+// digits) and the grouping/decimal separators (e.g. fr "12 480", es "12.480").
+// Anything not listed falls back to the raw code, then to English formatting.
+const NUMBER_LOCALES = {
+  en: 'en-US',
+  es: 'es',
+  zh: 'zh-CN',
+  tl: 'fil',
+  vi: 'vi',
+  fr: 'fr',
+  ko: 'ko',
+  ru: 'ru',
+  ht: 'fr-HT', // Haitian Creole has no CLDR number data; French (Haiti) matches usage.
+  hi: 'hi-IN-u-nu-deva',
+  ne: 'ne-NP-u-nu-deva',
+};
+
+// Cache formatters — building an Intl.NumberFormat per interpolation is wasteful
+// and this runs on every rendered number.
+const numberFormatters = {};
+const formatNumber = (value, lng) => {
+  const locale = NUMBER_LOCALES[lng] || lng || 'en-US';
+  if (!numberFormatters[locale]) {
+    try {
+      numberFormatters[locale] = new Intl.NumberFormat(locale);
+    } catch {
+      // An unrecognized locale string throws; fall back to English so a bad
+      // code never crashes rendering.
+      numberFormatters[locale] = new Intl.NumberFormat('en-US');
+    }
+  }
+  return numberFormatters[locale].format(value);
+};
+
 i18n.use(initReactI18next).init({
   resources: {
     en: { translation: en },
@@ -70,7 +107,28 @@ i18n.use(initReactI18next).init({
   interpolation: {
     // React already escapes values, so i18next doesn't need to.
     escapeValue: false,
+    // Route EVERY interpolation through the formatter (not just ones written as
+    // "{{x, number}}"), so we can localize numbers app-wide without editing each
+    // string. See the interpolator override below for what that formatting does.
+    alwaysFormat: true,
   },
 });
+
+// Localize every interpolated number ({{count}}, {{pct}}, {{miles}}, …) to the
+// active language: Devanagari digits for Hindi/Nepali, locale-correct grouping
+// and separators for the rest (fr "12 480", es "12.480").
+//
+// Why override the interpolator here instead of passing `format` to init():
+// i18next v21+ replaces interpolation.format with its own formatter service on
+// init, so a `format` option is silently dropped. We wrap that service instead —
+// bare numbers get our locale formatting; anything with an explicit format
+// (e.g. "{{x, number}}") still goes to the built-in formatter; non-numbers
+// (names, phone numbers stored as literal text) pass through untouched.
+const builtinFormatter = i18n.services.formatter;
+i18n.services.interpolator.format = (value, format, lng, options) => {
+  if (typeof value === 'number' && !format) return formatNumber(value, lng);
+  if (format) return builtinFormatter.format(value, format, lng, options);
+  return value;
+};
 
 export default i18n;

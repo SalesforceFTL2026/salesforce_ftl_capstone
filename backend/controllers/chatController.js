@@ -3,6 +3,7 @@ import { detectHelpRequest } from '../services/ai/extractor.js';
 import * as requestModel from '../models/requestModel.js';
 import prisma from '../services/database/prisma.js';
 import { hasRole } from '../utils/roles.js';
+import { buildLanguageDirective } from '../utils/language.js';
 
 /**
  * Chat Controller
@@ -449,6 +450,10 @@ export const chat = async (req, res) => {
       systemPrompt = buildHelpSeekerPrompt(req.user, requests);
     }
 
+    // Make the assistant answer in the user's chosen language, not just the
+    // language they happened to type in. Preference lives on the user record.
+    systemPrompt += buildLanguageDirective(req.user.languagePreference);
+
     const reply = await askLLM(message, { systemPrompt, history: safeHistory });
 
     // For help-seekers, also check whether this message describes a NEW need. If
@@ -461,7 +466,7 @@ export const chat = async (req, res) => {
         const convo = [...safeHistory, { role: 'user', content: message }]
           .map((m) => `${m.role}: ${m.content}`)
           .join('\n');
-        const detection = await detectHelpRequest(convo);
+        const detection = await detectHelpRequest(convo, req.user.languagePreference);
         if (detection.isRequest) {
           draft = {
             category: detection.category,
