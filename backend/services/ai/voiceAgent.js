@@ -1,5 +1,10 @@
 import { askLLM } from './chatbot.js';
 import { hasLifeSafetySignal } from './scoring.js';
+import {
+  buildLanguageDirective,
+  buildFieldLanguageDirective,
+  voiceScript,
+} from '../../utils/language.js';
 
 /**
  * Voice Agent
@@ -38,26 +43,18 @@ const VALID_URGENCIES = ['Low', 'Medium', 'High', 'Critical'];
 // hand off to the manual form instead of grinding through the quota.
 const MAX_TURNS = 12;
 
-// Spoken verbatim when either life-safety layer fires. NOT model-generated: a
-// model that is rate-limited, or that decides to be reassuring instead of
-// directive, must never be what stands between a caller and 911.
-// Note what this deliberately does NOT say: that a responder has been notified.
-// Nothing is submitted during the conversation, so promising that help is coming
-// could leave someone in a life-threatening situation waiting on us instead of
-// calling 911.
-const EMERGENCY_SCRIPT =
-  'This sounds like a life-threatening emergency. Please call 911 right now — they can ' +
-  "reach you faster than we can. I've marked your request critical, and it's here on " +
-  'screen ready for you to send when you are safe.';
-
-// Spoken verbatim on the closing turn, replacing whatever the model wrote.
-// Nothing has been submitted at this point — the review screen comes next and the
-// caller still has to press Submit there. Left to the model, it reliably signs off
-// with "your request has been submitted", which is false and would leave someone
-// believing help is on the way when their request was never filed.
-const REVIEW_HANDOFF_SCRIPT =
-  "Thanks. I've put your request on the screen now. Please check the details and " +
-  'fix anything I got wrong, then press Submit to send it.';
+// The fixed spoken scripts — emergency (911), review handoff, and give-up — are
+// NOT model-generated: a model that is rate-limited, or that decides to be
+// reassuring instead of directive, must never be what stands between a caller
+// and 911, and left to the model the closing line reliably (and falsely) claims
+// the request was "submitted" when nothing has been sent yet. They live in
+// utils/language.js so each can be returned in the caller's chosen language;
+// voiceScript(name, langCode) resolves the right one (English fallback).
+//
+// Note what the emergency script deliberately does NOT say: that a responder has
+// been notified. Nothing is submitted during the conversation, so promising help
+// is coming could leave someone in a life-threatening situation waiting on us
+// instead of calling 911.
 
 // Spoken-crisis phrasings the shared keyword list in scoring.js doesn't carry.
 // That list is tuned for typed request descriptions and feeds prioritization
@@ -145,15 +142,16 @@ export function detectLifeSafety(text, category = '') {
  * the caller gets identical behaviour no matter which one caught it.
  *
  * @param {Object} slots - Fields gathered so far
+ * @param {string} langCode - The caller's language, for the spoken 911 script
  * @returns {Object} - A completed turn result
  */
-function emergencyTurn(slots) {
+function emergencyTurn(slots, langCode) {
   // Force Critical so the request outranks everything else the moment it lands,
   // regardless of what urgency the caller or the model assigned.
   const escalated = { ...slots, urgency: 'Critical' };
 
   return {
-    say: EMERGENCY_SCRIPT,
+    say: voiceScript('emergency', langCode),
     slots: escalated,
     missing: missingSlots(escalated),
     readyToSubmit: false,
@@ -184,19 +182,21 @@ export async function runVoiceTurn({ user, requests = [], slots = {}, history = 
     throw new Error('Cannot run a voice turn with an empty message');
   }
 
+  // The caller's saved language drives both the model's spoken replies and the
+  // fixed scripts below. Falls back to English inside the helpers for unknown codes.
+  const langCode = user?.languagePreference;
+
   // --- Layer 1: zero-cost guardrail, before any model call ------------------
   // Instant and immune to rate limits, but limited recall: it only catches
   // phrasings we thought to list. Layer 2 below covers what it misses.
   if (detectLifeSafety(`${slots.description || ''} ${said}`, slots.category)) {
-    return emergencyTurn(slots);
+    return emergencyTurn(slots, langCode);
   }
 
   // --- Give up rather than loop --------------------------------------------
   if (history.length >= MAX_TURNS * 2) {
     return {
-      say:
-        "I'm having trouble getting all the details over voice. I've put what you told me " +
-        'on the screen — please finish the rest there and press Submit to send it.',
+      say: voiceScript('giveUp', langCode),
       slots,
       missing: missingSlots(slots),
       readyToSubmit: false,
@@ -206,8 +206,8 @@ export async function runVoiceTurn({ user, requests = [], slots = {}, history = 
   }
 
   // --- One LLM round-trip: understand + update slots + decide what to say ---
-  const reply = await askLLM(buildTurnPrompt(said, slots), {
-    systemPrompt: buildSystemPrompt(user, requests),
+  const reply = await askLLM(buildTurnPrompt(said, slots, langCode), {
+    systemPrompt: buildSystemPrompt(user, requests, langCode),
     history,
     // Reject anything we can't parse so askLLM rotates to the next Gemini model
     // (or on to OpenRouter) instead of us failing the call.
@@ -231,7 +231,7 @@ export async function runVoiceTurn({ user, requests = [], slots = {}, history = 
   // we deliberately never require agreement, because a missed emergency is a
   // categorically worse error than an unnecessary "call 911".
   if (parsed.lifeSafety === true) {
-    return emergencyTurn(merged);
+    return emergencyTurn(merged, langCode);
   }
 
   const missing = missingSlots(merged);
@@ -252,7 +252,7 @@ export async function runVoiceTurn({ user, requests = [], slots = {}, history = 
     // On the closing turn we say our own line rather than the model's, so the
     // caller is told to verify the request — never that it was already sent.
     say: readyToSubmit
-      ? REVIEW_HANDOFF_SCRIPT
+      ? voiceScript('review', langCode)
       : String(parsed.say || '').trim() || 'Sorry, could you say that again?',
     slots: merged,
     missing,
@@ -283,9 +283,10 @@ export function missingSlots(slots = {}) {
  *
  * @param {Object} user
  * @param {Array} requests
+ * @param {string} langCode - The caller's language; pins the model's replies to it
  * @returns {string}
  */
-function buildSystemPrompt(user, requests) {
+function buildSystemPrompt(user, requests, langCode) {
   const requestLines = requests.length
     ? requests
         .map((r) => `- ${r.category} (${r.status}) at ${r.location}: "${r.description}"`)
@@ -313,7 +314,9 @@ ${requestLines}
 Never invent a request that is not listed above. Never promise a specific responder, arrival
 time, or supply quantity — you are taking down the request, not fulfilling it.
 
-You reply with ONLY a single JSON object. No code fences, no commentary.`;
+You reply with ONLY a single JSON object. No code fences, no commentary.
+
+The "say" field is spoken aloud to the caller, so write it in the caller's language.${buildLanguageDirective(langCode)}`;
 }
 
 /**
@@ -322,10 +325,16 @@ You reply with ONLY a single JSON object. No code fences, no commentary.`;
  *
  * @param {string} said - The caller's latest utterance
  * @param {Object} slots - Fields gathered so far
+ * @param {string} langCode - The caller's language, for the free-text slots
  * @returns {string}
  */
-function buildTurnPrompt(said, slots) {
+function buildTurnPrompt(said, slots, langCode) {
   const missing = missingSlots(slots);
+
+  // Write the free-text slots (description, location) in the caller's language
+  // so the submitted request reads back in the language they spoke. The enum
+  // fields (category, urgency) stay English — see buildFieldLanguageDirective.
+  const slotLangRule = buildFieldLanguageDirective(langCode);
 
   return `The caller just said:
 """
@@ -379,7 +388,7 @@ Rules:
   never promise that help is on the way. Nothing is submitted while you are talking: the
   caller still has to check the details on screen and press Submit themselves. Saying
   otherwise could leave someone waiting for help that was never requested.
-- If they correct something, update it and confirm the correction in "say".`;
+- If they correct something, update it and confirm the correction in "say".${slotLangRule}`;
 }
 
 /**

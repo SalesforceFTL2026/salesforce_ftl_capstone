@@ -1,4 +1,5 @@
 import { askLLM } from './chatbot.js';
+import { buildFieldLanguageDirective } from '../../utils/language.js';
 
 // These MUST stay in sync with the validation in requestController.createRequest.
 const VALID_CATEGORIES = ['Food', 'Shelter', 'Medical', 'Transport', 'Other'];
@@ -17,17 +18,19 @@ const VALID_URGENCIES = ['Low', 'Medium', 'High', 'Critical'];
  * highlight anything the caller should double-check before submitting.
  *
  * @param {string} transcript - Transcribed text of what the caller said
+ * @param {string} [langCode] - The caller's language; the free-text fields
+ *   (description, location) come back in it so the draft reads in their language
  * @returns {Promise<{category: string, urgency: string, location: string,
  *   description: string, householdSize: number|null, confidence: Object}>}
  * @throws {Error} - If the transcript is empty or no usable JSON comes back
  */
-export async function extractRequestFields(transcript) {
+export async function extractRequestFields(transcript, langCode) {
   const text = (transcript || '').trim();
   if (!text) {
     throw new Error('Cannot extract fields from an empty transcript');
   }
 
-  const reply = await askLLM(buildExtractionPrompt(text), {
+  const reply = await askLLM(buildExtractionPrompt(text, langCode), {
     systemPrompt:
       'You extract structured data from crisis help-request transcripts. ' +
       'You reply with ONLY a single JSON object and no other text, code fences, or commentary.',
@@ -57,15 +60,17 @@ export async function extractRequestFields(transcript) {
  * extractRequestFields, so a draft's shape matches what createRequest expects.
  *
  * @param {string} conversationText - Recent conversation, oldest turn first
+ * @param {string} [langCode] - The user's language; the free-text fields
+ *   (description, location) come back in it so the draft reads in their language
  * @returns {Promise<{isRequest: boolean, category?: string, urgency?: string,
  *   location?: string, description?: string, householdSize?: number|null,
  *   confidence?: Object}>}
  */
-export async function detectHelpRequest(conversationText) {
+export async function detectHelpRequest(conversationText, langCode) {
   const text = (conversationText || '').trim();
   if (!text) return { isRequest: false };
 
-  const reply = await askLLM(buildDetectionPrompt(text), {
+  const reply = await askLLM(buildDetectionPrompt(text, langCode), {
     systemPrompt:
       'You analyze a help-seeker chat and decide if the user is describing a NEW ' +
       'aid need they want submitted as a request. You reply with ONLY a single JSON ' +
@@ -89,7 +94,7 @@ export async function detectHelpRequest(conversationText) {
  * @param {string} conversationText - Trimmed recent conversation
  * @returns {string}
  */
-function buildDetectionPrompt(conversationText) {
+function buildDetectionPrompt(conversationText, langCode) {
   return `A help-seeker is chatting with a disaster-relief assistant. Decide whether, in their
 most recent message, they are describing a NEW concrete need they want help with (e.g. they
 need food, water, shelter, medical supplies, a ride). Questions about existing requests,
@@ -111,7 +116,7 @@ Rules:
 - Only use information actually present in the conversation. Do NOT invent details.
 - category: use "Other" if it does not clearly fit the rest.
 - urgency: infer from tone and content (e.g. "trapped", "no water", "injured" => higher urgency).
-- Output the JSON object only — no markdown, no code fences, no explanation.
+- Output the JSON object only — no markdown, no code fences, no explanation.${buildFieldLanguageDirective(langCode)}
 
 Conversation:
 """
@@ -125,7 +130,7 @@ ${conversationText}
  * @param {string} transcript - Trimmed transcript text
  * @returns {string}
  */
-function buildExtractionPrompt(transcript) {
+function buildExtractionPrompt(transcript, langCode) {
   return `Extract the help-request fields from this crisis call transcript and return them as JSON.
 
 Return ONLY a JSON object with exactly these keys:
@@ -143,7 +148,7 @@ Rules:
 - category: use "Other" if it does not clearly fit the rest.
 - urgency: infer from tone and content (e.g. "trapped", "no water", "injured" => higher urgency).
 - confidence: give an honest 0-1 score per field; use a low score (below 0.6) when you had to guess or the transcript was vague or garbled.
-- Output the JSON object only — no markdown, no code fences, no explanation.
+- Output the JSON object only — no markdown, no code fences, no explanation.${buildFieldLanguageDirective(langCode)}
 
 Transcript:
 """

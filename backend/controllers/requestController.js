@@ -936,7 +936,7 @@ export const transcribeVoiceRequest = async (req, res) => {
     // Step 2: pull structured fields out of the transcript via Claude.
     let fields;
     try {
-      fields = await extractRequestFields(transcript);
+      fields = await extractRequestFields(transcript, req.user.languagePreference);
     } catch (error) {
       console.error('Voice intake field extraction failed:', error);
       return res.status(502).json({
