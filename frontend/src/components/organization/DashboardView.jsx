@@ -86,11 +86,12 @@ const DashboardView = ({
             <p className="text-ink font-semibold">{t('org.dashboard.noOpenRequests')}</p>
           </div>
         ) : (
-          /* Show every active disaster location, sized to reveal about one at a
-             time so the rest scroll into view — the org can scan the full list
-             without the panel growing unbounded. pr-1 keeps the scrollbar off
-             the cards. */
-          <ul className="flex flex-col gap-3 max-h-[9.5rem] overflow-y-auto pr-1">
+          /* Show up to three location rows in full, then scroll the rest. The
+             cap (366px = 3 rows of 114px + 2 gaps of 12px) lands exactly on a row
+             boundary so a card is never cut off mid-height — with 1-3 locations
+             the list just fits; with more it scrolls. pr-1 keeps the scrollbar
+             off the cards. */
+          <ul className="flex flex-col gap-3 max-h-[366px] overflow-y-auto pr-1">
             {locations.list.map((loc) => (
               <LocationCoverageRow key={loc.name} location={loc} onView={onViewRequests} t={t} />
             ))}

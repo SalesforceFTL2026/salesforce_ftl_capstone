@@ -30,12 +30,13 @@ const PortalShell = ({
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   return (
-    // App-shell layout: fill the available height (h-full — the viewport when
-    // standalone, or the space below the admin bar when embedded there) and keep
-    // the sidebar + top bar fixed while ONLY the main content scrolls. min-h-0 on
-    // the flex children lets the inner scroll area shrink instead of forcing the
-    // whole shell taller than its container.
-    <div className="h-full flex bg-[#c9d6c2] dark:bg-[#0f1a0f] transition-colors duration-300 overflow-hidden">
+    // App-shell layout: the shell grows to at least fill its container (min-h-full)
+    // but expands past it when a view's content is taller, so the whole page
+    // scrolls with the browser's normal scrollbar. This keeps content from being
+    // trapped below the fold on shorter screens (an earlier version clipped the
+    // shell to the viewport and scrolled only <main> internally, with no visible
+    // scrollbar — so tall dashboards looked cut off until you zoomed out).
+    <div className="min-h-full flex bg-[#c9d6c2] dark:bg-[#0f1a0f] transition-colors duration-300">
       <PortalSidebar
         label={personaLabel}
         groups={navGroups}
@@ -45,7 +46,7 @@ const PortalShell = ({
         onCloseMobile={() => setMobileNavOpen(false)}
       />
 
-      <div className="flex-1 flex flex-col min-w-0 min-h-0">
+      <div className="flex-1 flex flex-col min-w-0">
         <PortalTopBar
           title={title}
           currentUser={currentUser}
@@ -56,7 +57,7 @@ const PortalShell = ({
           searchPlaceholder={searchPlaceholder}
           searchResults={searchResults}
         />
-        <main className="flex-1 min-h-0 p-4 sm:p-6 overflow-y-auto overflow-x-hidden">{children}</main>
+        <main className="flex-1 p-4 sm:p-6 overflow-x-hidden">{children}</main>
       </div>
     </div>
   );
