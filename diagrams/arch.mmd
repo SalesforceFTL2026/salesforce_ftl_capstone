@@ -1,0 +1,24 @@
+flowchart LR
+    U(["Users<br/>Seekers · Volunteers · Orgs"])
+    FE["React Web App<br/>dashboards · maps · voice intake"]
+    BE["Express API<br/>auth · requests · AI services"]
+    DB[("PostgreSQL")]
+    AI["AI Providers<br/>LLM · embeddings"]
+    EXT["External Feeds & Services<br/>FEMA/USGS · Google · AWS S3"]
+
+    U --> FE
+    FE -- "REST + JWT" --> BE
+    BE --> DB
+    BE --> AI
+    BE --> EXT
+
+    classDef u fill:#cfe0ef,stroke:#3f6b8f,color:#173040,font-size:26px;
+    classDef f fill:#dbe9d6,stroke:#3f6b47,color:#22331f,font-size:26px;
+    classDef b fill:#e7ddc3,stroke:#b08a3e,color:#3a2e14,font-size:26px;
+    classDef d fill:#cfe0ef,stroke:#3f6b8f,color:#173040,font-size:26px;
+    classDef a fill:#f0ddd4,stroke:#b5714e,color:#402318,font-size:26px;
+    class U u;
+    class FE f;
+    class BE b;
+    class DB d;
+    class AI,EXT a;

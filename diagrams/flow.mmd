@@ -1,0 +1,10 @@
+flowchart LR
+    A["Request<br/>submitted"] --> B["AI reads<br/>& scores it"]
+    B --> C["Groups similar<br/>needs nearby"]
+    C --> D["Ranks by<br/>priority"]
+    D --> E["Live feed to<br/>volunteers & orgs"]
+
+    classDef io fill:#cfe0ef,stroke:#3f6b8f,color:#173040,font-size:28px;
+    classDef ai fill:#e7ddc3,stroke:#b08a3e,color:#3a2e14,font-size:28px;
+    class A,E io;
+    class B,C,D ai;
